@@ -4,8 +4,9 @@ using System.IO;
 using System.IO.Compression;
 using ProtoBuf;
 
-namespace DepotDownloader
+namespace DepotDownloader.Protos
 {
+    //TODO rework this to keep track of installed apps + depots + languages + etc
     [ProtoContract]
     class DepotConfigStore
     {

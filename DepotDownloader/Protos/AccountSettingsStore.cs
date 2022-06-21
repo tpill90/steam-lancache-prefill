@@ -6,7 +6,7 @@ using System.IO.Compression;
 using System.IO.IsolatedStorage;
 using ProtoBuf;
 
-namespace DepotDownloader
+namespace DepotDownloader.Protos
 {
     [ProtoContract]
     class AccountSettingsStore
