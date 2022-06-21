@@ -1,31 +1,32 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using AutoMapper;
+using DepotDownloader.Models;
+using SteamKit2.CDN;
 
 namespace DepotDownloader
 {
-    class DownloadConfig
+    public class DownloadConfig
     {
         public int CellID { get; set; }
         public bool DownloadAllPlatforms { get; set; }
         public bool DownloadAllLanguages { get; set; }
-        public bool DownloadManifestOnly { get; set; }
-        public string InstallDirectory { get; set; }
-
-        public bool UsingFileList { get; set; }
-        public HashSet<string> FilesToDownload { get; set; }
-        public List<Regex> FilesToDownloadRegex { get; set; }
-
-        public string BetaPassword { get; set; }
-
-        public bool VerifyAll { get; set; }
-
-        public int MaxServers { get; set; }
-        public int MaxDownloads { get; set; }
 
         public string SuppliedPassword { get; set; }
         public bool RememberPassword { get; set; }
 
-        // A Steam LoginID to allow multiple concurrent connections
-        public uint? LoginID { get; set; }
+        //TODO split out into AppConfig
+        public static string ManifestCacheDir => "ManifestCache";
+        public static string ConfigDir => ".DepotDownloader";
+
+        //TODO remove this in favor of null
+        public static ulong INVALID_MANIFEST_ID = ulong.MaxValue;
+
+        // Debugging only
+        //TODO revert
+        public static bool SkipDownload = true;
+
+        //TODO split out into AppConfig
+        public static Mapper AutoMapper = new Mapper(new MapperConfiguration(cfg =>
+                cfg.CreateMap<ServerShim, Server>()
+        ));
     }
 }

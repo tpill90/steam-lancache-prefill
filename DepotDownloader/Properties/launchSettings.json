@@ -1,12 +1,28 @@
 {
   "profiles": {
-    "DepotDownloader": {
+    "Tiny Game": {
       "commandName": "Project",
-      "commandLineArgs": "-username bearingbreaker92 -app 570 -depot 381455 -remember-password"
+      "commandLineArgs": "-username bearingbreaker92 -app 945360 -remember-password"
     },
-    "Destiny 2": {
+    "Medium Game": {
       "commandName": "Project",
-      "commandLineArgs": "-username bearingbreaker92 -app 1085660 -depot 1085661 -remember-password"
+      "commandLineArgs": "-username bearingbreaker92 -app 570 -remember-password"
+    },
+    "Unowned Game - GTA V": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 271590 -remember-password"
+    },
+    "TF2 - Multiple Languages": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 440 -remember-password"
+    },
+    "TF2 - Low Violence": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 440 -remember-password -lowviolence"
+    },
+    "Large Game - Multiple Languages": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 1085660 -remember-password"
     }
   }
 }

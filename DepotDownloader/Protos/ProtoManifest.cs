@@ -2,13 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using DepotDownloader.Utils;
+using HexMate;
 using ProtoBuf;
 using SteamKit2;
 
-namespace DepotDownloader
+namespace DepotDownloader.Protos
 {
     [ProtoContract]
-    class ProtoManifest
+    public class ProtoManifest
     {
         // Proto ctor
         private ProtoManifest()
@@ -67,6 +69,11 @@ namespace DepotDownloader
             /// </summary>
             [ProtoMember(5)]
             public byte[] FileHash { get; private set; }
+
+            public override string ToString()
+            {
+                return FileName;
+            }
         }
 
         [ProtoContract(SkipConstructor = true)]
@@ -110,6 +117,11 @@ namespace DepotDownloader
             /// </summary>
             [ProtoMember(5)]
             public uint UncompressedLength { get; private set; }
+
+            public override string ToString()
+            {
+                return HexMate.Convert.ToHexString(ChunkID, HexFormattingOptions.Lowercase);
+            }
         }
 
         [ProtoMember(1)]
