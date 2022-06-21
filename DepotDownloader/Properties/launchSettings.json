@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "DepotDownloader": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 570 -depot 381455 -remember-password"
+    },
+    "Destiny 2": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 1085660 -depot 1085661 -remember-password"
+    }
+  }
+}
