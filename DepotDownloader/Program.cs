@@ -11,6 +11,9 @@ using SteamKit2;
 
 namespace DepotDownloader
 {
+    //TODO rename program
+    //TODO remove password from launchSettings.json
+    //TODO start implementing zeropingheroes autofill features https://github.com/zeropingheroes/lancache-autofill
     class Program
     {
         static int Main(string[] args)
@@ -24,7 +27,7 @@ namespace DepotDownloader
                 return 1;
             }
 
-            DebugLog.Enabled = false;
+            DebugLog.Enabled = true;
 
             AccountSettingsStore.LoadFromFile("account.config");
 
@@ -96,7 +99,7 @@ namespace DepotDownloader
 
             ContentDownloader.Config.VerifyAll = HasParameter(args, "-verify-all") || HasParameter(args, "-verify_all") || HasParameter(args, "-validate");
             ContentDownloader.Config.MaxServers = GetParameter(args, "-max-servers", 20);
-            ContentDownloader.Config.MaxDownloads = GetParameter(args, "-max-downloads", 8);
+            ContentDownloader.Config.MaxDownloads = GetParameter(args, "-max-downloads", 20);
             ContentDownloader.Config.MaxServers = Math.Max(ContentDownloader.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
             ContentDownloader.Config.LoginID = HasParameter(args, "-loginid") ? GetParameter<uint>(args, "-loginid") : null;
 
