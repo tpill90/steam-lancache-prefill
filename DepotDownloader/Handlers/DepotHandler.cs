@@ -18,14 +18,14 @@ namespace DepotDownloader.Handlers
         //TODO comment
         public static List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allAvailableDepots, DownloadConfig config)
         {
-            var depotSectionsFound = new List<DepotInfo>();
+            var filteredDepots = new List<DepotInfo>();
 
             foreach (var depot in allAvailableDepots)
             {
                 var configInfo = depot.ConfigInfo;
                 if (configInfo == null)
                 {
-                    depotSectionsFound.Add(depot);
+                    filteredDepots.Add(depot);
                     continue;
                 }
                 
@@ -65,17 +65,14 @@ namespace DepotDownloader.Handlers
                     // TODO test this condition
                     continue;
                 }
-                depotSectionsFound.Add(depot);
+                filteredDepots.Add(depot);
             }
 
-            if (!depotSectionsFound.Any())
+            if (!filteredDepots.Any())
             {
                 throw new ContentDownloaderException($"Couldn't find any depots to download for app {downloadArgs.AppId}");
             }
-
-            AnsiConsole.Console.LogMarkupLine($"Filtered {Yellow(depotSectionsFound.Count)} depots for app {Cyan(downloadArgs.AppId)}");
-
-            return depotSectionsFound;
+            return filteredDepots;
         }
 
         //TODO comment

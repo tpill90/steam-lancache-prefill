@@ -29,7 +29,7 @@ namespace DepotDownloader.Models
             var c = keyValues.Children;
 
             DepotId = uint.Parse(keyValues.Name);
-            Name = c.First(e => e.Name == "name").Value;
+            Name = c.FirstOrDefault(e => e.Name == "name")?.Value;
 
             // Config
             var configSection = c.FirstOrDefault(e => e.Name == "config");

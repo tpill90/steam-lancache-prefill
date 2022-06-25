@@ -429,25 +429,6 @@ namespace DepotDownloader.Steam
         }
 
         //TODO cleanup
-        public bool RequestFreeAppLicense(uint appId)
-        {
-            var success = false;
-            var completed = false;
-            Action<SteamApps.FreeLicenseCallback> cbMethod = resultInfo =>
-            {
-                completed = true;
-                success = resultInfo.GrantedApps.Contains(appId);
-            };
-
-            WaitUntilCallback(() =>
-            {
-                callbacks.Subscribe(steamApps.RequestFreeLicense(appId), cbMethod);
-            }, () => { return completed; });
-
-            return success;
-        }
-
-        //TODO cleanup
         public void RequestDepotKey(uint depotId, uint appid = 0)
         {
             if (DepotKeys.ContainsKey(depotId) || bAborted)

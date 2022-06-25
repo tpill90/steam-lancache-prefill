@@ -122,7 +122,7 @@ namespace DepotDownloader
                 throw new Exception("Steam session not initialized!!");
             }
 
-            var appInfo = _steam3.GetAppInfo(downloadArgs.AppId);
+            AppInfoShim appInfo = _steam3.GetAppInfo(downloadArgs.AppId);
             DetermineIfUserHasAccess(appInfo);
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
@@ -190,28 +190,18 @@ namespace DepotDownloader
         }
 
         //TODO comment
-        //TODO work on this
+        //TODO determine how to handle user adding new games to account
         private void DetermineIfUserHasAccess(AppInfoShim app)
         {
-            var appId = app.AppId;
             var timer = Stopwatch.StartNew();
-            if (DepotHandler.AccountHasAccess(appId, _steam3))
+            //TODO this doesn't seem to be working correctly for games I don't own
+            if (DepotHandler.AccountHasAccess(app.AppId, _steam3))
             {
                 _ansiConsole.LogMarkupLine("Determined user app access ", timer.Elapsed);
                 return;
             }
-            
-            if (_steam3.RequestFreeAppLicense(appId))
-            {
-                _ansiConsole.WriteLine($"Obtained FreeOnDemand license for app {appId}");
 
-                // Fetch app info again in case we didn't get it fully without a license.
-                _steam3.GetAppInfo(appId);
-                _ansiConsole.LogMarkupLine("Determined user app access ", timer.Elapsed);
-                return;
-            }
-
-            throw new ContentDownloaderException($"App {appId} ({app.Common.Name}) is not available from this account.");
+            throw new ContentDownloaderException($"App {app.AppId} ({app.Common.Name}) is not available from this account.");
         }
     }
 }
