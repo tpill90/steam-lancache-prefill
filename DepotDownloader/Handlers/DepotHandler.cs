@@ -6,7 +6,6 @@ using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
 using SteamKit2;
-using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader.Handlers
 {

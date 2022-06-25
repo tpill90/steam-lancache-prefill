@@ -77,7 +77,6 @@ namespace DepotDownloader.Steam
             callbacks = new CallbackManager(steamClient);
 
             callbacks.Subscribe<SteamUser.LoggedOnCallback>(LogOnCallback);
-
             callbacks.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             callbacks.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
 
@@ -144,6 +143,8 @@ namespace DepotDownloader.Steam
             }
         }
 
+
+        //TODO this needs thorough testing
         private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
         {
             var isSteamGuard = loggedOn.Result == EResult.AccountLogonDenied;
@@ -223,7 +224,6 @@ namespace DepotDownloader.Steam
                 return;
             }
 
-
             seq++;
             credentials.LoggedOn = true;
 
@@ -245,12 +245,6 @@ namespace DepotDownloader.Steam
         //TODO handle files not existing
         public void LoadCachedData()
         {
-            var timer = Stopwatch.StartNew();
-
-            //if (File.Exists($"{DownloadConfig.ConfigDir}/appInfo.json"))
-            //{
-            //    AppInfoShims = JsonSerializer.Deserialize<Dictionary<uint, AppInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appInfo.json"));
-            //}
             if (File.Exists($"{DownloadConfig.ConfigDir}/appTokens.json"))
             {
                 AppTokens = JsonSerializer.Deserialize<Dictionary<uint, ulong>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appTokens.json"));
@@ -259,35 +253,23 @@ namespace DepotDownloader.Steam
             {
                 PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/packageInfo.json"));
             }
-
-            _ansiConsole.LogMarkupLine("Loaded data from disk", timer.Elapsed);
         }
 
         //TODO test this with very large data sets
         //TODO measure performance
         public void SerializeCachedData()
         {
-            var timer = Stopwatch.StartNew();
-
-            //TODO not sure this is a good idea
-            //File.WriteAllText($"{DownloadConfig.ConfigDir}/appInfo.json", JsonSerializer.ToJsonString(AppInfoShims));
             File.WriteAllText($"{DownloadConfig.ConfigDir}/appTokens.json", JsonSerializer.ToJsonString(AppTokens));
             File.WriteAllText($"{DownloadConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
-
-            _ansiConsole.WriteLine();
-            _ansiConsole.LogMarkupLine("Saved data to disk", timer.Elapsed);
         }
         
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
-        private Stopwatch _loadAccountLicensesTimer;
 
         //TODO speed this up by serializing/deserializing?
         public void LoadAccountLicenses()
         {
-            _loadAccountLicensesTimer = Stopwatch.StartNew();
-
             callbacks.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
             while (_loadAccountLicensesIsRunning)
             {
@@ -301,6 +283,7 @@ namespace DepotDownloader.Steam
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
+                //TODO handle
                 Console.WriteLine("Unable to get license list: {0} ", licenseList.Result);
                 Abort();
 
@@ -316,9 +299,6 @@ namespace DepotDownloader.Steam
                     PackageTokens.TryAdd(license.PackageID, license.AccessToken);
                 }
             }
-
-            AnsiConsole.Console.LogMarkupLine($"Got {Cyan(licenseList.LicenseList.Count)} licenses for account!".PadRight(54), _loadAccountLicensesTimer.Elapsed);
-            _loadAccountLicensesTimer.Stop();
         }
         #endregion
 

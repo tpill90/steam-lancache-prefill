@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -73,7 +72,6 @@ namespace DepotDownloader
 
         private void ConnectToSteam(string username, string password)
         {
-            var timer = Stopwatch.StartNew();
             string loginKey = null;
 
             if (username != null && Config.RememberPassword)
@@ -109,8 +107,6 @@ namespace DepotDownloader
                 _ansiConsole.MarkupLine($"{Red("Error: Login to Steam failed")}");
                 throw new Exception("Unable to get steam3 credentials.");
             }
-
-            _ansiConsole.LogMarkupLine("Logged into steam", timer.Elapsed);
         }
 
         //TODO lookup the app name by id
@@ -129,23 +125,24 @@ namespace DepotDownloader
             DepotHandler.BuildLinkedDepotInfo(filteredDepots, _steam3, appInfo);
 
             // Get the full file list for each depot, and queue up the required chunks
-            var manifests = await GetManifests(filteredDepots);
-            var chunkDownloadQueue = BuildChunkDownloadQueue(manifests);
+            var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
 
             // Finally run the queued downloads
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+
             //TODO total download is wrong
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.UncompressedLength));
-            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(manifests.Count)} depots");
+            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} depots");
         }
 
         //TODO document
-        private async Task<List<ProtoManifest>> GetManifests(List<DepotInfo> depots)
+        //TODO consider parallelizing this for speed
+        private async Task<List<QueuedRequest>> BuildChunkDownloadQueue(List<DepotInfo> depots)
         {
-            var manifests = new List<ProtoManifest>();
+            var chunkQueue = new List<QueuedRequest>();
             var timer = Stopwatch.StartNew();
 
-            // First, fetch all the manifests for each depot
+            // Fetch all the manifests for each depot, and queue up their chunks
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Fetching", async ctx =>
             {
                 foreach (var depot in depots)
@@ -153,36 +150,23 @@ namespace DepotDownloader
                     ctx.Status = $"Fetching depot files for {Cyan(depot.Name)}";
 
                     ProtoManifest manifest = await ManifestHandler.GetManifestFile(depot, _cdnPool, _steam3);
-                    manifests.Add(manifest);
+                    // A depot can be made up of multiple files
+                    foreach (var file in manifest.Files)
+                    {
+                        // A file larger than 1MB will need to be downloaded in multiple chunks
+                        foreach (var chunk in file.Chunks)
+                        {
+                            chunkQueue.Add(new QueuedRequest
+                            {
+                                chunk = chunk
+                            });
+                        }
+                    }
                 }
                 
             });
-            _ansiConsole.LogMarkupLine("Got manifests", timer.Elapsed);
-            return manifests;
-        }
-
-        //TODO document
-        private List<QueuedRequest> BuildChunkDownloadQueue(List<ProtoManifest> manifests)
-        {
-            var networkChunkQueue = new List<QueuedRequest>();
-
-            // Process each depot, and aggregate all chunks that need to be downloaded
-            foreach (var manifest in manifests)
-            {
-                // A depot can be made up of multiple files
-                foreach(var file in manifest.Files)
-                {
-                    // A file larger than 1MB will need to be downloaded in multiple chunks
-                    foreach (var chunk in file.Chunks)
-                    {
-                        networkChunkQueue.Add(new QueuedRequest
-                        {
-                            chunk = chunk
-                        });
-                    }
-                }
-            }
-            return networkChunkQueue;
+            _ansiConsole.LogMarkupLine("Built chunk download queue", timer.Elapsed);
+            return chunkQueue;
         }
 
         //TODO comment
