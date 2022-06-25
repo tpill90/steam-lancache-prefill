@@ -27,9 +27,9 @@ namespace DepotDownloader
     // TODO - Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
     // TODO - Spectre - Cleanup all instances of AnsiConsole.Console
     // TODO - Logging into steam with expired password fails on first try.  Rerunning works
+    // TODO Write logic that only downloads a manifest if it hasnt been downloaded already
 
-    // TODO - General - Cleanup CdnPool class
-    class Program
+    public class Program
     {
         public static async Task<int> Main(string[] args)
         {

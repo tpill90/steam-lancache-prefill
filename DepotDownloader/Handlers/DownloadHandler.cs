@@ -81,6 +81,7 @@ namespace DepotDownloader.Handlers
             //TODO determine the server once
             var server = _cdnPool.GetConnection();
 
+            //TODO need to add title task for retries
             var failedRequests = new ConcurrentBag<QueuedRequest>();
             await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (request, _) =>
             {
@@ -107,7 +108,7 @@ namespace DepotDownloader.Handlers
 
             try
             {
-                var uri = new Uri($"http://{connection.Host}/depot/{request.depotDownloadInfo.DepotId}/chunk/{request.chunk}");
+                var uri = new Uri($"http://{connection.Host}/depot/{request.DepotId}/chunk/{request.chunk}");
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
                 using var responseMessage = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);

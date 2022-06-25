@@ -116,9 +116,17 @@ namespace DepotDownloader
             {
                 throw new Exception("Steam session not initialized!!");
             }
-
+            
+            _ansiConsole.LogMarkupLine($"Processing AppId {Cyan(downloadArgs.AppId)}");
             AppInfoShim appInfo = _steam3.GetAppInfo(downloadArgs.AppId);
-            DetermineIfUserHasAccess(appInfo);
+            _ansiConsole.LogMarkupLine($"Found app {Cyan(appInfo.Common.Name)}");
+
+            //TODO this doesn't seem to be working correctly for games I don't own
+            if (!DepotHandler.AccountHasAccess(appInfo.AppId, _steam3))
+            {
+                //TODO handle this better
+                throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");
+            }
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
             List<DepotInfo> filteredDepots = DepotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots, Config);
@@ -131,7 +139,7 @@ namespace DepotDownloader
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
 
             //TODO total download is wrong
-            var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.UncompressedLength));
+            var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
             _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} depots");
         }
 
@@ -158,6 +166,7 @@ namespace DepotDownloader
                         {
                             chunkQueue.Add(new QueuedRequest
                             {
+                                DepotId = depot.DepotId,
                                 chunk = chunk
                             });
                         }
@@ -167,21 +176,6 @@ namespace DepotDownloader
             });
             _ansiConsole.LogMarkupLine("Built chunk download queue", timer.Elapsed);
             return chunkQueue;
-        }
-
-        //TODO comment
-        //TODO determine how to handle user adding new games to account
-        private void DetermineIfUserHasAccess(AppInfoShim app)
-        {
-            var timer = Stopwatch.StartNew();
-            //TODO this doesn't seem to be working correctly for games I don't own
-            if (DepotHandler.AccountHasAccess(app.AppId, _steam3))
-            {
-                _ansiConsole.LogMarkupLine("Determined user app access ", timer.Elapsed);
-                return;
-            }
-
-            throw new ContentDownloaderException($"App {app.AppId} ({app.Common.Name}) is not available from this account.");
         }
     }
 }

@@ -1,12 +1,9 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DepotDownloader.Models;
 using DepotDownloader.Protos;
@@ -22,7 +19,6 @@ namespace DepotDownloader.Steam
     {
         public ReadOnlyCollection<SteamApps.LicenseListCallback.License> Licenses { get; private set; }
 
-        public Dictionary<uint, ulong> AppTokens { get; private set; }
         public Dictionary<uint, ulong> PackageTokens { get; private set; }
         public Dictionary<uint, byte[]> DepotKeys { get; private set; }
         
@@ -64,7 +60,6 @@ namespace DepotDownloader.Steam
             bAborted = false;
             seq = 0;
 
-            AppTokens = new Dictionary<uint, ulong>();
             PackageTokens = new Dictionary<uint, ulong>();
             DepotKeys = new Dictionary<uint, byte[]>();
             
@@ -245,10 +240,6 @@ namespace DepotDownloader.Steam
         //TODO handle files not existing
         public void LoadCachedData()
         {
-            if (File.Exists($"{DownloadConfig.ConfigDir}/appTokens.json"))
-            {
-                AppTokens = JsonSerializer.Deserialize<Dictionary<uint, ulong>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appTokens.json"));
-            }
             if (File.Exists($"{DownloadConfig.ConfigDir}/packageInfo.json"))
             {
                 PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/packageInfo.json"));
@@ -259,7 +250,6 @@ namespace DepotDownloader.Steam
         //TODO measure performance
         public void SerializeCachedData()
         {
-            File.WriteAllText($"{DownloadConfig.ConfigDir}/appTokens.json", JsonSerializer.ToJsonString(AppTokens));
             File.WriteAllText($"{DownloadConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
         }
         
@@ -322,7 +312,6 @@ namespace DepotDownloader.Steam
         //TODO comment
         public AppInfoShim GetAppInfo(uint appId)
         {
-            var timer = Stopwatch.StartNew();
             if (AppInfoShims.ContainsKey(appId))
             {
                 return AppInfoShims[appId];
@@ -351,7 +340,6 @@ namespace DepotDownloader.Steam
                     }
                 }
             }
-            _ansiConsole.LogMarkupLine("GetAppInfo complete", timer.Elapsed);
             return AppInfoShims[appId];
         }
         

@@ -1,4 +1,5 @@
 using AutoMapper;
+using CliFx.Infrastructure;
 using DepotDownloader.Models;
 using SteamKit2.CDN;
 
@@ -20,7 +21,7 @@ namespace DepotDownloader
 
         // Debugging only
         //TODO revert
-        public static bool SkipDownload = true;
+        public static bool SkipDownload = false;
 
         //TODO split out into AppConfig
         public static Mapper AutoMapper = new Mapper(new MapperConfiguration(cfg =>
