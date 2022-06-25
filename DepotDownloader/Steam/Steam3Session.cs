@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -20,16 +19,11 @@ namespace DepotDownloader.Steam
     {
         public ReadOnlyCollection<SteamApps.LicenseListCallback.License> Licenses { get; private set; }
 
-        public Dictionary<uint, ulong> AppTokens { get; private set; }
         public Dictionary<uint, ulong> PackageTokens { get; private set; }
         public Dictionary<uint, byte[]> DepotKeys { get; private set; }
-        public ConcurrentDictionary<string, TaskCompletionSource<SteamApps.CDNAuthTokenCallback>> CDNAuthTokens { get; private set; }
         
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
-
         public Dictionary<uint, PackageInfoShim> PackageInfoShims { get; private set; } = new Dictionary<uint, PackageInfoShim>();
-
-        public Dictionary<string, byte[]> AppBetaPasswords { get; private set; }
 
         public SteamClient steamClient;
         public SteamUser steamUser;
@@ -37,7 +31,7 @@ namespace DepotDownloader.Steam
         readonly SteamApps steamApps;
 
         readonly CallbackManager callbacks;
-
+        
         readonly bool authenticatedUser;
         bool bAborted;
         int seq; // more hack fixes
@@ -66,15 +60,10 @@ namespace DepotDownloader.Steam
             bAborted = false;
             seq = 0;
 
-            AppTokens = new Dictionary<uint, ulong>();
             PackageTokens = new Dictionary<uint, ulong>();
             DepotKeys = new Dictionary<uint, byte[]>();
-            CDNAuthTokens = new ConcurrentDictionary<string, TaskCompletionSource<SteamApps.CDNAuthTokenCallback>>();
             
-            AppBetaPasswords = new Dictionary<string, byte[]>();
-
-            var clientConfiguration = SteamConfiguration.Create(config => config.WithHttpClientFactory(HttpClientFactory.CreateHttpClient));
-            steamClient = new SteamClient(clientConfiguration);
+            steamClient = new SteamClient();
 
             steamUser = steamClient.GetHandler<SteamUser>();
             steamApps = steamClient.GetHandler<SteamApps>();
@@ -83,7 +72,6 @@ namespace DepotDownloader.Steam
             callbacks = new CallbackManager(steamClient);
 
             callbacks.Subscribe<SteamUser.LoggedOnCallback>(LogOnCallback);
-
             callbacks.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             callbacks.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
 
@@ -150,6 +138,8 @@ namespace DepotDownloader.Steam
             }
         }
 
+
+        //TODO this needs thorough testing
         private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
         {
             var isSteamGuard = loggedOn.Result == EResult.AccountLogonDenied;
@@ -229,7 +219,6 @@ namespace DepotDownloader.Steam
                 return;
             }
 
-
             seq++;
             credentials.LoggedOn = true;
 
@@ -251,50 +240,26 @@ namespace DepotDownloader.Steam
         //TODO handle files not existing
         public void LoadCachedData()
         {
-            var timer = Stopwatch.StartNew();
-
-            if (File.Exists($"{DownloadConfig.ConfigDir}/appInfo.json"))
-            {
-                //TODO swap to UTF8 Json
-                AppInfoShims = JsonSerializer.Deserialize<Dictionary<uint, AppInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appInfo.json"));
-            }
-            if (File.Exists($"{DownloadConfig.ConfigDir}/appTokens.json"))
-            {
-                AppTokens = JsonSerializer.Deserialize<Dictionary<uint, ulong>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appTokens.json"));
-            }
             if (File.Exists($"{DownloadConfig.ConfigDir}/packageInfo.json"))
             {
                 PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/packageInfo.json"));
             }
-
-            _ansiConsole.LogMarkupLine("Loaded data from disk", timer.Elapsed);
         }
 
         //TODO test this with very large data sets
         //TODO measure performance
         public void SerializeCachedData()
         {
-            var timer = Stopwatch.StartNew();
-
-            //TODO reduce the amount of data this is serializing.  Alot of it isn't important
-            File.WriteAllText($"{DownloadConfig.ConfigDir}/appInfo.json", JsonSerializer.ToJsonString(AppInfoShims));
-            File.WriteAllText($"{DownloadConfig.ConfigDir}/appTokens.json", JsonSerializer.ToJsonString(AppTokens));
-
             File.WriteAllText($"{DownloadConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
-
-            _ansiConsole.LogMarkupLine("Saved data to disk", timer.Elapsed);
         }
         
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
-        private Stopwatch _loadAccountLicensesTimer;
 
         //TODO speed this up by serializing/deserializing?
         public void LoadAccountLicenses()
         {
-            _loadAccountLicensesTimer = Stopwatch.StartNew();
-
             callbacks.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
             while (_loadAccountLicensesIsRunning)
             {
@@ -308,6 +273,7 @@ namespace DepotDownloader.Steam
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
+                //TODO handle
                 Console.WriteLine("Unable to get license list: {0} ", licenseList.Result);
                 Abort();
 
@@ -323,41 +289,36 @@ namespace DepotDownloader.Steam
                     PackageTokens.TryAdd(license.PackageID, license.AccessToken);
                 }
             }
-
-            AnsiConsole.Console.LogMarkupLine($"Got {Cyan(licenseList.LicenseList.Count)} licenses for account!".PadRight(54), _loadAccountLicensesTimer.Elapsed);
-            _loadAccountLicensesTimer.Stop();
         }
         #endregion
 
-        //TODO comment
-        public AppInfoShim RequestAppInfo(uint appId)
+        //TODO fully implement this.  Seems to be faster than an individual load
+        public void BulkLoadAppInfos()
         {
             var timer = Stopwatch.StartNew();
+            var requests = new List<SteamApps.PICSRequest>();
+            foreach (var id in new List<uint>() { 730, 570, 1085660, 440 })
+            {
+                requests.Add(new SteamApps.PICSRequest(id));
+            }
+
+            //TODO async await
+            var productJob = steamApps.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>());
+            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
+            timer.Stop();
+            Debugger.Break();
+        }
+
+        //TODO comment
+        public AppInfoShim GetAppInfo(uint appId)
+        {
             if (AppInfoShims.ContainsKey(appId))
             {
                 return AppInfoShims[appId];
             }
-
-            // WTF 1
-            //TODO async await
-            var appTokens = steamApps.PICSGetAccessTokens(new List<uint> { appId }, new List<uint>()).GetAwaiter().GetResult();
-            if (appTokens.AppTokensDenied.Contains(appId))
-            {
-                Console.WriteLine("Insufficient privileges to get access token for app {0}", appId);
-            }
-
-            foreach (var token_dict in appTokens.AppTokens)
-            {
-                AppTokens[token_dict.Key] = token_dict.Value;
-            }
-
-            // WTF 2
+            
             var request = new SteamApps.PICSRequest(appId);
-            if (AppTokens.ContainsKey(appId))
-            {
-                request.AccessToken = AppTokens[appId];
-            }
-
+            
             //TODO async await
             var productJob = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>());
             AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
@@ -370,7 +331,7 @@ namespace DepotDownloader.Steam
                     {
                         var app = app_value.Value;
 
-                        AppInfoShims[app.ID] = new AppInfoShim(app.KeyValues);
+                        AppInfoShims[app.ID] = new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues);
                     }
 
                     foreach (var app in appInfo.UnknownApps)
@@ -379,10 +340,9 @@ namespace DepotDownloader.Steam
                     }
                 }
             }
-            _ansiConsole.LogMarkupLine("RequestAppInfo complete", timer.Elapsed);
             return AppInfoShims[appId];
         }
-
+        
         public void RequestPackageInfo(List<uint> packages)
         {
             if (PackageInfoShims.Count > 0)
@@ -436,24 +396,7 @@ namespace DepotDownloader.Steam
             }
         }
 
-        public bool RequestFreeAppLicense(uint appId)
-        {
-            var success = false;
-            var completed = false;
-            Action<SteamApps.FreeLicenseCallback> cbMethod = resultInfo =>
-            {
-                completed = true;
-                success = resultInfo.GrantedApps.Contains(appId);
-            };
-
-            WaitUntilCallback(() =>
-            {
-                callbacks.Subscribe(steamApps.RequestFreeLicense(appId), cbMethod);
-            }, () => { return completed; });
-
-            return success;
-        }
-
+        //TODO cleanup
         public void RequestDepotKey(uint depotId, uint appid = 0)
         {
             if (DepotKeys.ContainsKey(depotId) || bAborted)

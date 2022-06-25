@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using DepotDownloader.Models;
 using DepotDownloader.Protos;
@@ -17,20 +15,10 @@ namespace DepotDownloader.Handlers
     //TODO make not static
     public static class ManifestHandler
     {
-        public static async Task<DepotFilesData> GetManifestFilesAsync(DepotDownloadInfo depot, CDNClientPool cdnPool, Steam3Session steam3)
-        {
-            ProtoManifest manifest = await GetManifestFile(depot, cdnPool, steam3);
-            return new DepotFilesData
-            {
-                depotDownloadInfo = depot,
-                filteredFiles = manifest.Files.ToList()
-            };
-        }
-
         //TODO document
-        public static async Task<ProtoManifest> GetManifestFile(DepotDownloadInfo depot, CDNClientPool cdnPool, Steam3Session steam3)
+        public static async Task<ProtoManifest> GetManifestFile(DepotInfo depot, CDNClientPool cdnPool, Steam3Session steam3)
         {
-            var manifestFileName = Path.Combine(DownloadConfig.ManifestCacheDir, $"{depot.appId}_{depot.id}_{depot.manifestId}.bin");
+            var manifestFileName = Path.Combine(DownloadConfig.ManifestCacheDir, $"{depot.ContaingAppId}_{depot.DepotId}_{depot.ManifestId}.bin");
             if (File.Exists(manifestFileName))
             {
                 return LoadManifestFromDisk(depot);
@@ -49,7 +37,7 @@ namespace DepotDownloader.Handlers
                 // The manifest request code is only valid for a specific period in time
                 if (manifestRequestCode == 0 || now >= manifestRequestCodeExpiration)
                 {
-                    manifestRequestCode = await steam3.GetDepotManifestRequestCodeAsync(depot.id, depot.appId, depot.manifestId);
+                    manifestRequestCode = await steam3.GetDepotManifestRequestCodeAsync(depot.DepotId, depot.ContaingAppId.Value, depot.ManifestId.Value);
                     // This code will hopefully be valid for one period following the issuing period
                     manifestRequestCodeExpiration = now.Add(TimeSpan.FromMinutes(5));
 
@@ -57,28 +45,28 @@ namespace DepotDownloader.Handlers
                     if (manifestRequestCode == 0)
                     {
                         //TODO handle error here
-                        Console.WriteLine("No manifest request code was returned for {0} {1}", depot.id, depot.manifestId);
+                        Console.WriteLine("No manifest request code was returned for {0} {1}", depot.DepotId, depot.ManifestId.Value);
                     }
                 }
                 // TODO only need to get the depot key if we haven't already downloaded the manifest
-                steam3.RequestDepotKey(depot.id, depot.appId);
-                if (!steam3.DepotKeys.ContainsKey(depot.id))
+                steam3.RequestDepotKey(depot.DepotId, depot.ContaingAppId.Value);
+                if (!steam3.DepotKeys.ContainsKey(depot.DepotId))
                 {
                     //TODO better exception handling
-                    AnsiConsole.WriteLine("No valid depot key for {0}, unable to download.", depot.id);
+                    AnsiConsole.WriteLine("No valid depot key for {0}, unable to download.", depot.DepotId);
                     throw new Exception("No valid depot key");
                 }
 
                 //TODO store depot keys somewhere, and reload them.  They apparantly do not change when the manifest changes
-                depot.depotKey = steam3.DepotKeys[depot.id];
+                depot.depotKey = steam3.DepotKeys[depot.DepotId];
 
                 Server server = DownloadConfig.AutoMapper.Map<Server>(cdnPool.GetConnection());
 
-                depotManifest = await cdnPool.CDNClient.DownloadManifestAsync(depot.id, depot.manifestId, manifestRequestCode, server, depot.depotKey);
+                depotManifest = await cdnPool.CDNClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode, server, depot.depotKey);
              
             } while (depotManifest == null);
             
-            var protoManifest = new ProtoManifest(depotManifest, depot.manifestId);
+            var protoManifest = new ProtoManifest(depotManifest, depot.ManifestId.Value);
             protoManifest.SaveToFile(manifestFileName, out var checksum);
 
             File.WriteAllBytes(manifestFileName + ".sha", checksum);
@@ -86,9 +74,9 @@ namespace DepotDownloader.Handlers
             return protoManifest;
         }
 
-        private static ProtoManifest LoadManifestFromDisk(DepotDownloadInfo depot)
+        private static ProtoManifest LoadManifestFromDisk(DepotInfo depot)
         {
-            var manifestFileName = Path.Combine(DownloadConfig.ManifestCacheDir, $"{depot.appId}_{depot.id}_{depot.manifestId}.bin");
+            var manifestFileName = Path.Combine(DownloadConfig.ManifestCacheDir, $"{depot.ContaingAppId}_{depot.DepotId}_{depot.ManifestId}.bin");
             byte[] expectedChecksum = File.ReadAllBytes(manifestFileName + ".sha");
 
             byte[] currentChecksum;
@@ -96,7 +84,7 @@ namespace DepotDownloader.Handlers
             if (manifest != null && !expectedChecksum.SequenceEqual(currentChecksum))
             {
                 //TODO better handling
-                Console.WriteLine("Manifest {0} on disk did not match the expected checksum.", depot.manifestId);
+                Console.WriteLine("Manifest {0} on disk did not match the expected checksum.", depot.ManifestId);
                 throw new Exception("Manifest checksum does not match expected");
             }
             return manifest;

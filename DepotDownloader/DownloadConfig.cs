@@ -1,4 +1,5 @@
 using AutoMapper;
+using CliFx.Infrastructure;
 using DepotDownloader.Models;
 using SteamKit2.CDN;
 
@@ -17,12 +18,10 @@ namespace DepotDownloader
         public static string ManifestCacheDir => "ManifestCache";
         public static string ConfigDir => ".DepotDownloader";
 
-        //TODO remove this in favor of null
-        public static ulong INVALID_MANIFEST_ID = ulong.MaxValue;
 
         // Debugging only
         //TODO revert
-        public static bool SkipDownload = true;
+        public static bool SkipDownload = false;
 
         //TODO split out into AppConfig
         public static Mapper AutoMapper = new Mapper(new MapperConfiguration(cfg =>

@@ -2,6 +2,7 @@
 
 namespace DepotDownloader.Models
 {
+    //TODO rename
     public class PackageInfoShim
     {
         public List<uint> AppIds { get; set; } = new List<uint>();

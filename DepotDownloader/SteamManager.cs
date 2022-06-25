@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -49,7 +48,6 @@ namespace DepotDownloader
 
             // capture the supplied password in case we need to re-use it after checking the login key
             Config.SuppliedPassword = password;
-
             ConnectToSteam(username, password);
 
             // Loading cached data from previous runs
@@ -74,7 +72,6 @@ namespace DepotDownloader
 
         private void ConnectToSteam(string username, string password)
         {
-            var timer = Stopwatch.StartNew();
             string loginKey = null;
 
             if (username != null && Config.RememberPassword)
@@ -110,8 +107,6 @@ namespace DepotDownloader
                 _ansiConsole.MarkupLine($"{Red("Error: Login to Steam failed")}");
                 throw new Exception("Unable to get steam3 credentials.");
             }
-
-            _ansiConsole.LogMarkupLine("Logged into steam", timer.Elapsed);
         }
 
         //TODO lookup the app name by id
@@ -121,97 +116,66 @@ namespace DepotDownloader
             {
                 throw new Exception("Steam session not initialized!!");
             }
+            
+            _ansiConsole.LogMarkupLine($"Processing AppId {Cyan(downloadArgs.AppId)}");
+            AppInfoShim appInfo = _steam3.GetAppInfo(downloadArgs.AppId);
+            _ansiConsole.LogMarkupLine($"Found app {Cyan(appInfo.Common.Name)}");
 
-            var appInfo = _steam3.RequestAppInfo(downloadArgs.AppId);
-            DetermineIfUserHasAccess(appInfo);
+            //TODO this doesn't seem to be working correctly for games I don't own
+            if (!DepotHandler.AccountHasAccess(appInfo.AppId, _steam3))
+            {
+                //TODO handle this better
+                throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");
+            }
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
             List<DepotInfo> filteredDepots = DepotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots, Config);
-            var depotsToDownload = DepotHandler.GetDepotDownloadInfo(filteredDepots, _steam3, appInfo);
+            DepotHandler.BuildLinkedDepotInfo(filteredDepots, _steam3, appInfo);
 
             // Get the full file list for each depot, and queue up the required chunks
-            var manifests = await GetManifests(depotsToDownload);
-            var chunkDownloadQueue = BuildChunkDownloadQueue(manifests);
+            var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
 
             // Finally run the queued downloads
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+
             //TODO total download is wrong
-            var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.UncompressedLength));
-            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(manifests.Count)} depots");
+            var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
+            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} depots");
         }
 
         //TODO document
-        private async Task<List<DepotFilesData>> GetManifests(List<DepotDownloadInfo> depots)
+        //TODO consider parallelizing this for speed
+        private async Task<List<QueuedRequest>> BuildChunkDownloadQueue(List<DepotInfo> depots)
         {
-            var depotsToDownload = new List<DepotFilesData>();
+            var chunkQueue = new List<QueuedRequest>();
             var timer = Stopwatch.StartNew();
 
-            // First, fetch all the manifests for each depot
+            // Fetch all the manifests for each depot, and queue up their chunks
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Fetching", async ctx =>
             {
                 foreach (var depot in depots)
                 {
-                    ctx.Status = $"Fetching depot files for {Yellow(depot.id)} - {Cyan(depot.contentName)}";
+                    ctx.Status = $"Fetching depot files for {Cyan(depot.Name)}";
 
-                    DepotFilesData depotFileData = await ManifestHandler.GetManifestFilesAsync(depot, _cdnPool, _steam3);
-                    depotsToDownload.Add(depotFileData);
+                    ProtoManifest manifest = await ManifestHandler.GetManifestFile(depot, _cdnPool, _steam3);
+                    // A depot can be made up of multiple files
+                    foreach (var file in manifest.Files)
+                    {
+                        // A file larger than 1MB will need to be downloaded in multiple chunks
+                        foreach (var chunk in file.Chunks)
+                        {
+                            chunkQueue.Add(new QueuedRequest
+                            {
+                                DepotId = depot.DepotId,
+                                chunk = chunk
+                            });
+                        }
+                    }
                 }
                 
             });
-            _ansiConsole.LogMarkupLine("Got manifests", timer.Elapsed);
-            return depotsToDownload;
-        }
-
-        //TODO document
-        private ConcurrentBag<QueuedRequest> BuildChunkDownloadQueue(List<DepotFilesData> depotsToDownload)
-        {
-            var timer = Stopwatch.StartNew();
-            var networkChunkQueue = new ConcurrentBag<QueuedRequest>();
-
-            // Process each depot, and aggregate all chunks that need to be downloaded
-            foreach (var depotFilesData in depotsToDownload)
-            {
-                // A depot can be made up of multiple files
-                foreach(var file in depotFilesData.filteredFiles)
-                {
-                    // A file larger than 1MB will need to be downloaded in multiple chunks
-                    foreach (var chunk in file.Chunks)
-                    {
-                        networkChunkQueue.Add(new QueuedRequest
-                        {
-                            chunk = chunk,
-                            depotDownloadInfo = depotFilesData.depotDownloadInfo
-                        });
-                    }
-                }
-            }
-            _ansiConsole.LogMarkupLine("Build chunk queue", timer.Elapsed);
-            return networkChunkQueue;
-        }
-
-        //TODO comment
-        //TODO work on this
-        private void DetermineIfUserHasAccess(AppInfoShim app)
-        {
-            var appId = app.AppId;
-            var timer = Stopwatch.StartNew();
-            if (DepotHandler.AccountHasAccess(appId, _steam3))
-            {
-                _ansiConsole.LogMarkupLine("Determined user app access ", timer.Elapsed);
-                return;
-            }
-            
-            if (_steam3.RequestFreeAppLicense(appId))
-            {
-                _ansiConsole.WriteLine($"Obtained FreeOnDemand license for app {appId}");
-
-                // Fetch app info again in case we didn't get it fully without a license.
-                _steam3.RequestAppInfo(appId);
-                _ansiConsole.LogMarkupLine("Determined user app access ", timer.Elapsed);
-                return;
-            }
-
-            throw new ContentDownloaderException($"App {appId} ({app.Common.Name}) is not available from this account.");
+            _ansiConsole.LogMarkupLine("Built chunk download queue", timer.Elapsed);
+            return chunkQueue;
         }
     }
 }

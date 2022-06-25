@@ -13,11 +13,14 @@ namespace DepotDownloader.Models
 
         public ConfigInfo ConfigInfo { get; set; }
 
-        //TODO this may need to be checked to see if it has changed, otherwise there is no way to know if there is an update
-        public ulong ManifestId { get; set; } = DownloadConfig.INVALID_MANIFEST_ID;
+        public ulong? ManifestId { get; set; } = null;
 
         public long MaxSize { get; set; }
+
+        public uint? ContaingAppId { get; set; }
         public uint? DepotFromApp { get; set; } = null;
+
+        public byte[] depotKey { get; set; }
 
         public DepotInfo()
         {
@@ -29,7 +32,7 @@ namespace DepotDownloader.Models
             var c = keyValues.Children;
 
             DepotId = uint.Parse(keyValues.Name);
-            Name = c.First(e => e.Name == "name").Value;
+            Name = c.FirstOrDefault(e => e.Name == "name")?.Value;
 
             // Config
             var configSection = c.FirstOrDefault(e => e.Name == "config");

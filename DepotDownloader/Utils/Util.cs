@@ -1,5 +1,4 @@
 using System;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -7,26 +6,6 @@ namespace DepotDownloader.Utils
 {
     static class Util
     {
-        public static string GetSteamOS()
-        {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                return "windows";
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                return "macos";
-            }
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                return "linux";
-            }
-
-            return "unknown";
-        }
-
         public static string GetSteamArch()
         {
             return Environment.Is64BitOperatingSystem ? "64" : "32";
