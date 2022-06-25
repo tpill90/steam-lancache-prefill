@@ -3,10 +3,14 @@ using SteamKit2;
 
 namespace DepotDownloader.Models
 {
+    //TODO document
     public class CommonInfo
     {
         public string Name { get; set; }
+
+        //TODO enum
         public string Type { get; set; }
+
         public uint GameID { get; set; }
 
         public CommonInfo()

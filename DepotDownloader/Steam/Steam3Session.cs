@@ -5,6 +5,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using DepotDownloader.Models;
 using DepotDownloader.Protos;
@@ -37,6 +39,8 @@ namespace DepotDownloader.Steam
         readonly SteamApps steamApps;
 
         readonly CallbackManager callbacks;
+
+        private HttpClient _client = new HttpClient();
 
         readonly bool authenticatedUser;
         bool bAborted;
@@ -255,7 +259,6 @@ namespace DepotDownloader.Steam
 
             if (File.Exists($"{DownloadConfig.ConfigDir}/appInfo.json"))
             {
-                //TODO swap to UTF8 Json
                 AppInfoShims = JsonSerializer.Deserialize<Dictionary<uint, AppInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appInfo.json"));
             }
             if (File.Exists($"{DownloadConfig.ConfigDir}/appTokens.json"))
@@ -276,12 +279,12 @@ namespace DepotDownloader.Steam
         {
             var timer = Stopwatch.StartNew();
 
-            //TODO reduce the amount of data this is serializing.  Alot of it isn't important
-            File.WriteAllText($"{DownloadConfig.ConfigDir}/appInfo.json", JsonSerializer.ToJsonString(AppInfoShims));
+            //TODO not sure this is a good idea
+            //File.WriteAllText($"{DownloadConfig.ConfigDir}/appInfo.json", JsonSerializer.ToJsonString(AppInfoShims));
             File.WriteAllText($"{DownloadConfig.ConfigDir}/appTokens.json", JsonSerializer.ToJsonString(AppTokens));
-
             File.WriteAllText($"{DownloadConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
 
+            _ansiConsole.WriteLine();
             _ansiConsole.LogMarkupLine("Saved data to disk", timer.Elapsed);
         }
         
@@ -335,29 +338,12 @@ namespace DepotDownloader.Steam
             var timer = Stopwatch.StartNew();
             if (AppInfoShims.ContainsKey(appId))
             {
-                return AppInfoShims[appId];
+                var appInfo = AppInfoShims[appId];
+                _ansiConsole.LogMarkupLine("RequestAppInfo complete", timer.Elapsed);
+                return appInfo;
             }
-
-            // WTF 1
-            //TODO async await
-            var appTokens = steamApps.PICSGetAccessTokens(new List<uint> { appId }, new List<uint>()).GetAwaiter().GetResult();
-            if (appTokens.AppTokensDenied.Contains(appId))
-            {
-                Console.WriteLine("Insufficient privileges to get access token for app {0}", appId);
-            }
-
-            foreach (var token_dict in appTokens.AppTokens)
-            {
-                AppTokens[token_dict.Key] = token_dict.Value;
-            }
-
-            // WTF 2
+            
             var request = new SteamApps.PICSRequest(appId);
-            if (AppTokens.ContainsKey(appId))
-            {
-                request.AccessToken = AppTokens[appId];
-            }
-
             //TODO async await
             var productJob = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>());
             AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
@@ -370,7 +356,7 @@ namespace DepotDownloader.Steam
                     {
                         var app = app_value.Value;
 
-                        AppInfoShims[app.ID] = new AppInfoShim(app.KeyValues);
+                        AppInfoShims[app.ID] = new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues);
                     }
 
                     foreach (var app in appInfo.UnknownApps)
@@ -381,6 +367,21 @@ namespace DepotDownloader.Steam
             }
             _ansiConsole.LogMarkupLine("RequestAppInfo complete", timer.Elapsed);
             return AppInfoShims[appId];
+        }
+
+        //TODO I'm not sure this is a good idea
+        public async Task<bool> IsAppVersionUpToDate(AppInfoShim appInfo)
+        {
+            if (appInfo.Common.Type == "Tool")
+            {
+                return false;
+            }
+            var newsUrl = $"http://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid={appInfo.AppId}&count=2&format=json&feeds=SteamDB";
+            HttpResponseMessage response = await _client.GetAsync(newsUrl);
+            response.EnsureSuccessStatusCode();
+            Appnews news = await response.Content.ReadFromJsonAsync<Appnews>();
+
+            return false;
         }
 
         public void RequestPackageInfo(List<uint> packages)
@@ -436,6 +437,7 @@ namespace DepotDownloader.Steam
             }
         }
 
+        //TODO cleanup
         public bool RequestFreeAppLicense(uint appId)
         {
             var success = false;
@@ -454,6 +456,7 @@ namespace DepotDownloader.Steam
             return success;
         }
 
+        //TODO cleanup
         public void RequestDepotKey(uint depotId, uint appid = 0)
         {
             if (DepotKeys.ContainsKey(depotId) || bAborted)

@@ -6,6 +6,7 @@ using SteamKit2;
 namespace DepotDownloader.Models
 {
     //TODO document
+    //TODO extended properties includes the list of available languages for a game
     public class AppInfoShim
     {
         public uint AppId { get; set; }
@@ -14,17 +15,21 @@ namespace DepotDownloader.Models
 
         public CommonInfo Common { get; set; }
 
+        public uint Version { get; set; }
+
         // Parameterless constructor for deserialization
         public AppInfoShim()
         {
 
         }
 
-        public AppInfoShim(KeyValue rootKeyValues)
+        public AppInfoShim(uint appId, uint version, KeyValue rootKeyValues)
         {
             var c = rootKeyValues.Children;
 
-            AppId =  uint.Parse(c.FirstOrDefault(e => e.Name == "appid").Value);
+            AppId = appId;
+            Version = version;
+
             Common = new CommonInfo(c.FirstOrDefault(e => e.Name == "common"));
             Depots = BuildDepotInfos(c.FirstOrDefault(e => e.Name == "depots"));
         }
