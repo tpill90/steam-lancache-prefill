@@ -6,7 +6,7 @@ namespace DepotDownloader.Models
     public class QueuedRequest
     {
         public ProtoManifest.ChunkData chunk;
-        public DepotDownloadInfo depotDownloadInfo;
+        public DepotInfo depotDownloadInfo;
 
         public Exception PreviousError;
     }

@@ -5,7 +5,7 @@ namespace DepotDownloader.Models
 {
     public class DepotFilesData
     {
-        public DepotDownloadInfo depotDownloadInfo;
+        public DepotInfo depotDownloadInfo;
        
         public List<ProtoManifest.FileData> filteredFiles;
     }

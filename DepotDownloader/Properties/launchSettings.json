@@ -12,7 +12,11 @@
       "commandName": "Project",
       "commandLineArgs": "-username bearingbreaker92 -app 271590 -remember-password"
     },
-    "TF2 - Multiple Languages": {
+    "Unowned Free Game": {
+      "commandName": "Project",
+      "commandLineArgs": "-username bearingbreaker92 -app 1407200 -remember-password"
+    },
+	"TF2 - Multiple Languages": {
       "commandName": "Project",
       "commandLineArgs": "-username bearingbreaker92 -app 440 -remember-password"
     },

@@ -31,7 +31,7 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO comment
-        public async Task DownloadQueuedChunksAsync(ConcurrentBag<QueuedRequest> queuedRequests)
+        public async Task DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
             if (DownloadConfig.SkipDownload)
             {
@@ -107,7 +107,7 @@ namespace DepotDownloader.Handlers
 
             try
             {
-                var uri = new Uri($"http://{connection.Host}/depot/{request.depotDownloadInfo.id}/chunk/{request.chunk}");
+                var uri = new Uri($"http://{connection.Host}/depot/{request.depotDownloadInfo.DepotId}/chunk/{request.chunk}");
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
 
                 using var responseMessage = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DepotDownloader.Models;
 using DepotDownloader.Steam;
@@ -76,93 +75,48 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO comment
-        //TODO crappy name
-        public static List<DepotDownloadInfo> GetDepotDownloadInfo(List<DepotInfo> depotsToDownload, Steam3Session steam3, AppInfoShim appInfo)
+        public static void BuildLinkedDepotInfo(List<DepotInfo> depotsToDownload, Steam3Session steam3, AppInfoShim app)
         {
-            var timer = Stopwatch.StartNew();
-            
-            var depotDownloadInfos = new List<DepotDownloadInfo>();
             foreach (var depotInfo in depotsToDownload)
             {
-                var info = GetDepotInfo(depotInfo, appInfo, steam3);
-                if (info != null)
+                var depotId = depotInfo.DepotId;
+
+                if (!AccountHasAccess(depotId, steam3))
                 {
-                    depotDownloadInfos.Add(info);
+                    AnsiConsole.WriteLine($"Depot {depotInfo.DepotId} ({depotInfo.Name}) is not available from this account.");
+                    return;
+                }
+
+                // Finds manifestId for a linked app's depot.  
+                if (depotInfo.ManifestId == null)
+                {
+                    depotInfo.ManifestId = GetLinkedAppManifestId(depotInfo, app, steam3);
+                }
+
+                // For depots that are proxied through depotfromapp, we still need to resolve the proxy app id
+                depotInfo.ContaingAppId = app.AppId;
+                if (depotInfo.DepotFromApp != null)
+                {
+                    depotInfo.ContaingAppId = depotInfo.DepotFromApp.Value;
                 }
             }
-
-            AnsiConsole.Console.LogMarkupLine($"Got depot info for {Yellow(depotsToDownload.Count)} depots".PadRight(55), timer.Elapsed);
-            return depotDownloadInfos;
         }
-
-        //TODO finish refactoring
-        //TODO document
-        public static DepotDownloadInfo GetDepotInfo(DepotInfo depotInfo, AppInfoShim app, Steam3Session steam3)
-        {
-            ulong manifestId = depotInfo.ManifestId;
-            var depotId = depotInfo.DepotId;
-
-            if (!AccountHasAccess(depotId, steam3))
-            {
-                AnsiConsole.WriteLine($"Depot {depotInfo.DepotId} ({depotInfo.Name}) is not available from this account.");
-                return null;
-            }
-            
-            // Finds manifestId for a linked app's depot.  
-            // TODO can probably refactor this to just find the child depot from the list of depots we already know 
-            if (depotInfo.ManifestId == DownloadConfig.INVALID_MANIFEST_ID)
-            {
-                manifestId = GetManifestId(depotInfo, app, steam3);
-                if (manifestId == DownloadConfig.INVALID_MANIFEST_ID)
-                {
-                    // TODO handle
-                    AnsiConsole.WriteLine("Depot {0} ({1}) missing public subsection or manifest section.", depotId, depotInfo.Name);
-                    return null;
-                }
-            }
-
-            // For depots that are proxied through depotfromapp, we still need to resolve the proxy app id
-            var containingAppId = app.AppId;
-            if (depotInfo.DepotFromApp != null)
-            {
-                containingAppId = depotInfo.DepotFromApp.Value;
-            }
-            return new DepotDownloadInfo(depotId, containingAppId, manifestId, depotInfo.Name);
-        }
-
         // TODO document
-        public static ulong GetManifestId(DepotInfo depot, AppInfoShim app, Steam3Session steam3)
+        public static ulong? GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app, Steam3Session steam3)
         {
-            var appId = app.AppId;
-            var childDepot = app.Depots.FirstOrDefault(e => e.DepotId == depot.DepotId);
-            if (childDepot == null)
-            {
-                return DownloadConfig.INVALID_MANIFEST_ID;
-            }
-
             // Shared depots can either provide manifests, or leave you relying on their parent app.
             // It seems that with the latter, "sharedinstall" will exist (and equals 2 in the one existance I know of).
             // Rather than relay on the unknown sharedinstall key, just look for manifests. Test cases: 111710, 346680.
-            if (childDepot.ManifestId == DownloadConfig.INVALID_MANIFEST_ID && childDepot.DepotFromApp != null)
+            var parentAppId = depot.DepotFromApp.Value;
+            if (parentAppId == app.AppId)
             {
-                var otherAppId = childDepot.DepotFromApp.Value;
-                if (otherAppId == appId)
-                {
-                    //TODO handle
-                    // This shouldn't ever happen, but ya never know with Valve. Don't infinite loop.
-                    AnsiConsole.WriteLine("App {0}, Depot {1} has depotfromapp of {2}!", appId, depot.DepotId, otherAppId);
-                    return DownloadConfig.INVALID_MANIFEST_ID;
-                }
-
-                // TODO is this even necessary?
-                var otherapp = steam3.GetAppInfo(otherAppId);
-
-                //TODO wtf recursion
-                var returnValue = GetManifestId(depot, otherapp, steam3);
-                return returnValue;
+                //TODO handle
+                // This shouldn't ever happen, but ya never know with Valve. Don't infinite loop.
+                throw new Exception($"App {app.AppId}, Depot {depot.DepotId} has depotfromapp of {parentAppId}!");
             }
 
-            return childDepot.ManifestId;
+            var parentAppInfo = steam3.GetAppInfo(parentAppId);
+            return parentAppInfo.Depots.FirstOrDefault(e => e.DepotId == depot.DepotId).ManifestId;
         }
 
         // TODO clean this up

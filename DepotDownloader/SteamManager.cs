@@ -49,7 +49,6 @@ namespace DepotDownloader
 
             // capture the supplied password in case we need to re-use it after checking the login key
             Config.SuppliedPassword = password;
-
             ConnectToSteam(username, password);
 
             // Loading cached data from previous runs
@@ -127,10 +126,10 @@ namespace DepotDownloader
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
             List<DepotInfo> filteredDepots = DepotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots, Config);
-            var depotsToDownload = DepotHandler.GetDepotDownloadInfo(filteredDepots, _steam3, appInfo);
+            DepotHandler.BuildLinkedDepotInfo(filteredDepots, _steam3, appInfo);
 
             // Get the full file list for each depot, and queue up the required chunks
-            var manifests = await GetManifests(depotsToDownload);
+            var manifests = await GetManifests(filteredDepots);
             var chunkDownloadQueue = BuildChunkDownloadQueue(manifests);
 
             // Finally run the queued downloads
@@ -141,9 +140,9 @@ namespace DepotDownloader
         }
 
         //TODO document
-        private async Task<List<DepotFilesData>> GetManifests(List<DepotDownloadInfo> depots)
+        private async Task<List<ProtoManifest>> GetManifests(List<DepotInfo> depots)
         {
-            var depotsToDownload = new List<DepotFilesData>();
+            var manifests = new List<ProtoManifest>();
             var timer = Stopwatch.StartNew();
 
             // First, fetch all the manifests for each depot
@@ -151,41 +150,38 @@ namespace DepotDownloader
             {
                 foreach (var depot in depots)
                 {
-                    ctx.Status = $"Fetching depot files for {Yellow(depot.id)} - {Cyan(depot.contentName)}";
+                    ctx.Status = $"Fetching depot files for {Cyan(depot.Name)}";
 
-                    DepotFilesData depotFileData = await ManifestHandler.GetManifestFilesAsync(depot, _cdnPool, _steam3);
-                    depotsToDownload.Add(depotFileData);
+                    ProtoManifest manifest = await ManifestHandler.GetManifestFile(depot, _cdnPool, _steam3);
+                    manifests.Add(manifest);
                 }
                 
             });
             _ansiConsole.LogMarkupLine("Got manifests", timer.Elapsed);
-            return depotsToDownload;
+            return manifests;
         }
 
         //TODO document
-        private ConcurrentBag<QueuedRequest> BuildChunkDownloadQueue(List<DepotFilesData> depotsToDownload)
+        private List<QueuedRequest> BuildChunkDownloadQueue(List<ProtoManifest> manifests)
         {
-            var timer = Stopwatch.StartNew();
-            var networkChunkQueue = new ConcurrentBag<QueuedRequest>();
+            var networkChunkQueue = new List<QueuedRequest>();
 
             // Process each depot, and aggregate all chunks that need to be downloaded
-            foreach (var depotFilesData in depotsToDownload)
+            foreach (var manifest in manifests)
             {
                 // A depot can be made up of multiple files
-                foreach(var file in depotFilesData.filteredFiles)
+                foreach(var file in manifest.Files)
                 {
                     // A file larger than 1MB will need to be downloaded in multiple chunks
                     foreach (var chunk in file.Chunks)
                     {
                         networkChunkQueue.Add(new QueuedRequest
                         {
-                            chunk = chunk,
-                            depotDownloadInfo = depotFilesData.depotDownloadInfo
+                            chunk = chunk
                         });
                     }
                 }
             }
-            _ansiConsole.LogMarkupLine("Build chunk queue", timer.Elapsed);
             return networkChunkQueue;
         }
 

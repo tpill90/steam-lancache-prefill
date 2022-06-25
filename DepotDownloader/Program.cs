@@ -26,6 +26,7 @@ namespace DepotDownloader
     // TODO - Performance - Figure out why this app isn't consistently hitting 10gbit download speeds.
     // TODO - Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
     // TODO - Spectre - Cleanup all instances of AnsiConsole.Console
+    // TODO - Logging into steam with expired password fails on first try.  Rerunning works
 
     // TODO - General - Cleanup CdnPool class
     class Program
