@@ -7,6 +7,7 @@ namespace DepotDownloader.Models
 {
     //TODO document
     //TODO extended properties includes the list of available languages for a game
+    //TODO rename
     public class AppInfoShim
     {
         public uint AppId { get; set; }

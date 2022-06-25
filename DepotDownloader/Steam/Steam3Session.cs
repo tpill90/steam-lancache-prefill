@@ -25,13 +25,9 @@ namespace DepotDownloader.Steam
         public Dictionary<uint, ulong> AppTokens { get; private set; }
         public Dictionary<uint, ulong> PackageTokens { get; private set; }
         public Dictionary<uint, byte[]> DepotKeys { get; private set; }
-        public ConcurrentDictionary<string, TaskCompletionSource<SteamApps.CDNAuthTokenCallback>> CDNAuthTokens { get; private set; }
         
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
-
         public Dictionary<uint, PackageInfoShim> PackageInfoShims { get; private set; } = new Dictionary<uint, PackageInfoShim>();
-
-        public Dictionary<string, byte[]> AppBetaPasswords { get; private set; }
 
         public SteamClient steamClient;
         public SteamUser steamUser;
@@ -39,9 +35,7 @@ namespace DepotDownloader.Steam
         readonly SteamApps steamApps;
 
         readonly CallbackManager callbacks;
-
-        private HttpClient _client = new HttpClient();
-
+        
         readonly bool authenticatedUser;
         bool bAborted;
         int seq; // more hack fixes
@@ -73,12 +67,8 @@ namespace DepotDownloader.Steam
             AppTokens = new Dictionary<uint, ulong>();
             PackageTokens = new Dictionary<uint, ulong>();
             DepotKeys = new Dictionary<uint, byte[]>();
-            CDNAuthTokens = new ConcurrentDictionary<string, TaskCompletionSource<SteamApps.CDNAuthTokenCallback>>();
             
-            AppBetaPasswords = new Dictionary<string, byte[]>();
-
-            var clientConfiguration = SteamConfiguration.Create(config => config.WithHttpClientFactory(HttpClientFactory.CreateHttpClient));
-            steamClient = new SteamClient(clientConfiguration);
+            steamClient = new SteamClient();
 
             steamUser = steamClient.GetHandler<SteamUser>();
             steamApps = steamClient.GetHandler<SteamApps>();
@@ -257,10 +247,10 @@ namespace DepotDownloader.Steam
         {
             var timer = Stopwatch.StartNew();
 
-            if (File.Exists($"{DownloadConfig.ConfigDir}/appInfo.json"))
-            {
-                AppInfoShims = JsonSerializer.Deserialize<Dictionary<uint, AppInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appInfo.json"));
-            }
+            //if (File.Exists($"{DownloadConfig.ConfigDir}/appInfo.json"))
+            //{
+            //    AppInfoShims = JsonSerializer.Deserialize<Dictionary<uint, AppInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appInfo.json"));
+            //}
             if (File.Exists($"{DownloadConfig.ConfigDir}/appTokens.json"))
             {
                 AppTokens = JsonSerializer.Deserialize<Dictionary<uint, ulong>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/appTokens.json"));
@@ -332,18 +322,34 @@ namespace DepotDownloader.Steam
         }
         #endregion
 
+        //TODO fully implement this.  Seems to be faster than an individual load
+        public void BulkLoadAppInfos()
+        {
+            var timer = Stopwatch.StartNew();
+            var requests = new List<SteamApps.PICSRequest>();
+            foreach (var id in new List<uint>() { 730, 570, 1085660, 440 })
+            {
+                requests.Add(new SteamApps.PICSRequest(id));
+            }
+
+            //TODO async await
+            var productJob = steamApps.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>());
+            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
+            timer.Stop();
+            Debugger.Break();
+        }
+
         //TODO comment
-        public AppInfoShim RequestAppInfo(uint appId)
+        public AppInfoShim GetAppInfo(uint appId)
         {
             var timer = Stopwatch.StartNew();
             if (AppInfoShims.ContainsKey(appId))
             {
-                var appInfo = AppInfoShims[appId];
-                _ansiConsole.LogMarkupLine("RequestAppInfo complete", timer.Elapsed);
-                return appInfo;
+                return AppInfoShims[appId];
             }
             
             var request = new SteamApps.PICSRequest(appId);
+            
             //TODO async await
             var productJob = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>());
             AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
@@ -365,25 +371,10 @@ namespace DepotDownloader.Steam
                     }
                 }
             }
-            _ansiConsole.LogMarkupLine("RequestAppInfo complete", timer.Elapsed);
+            _ansiConsole.LogMarkupLine("GetAppInfo complete", timer.Elapsed);
             return AppInfoShims[appId];
         }
-
-        //TODO I'm not sure this is a good idea
-        public async Task<bool> IsAppVersionUpToDate(AppInfoShim appInfo)
-        {
-            if (appInfo.Common.Type == "Tool")
-            {
-                return false;
-            }
-            var newsUrl = $"http://api.steampowered.com/ISteamNews/GetNewsForApp/v2/?appid={appInfo.AppId}&count=2&format=json&feeds=SteamDB";
-            HttpResponseMessage response = await _client.GetAsync(newsUrl);
-            response.EnsureSuccessStatusCode();
-            Appnews news = await response.Content.ReadFromJsonAsync<Appnews>();
-
-            return false;
-        }
-
+        
         public void RequestPackageInfo(List<uint> packages)
         {
             if (PackageInfoShims.Count > 0)

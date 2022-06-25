@@ -35,6 +35,7 @@ namespace DepotDownloader.Protos
         }
 
         public static AccountSettingsStore Instance;
+        //TODO test if IsolatedStorage works on Linux
         static readonly IsolatedStorageFile IsolatedStorage = IsolatedStorageFile.GetUserStoreForAssembly();
 
         public static void LoadFromFile(string filename)

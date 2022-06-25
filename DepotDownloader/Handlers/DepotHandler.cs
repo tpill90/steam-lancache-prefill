@@ -158,7 +158,7 @@ namespace DepotDownloader.Handlers
                 }
 
                 // TODO is this even necessary?
-                var otherapp = steam3.RequestAppInfo(otherAppId);
+                var otherapp = steam3.GetAppInfo(otherAppId);
 
                 //TODO wtf recursion
                 var returnValue = GetManifestId(depot, otherapp, steam3);

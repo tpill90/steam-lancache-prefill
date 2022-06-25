@@ -122,7 +122,7 @@ namespace DepotDownloader
                 throw new Exception("Steam session not initialized!!");
             }
 
-            var appInfo = _steam3.RequestAppInfo(downloadArgs.AppId);
+            var appInfo = _steam3.GetAppInfo(downloadArgs.AppId);
             DetermineIfUserHasAccess(appInfo);
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
@@ -206,7 +206,7 @@ namespace DepotDownloader
                 _ansiConsole.WriteLine($"Obtained FreeOnDemand license for app {appId}");
 
                 // Fetch app info again in case we didn't get it fully without a license.
-                _steam3.RequestAppInfo(appId);
+                _steam3.GetAppInfo(appId);
                 _ansiConsole.LogMarkupLine("Determined user app access ", timer.Elapsed);
                 return;
             }
