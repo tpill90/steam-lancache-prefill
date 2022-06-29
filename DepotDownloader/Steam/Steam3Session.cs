@@ -10,6 +10,7 @@ using DepotDownloader.Protos;
 using DepotDownloader.Utils;
 using Spectre.Console;
 using SteamKit2;
+using SteamKit2.CDN;
 using static DepotDownloader.Utils.SpectreColors;
 using JsonSerializer = Utf8Json.JsonSerializer;
 
@@ -20,7 +21,6 @@ namespace DepotDownloader.Steam
         public ReadOnlyCollection<SteamApps.LicenseListCallback.License> Licenses { get; private set; }
 
         public Dictionary<uint, ulong> PackageTokens { get; private set; }
-        public Dictionary<uint, byte[]> DepotKeys { get; private set; }
         
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
         public Dictionary<uint, PackageInfoShim> PackageInfoShims { get; private set; } = new Dictionary<uint, PackageInfoShim>();
@@ -29,6 +29,8 @@ namespace DepotDownloader.Steam
         public SteamUser steamUser;
         public SteamContent steamContent;
         readonly SteamApps steamApps;
+        //TODO not sure if this should be public or not
+        public readonly Client CdnClient;
 
         readonly CallbackManager callbacks;
         
@@ -46,10 +48,10 @@ namespace DepotDownloader.Steam
         public delegate bool WaitCondition();
 
         private readonly object steamLock = new object();
-
-
         static readonly TimeSpan STEAM3_TIMEOUT = TimeSpan.FromSeconds(30);
+
         
+
         public Steam3Session(SteamUser.LogOnDetails details, IAnsiConsole ansiConsole)
         {
             logonDetails = details;
@@ -61,9 +63,9 @@ namespace DepotDownloader.Steam
             seq = 0;
 
             PackageTokens = new Dictionary<uint, ulong>();
-            DepotKeys = new Dictionary<uint, byte[]>();
             
             steamClient = new SteamClient();
+            
 
             steamUser = steamClient.GetHandler<SteamUser>();
             steamApps = steamClient.GetHandler<SteamApps>();
@@ -76,6 +78,8 @@ namespace DepotDownloader.Steam
             callbacks.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
 
             callbacks.RunCallbacks();
+
+            CdnClient = new Client(steamClient);
 
             if (authenticatedUser)
             {
@@ -170,6 +174,7 @@ namespace DepotDownloader.Steam
 
                     if (SteamManager.Config.SuppliedPassword != null)
                     {
+                        // TODO this happening in the middle of a run.  Is there a way to make sure this doesn't happen?
                         Console.WriteLine("Login key was expired. Connecting with supplied password.");
                         logonDetails.Password = SteamManager.Config.SuppliedPassword;
                     }
@@ -234,6 +239,16 @@ namespace DepotDownloader.Steam
             }
         }
 
+        public void ThrowIfNotConnected()
+        {
+            //TODO should probably handle this better than just throwing
+            if (!steamClient.IsConnected)
+            {
+                //TODO better exception type and message
+                throw new Exception("Steam session not connected");
+            }
+        }
+
         #endregion
 
         //TODO measure performance
@@ -292,36 +307,14 @@ namespace DepotDownloader.Steam
         }
         #endregion
 
-        //TODO fully implement this.  Seems to be faster than an individual load
-        public void BulkLoadAppInfos()
+        // TODO document
+        // TODO make sure that this isn't actually a performance issue when loading a large # of apps
+        public async Task BulkLoadAppInfos(List<uint> appIds)
         {
-            var timer = Stopwatch.StartNew();
-            var requests = new List<SteamApps.PICSRequest>();
-            foreach (var id in new List<uint>() { 730, 570, 1085660, 440 })
-            {
-                requests.Add(new SteamApps.PICSRequest(id));
-            }
+            var requests = appIds.Select(id => new SteamApps.PICSRequest(id)).ToList();
 
-            //TODO async await
             var productJob = steamApps.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>());
-            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
-            timer.Stop();
-            Debugger.Break();
-        }
-
-        //TODO comment
-        public AppInfoShim GetAppInfo(uint appId)
-        {
-            if (AppInfoShims.ContainsKey(appId))
-            {
-                return AppInfoShims[appId];
-            }
-            
-            var request = new SteamApps.PICSRequest(appId);
-            
-            //TODO async await
-            var productJob = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest> { request }, new List<SteamApps.PICSRequest>());
-            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = productJob.GetAwaiter().GetResult();
+            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = await productJob.ToTask();
 
             if (resultSet.Complete)
             {
@@ -340,6 +333,16 @@ namespace DepotDownloader.Steam
                     }
                 }
             }
+        }
+
+        //TODO comment
+        public async Task<AppInfoShim> GetAppInfo(uint appId)
+        {
+            if (AppInfoShims.ContainsKey(appId))
+            {
+                return AppInfoShims[appId];
+            }
+            await BulkLoadAppInfos(new List<uint> { appId });
             return AppInfoShims[appId];
         }
         
@@ -394,44 +397,6 @@ namespace DepotDownloader.Steam
                     }
                 }
             }
-        }
-
-        //TODO cleanup
-        public void RequestDepotKey(uint depotId, uint appid = 0)
-        {
-            if (DepotKeys.ContainsKey(depotId) || bAborted)
-                return;
-
-            var completed = false;
-
-            Action<SteamApps.DepotKeyCallback> cbMethod = depotKey =>
-            {
-                completed = true;
-
-                if (depotKey.Result != EResult.OK)
-                {
-                    Abort();
-                    return;
-                }
-
-                DepotKeys[depotKey.DepotID] = depotKey.DepotKey;
-            };
-
-            WaitUntilCallback(() =>
-            {
-                callbacks.Subscribe(steamApps.GetDepotDecryptionKey(depotId, appid), cbMethod);
-            }, () => { return completed; });
-        }
-
-        public async Task<ulong> GetDepotManifestRequestCodeAsync(uint depotId, uint appId, ulong manifestId)
-        {
-            if (bAborted)
-            {
-                return 0;
-            }
-
-            var requestCode = await steamContent.GetManifestRequestCode(depotId, appId, manifestId, "public");
-            return requestCode;
         }
 
         private void Abort()

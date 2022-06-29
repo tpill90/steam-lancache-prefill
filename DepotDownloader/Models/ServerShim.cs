@@ -1,16 +1,20 @@
-﻿
-using SteamKit2.CDN;
+﻿using SteamKit2.CDN;
 
 namespace DepotDownloader.Models
 {
+    //TODO rename
     public class ServerShim
     {
-        public uint CellID { get; set; }
         public string Host { get; set; }
-        public int Port { get; set; }
+        public string VHost { get; set; }
 
+        public int Port { get; set; }
         public Server.ConnectionProtocol Protocol { get; set; }
 
-        public string VHost { get; set; }
+        //TODO document
+        public Server ToSteamKitServer()
+        {
+            return DownloadConfig.AutoMapper.Map<Server>(this);
+        }
     }
 }

@@ -5,7 +5,7 @@ namespace DepotDownloader.Models
     public class DownloadArguments
     {
         public string Username { get; set; }
-        public string Password { get; set; }
+        //public string Password { get; set; }
 
         public uint AppId { get; set; }
 

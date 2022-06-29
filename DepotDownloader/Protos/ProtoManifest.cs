@@ -1,28 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
-using DepotDownloader.Utils;
+using DepotDownloader.Models;
 using HexMate;
 using ProtoBuf;
 using SteamKit2;
 
 namespace DepotDownloader.Protos
 {
+    //TODO cleanup + document
     [ProtoContract]
     public class ProtoManifest
     {
-        // Proto ctor
         private ProtoManifest()
         {
             Files = new List<FileData>();
         }
 
-        public ProtoManifest(DepotManifest sourceManifest, ulong id) : this()
+        public ProtoManifest(DepotManifest sourceManifest, DepotInfo depotInfo) : this()
         {
             sourceManifest.Files.ForEach(f => Files.Add(new FileData(f)));
-            ID = id;
+            ID = depotInfo.ManifestId.Value;
             CreationTime = sourceManifest.CreationTime;
+            DepotId = depotInfo.DepotId;
         }
 
         [ProtoContract]
@@ -36,44 +36,35 @@ namespace DepotDownloader.Protos
 
             public FileData(DepotManifest.FileData sourceData) : this()
             {
-                FileName = sourceData.FileName;
                 sourceData.Chunks.ForEach(c => Chunks.Add(new ChunkData(c)));
                 Flags = sourceData.Flags;
                 TotalSize = sourceData.TotalSize;
                 FileHash = sourceData.FileHash;
             }
 
-            [ProtoMember(1)]
-            public string FileName { get; internal set; }
-
             /// <summary>
             /// Gets the chunks that this file is composed of.
             /// </summary>
-            [ProtoMember(2)]
+            [ProtoMember(1)]
             public List<ChunkData> Chunks { get; private set; }
 
             /// <summary>
             /// Gets the file flags
             /// </summary>
-            [ProtoMember(3)]
+            [ProtoMember(2)]
             public EDepotFileFlag Flags { get; private set; }
 
             /// <summary>
             /// Gets the total size of this file.
             /// </summary>
-            [ProtoMember(4)]
+            [ProtoMember(3)]
             public ulong TotalSize { get; private set; }
 
             /// <summary>
             /// Gets the hash of this file.
             /// </summary>
-            [ProtoMember(5)]
+            [ProtoMember(4)]
             public byte[] FileHash { get; private set; }
-
-            public override string ToString()
-            {
-                return FileName;
-            }
         }
 
         [ProtoContract(SkipConstructor = true)]
@@ -133,40 +124,32 @@ namespace DepotDownloader.Protos
         [ProtoMember(3)]
         public DateTime CreationTime { get; private set; }
 
-        public static ProtoManifest LoadFromFile(string filename, out byte[] checksum)
+        [ProtoMember(4)]
+        public uint DepotId { get; private set; }
+
+        //TODO protobuf-net seems kind of slow.  Consider swapping it with something else?
+        public static ProtoManifest LoadFromFile(string filename)
         {
             if (!File.Exists(filename))
             {
-                checksum = null;
                 return null;
             }
-
-            using (var ms = new MemoryStream())
-            {
-                using (var fs = File.Open(filename, FileMode.Open))
-                using (var ds = new DeflateStream(fs, CompressionMode.Decompress))
-                    ds.CopyTo(ms);
-
-                checksum = Util.SHAHash(ms.ToArray());
-
-                ms.Seek(0, SeekOrigin.Begin);
-                return Serializer.Deserialize<ProtoManifest>(ms);
-            }
+            using var fs = File.Open(filename, FileMode.Open);
+            return Serializer.Deserialize<ProtoManifest>(fs);
         }
 
-        public void SaveToFile(string filename, out byte[] checksum)
+        public void SaveToFile(string filename)
         {
             using (var ms = new MemoryStream())
             {
                 Serializer.Serialize(ms, this);
 
-                checksum = Util.SHAHash(ms.ToArray());
-
                 ms.Seek(0, SeekOrigin.Begin);
 
                 using (var fs = File.Open(filename, FileMode.Create))
-                using (var ds = new DeflateStream(fs, CompressionMode.Compress))
-                    ms.CopyTo(ds);
+                {
+                    ms.CopyTo(fs);
+                }
             }
         }
     }

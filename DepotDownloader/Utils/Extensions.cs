@@ -46,12 +46,12 @@ namespace DepotDownloader.Utils
 
         public static void LogMarkupLine(this IAnsiConsole console, string message)
         {
-            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss.ffff tt")}]] {message}");
+            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");
         }
 
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)
         {
-            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss.ffff tt")}]] {message}".PadRight(65) + Yellow(elapsed.ToString(@"ss\.FFFF")));
+            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}".PadRight(65) + Yellow(elapsed.ToString(@"ss\.FFFF")));
         }
     }
 }

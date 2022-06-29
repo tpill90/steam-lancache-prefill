@@ -20,7 +20,8 @@ namespace DepotDownloader.Models
         public uint? ContaingAppId { get; set; }
         public uint? DepotFromApp { get; set; } = null;
 
-        public byte[] depotKey { get; set; }
+        //TODO comment
+        public string ManifestFileName => $"{DownloadConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";
 
         public DepotInfo()
         {

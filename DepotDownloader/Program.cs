@@ -1,12 +1,6 @@
-using System;
-using System.Diagnostics;
-using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using DepotDownloader.Models;
-using DepotDownloader.Protos;
-using DepotDownloader.Utils;
-using Spectre.Console;
-using static DepotDownloader.Utils.SpectreColors;
+using CliFx;
 
 namespace DepotDownloader
 {
@@ -20,7 +14,7 @@ namespace DepotDownloader
     // TODO - Documentation - Update documentation in readme
     // TODO - Documentation - Include reasons as to why this program is better than the one it replaces.  Download speed, no dependencies, no disk writes.
     // TODO - Documentation - Update documentation to show why you should be using UTF16.  Include an image showing before/after.  Also possibly do a check on startup?
-    // TODO - Performance - Benchmark allocations
+    // TODO - Performance - Benchmark allocations, especially during the download.  Write a benchmark.net test for the download stage.
     // TODO - Performance - Finish reducing allocation warnings in DPA.
     // TODO - Performance - Program startup is really slow.  Seems mostly related to logging into Steam. Should log how long certain things take
     // TODO - Performance - Figure out why this app isn't consistently hitting 10gbit download speeds.
@@ -28,69 +22,33 @@ namespace DepotDownloader
     // TODO - Spectre - Cleanup all instances of AnsiConsole.Console
     // TODO - Logging into steam with expired password fails on first try.  Rerunning works
     // TODO Write logic that only downloads a manifest if it hasnt been downloaded already
-
+    // TODO implement logic that gets a list of all games that a user has, and downloads them
+    // TODO implement logic to get a list of games from a user's collection
+    // TODO - Document in readme where users can find help with this project
+    // TODO - See if WebClient baseUrl can help with the number of allocations
+    // TODO - See if UriBuilder can help w\ allocations
+    // TODO - Run dotnet format on this program
+    // TODO - Design a "benchmark mode" that runs a single/multiple applications in a loop.  If a game's manifests already exist, then there won't even be a need to login to Steam.
+    // TODO - Exceptions being thrown causes the application to hang.
+    // TODO - Remove spectre.console.xml from publish package
+    // TODO - Consider adding a flag for not saving manifest cache.  Measure how much the manifest cache could actually end up being after a large # of installs
+    // TODO setup build
+    // TODO setup publish script
     public class Program
     {
-        public static async Task<int> Main(string[] args)
+        public static async Task<int> Main()
         {
-            var timer = Stopwatch.StartNew();
-            //TODO remove this ansiconsole
-            var ansiConsole = AnsiConsole.Console;
-
-            AccountSettingsStore.LoadFromFile("account.config");
-            DownloadArguments downloadArgs = ParseArguments(args);
-
-            var steamManager = new SteamManager(ansiConsole);
-            //TODO remove
-            downloadArgs.Password = File.ReadAllText(@"C:\Users\Tim\Desktop\password.txt");
-
-
-            await steamManager.Initialize(downloadArgs.Username, downloadArgs.Password);
-            await steamManager.DownloadAppAsync(downloadArgs);
-            steamManager.Shutdown();
-           
-            ansiConsole.LogMarkupLine($"Completed prefill in {Yellow(timer.Elapsed.ToString(@"ss\.FFFF"))}");
-
-            // TODO this feels like a hack, but for whatever reason the application hangs if you don't explicitly call the logout method
-            Environment.Exit(0);
-            return 0;
-        }
-
-        public static DownloadArguments ParseArguments(string[] args)
-        {
-            var downloadArgs = new DownloadArguments();
-
-            downloadArgs.Username = ArgumentUtils.GetParameter<string>(args, "-username") ?? ArgumentUtils.GetParameter<string>(args, "-user");
-            downloadArgs.Password = ArgumentUtils.GetParameter<string>(args, "-password") ?? ArgumentUtils.GetParameter<string>(args, "-pass");
-            SteamManager.Config.RememberPassword = ArgumentUtils.HasParameter(args, "-remember-password");
-
-            downloadArgs.AppId = ArgumentUtils.GetParameter<uint>(args, "-app");
-
-            SteamManager.Config.DownloadAllPlatforms = ArgumentUtils.HasParameter(args, "-all-platforms");
-
-            if (ArgumentUtils.HasParameter(args, "-os"))
+            var cliBuilder = new CliApplicationBuilder()
+                             .AddCommandsFromThisAssembly()
+                             .SetTitle("SteamPrefill")
+                             .SetExecutableName("SteamPrefill");
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                downloadArgs.OperatingSystem = ArgumentUtils.GetParameter<string>(args, "-os");
-                if (SteamManager.Config.DownloadAllPlatforms && !String.IsNullOrEmpty(downloadArgs.OperatingSystem))
-                {
-                    Console.WriteLine("Error: Cannot specify -os when -all-platforms is specified.");
-                }
+                cliBuilder.SetExecutableName("SteamPrefill.exe");
             }
-            
-            downloadArgs.Architecture = ArgumentUtils.GetParameter<string>(args, "-osarch");
-            SteamManager.Config.DownloadAllLanguages = ArgumentUtils.HasParameter(args, "-all-languages");
-
-            if (ArgumentUtils.HasParameter(args, "-language"))
-            {
-                downloadArgs.Language = ArgumentUtils.GetParameter<string>(args, "-language");
-                if (SteamManager.Config.DownloadAllLanguages && !String.IsNullOrEmpty(downloadArgs.Language))
-                {
-                    Console.WriteLine("Error: Cannot specify -language when -all-languages is specified.");
-                }
-            }
-            downloadArgs.LowViolence = ArgumentUtils.HasParameter(args, "-lowviolence");
-
-            return downloadArgs;
+            return await cliBuilder
+                         .Build()
+                         .RunAsync();
         }
     }
 }

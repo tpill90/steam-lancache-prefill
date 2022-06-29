@@ -19,12 +19,12 @@ namespace DepotDownloader.Handlers
     public class DownloadHandler
     {
         private readonly IAnsiConsole _ansiConsole;
-        private readonly CDNClientPool _cdnPool;
+        private readonly CdnPool _cdnPool;
         private readonly HttpClient _client = new HttpClient();
         
         private readonly ArrayPool<byte> _bytePool = ArrayPool<byte>.Shared;
 
-        public DownloadHandler(IAnsiConsole ansiConsole, CDNClientPool cdnPool)
+        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
@@ -78,8 +78,8 @@ namespace DepotDownloader.Handlers
             double requestTotalSize = requestsToDownload.Sum(e => e.chunk.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
-            //TODO determine the server once
-            var server = _cdnPool.GetConnection();
+            //TODO In the case of an exception, cycle the server being used
+            var cdnServer = _cdnPool.TakeConnection();
 
             //TODO need to add title task for retries
             var failedRequests = new ConcurrentBag<QueuedRequest>();
@@ -87,13 +87,14 @@ namespace DepotDownloader.Handlers
             {
                 try
                 {
-                    await DownloadChunkAsync(request, progressTask, server);
+                    await DownloadChunkAsync(request, progressTask, cdnServer);
                 }
                 catch
                 {
                     failedRequests.Add(request);
                 }
             });
+            _cdnPool.ReturnConnection(cdnServer);
 
             // Making sure the progress bar is always set to its max value, some files don't have a size, so the progress bar will appear as unfinished.
             progressTask.Increment(progressTask.MaxValue);

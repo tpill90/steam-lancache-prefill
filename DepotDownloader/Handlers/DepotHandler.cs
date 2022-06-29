@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using DepotDownloader.Models;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
@@ -74,7 +75,7 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO comment
-        public static void BuildLinkedDepotInfo(List<DepotInfo> depotsToDownload, Steam3Session steam3, AppInfoShim app)
+        public static async Task BuildLinkedDepotInfo(List<DepotInfo> depotsToDownload, Steam3Session steam3, AppInfoShim app)
         {
             foreach (var depotInfo in depotsToDownload)
             {
@@ -89,7 +90,7 @@ namespace DepotDownloader.Handlers
                 // Finds manifestId for a linked app's depot.  
                 if (depotInfo.ManifestId == null)
                 {
-                    depotInfo.ManifestId = GetLinkedAppManifestId(depotInfo, app, steam3);
+                    depotInfo.ManifestId = await GetLinkedAppManifestId(depotInfo, app, steam3);
                 }
 
                 // For depots that are proxied through depotfromapp, we still need to resolve the proxy app id
@@ -101,7 +102,7 @@ namespace DepotDownloader.Handlers
             }
         }
         // TODO document
-        public static ulong? GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app, Steam3Session steam3)
+        public async static Task<ulong?> GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app, Steam3Session steam3)
         {
             // Shared depots can either provide manifests, or leave you relying on their parent app.
             // It seems that with the latter, "sharedinstall" will exist (and equals 2 in the one existance I know of).
@@ -114,7 +115,7 @@ namespace DepotDownloader.Handlers
                 throw new Exception($"App {app.AppId}, Depot {depot.DepotId} has depotfromapp of {parentAppId}!");
             }
 
-            var parentAppInfo = steam3.GetAppInfo(parentAppId);
+            var parentAppInfo = await steam3.GetAppInfo(parentAppId);
             return parentAppInfo.Depots.FirstOrDefault(e => e.DepotId == depot.DepotId).ManifestId;
         }
 
