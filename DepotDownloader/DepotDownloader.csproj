@@ -17,7 +17,7 @@
     <!-- External -->
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="ByteSize" Version="2.0.0" />
-    <PackageReference Include="CliFx" Version="2.0.6" />
+    <PackageReference Include="CliFx" Version="2.2.6" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="protobuf-net" Version="3.0.101" />
     <PackageReference Include="SteamKit2" Version="2.4.1" />
