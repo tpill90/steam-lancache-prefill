@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using JetBrains.Annotations;
 using SteamKit2;
 
 namespace DepotDownloader.Models
@@ -10,9 +11,9 @@ namespace DepotDownloader.Models
 
         //TODO enum
         public string Type { get; set; }
-
         public uint GameID { get; set; }
 
+        [UsedImplicitly]
         public CommonInfo()
         {
             // Parameter-less constructor for deserialization

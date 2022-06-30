@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
-using DepotDownloader.Models;
 using DepotDownloader.Protos;
 using DepotDownloader.Utils;
 using JetBrains.Annotations;

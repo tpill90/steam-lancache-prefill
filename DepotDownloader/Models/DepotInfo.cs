@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using JetBrains.Annotations;
 using SteamKit2;
 
 namespace DepotDownloader.Models
@@ -23,9 +24,10 @@ namespace DepotDownloader.Models
         //TODO comment
         public string ManifestFileName => $"{AppConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";
 
+        [UsedImplicitly]
         public DepotInfo()
         {
-            // Parameterless constructor for deserialization
+            // Parameter-less constructor for deserialization
         }
 
         public DepotInfo(KeyValue keyValues)

@@ -22,7 +22,7 @@ namespace DepotDownloader.Models
         [UsedImplicitly]
         public AppInfoShim()
         {
-            // Parameterless constructor for deserialization
+            // Parameter-less constructor for deserialization
         }
 
         public AppInfoShim(uint appId, uint version, KeyValue rootKeyValues)

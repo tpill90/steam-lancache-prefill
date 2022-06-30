@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using SteamKit2;
 
 namespace DepotDownloader.Models
@@ -15,9 +16,10 @@ namespace DepotDownloader.Models
 
         public List<string> OperatingSystemList { get; set; }
 
+        [UsedImplicitly]
         public ConfigInfo()
         {
-            // Parameterless for deserialization
+            // Parameter-less constructor for deserialization
         }
 
         public ConfigInfo(KeyValue keyValues)
