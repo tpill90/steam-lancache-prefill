@@ -149,15 +149,12 @@ namespace DepotDownloader
 
         //TODO document
         //TODO cleanup
-        //TODO consider parallelizing this for speed
         //TODO implement logic that skips depots if they have previously been downloaded
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueue(List<DepotInfo> depots)
         {
             var chunkQueue = new List<QueuedRequest>();
             var depotManifests = new ConcurrentBag<ProtoManifest>();
-
-            var timer = Stopwatch.StartNew();
-
+            
             // Fetch all the manifests for each depot in parallel, as individually they can take a long time, 
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
@@ -185,7 +182,6 @@ namespace DepotDownloader
                     }
                 }
             }
-            _ansiConsole.LogMarkupLine("Built chunk download queue", timer.Elapsed);
             return chunkQueue;
         }
     }

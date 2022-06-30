@@ -102,9 +102,11 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO comment
+        //TODO consider making this syncronous
         private async Task DownloadChunkAsync(QueuedRequest request, ProgressTask progressTask, ServerShim connection)
         {
             var totalBytesRead = 0;
+            //TODO bump to 1mb
             var buffer = _bytePool.Rent(16384);
 
             try
