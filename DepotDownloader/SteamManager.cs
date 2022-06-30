@@ -131,19 +131,35 @@ namespace DepotDownloader
                 throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");
             }
 
-            // Get all depots, and filter them down based on lang/os/architecture/etc
-            List<DepotInfo> filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots);
+            // Get all depots, and filter out any unavailable depots.
+            var allDepots = appInfo.Depots;
+            var filteredDepots = _depotHandler.RemoveInvalidDepots(allDepots);
             await _depotHandler.BuildLinkedDepotInfo(filteredDepots, appInfo);
+
+            // Filter depots based on specified lang/os/architecture/etc
+            filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, filteredDepots);
+
+            filteredDepots = _depotHandler.FilterPreviouslyDownloadedDepots(filteredDepots);
+            if (filteredDepots.Count == 0)
+            {
+                //TODO better message
+                _ansiConsole.WriteLine("  Already downloaded.  Skipping..");
+                _ansiConsole.WriteLine();
+                return;
+            }
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
 
             // Finally run the queued downloads
-            await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
-
-            //TODO total download size is wrong
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
-            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} depots");
+            //TODO total download size is the wrong unit.
+            _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} updated depots");
+            //await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+
+            //TODO determine if there were any errors
+            _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
+
             _ansiConsole.WriteLine();
         }
 

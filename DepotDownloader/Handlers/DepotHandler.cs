@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DepotDownloader.Models;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
+using Utf8Json;
 using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader.Handlers
@@ -17,10 +20,73 @@ namespace DepotDownloader.Handlers
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
 
+        //TODO document
+        //TODO should this have a better type?  Kinda gives you no idea what is being stored here
+        private readonly Dictionary<uint, List<ulong>> SuccessfullyDownloadedDepots = new Dictionary<uint, List<ulong>>();
+        private readonly string _downloadedDepotsPath = $"{AppConfig.ConfigDir}/successfullyDownloadedDepots.json";
+
         public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
         {
             _ansiConsole = ansiConsole;
             _steam3Session = steam3Session;
+
+            //TODO measure performance
+            if (File.Exists(_downloadedDepotsPath))
+            {
+                SuccessfullyDownloadedDepots = JsonSerializer.Deserialize<Dictionary<uint, List<ulong>>>(File.ReadAllText(_downloadedDepotsPath));
+            }
+        }
+
+        //TODO document
+        //TODO measure performance of this on a large set of data
+        public void MarkDownloadAsSuccessful(List<DepotInfo> depots)
+        {
+            foreach (var depot in depots)
+            {
+                if (!SuccessfullyDownloadedDepots.ContainsKey(depot.DepotId))
+                {
+                    SuccessfullyDownloadedDepots.Add(depot.DepotId, new List<ulong>());
+                }
+                var successfulManifests = SuccessfullyDownloadedDepots[depot.DepotId];
+                successfulManifests.Add(depot.ManifestId.Value);
+            }
+            File.WriteAllText(_downloadedDepotsPath, JsonSerializer.ToJsonString(SuccessfullyDownloadedDepots));
+        }
+
+        //TODO document
+        public bool HasDepotBeenPreviouslyDownloaded(DepotInfo depot)
+        {
+            if (!SuccessfullyDownloadedDepots.ContainsKey(depot.DepotId))
+            {
+                return false;
+            }
+            var successfulManifests = SuccessfullyDownloadedDepots[depot.DepotId];
+            return successfulManifests.Contains(depot.ManifestId.Value);
+        }
+
+        //TODO document
+        public List<DepotInfo> RemoveInvalidDepots(List<DepotInfo> depots)
+        {
+            var results = new List<DepotInfo>();
+            foreach (var depot in depots)
+            {
+                if (!(depot.ManifestId == null && depot.DepotFromApp == null))
+                {
+                    results.Add(depot);
+                }
+                else
+                {
+                    //TODO debugging, validate why this is happening for all games I own
+                    _ansiConsole.MarkupLine("  " + White(depot) + Yellow(" appears to be an invalid depot."));
+                }
+            }
+            return results;
+        }
+
+        //TODO document
+        public List<DepotInfo> FilterPreviouslyDownloadedDepots(List<DepotInfo> depots)
+        {
+            return depots.Where(e => HasDepotBeenPreviouslyDownloaded(e) == false).ToList();
         }
 
         //TODO comment
@@ -33,7 +99,7 @@ namespace DepotDownloader.Handlers
                 if (!_steam3Session.AccountHasDepotAccess(depot.DepotId))
                 {
                     //TODO should this be handled differently? Return a value saying that this was unsuccessful?  
-                    _ansiConsole.MarkupLine(White(depot) + Yellow(" is not available from this account."));
+                    _ansiConsole.MarkupLine("  " + White(depot) + Yellow(" is not available from this account."));
                     continue;
                 }
 
