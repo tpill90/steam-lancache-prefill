@@ -323,6 +323,26 @@ namespace DepotDownloader.Steam
         #endregion
 
         // TODO document
+        // TODO I don't like the name appOrDepotId
+        public bool AccountHasAccess(uint appOrDepotId)
+        {
+            // TODO is there anything to be done with this?
+            // https://steamdb.info/sub/17906/apps/
+            uint AnonymousDedicatedServerComp = 17906;
+
+            if (OwnedAppIds.Contains(appOrDepotId))
+            {
+                return true;
+            }
+            if (OwnedDepotIds.Contains(appOrDepotId))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        // TODO document
         // TODO make sure that this isn't actually a performance issue when loading a large # of apps
         public async Task BulkLoadAppInfos(List<uint> appIds)
         {

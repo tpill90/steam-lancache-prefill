@@ -136,14 +136,14 @@ namespace DepotDownloader
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo.Common.Name)}");
 
             //TODO this doesn't seem to be working correctly for games I don't own
-            if (!_depotHandler.AccountHasAccess(appInfo.AppId))
+            if (!_steam3.AccountHasAccess(appInfo.AppId))
             {
                 //TODO handle this better
                 throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");
             }
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
-            List<DepotInfo> filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots, Config);
+            List<DepotInfo> filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots);
             await _depotHandler.BuildLinkedDepotInfo(filteredDepots, appInfo);
 
             // Get the full file list for each depot, and queue up the required chunks

@@ -11,6 +11,7 @@ using static DepotDownloader.Utils.SpectreColors;
 namespace DepotDownloader.Handlers
 {
     //TODO document
+    //TODO finish cleaning up
     public class DepotHandler
     {
         private readonly IAnsiConsole _ansiConsole;
@@ -23,13 +24,13 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO comment
-        public List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allAvailableDepots, AppConfig config)
+        public List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allAvailableDepots)
         {
             var filteredDepots = new List<DepotInfo>();
 
             foreach (var depot in allAvailableDepots)
             {
-                if (!AccountHasAccess(depot.DepotId))
+                if (!_steam3Session.AccountHasAccess(depot.DepotId))
                 {
                     //TODO should this be handled differently? Return a value saying that this was unsuccessful?  
                     _ansiConsole.MarkupLine(White(depot) + Yellow(" is not available from this account."));
@@ -94,7 +95,7 @@ namespace DepotDownloader.Handlers
         {
             foreach (var depotInfo in depotsToDownload)
             {
-                // Finds manifestId for a linked app's depot.  
+                // Finds manifestId for a linked app.  
                 if (depotInfo.ManifestId == null)
                 {
                     depotInfo.ManifestId = await GetLinkedAppManifestId(depotInfo, app);
@@ -110,7 +111,7 @@ namespace DepotDownloader.Handlers
         }
 
         // TODO document
-        public async Task<ulong?> GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app)
+        private async Task<ulong?> GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app)
         {
             // Shared depots can either provide manifests, or leave you relying on their parent app.
             // It seems that with the latter, "sharedinstall" will exist (and equals 2 in the one existance I know of).
@@ -125,33 +126,6 @@ namespace DepotDownloader.Handlers
 
             var parentAppInfo = await _steam3Session.GetAppInfo(parentAppId);
             return parentAppInfo.Depots.FirstOrDefault(e => e.DepotId == depot.DepotId).ManifestId;
-        }
-
-        // TODO clean this up
-        // TODO document
-        // TODO I don't like the name appOrDepotId
-        public bool AccountHasAccess(uint appOrDepotId)
-        {
-            // TODO make it so that if licenses are null, they get loaded automatically.  Without requiring the LoadLicenses() call to be made
-            if (_steam3Session.OwnedPackageLicenses == null)
-            {
-                throw new Exception($"Licenses must be loaded before calling{nameof(AccountHasAccess)}");
-            }
-
-            // TODO is there anything to be done with this?
-            // https://steamdb.info/sub/17906/apps/
-            uint AnonymousDedicatedServerComp = 17906;
-
-            if (_steam3Session.OwnedAppIds.Contains(appOrDepotId))
-            {
-                return true;
-            }
-            if (_steam3Session.OwnedDepotIds.Contains(appOrDepotId))
-            {
-                return true;
-            }
-
-            return false;
         }
     }
 }
