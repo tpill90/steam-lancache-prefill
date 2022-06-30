@@ -375,24 +375,24 @@ namespace DepotDownloader.Steam
         }
         #endregion
 
-        // TODO document
-        // TODO I don't like the name appOrDepotId
-        public bool AccountHasAccess(uint appOrDepotId)
+        /// <summary>
+        /// Checks against the list of currently owned apps to determine if the user is able to download this app.
+        /// </summary>
+        /// <param name="appid">Id of the application to check for access</param>
+        /// <returns>True if the user has access to the app</returns>
+        public bool AccountHasAppAccess(uint appid)
         {
-            // TODO is there anything to be done with this?
-            // https://steamdb.info/sub/17906/apps/
-            uint AnonymousDedicatedServerComp = 17906;
+            return OwnedAppIds.Contains(appid);
+        }
 
-            if (OwnedAppIds.Contains(appOrDepotId))
-            {
-                return true;
-            }
-            if (OwnedDepotIds.Contains(appOrDepotId))
-            {
-                return true;
-            }
-
-            return false;
+        /// <summary>
+        /// Checks against the list of currently owned apps to determine if the user is able to download this depot.
+        /// </summary>
+        /// <param name="depotId">Id of the depot to check for access</param>
+        /// <returns>True if the user has access to the depot</returns>
+        public bool AccountHasDepotAccess(uint depotId)
+        {
+            return OwnedDepotIds.Contains(depotId);
         }
 
         // TODO document
@@ -404,21 +404,24 @@ namespace DepotDownloader.Steam
             var productJob = steamApps.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>());
             AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = await productJob.ToTask();
 
-            if (resultSet.Complete)
+            if (!resultSet.Complete)
             {
-                foreach (var appInfo in resultSet.Results)
+                //TODO not sure this ever happens
+                throw new Exception(nameof(BulkLoadAppInfos) + " request is incomplete");
+            }
+            //TODO flatten this
+            foreach (var appInfo in resultSet.Results)
+            {
+                foreach (var app_value in appInfo.Apps)
                 {
-                    foreach (var app_value in appInfo.Apps)
-                    {
-                        var app = app_value.Value;
+                    var app = app_value.Value;
+                    //TODO if an app doesn't have a DepotFromApp value, and doesn't have a manifest, it likely means its not actually used.  Needs more testing
+                    AppInfoShims[app.ID] = new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues);
+                }
 
-                        AppInfoShims[app.ID] = new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues);
-                    }
-
-                    foreach (var app in appInfo.UnknownApps)
-                    {
-                        AppInfoShims[app] = null;
-                    }
+                foreach (var app in appInfo.UnknownApps)
+                {
+                    AppInfoShims[app] = null;
                 }
             }
         }

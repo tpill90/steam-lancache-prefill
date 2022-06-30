@@ -125,7 +125,7 @@ namespace DepotDownloader
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo.Common.Name)}");
 
             //TODO this doesn't seem to be working correctly for games I don't own
-            if (!_steam3.AccountHasAccess(appInfo.AppId))
+            if (!_steam3.AccountHasAppAccess(appInfo.AppId))
             {
                 //TODO handle this better
                 throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");

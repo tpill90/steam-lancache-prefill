@@ -30,7 +30,7 @@ namespace DepotDownloader.Handlers
 
             foreach (var depot in allAvailableDepots)
             {
-                if (!_steam3Session.AccountHasAccess(depot.DepotId))
+                if (!_steam3Session.AccountHasDepotAccess(depot.DepotId))
                 {
                     //TODO should this be handled differently? Return a value saying that this was unsuccessful?  
                     _ansiConsole.MarkupLine(White(depot) + Yellow(" is not available from this account."));

@@ -26,7 +26,6 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO document
-        //TODO possibly write a retry loop?
         public async Task<ProtoManifest> GetManifestFile(DepotInfo depot)
         {
             if (File.Exists(depot.ManifestFileName))
@@ -76,11 +75,19 @@ namespace DepotDownloader.Handlers
         // TODO document
         // TODO include in docs -  ManifestRequestCodes can only be requested if you own the game. They act as a form of "authorization" for the CDN.
         // TODO  https://steamdb.info/blog/manifest-request-codes/ 
+        /// <summary>
+        /// Requests a ManifestRequestCode for the specified depot.  Each depot will have a unique code, that gets rotated every 5 minutes.
+        /// These manifest codes are not unique to a user, so they will be used by all users in the same 5 minute window.
+        ///
+        /// These manifest codes act as a form of "authorization" for the CDN.  You can only download a manifest if your account has access to the
+        /// specified depot, so since the CDN itself doesn't check for access, this will prevent unauthorized depot downloads
+        /// </summary>
+        /// <param name="depot">The depot </param>
+        /// <returns></returns>
         private async Task<ManifestRequestCode> GetManifestRequestCode(DepotInfo depot)
         {
-            var requestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContaingAppId, depot.ManifestId.Value, "public");
-            ulong manifestRequestCode = requestCode;
-
+            ulong manifestRequestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContaingAppId, depot.ManifestId.Value, "public");
+            
             // If we could not get the manifest code, this is a fatal error
             if (manifestRequestCode == 0)
             {
