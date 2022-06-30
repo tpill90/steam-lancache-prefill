@@ -17,17 +17,16 @@ namespace DepotDownloader.Steam
     public class Steam3Session
     {
         //TODO document
-        public List<uint> OwnedPackageLicenses { get; private set; }
+        private List<uint> OwnedPackageLicenses { get; set; }
         // TODO this is all games owned + dlc. Could this possibly be filtered?
-        public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
-        public HashSet<uint> OwnedDepotIds { get; private set; } = new HashSet<uint>();
-
-
+        private HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
+        private HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
+        
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
 
-        public SteamClient steamClient;
-        public SteamUser steamUser;
-        public SteamContent steamContent;
+        private readonly SteamClient _steamClient;
+        private readonly SteamUser _steamUser;
+        public readonly SteamContent steamContent;
         readonly SteamApps steamApps;
         //TODO not sure if this should be public or not
         public readonly Client CdnClient;
@@ -60,12 +59,12 @@ namespace DepotDownloader.Steam
             bAborted = false;
             seq = 0;
             
-            steamClient = new SteamClient();
-            steamUser = steamClient.GetHandler<SteamUser>();
-            steamApps = steamClient.GetHandler<SteamApps>();
-            steamContent = steamClient.GetHandler<SteamContent>();
+            _steamClient = new SteamClient();
+            _steamUser = _steamClient.GetHandler<SteamUser>();
+            steamApps = _steamClient.GetHandler<SteamApps>();
+            steamContent = _steamClient.GetHandler<SteamContent>();
 
-            callbacks = new CallbackManager(steamClient);
+            callbacks = new CallbackManager(_steamClient);
 
             callbacks.Subscribe<SteamUser.LoggedOnCallback>(LogOnCallback);
             callbacks.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
@@ -73,7 +72,7 @@ namespace DepotDownloader.Steam
 
             callbacks.RunCallbacks();
 
-            CdnClient = new Client(steamClient);
+            CdnClient = new Client(_steamClient);
 
             if (authenticatedUser)
             {
@@ -106,7 +105,7 @@ namespace DepotDownloader.Steam
             _connectTime = DateTime.Now;
             
             callbacks.Subscribe<SteamClient.ConnectedCallback>(ConnectedCallback);
-            steamClient.Connect();
+            _steamClient.Connect();
 
             while (_connectingToSteamIsRunning)
             {
@@ -128,11 +127,11 @@ namespace DepotDownloader.Steam
         {
             if (!authenticatedUser)
             {
-                steamUser.LogOnAnonymous();
+                _steamUser.LogOnAnonymous();
             }
             else
             {
-                steamUser.LogOn(logonDetails);
+                _steamUser.LogOn(logonDetails);
             }
         }
 
@@ -234,7 +233,7 @@ namespace DepotDownloader.Steam
         public void ThrowIfNotConnected()
         {
             //TODO should probably handle this better than just throwing
-            if (!steamClient.IsConnected)
+            if (!_steamClient.IsConnected)
             {
                 //TODO better exception type and message
                 throw new Exception("Steam session not connected");
@@ -243,28 +242,63 @@ namespace DepotDownloader.Steam
 
         #endregion
 
-        //TODO measure performance
-        //TODO handle files not existing
-        public void LoadCachedData()
+        #region Other Auth Methods
+
+        private void Abort()
         {
-            //if (File.Exists($"{AppConfig.ConfigDir}/packageInfo.json"))
-            //{
-            //    PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{AppConfig.ConfigDir}/packageInfo.json"));
-            //}
+            throw new Exception("aborted");
         }
 
-        //TODO test this with very large data sets
-        //TODO measure performance
-        public void SerializeCachedData()
+        private void Reconnect()
         {
-            //File.WriteAllText($"{AppConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
+            _steamClient.Disconnect();
         }
-        
+
+        private void UpdateMachineAuthCallback(SteamUser.UpdateMachineAuthCallback machineAuth)
+        {
+            var hash = Util.SHAHash(machineAuth.Data);
+            Console.WriteLine("Got Machine Auth: {0} {1} {2} {3}", machineAuth.FileName, machineAuth.Offset, machineAuth.BytesToWrite, machineAuth.Data.Length, hash);
+
+            AccountSettingsStore.Instance.SentryData[logonDetails.Username] = machineAuth.Data;
+            AccountSettingsStore.Save();
+
+            var authResponse = new SteamUser.MachineAuthDetails
+            {
+                BytesWritten = machineAuth.BytesToWrite,
+                FileName = machineAuth.FileName,
+                FileSize = machineAuth.BytesToWrite,
+                Offset = machineAuth.Offset,
+
+                SentryFileHash = hash, // should be the sha1 hash of the sentry file we just wrote
+
+                OneTimePassword = machineAuth.OneTimePassword, // not sure on this one yet, since we've had no examples of steam using OTPs
+
+                LastError = 0, // result from win32 GetLastError
+                Result = EResult.OK, // if everything went okay, otherwise ~who knows~
+
+                JobID = machineAuth.JobID, // so we respond to the correct server job
+            };
+
+            // send off our response
+            _steamUser.SendMachineAuthResponse(authResponse);
+        }
+
+        private void LoginKeyCallback(SteamUser.LoginKeyCallback loginKey)
+        {
+            Console.WriteLine("Accepted new login key for account {0}", logonDetails.Username);
+
+            AccountSettingsStore.Instance.LoginKeys[logonDetails.Username] = loginKey.LoginKey;
+            AccountSettingsStore.Save();
+
+            _steamUser.AcceptNewLoginKey(loginKey);
+        }
+
+        #endregion
+
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
 
-        // TODO this takes about 200ms.  Can this be sped up in any way?
         public void LoadAccountLicenses()
         {
             callbacks.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
@@ -295,30 +329,49 @@ namespace DepotDownloader.Steam
         }
 
         //TODO document
-        private void LoadPackageInfo(List<uint> packages)
+        private void LoadPackageInfo(List<uint> packageIds)
         {
-            var packageRequests = packages.Select(package => new SteamApps.PICSRequest(package)).ToList();
+            // TODO consider turning this into a class, for the sake of readability
+            var packageCountPath = $"{AppConfig.ConfigDir}/packageCount.txt";
+            var ownedAppIdsPath = $"{AppConfig.ConfigDir}/OwnedAppIds.json";
+            var ownedDepotIdsPath = $"{AppConfig.ConfigDir}/OwnedDepotIds.json";
 
-            //TODO async
-            var jobResult = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).GetAwaiter().GetResult();
-            if (jobResult.Complete)
+            // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
+            if (File.Exists(packageCountPath) && File.ReadAllText(packageCountPath) == packageIds.Count.ToString())
             {
-                foreach (var packageInfo in jobResult.Results)
+                if (File.Exists(ownedAppIdsPath) && File.Exists(ownedDepotIdsPath))
                 {
-                    foreach (var package_value in packageInfo.Packages)
-                    {
-                        var package = package_value.Value;
-                        foreach (KeyValue appId in package.KeyValues["appids"].Children)
-                        {
-                            OwnedAppIds.Add(UInt32.Parse(appId.Value));
-                        }
-                        foreach (KeyValue appId in package.KeyValues["depotids"].Children)
-                        {
-                            OwnedDepotIds.Add(UInt32.Parse(appId.Value));
-                        }
-                    }
+                    OwnedAppIds = JsonSerializer.Deserialize<HashSet<uint>>(File.ReadAllText($"{AppConfig.ConfigDir}/OwnedAppIds.json"));
+                    OwnedDepotIds = JsonSerializer.Deserialize<HashSet<uint>>(File.ReadAllText($"{AppConfig.ConfigDir}/OwnedDepotIds.json"));
+                    return;
                 }
             }
+            
+            var packageRequests = packageIds.Select(package => new SteamApps.PICSRequest(package)).ToList();
+            //TODO async
+            var jobResult = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
+            if (!jobResult.Complete)
+            {
+                //TODO not sure this ever happens
+                throw new Exception("Job not complete");
+            }
+
+            var packages = jobResult.Results.SelectMany(e => e.Packages).Select(e => e.Value).ToList();
+            foreach (var package in packages)
+            {
+                foreach (KeyValue appId in package.KeyValues["appids"].Children)
+                {
+                    OwnedAppIds.Add(UInt32.Parse(appId.Value));
+                }
+                foreach (KeyValue appId in package.KeyValues["depotids"].Children)
+                {
+                    OwnedDepotIds.Add(UInt32.Parse(appId.Value));
+                }
+            }
+
+            File.WriteAllText(ownedAppIdsPath, JsonSerializer.ToJsonString(OwnedAppIds));
+            File.WriteAllText(ownedDepotIdsPath, JsonSerializer.ToJsonString(OwnedDepotIds));
+            File.WriteAllText(packageCountPath, packageIds.Count.ToString());
         }
         #endregion
 
@@ -381,54 +434,7 @@ namespace DepotDownloader.Steam
             return AppInfoShims[appId];
         }
         
-        private void Abort()
-        {
-            throw new Exception("aborted");
-        }
         
-        private void Reconnect()
-        {
-            steamClient.Disconnect();
-        }
-
-        private void UpdateMachineAuthCallback(SteamUser.UpdateMachineAuthCallback machineAuth)
-        {
-            var hash = Util.SHAHash(machineAuth.Data);
-            Console.WriteLine("Got Machine Auth: {0} {1} {2} {3}", machineAuth.FileName, machineAuth.Offset, machineAuth.BytesToWrite, machineAuth.Data.Length, hash);
-
-            AccountSettingsStore.Instance.SentryData[logonDetails.Username] = machineAuth.Data;
-            AccountSettingsStore.Save();
-
-            var authResponse = new SteamUser.MachineAuthDetails
-            {
-                BytesWritten = machineAuth.BytesToWrite,
-                FileName = machineAuth.FileName,
-                FileSize = machineAuth.BytesToWrite,
-                Offset = machineAuth.Offset,
-
-                SentryFileHash = hash, // should be the sha1 hash of the sentry file we just wrote
-
-                OneTimePassword = machineAuth.OneTimePassword, // not sure on this one yet, since we've had no examples of steam using OTPs
-
-                LastError = 0, // result from win32 GetLastError
-                Result = EResult.OK, // if everything went okay, otherwise ~who knows~
-
-                JobID = machineAuth.JobID, // so we respond to the correct server job
-            };
-
-            // send off our response
-            steamUser.SendMachineAuthResponse(authResponse);
-        }
-
-        private void LoginKeyCallback(SteamUser.LoginKeyCallback loginKey)
-        {
-            Console.WriteLine("Accepted new login key for account {0}", logonDetails.Username);
-
-            AccountSettingsStore.Instance.LoginKeys[logonDetails.Username] = loginKey.LoginKey;
-            AccountSettingsStore.Save();
-
-            steamUser.AcceptNewLoginKey(loginKey);
-        }
 
         #region Callback Waiting methods
 

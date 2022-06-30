@@ -34,6 +34,7 @@ namespace DepotDownloader
     // TODO - Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
     // TODO - Metrics - Setup and configure Github historical statistics (Downloads, page views, etc).  This will be useful for seeing project usage.
     // TODO Test this app on Linux to ensure that it works correctly
+    // TODO - Rewrite the repo's original init commit
     public class Program
     {
         public static async Task<int> Main()

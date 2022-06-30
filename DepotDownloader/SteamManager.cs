@@ -53,10 +53,7 @@ namespace DepotDownloader
             // capture the supplied password in case we need to re-use it after checking the login key
             Config.SuppliedPassword = password;
             ConnectToSteam(username, password, rememberPassword);
-
-            // Loading cached data from previous runs
-            _steam3.LoadCachedData();
-
+            
             // Populating available CDN servers
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             await _cdnPool.PopulateAvailableServers();
@@ -67,20 +64,12 @@ namespace DepotDownloader
             _depotHandler = new DepotHandler(_ansiConsole, _steam3);
 
             // Loading available licenses(games) for the current user
-            var timer2 = Stopwatch.StartNew();
             _steam3.LoadAccountLicenses();
-            timer2.Stop();
-            _ansiConsole.LogMarkupLine("Licenses loaded", timer2.Elapsed);
 
             _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
             _ansiConsole.WriteLine();
         }
         
-        public void Shutdown()
-        {
-            _steam3.SerializeCachedData();
-        }
-
         //TODO wrap in a spectre status?
         private void ConnectToSteam(string username, string password, bool shouldRememberPassword)
         {
