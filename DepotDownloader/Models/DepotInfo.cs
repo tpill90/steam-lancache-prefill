@@ -13,12 +13,12 @@ namespace DepotDownloader.Models
 
         public ConfigInfo ConfigInfo { get; set; }
 
-        public ulong? ManifestId { get; set; } = null;
+        public ulong? ManifestId { get; set; }
 
         public long MaxSize { get; set; }
 
         public uint ContaingAppId { get; set; }
-        public uint? DepotFromApp { get; set; } = null;
+        public uint? DepotFromApp { get; set; }
 
         //TODO comment
         public string ManifestFileName => $"{AppConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";

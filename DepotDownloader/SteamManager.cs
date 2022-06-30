@@ -28,7 +28,7 @@ namespace DepotDownloader
         public static AppConfig Config = new AppConfig();
 
 		//TODO make private
-        public Steam3Session _steam3;
+        private Steam3Session _steam3;
         private Credentials _steam3Credentials;
         private CdnPool _cdnPool;
         private DownloadHandler _downloadHandler;
@@ -70,7 +70,7 @@ namespace DepotDownloader
             var timer2 = Stopwatch.StartNew();
             _steam3.LoadAccountLicenses();
             timer2.Stop();
-            _ansiConsole.LogMarkupLine($"Licenses loaded", timer2.Elapsed);
+            _ansiConsole.LogMarkupLine("Licenses loaded", timer2.Elapsed);
 
             _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
             _ansiConsole.WriteLine();
@@ -182,19 +182,19 @@ namespace DepotDownloader
             // Queueing up chunks for each depot
             foreach (var depotManifest in depotManifests)
             {
-                    // A depot can be made up of multiple files
-                    foreach (var file in depotManifest.Files)
+                // A depot can be made up of multiple files
+                foreach (var file in depotManifest.Files)
+                {
+                    // A file larger than 1MB will need to be downloaded in multiple chunks
+                    foreach (var chunk in file.Chunks)
                     {
-                        // A file larger than 1MB will need to be downloaded in multiple chunks
-                        foreach (var chunk in file.Chunks)
+                        chunkQueue.Add(new QueuedRequest
                         {
-                            chunkQueue.Add(new QueuedRequest
-                            {
-                                DepotId = depotManifest.DepotId,
-                                chunk = chunk
-                            });
-                        }
+                            DepotId = depotManifest.DepotId,
+                            chunk = chunk
+                        });
                     }
+                }
             }
             _ansiConsole.LogMarkupLine("Built chunk download queue", timer.Elapsed);
             return chunkQueue;

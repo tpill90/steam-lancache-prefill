@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using SteamKit2;
 
 namespace DepotDownloader.Models
@@ -18,10 +19,10 @@ namespace DepotDownloader.Models
 
         public uint Version { get; set; }
 
-        // Parameterless constructor for deserialization
+        [UsedImplicitly]
         public AppInfoShim()
         {
-
+            // Parameterless constructor for deserialization
         }
 
         public AppInfoShim(uint appId, uint version, KeyValue rootKeyValues)

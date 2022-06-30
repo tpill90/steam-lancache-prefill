@@ -15,7 +15,7 @@ namespace DepotDownloader.Models
 
         public CommonInfo()
         {
-            // Parameterless constructor for deserialization
+            // Parameter-less constructor for deserialization
         }
 
         public CommonInfo(KeyValue keyValues)
