@@ -6,7 +6,6 @@ using DepotDownloader.Models;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
-using SteamKit2;
 using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader.Handlers
@@ -143,32 +142,15 @@ namespace DepotDownloader.Handlers
             // https://steamdb.info/sub/17906/apps/
             uint AnonymousDedicatedServerComp = 17906;
 
-            
-            _steam3Session.RequestPackageInfo(_steam3Session.OwnedPackageLicenses);
-
-            // TODO this is all games owned + dlc. Could this possibly be filtered?
-            var allAppsAndDlc = _steam3Session.PackageInfoShims.Select(e => e.Value)
-                                              .SelectMany(e2 => e2.AppIds)
-                                              .Distinct()
-                                              .ToList();
-
-            var appHasAccess = allAppsAndDlc.Contains(appOrDepotId);
-
-            foreach (var license in _steam3Session.OwnedPackageLicenses)
+            if (_steam3Session.OwnedAppIds.Contains(appOrDepotId))
             {
-                PackageInfoShim package;
-                if (_steam3Session.PackageInfoShims.TryGetValue(license, out package) && package != null)
-                {
-                    if (package.AppIds.Any(e => e == appOrDepotId))
-                    {
-                        return true;
-                    }
-                    if (package.DepotIds.Any(e => e == appOrDepotId))
-                    {
-                        return true;
-                    }
-                }
+                return true;
             }
+            if (_steam3Session.OwnedDepotIds.Contains(appOrDepotId))
+            {
+                return true;
+            }
+
             return false;
         }
     }

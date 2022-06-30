@@ -67,7 +67,10 @@ namespace DepotDownloader
             _depotHandler = new DepotHandler(_ansiConsole, _steam3);
 
             // Loading available licenses(games) for the current user
+            var timer2 = Stopwatch.StartNew();
             _steam3.LoadAccountLicenses();
+            timer2.Stop();
+            _ansiConsole.LogMarkupLine($"Licenses loaded", timer2.Elapsed);
 
             _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
             _ansiConsole.WriteLine();

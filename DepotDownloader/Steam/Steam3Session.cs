@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,9 +18,12 @@ namespace DepotDownloader.Steam
     {
         //TODO document
         public List<uint> OwnedPackageLicenses { get; private set; }
-        
+        // TODO this is all games owned + dlc. Could this possibly be filtered?
+        public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
+        public HashSet<uint> OwnedDepotIds { get; private set; } = new HashSet<uint>();
+
+
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
-        public Dictionary<uint, PackageInfoShim> PackageInfoShims { get; private set; } = new Dictionary<uint, PackageInfoShim>();
 
         public SteamClient steamClient;
         public SteamUser steamUser;
@@ -245,24 +247,24 @@ namespace DepotDownloader.Steam
         //TODO handle files not existing
         public void LoadCachedData()
         {
-            if (File.Exists($"{AppConfig.ConfigDir}/packageInfo.json"))
-            {
-                PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{AppConfig.ConfigDir}/packageInfo.json"));
-            }
+            //if (File.Exists($"{AppConfig.ConfigDir}/packageInfo.json"))
+            //{
+            //    PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{AppConfig.ConfigDir}/packageInfo.json"));
+            //}
         }
 
         //TODO test this with very large data sets
         //TODO measure performance
         public void SerializeCachedData()
         {
-            File.WriteAllText($"{AppConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
+            //File.WriteAllText($"{AppConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
         }
         
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
 
-        //TODO speed this up by serializing/deserializing?
+        // TODO this takes about 200ms.  Can this be sped up in any way?
         public void LoadAccountLicenses()
         {
             callbacks.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
@@ -279,37 +281,25 @@ namespace DepotDownloader.Steam
             if (licenseList.Result != EResult.OK)
             {
                 //TODO handle
-                Console.WriteLine("Unable to get license list: {0} ", licenseList.Result);
+                _ansiConsole.WriteLine($"Unable to get license list: {licenseList.Result}");
                 Abort();
 
                 return;
             }
 
-            OwnedPackageLicenses = licenseList.LicenseList.Select(x => x.PackageID).Distinct().ToList();
+            OwnedPackageLicenses = licenseList.LicenseList.Select(x => x.PackageID)
+                                              .Distinct()
+                                              .ToList();
+
+            LoadPackageInfo(OwnedPackageLicenses);
         }
 
         //TODO document
-        public void RequestPackageInfo(List<uint> packages)
+        private void LoadPackageInfo(List<uint> packages)
         {
-            if (PackageInfoShims.Count > 0)
-            {
-                // Skipping since this is already loaded
-                return;
-            }
+            var packageRequests = packages.Select(package => new SteamApps.PICSRequest(package)).ToList();
 
-            if (packages.Count == 0 || bAborted)
-            {
-                return;
-            }
-
-            //TODO need to serialize this data too
-            var packageRequests = new List<SteamApps.PICSRequest>();
-
-            foreach (var package in packages)
-            {
-                var request = new SteamApps.PICSRequest(package);
-                packageRequests.Add(request);
-            }
+            //TODO async
             var jobResult = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).GetAwaiter().GetResult();
             if (jobResult.Complete)
             {
@@ -318,19 +308,14 @@ namespace DepotDownloader.Steam
                     foreach (var package_value in packageInfo.Packages)
                     {
                         var package = package_value.Value;
-
-                        var packageInfoShim = new PackageInfoShim
+                        foreach (KeyValue appId in package.KeyValues["appids"].Children)
                         {
-                            AppIds = package.KeyValues["appids"].Children.Select(e => UInt32.Parse(e.Value)).ToList(),
-                            DepotIds = package.KeyValues["depotids"].Children.Select(e => UInt32.Parse(e.Value)).ToList()
-                        };
-
-                        PackageInfoShims[package.ID] = packageInfoShim;
-                    }
-
-                    foreach (var package in packageInfo.UnknownPackages)
-                    {
-                        PackageInfoShims[package] = null;
+                            OwnedAppIds.Add(UInt32.Parse(appId.Value));
+                        }
+                        foreach (KeyValue appId in package.KeyValues["depotids"].Children)
+                        {
+                            OwnedDepotIds.Add(UInt32.Parse(appId.Value));
+                        }
                     }
                 }
             }
@@ -376,8 +361,6 @@ namespace DepotDownloader.Steam
             return AppInfoShims[appId];
         }
         
-        
-
         private void Abort()
         {
             throw new Exception("aborted");
