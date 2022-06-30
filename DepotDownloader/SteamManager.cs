@@ -25,7 +25,7 @@ namespace DepotDownloader
         private readonly IAnsiConsole _ansiConsole;
 
         //TODO remove static
-        public static DownloadConfig Config = new DownloadConfig();
+        public static AppConfig Config = new AppConfig();
 
 		//TODO make private
         public Steam3Session _steam3;
@@ -33,13 +33,14 @@ namespace DepotDownloader
         private CdnPool _cdnPool;
         private DownloadHandler _downloadHandler;
         private ManifestHandler _manifestHandler;
+        private DepotHandler _depotHandler;
 
         public SteamManager(IAnsiConsole ansiConsole)
         {
             _ansiConsole = ansiConsole;
             // Create required folders
-            Directory.CreateDirectory(DownloadConfig.ConfigDir);
-            Directory.CreateDirectory(DownloadConfig.ManifestCacheDir);
+            Directory.CreateDirectory(AppConfig.ConfigDir);
+            Directory.CreateDirectory(AppConfig.ManifestCacheDir);
         }
 
         // TODO comment
@@ -63,6 +64,7 @@ namespace DepotDownloader
             // Initializing our various classes now that Steam is connected
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
             _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
+            _depotHandler = new DepotHandler(_ansiConsole, _steam3);
 
             // Loading available licenses(games) for the current user
             _steam3.LoadAccountLicenses();
@@ -76,6 +78,7 @@ namespace DepotDownloader
             _steam3.SerializeCachedData();
         }
 
+        //TODO wrap in a spectre status?
         private void ConnectToSteam(string username, string password, bool shouldRememberPassword)
         {
             Config.RememberPassword = shouldRememberPassword;
@@ -130,15 +133,15 @@ namespace DepotDownloader
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo.Common.Name)}");
 
             //TODO this doesn't seem to be working correctly for games I don't own
-            if (!DepotHandler.AccountHasAccess(appInfo.AppId, _steam3))
+            if (!_depotHandler.AccountHasAccess(appInfo.AppId))
             {
                 //TODO handle this better
                 throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");
             }
 
             // Get all depots, and filter them down based on lang/os/architecture/etc
-            List<DepotInfo> filteredDepots = DepotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots, Config);
-            await DepotHandler.BuildLinkedDepotInfo(filteredDepots, _steam3, appInfo);
+            List<DepotInfo> filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots, Config);
+            await _depotHandler.BuildLinkedDepotInfo(filteredDepots, appInfo);
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
@@ -146,7 +149,7 @@ namespace DepotDownloader
             // Finally run the queued downloads
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
 
-            //TODO total download is wrong
+            //TODO total download size is wrong
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
             _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} depots");
             _ansiConsole.WriteLine();

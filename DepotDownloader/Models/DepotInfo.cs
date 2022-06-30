@@ -17,11 +17,11 @@ namespace DepotDownloader.Models
 
         public long MaxSize { get; set; }
 
-        public uint? ContaingAppId { get; set; }
+        public uint ContaingAppId { get; set; }
         public uint? DepotFromApp { get; set; } = null;
 
         //TODO comment
-        public string ManifestFileName => $"{DownloadConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";
+        public string ManifestFileName => $"{AppConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";
 
         public DepotInfo()
         {

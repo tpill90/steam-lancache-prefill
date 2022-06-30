@@ -227,8 +227,6 @@ namespace DepotDownloader.Steam
             seq++;
             credentials.LoggedOn = true;
 
-            SteamManager.Config.CellID = (int)loggedOn.CellID;
-
             if (!authenticatedUser)
             { 
                 _ansiConsole.LogMarkupLine("Logged anonymously into Steam3...");
@@ -255,9 +253,9 @@ namespace DepotDownloader.Steam
         //TODO handle files not existing
         public void LoadCachedData()
         {
-            if (File.Exists($"{DownloadConfig.ConfigDir}/packageInfo.json"))
+            if (File.Exists($"{AppConfig.ConfigDir}/packageInfo.json"))
             {
-                PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{DownloadConfig.ConfigDir}/packageInfo.json"));
+                PackageInfoShims = JsonSerializer.Deserialize<Dictionary<uint, PackageInfoShim>>(File.ReadAllText($"{AppConfig.ConfigDir}/packageInfo.json"));
             }
         }
 
@@ -265,7 +263,7 @@ namespace DepotDownloader.Steam
         //TODO measure performance
         public void SerializeCachedData()
         {
-            File.WriteAllText($"{DownloadConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
+            File.WriteAllText($"{AppConfig.ConfigDir}/packageInfo.json", JsonSerializer.ToJsonString(PackageInfoShims));
         }
         
         #region LoadAccountLicenses

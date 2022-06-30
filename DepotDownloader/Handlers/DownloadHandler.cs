@@ -33,7 +33,7 @@ namespace DepotDownloader.Handlers
         //TODO comment
         public async Task DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
-            if (DownloadConfig.SkipDownload)
+            if (AppConfig.SkipDownload)
             {
                 return;
             }

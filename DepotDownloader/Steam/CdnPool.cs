@@ -22,7 +22,7 @@ namespace DepotDownloader.Steam
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steamSession;
 
-        private readonly string _cachedCdnFilePath = $"{DownloadConfig.ConfigDir}/cdnServers.json";
+        private readonly string _cachedCdnFilePath = $"{AppConfig.ConfigDir}/cdnServers.json";
 
         private ConcurrentBag<ServerShim> _availableServerEndpoints = new ConcurrentBag<ServerShim>();
         private int _minimumServerCount = 15;

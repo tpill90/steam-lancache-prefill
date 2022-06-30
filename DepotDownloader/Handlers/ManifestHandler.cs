@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -14,7 +12,6 @@ using SteamKit2;
 namespace DepotDownloader.Handlers
 {
     //TODO document
-    //TODO make not static
     public class ManifestHandler
     {
         private readonly IAnsiConsole _ansiConsole;
@@ -81,7 +78,7 @@ namespace DepotDownloader.Handlers
         // TODO  https://steamdb.info/blog/manifest-request-codes/ 
         private async Task<ManifestRequestCode> GetManifestRequestCode(DepotInfo depot)
         {
-            var requestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContaingAppId.Value, depot.ManifestId.Value, "public");
+            var requestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContaingAppId, depot.ManifestId.Value, "public");
             ulong manifestRequestCode = requestCode;
 
             // If we could not get the manifest code, this is a fatal error

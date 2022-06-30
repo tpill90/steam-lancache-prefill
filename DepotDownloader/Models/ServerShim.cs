@@ -14,7 +14,7 @@ namespace DepotDownloader.Models
         //TODO document
         public Server ToSteamKitServer()
         {
-            return DownloadConfig.AutoMapper.Map<Server>(this);
+            return AppConfig.AutoMapper.Map<Server>(this);
         }
     }
 }

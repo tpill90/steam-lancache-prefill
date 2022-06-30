@@ -7,20 +7,36 @@ using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
 using SteamKit2;
+using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader.Handlers
 {
-    //TODO make this not static
     //TODO document
-    public static class DepotHandler
+    public class DepotHandler
     {
+        private readonly IAnsiConsole _ansiConsole;
+        private readonly Steam3Session _steam3Session;
+
+        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
+        {
+            _ansiConsole = ansiConsole;
+            _steam3Session = steam3Session;
+        }
+
         //TODO comment
-        public static List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allAvailableDepots, DownloadConfig config)
+        public List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allAvailableDepots, AppConfig config)
         {
             var filteredDepots = new List<DepotInfo>();
 
             foreach (var depot in allAvailableDepots)
             {
+                if (!AccountHasAccess(depot.DepotId))
+                {
+                    //TODO should this be handled differently? Return a value saying that this was unsuccessful?  
+                    _ansiConsole.MarkupLine(White(depot) + Yellow(" is not available from this account."));
+                    continue;
+                }
+
                 var configInfo = depot.ConfigInfo;
                 if (configInfo == null)
                 {
@@ -29,7 +45,7 @@ namespace DepotDownloader.Handlers
                 }
                 
                 // Filtering to only specified operating systems
-                if (!config.DownloadAllPlatforms && configInfo.OperatingSystemList != null)
+                if (!downloadArgs.DownloadAllPlatforms && configInfo.OperatingSystemList != null)
                 {
                     // TODO test this condition
                     if (!configInfo.OperatingSystemList.Contains(downloadArgs.OperatingSystem))
@@ -49,7 +65,7 @@ namespace DepotDownloader.Handlers
                 }
 
                 // Language
-                if (!config.DownloadAllLanguages && !String.IsNullOrEmpty(configInfo.Language))
+                if (!downloadArgs.DownloadAllLanguages && !String.IsNullOrEmpty(configInfo.Language))
                 {
                     // TODO test this condition
                     if (configInfo.Language != downloadArgs.Language)
@@ -75,22 +91,22 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO comment
-        public static async Task BuildLinkedDepotInfo(List<DepotInfo> depotsToDownload, Steam3Session steam3, AppInfoShim app)
+        public async Task BuildLinkedDepotInfo(List<DepotInfo> depotsToDownload, AppInfoShim app)
         {
             foreach (var depotInfo in depotsToDownload)
             {
                 var depotId = depotInfo.DepotId;
 
-                if (!AccountHasAccess(depotId, steam3))
+                if (!AccountHasAccess(depotId))
                 {
-                    AnsiConsole.WriteLine($"Depot {depotInfo.DepotId} ({depotInfo.Name}) is not available from this account.");
+                    _ansiConsole.WriteLine($"Depot {depotInfo.DepotId} ({depotInfo.Name}) is not available from this account.");
                     return;
                 }
 
                 // Finds manifestId for a linked app's depot.  
                 if (depotInfo.ManifestId == null)
                 {
-                    depotInfo.ManifestId = await GetLinkedAppManifestId(depotInfo, app, steam3);
+                    depotInfo.ManifestId = await GetLinkedAppManifestId(depotInfo, app);
                 }
 
                 // For depots that are proxied through depotfromapp, we still need to resolve the proxy app id
@@ -101,8 +117,9 @@ namespace DepotDownloader.Handlers
                 }
             }
         }
+
         // TODO document
-        public async static Task<ulong?> GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app, Steam3Session steam3)
+        public async Task<ulong?> GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app)
         {
             // Shared depots can either provide manifests, or leave you relying on their parent app.
             // It seems that with the latter, "sharedinstall" will exist (and equals 2 in the one existance I know of).
@@ -115,35 +132,45 @@ namespace DepotDownloader.Handlers
                 throw new Exception($"App {app.AppId}, Depot {depot.DepotId} has depotfromapp of {parentAppId}!");
             }
 
-            var parentAppInfo = await steam3.GetAppInfo(parentAppId);
+            var parentAppInfo = await _steam3Session.GetAppInfo(parentAppId);
             return parentAppInfo.Depots.FirstOrDefault(e => e.DepotId == depot.DepotId).ManifestId;
         }
 
         // TODO clean this up
         // TODO is this really necessary?
-        public static bool AccountHasAccess(uint depotId, Steam3Session steam3)
+        public bool AccountHasAccess(uint depotId)
         {
-            if (steam3 == null || steam3.steamUser.SteamID == null || (steam3.Licenses == null && steam3.steamUser.SteamID.AccountType != EAccountType.AnonUser))
+            // TODO make it so that if licenses are null, they get loaded automatically.  Without requiring the LoadLicenses() call to be made
+            if (_steam3Session.Licenses == null)
             {
-                return false;
+                throw new Exception($"Licenses must be loaded before calling{nameof(AccountHasAccess)}");
             }
 
+            // TODO this is all games owned + dlc. Could this possibly be filtered?
+            var allAppsAndDlc = _steam3Session.PackageInfoShims.Select(e => e.Value)
+                                              .SelectMany(e2 => e2.AppIds)
+                                              .Distinct()
+                                              .ToList();
+
+            //https://steamdb.info/sub/17906/apps/
+            ulong AnonymousDedicatedServerComp = 17906;
+
             List<uint> licenseQuery;
-            if (steam3.steamUser.SteamID.AccountType == EAccountType.AnonUser)
+            if (_steam3Session.steamUser.SteamID.AccountType == EAccountType.AnonUser)
             {
                 licenseQuery = new List<uint> { 17906 };
             }
             else
             {
-                licenseQuery = steam3.Licenses.Select(x => x.PackageID).Distinct().ToList();
+                licenseQuery = _steam3Session.Licenses.Select(x => x.PackageID).Distinct().ToList();
             }
 
-            steam3.RequestPackageInfo(licenseQuery);
+            _steam3Session.RequestPackageInfo(licenseQuery);
 
             foreach (var license in licenseQuery)
             {
                 PackageInfoShim package;
-                if (steam3.PackageInfoShims.TryGetValue(license, out package) && package != null)
+                if (_steam3Session.PackageInfoShims.TryGetValue(license, out package) && package != null)
                 {
                     if (package.AppIds.Any(e => e == depotId))
                     {

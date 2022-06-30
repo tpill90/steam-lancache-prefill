@@ -4,21 +4,21 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 945360 570 440 1085660 --remember-password"
     },
-    "Tiny Game": {
+    "Multi-App - One unowned game": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 945360 1407200 570 --remember-password"
+    },
+    "Tiny Game - Amogus": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 945360 --remember-password"
     },
-    "Medium Game": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 --remember-password"
-    },
-    "Large Game": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill -username bearingbreaker92 -app 1085660 -remember-password"
-    },
     "Unowned Free Game": {
       "commandName": "Project",
-      "commandLineArgs": "prefill -username bearingbreaker92 -app 1407200 -remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 1407200 --remember-password"
+    },
+    "Unowned Dedicated Server": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 203300 --remember-password"
     },
     "TF2 - Multiple Languages": {
       "commandName": "Project",
@@ -26,7 +26,7 @@
     },
     "TF2 - Low Violence": {
       "commandName": "Project",
-      "commandLineArgs": "prefill -username bearingbreaker92 -app 440 -remember-password -lowviolence"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 440 --remember-password --lowviolence"
     }
   }
 }
