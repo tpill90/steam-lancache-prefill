@@ -11,7 +11,13 @@ using SteamKit2;
 
 namespace DepotDownloader.Handlers
 {
-    //TODO document
+    /// <summary>
+    /// Responsible for downloading manifests from Steam, as well as loading previously saved manifests from disk.
+    ///
+    /// A manifest lists the files for a depot, as well as where they can be downloaded on Steam's CDN.
+    /// A manifest typically represents a single "version" of a depot, so subsequent updates to the depot will have
+    /// a different manifest.
+    /// </summary>
     public class ManifestHandler
     {
         private readonly CdnPool _cdnPool;

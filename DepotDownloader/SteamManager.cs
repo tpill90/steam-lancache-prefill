@@ -60,7 +60,7 @@ namespace DepotDownloader
 
             // Initializing our various classes now that Steam is connected
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
-            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
+            _manifestHandler = new ManifestHandler(_cdnPool, _steam3);
             _depotHandler = new DepotHandler(_ansiConsole, _steam3);
 
             // Loading available licenses(games) for the current user
