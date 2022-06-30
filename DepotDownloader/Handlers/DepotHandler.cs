@@ -95,14 +95,6 @@ namespace DepotDownloader.Handlers
         {
             foreach (var depotInfo in depotsToDownload)
             {
-                var depotId = depotInfo.DepotId;
-
-                if (!AccountHasAccess(depotId))
-                {
-                    _ansiConsole.WriteLine($"Depot {depotInfo.DepotId} ({depotInfo.Name}) is not available from this account.");
-                    return;
-                }
-
                 // Finds manifestId for a linked app's depot.  
                 if (depotInfo.ManifestId == null)
                 {
@@ -137,14 +129,22 @@ namespace DepotDownloader.Handlers
         }
 
         // TODO clean this up
-        // TODO is this really necessary?
-        public bool AccountHasAccess(uint depotId)
+        // TODO document
+        // TODO I don't like the name appOrDepotId
+        public bool AccountHasAccess(uint appOrDepotId)
         {
             // TODO make it so that if licenses are null, they get loaded automatically.  Without requiring the LoadLicenses() call to be made
-            if (_steam3Session.Licenses == null)
+            if (_steam3Session.OwnedPackageLicenses == null)
             {
                 throw new Exception($"Licenses must be loaded before calling{nameof(AccountHasAccess)}");
             }
+
+            // TODO is there anything to be done with this?
+            // https://steamdb.info/sub/17906/apps/
+            uint AnonymousDedicatedServerComp = 17906;
+
+            
+            _steam3Session.RequestPackageInfo(_steam3Session.OwnedPackageLicenses);
 
             // TODO this is all games owned + dlc. Could this possibly be filtered?
             var allAppsAndDlc = _steam3Session.PackageInfoShims.Select(e => e.Value)
@@ -152,31 +152,18 @@ namespace DepotDownloader.Handlers
                                               .Distinct()
                                               .ToList();
 
-            //https://steamdb.info/sub/17906/apps/
-            ulong AnonymousDedicatedServerComp = 17906;
+            var appHasAccess = allAppsAndDlc.Contains(appOrDepotId);
 
-            List<uint> licenseQuery;
-            if (_steam3Session.steamUser.SteamID.AccountType == EAccountType.AnonUser)
-            {
-                licenseQuery = new List<uint> { 17906 };
-            }
-            else
-            {
-                licenseQuery = _steam3Session.Licenses.Select(x => x.PackageID).Distinct().ToList();
-            }
-
-            _steam3Session.RequestPackageInfo(licenseQuery);
-
-            foreach (var license in licenseQuery)
+            foreach (var license in _steam3Session.OwnedPackageLicenses)
             {
                 PackageInfoShim package;
                 if (_steam3Session.PackageInfoShims.TryGetValue(license, out package) && package != null)
                 {
-                    if (package.AppIds.Any(e => e == depotId))
+                    if (package.AppIds.Any(e => e == appOrDepotId))
                     {
                         return true;
                     }
-                    if (package.DepotIds.Any(e => e == depotId))
+                    if (package.DepotIds.Any(e => e == appOrDepotId))
                     {
                         return true;
                     }

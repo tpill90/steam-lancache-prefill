@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,9 +17,8 @@ namespace DepotDownloader.Steam
 {
     public class Steam3Session
     {
-        public ReadOnlyCollection<SteamApps.LicenseListCallback.License> Licenses { get; private set; }
-
-        public Dictionary<uint, ulong> PackageTokens { get; private set; }
+        //TODO document
+        public List<uint> OwnedPackageLicenses { get; private set; }
         
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
         public Dictionary<uint, PackageInfoShim> PackageInfoShims { get; private set; } = new Dictionary<uint, PackageInfoShim>();
@@ -49,9 +47,7 @@ namespace DepotDownloader.Steam
 
         private readonly object steamLock = new object();
         static readonly TimeSpan STEAM3_TIMEOUT = TimeSpan.FromSeconds(30);
-
         
-
         public Steam3Session(SteamUser.LogOnDetails details, IAnsiConsole ansiConsole)
         {
             logonDetails = details;
@@ -61,12 +57,8 @@ namespace DepotDownloader.Steam
             credentials = new Credentials();
             bAborted = false;
             seq = 0;
-
-            PackageTokens = new Dictionary<uint, ulong>();
             
             steamClient = new SteamClient();
-            
-
             steamUser = steamClient.GetHandler<SteamUser>();
             steamApps = steamClient.GetHandler<SteamApps>();
             steamContent = steamClient.GetHandler<SteamContent>();
@@ -293,13 +285,53 @@ namespace DepotDownloader.Steam
                 return;
             }
 
-            Licenses = licenseList.LicenseList;
+            OwnedPackageLicenses = licenseList.LicenseList.Select(x => x.PackageID).Distinct().ToList();
+        }
 
-            foreach (var license in licenseList.LicenseList)
+        //TODO document
+        public void RequestPackageInfo(List<uint> packages)
+        {
+            if (PackageInfoShims.Count > 0)
             {
-                if (license.AccessToken > 0)
+                // Skipping since this is already loaded
+                return;
+            }
+
+            if (packages.Count == 0 || bAborted)
+            {
+                return;
+            }
+
+            //TODO need to serialize this data too
+            var packageRequests = new List<SteamApps.PICSRequest>();
+
+            foreach (var package in packages)
+            {
+                var request = new SteamApps.PICSRequest(package);
+                packageRequests.Add(request);
+            }
+            var jobResult = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).GetAwaiter().GetResult();
+            if (jobResult.Complete)
+            {
+                foreach (var packageInfo in jobResult.Results)
                 {
-                    PackageTokens.TryAdd(license.PackageID, license.AccessToken);
+                    foreach (var package_value in packageInfo.Packages)
+                    {
+                        var package = package_value.Value;
+
+                        var packageInfoShim = new PackageInfoShim
+                        {
+                            AppIds = package.KeyValues["appids"].Children.Select(e => UInt32.Parse(e.Value)).ToList(),
+                            DepotIds = package.KeyValues["depotids"].Children.Select(e => UInt32.Parse(e.Value)).ToList()
+                        };
+
+                        PackageInfoShims[package.ID] = packageInfoShim;
+                    }
+
+                    foreach (var package in packageInfo.UnknownPackages)
+                    {
+                        PackageInfoShims[package] = null;
+                    }
                 }
             }
         }
@@ -344,58 +376,7 @@ namespace DepotDownloader.Steam
             return AppInfoShims[appId];
         }
         
-        public void RequestPackageInfo(List<uint> packages)
-        {
-            if (PackageInfoShims.Count > 0)
-            {
-                // Skipping since this is already loaded
-                return;
-            }
-
-            if (packages.Count == 0 || bAborted)
-            {
-                return;
-            }
-            
-            //TODO need to serialize this data too
-            var packageRequests = new List<SteamApps.PICSRequest>();
-
-            foreach (var package in packages)
-            {
-                var request = new SteamApps.PICSRequest(package);
-
-                if (PackageTokens.TryGetValue(package, out var token))
-                {
-                    request.AccessToken = token;
-                }
-
-                packageRequests.Add(request);
-            }
-            var jobResult = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).GetAwaiter().GetResult();
-            if (jobResult.Complete)
-            {
-                foreach (var packageInfo in jobResult.Results)
-                {
-                    foreach (var package_value in packageInfo.Packages)
-                    {
-                        var package = package_value.Value;
-
-                        var packageInfoShim = new PackageInfoShim
-                        {
-                            AppIds = package.KeyValues["appids"].Children.Select(e => UInt32.Parse(e.Value)).ToList(),
-                            DepotIds = package.KeyValues["depotids"].Children.Select(e => UInt32.Parse(e.Value)).ToList()
-                        };
-
-                        PackageInfoShims[package.ID] = packageInfoShim;
-                    }
-
-                    foreach (var package in packageInfo.UnknownPackages)
-                    {
-                        PackageInfoShims[package] = null;
-                    }
-                }
-            }
-        }
+        
 
         private void Abort()
         {
