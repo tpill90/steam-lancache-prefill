@@ -1,5 +1,9 @@
 {
   "profiles": {
+    "Download All": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username bearingbreaker92 --all --remember-password"
+    },
     "Multi-App": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 945360 570 440 1085660 --remember-password"

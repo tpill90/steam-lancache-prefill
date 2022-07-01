@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ByteSizeLib;
+using DepotDownloader.Exceptions;
 using DepotDownloader.Handlers;
 using DepotDownloader.Models;
 using DepotDownloader.Protos;
@@ -27,8 +28,8 @@ namespace DepotDownloader
         //TODO remove static
         public static AppConfig Config = new AppConfig();
 
-		//TODO make private
-        private Steam3Session _steam3;
+		//TODO make private again
+        public Steam3Session _steam3;
         private Credentials _steam3Credentials;
         private CdnPool _cdnPool;
         private DownloadHandler _downloadHandler;
@@ -112,17 +113,33 @@ namespace DepotDownloader
         }
 
         //TODO document
+        //TODO wrap in a status spinner
+        //TODO benchmark with a large # of apps
         public async Task BulkLoadAppInfos(List<uint> appIds)
         {
             await _steam3.BulkLoadAppInfos(appIds);
         }
 
+        public int unavailableApps = 0;
         public async Task DownloadAppAsync(DownloadArguments downloadArgs)
         {
             _steam3.ThrowIfNotConnected();
 
             AppInfoShim appInfo = await _steam3.GetAppInfo(downloadArgs.AppId);
-            _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo.Common.Name)}");
+
+            // Checking for invalid apps
+            if (appInfo.State == "eStateUnAvailable" || (appInfo.Common != null && appInfo.Common.Type != "game"))
+            {
+                //TODO message?
+                unavailableApps++;
+                return;
+            }
+            if (appInfo.Depots == null && appInfo.Common == null)
+            {
+                _ansiConsole.LogMarkupLine(Red("Unknown/Invalid AppID ") + downloadArgs.AppId + Red(".  Skipping..."));
+                return;
+            }
+            _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo.Common.Name)} - {White(appInfo.AppId)}");
 
             //TODO this doesn't seem to be working correctly for games I don't own
             if (!_steam3.AccountHasAppAccess(appInfo.AppId))
@@ -138,15 +155,21 @@ namespace DepotDownloader
 
             // Filter depots based on specified lang/os/architecture/etc
             filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, filteredDepots);
+            if (!filteredDepots.Any())
+            {
+                _ansiConsole.MarkupLine(Yellow("  No depots to download, all depots to download were filtered by current settings.  Skipping.."));
+                return;
+            }
 
+            // Filter depots that have already been downloaded, only want to download what has been updated
             filteredDepots = _depotHandler.FilterPreviouslyDownloadedDepots(filteredDepots);
             if (filteredDepots.Count == 0)
             {
                 //TODO better message
-                _ansiConsole.WriteLine("  Already downloaded.  Skipping..");
-                _ansiConsole.WriteLine();
+                _ansiConsole.MarkupLine(Green("  Up to date!"));
                 return;
             }
+            //_ansiConsole.Write("\n");
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
@@ -155,7 +178,7 @@ namespace DepotDownloader
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
             //TODO total download size is the wrong unit.
             _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} updated depots");
-            //await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+            await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
 
             //TODO determine if there were any errors
             _depotHandler.MarkDownloadAsSuccessful(filteredDepots);

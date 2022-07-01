@@ -44,6 +44,11 @@ namespace DepotDownloader.Utils
             return spectreProgress;
         }
 
+        public static void LogMarkup(this IAnsiConsole console, string message)
+        {
+            console.Markup($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");
+        }
+
         public static void LogMarkupLine(this IAnsiConsole console, string message)
         {
             console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using JetBrains.Annotations;
 using SteamKit2;
@@ -20,6 +21,8 @@ namespace DepotDownloader.Models
 
         public uint ContaingAppId { get; set; }
         public uint? DepotFromApp { get; set; }
+
+        public int? LvCache { get; set; }
 
         //TODO comment
         public string ManifestFileName => $"{AppConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";
@@ -60,10 +63,17 @@ namespace DepotDownloader.Models
             }
 
             // DepotFromApp
-            var depotFromApp = c.FirstOrDefault(e => e.Name == "depotfromapp");
-            if (depotFromApp != null)
+            var depotFromAppSection = c.FirstOrDefault(e => e.Name == "depotfromapp");
+            if (depotFromAppSection != null)
             {
-                DepotFromApp = UInt32.Parse(c.First(e => e.Name == "depotfromapp").Value);
+                DepotFromApp = UInt32.Parse(depotFromAppSection.Value);
+            }
+
+            // lvcache
+            var lvcache = c.FirstOrDefault(e => e.Name == "lvcache");
+            if (lvcache != null)
+            {
+                LvCache = Int32.Parse(lvcache.Value);
             }
         }
 

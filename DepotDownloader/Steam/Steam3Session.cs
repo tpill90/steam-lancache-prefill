@@ -18,8 +18,10 @@ namespace DepotDownloader.Steam
     {
         //TODO document
         private List<uint> OwnedPackageLicenses { get; set; }
+
         // TODO this is all games owned + dlc. Could this possibly be filtered?
-        private HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
+        // TODO make this private again
+        public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
         private HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
         
         public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();

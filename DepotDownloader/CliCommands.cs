@@ -25,19 +25,23 @@ namespace DepotDownloader
         [Command("prefill", Description = "Downloads the latest files for one or more specified apps(s)")]
         public class PrefillCommand : ICommand
         {
-            //TODO document
+            //TODO document + description
             //TODO required
             [CommandOption("app")]
             public IReadOnlyList<uint> AppIds { get; init; }
 
-            //TODO document
+            //TODO document + description
             //TODO required
             [CommandOption("username")]
             public string Username { get; init; }
 
-            //TODO document
+            //TODO document + description
             [CommandOption("remember-password")]
             public bool RememberPassword { get; init; }
+
+            //TODO document + description
+            [CommandOption("all")]
+            public bool DownloadAllOwnedGames { get; init; }
 
             public async ValueTask ExecuteAsync(IConsole console)
             {
@@ -53,20 +57,35 @@ namespace DepotDownloader
                     var steamManager = new SteamManager(ansiConsole);
                     await steamManager.Initialize(Username, password, RememberPassword);
 
-                    var distinctAppIds = AppIds.Distinct().ToList();
+                    //TODO validate that there was at least 1 id passed in
+                    var appIdsToDownload = new List<uint>();
+                    if (DownloadAllOwnedGames)
+                    {
+                        appIdsToDownload.AddRange(steamManager._steam3.OwnedAppIds);
+                    }
+                    if (AppIds != null)
+                    {
+                        appIdsToDownload.AddRange(AppIds);
+                    }
+                    
+                    var distinctAppIds = appIdsToDownload.Distinct().ToList();
+                    
+                    //TODO prefilter the apps to remove invalid apps.  Then order by name
                     await steamManager.BulkLoadAppInfos(distinctAppIds);
 
+                    // TODO order these by name?
                     foreach (var app in distinctAppIds)
                     {
                         // TODO need to implement the rest of the cli parameters
                         var downloadArgs = new DownloadArguments
                         {
                             Username = Username,
-                            AppId = app,
+                            AppId = app
                         };
                         await steamManager.DownloadAppAsync(downloadArgs);
                     }
-
+                    ansiConsole.LogMarkupLine($"Skipped {steamManager.unavailableApps} unavailable apps");
+                    ansiConsole.LogMarkupLine($"Prefilled {distinctAppIds.Count - steamManager.unavailableApps}  apps");
                     //TODO prefill needs to include hours + minutes
                     ansiConsole.LogMarkupLine($"Completed prefill in {Yellow(timer.Elapsed.ToString(@"ss\.FFFF"))}");
                 }

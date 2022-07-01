@@ -1,6 +1,6 @@
 using System;
 
-namespace DepotDownloader.Models
+namespace DepotDownloader.Exceptions
 {
     public class ContentDownloaderException : Exception
     {

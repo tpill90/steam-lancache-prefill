@@ -98,8 +98,16 @@ namespace DepotDownloader.Handlers
             {
                 if (!_steam3Session.AccountHasDepotAccess(depot.DepotId))
                 {
+					//TODO cleanup
+                    if (depot.ConfigInfo == null)
+                    {
+                        continue;
+                    }
                     //TODO should this be handled differently? Return a value saying that this was unsuccessful?  
-                    _ansiConsole.MarkupLine("  " + White(depot) + Yellow(" is not available from this account."));
+                    if (!depot.Name.Contains("low violence") || (depot.LvCache == null && depot.ConfigInfo.LowViolence == false))
+                    {
+                        _ansiConsole.MarkupLine("  " + White(depot) + Yellow(" is not available from this account."));
+                    }
                     continue;
                 }
 
@@ -149,10 +157,7 @@ namespace DepotDownloader.Handlers
                 filteredDepots.Add(depot);
             }
 
-            if (!filteredDepots.Any())
-            {
-                throw new ContentDownloaderException($"Couldn't find any depots to download for app {downloadArgs.AppId}");
-            }
+            
             return filteredDepots;
         }
 
