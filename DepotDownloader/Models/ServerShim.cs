@@ -11,6 +11,8 @@ namespace DepotDownloader.Models
         public int Port { get; set; }
         public Server.ConnectionProtocol Protocol { get; set; }
 
+        public int Load { get; set; }
+
         //TODO document
         public Server ToSteamKitServer()
         {

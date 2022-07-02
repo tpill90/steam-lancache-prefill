@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,12 +25,13 @@ namespace DepotDownloader.Steam
         public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
         private HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
         
-        public Dictionary<uint, AppInfoShim> AppInfoShims { get; private set; } = new Dictionary<uint, AppInfoShim>();
+        
 
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
         public readonly SteamContent steamContent;
-        readonly SteamApps steamApps;
+        public readonly SteamApps SteamAppsApi;
+
         //TODO not sure if this should be public or not
         public readonly Client CdnClient;
 
@@ -63,7 +65,7 @@ namespace DepotDownloader.Steam
             
             _steamClient = new SteamClient();
             _steamUser = _steamClient.GetHandler<SteamUser>();
-            steamApps = _steamClient.GetHandler<SteamApps>();
+            SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             steamContent = _steamClient.GetHandler<SteamContent>();
 
             callbacks = new CallbackManager(_steamClient);
@@ -230,6 +232,8 @@ namespace DepotDownloader.Steam
             {
                 _ansiConsole.LogMarkupLine($"Logged '{Cyan(logonDetails.Username)}' into Steam3...");
             }
+            //TODO test this
+            AppConfig.CellID = (int)loggedOn.CellID;
         }
 
         public void ThrowIfNotConnected()
@@ -351,16 +355,29 @@ namespace DepotDownloader.Steam
             
             var packageRequests = packageIds.Select(package => new SteamApps.PICSRequest(package)).ToList();
             //TODO async
-            var jobResult = steamApps.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
+            var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
             if (!jobResult.Complete)
             {
                 //TODO not sure this ever happens
                 throw new Exception("Job not complete");
             }
 
-            var packages = jobResult.Results.SelectMany(e => e.Packages).Select(e => e.Value).ToList();
+            var packages = jobResult.Results.SelectMany(e => e.Packages)
+                                    .Select(e => e.Value)
+                                    .ToList();
             foreach (var package in packages)
             {
+                // Removing any free weekends that are no longer active
+                //TODO turn this into a property on some class
+                var expiryTimeKey = package.KeyValues["extended"].Children.FirstOrDefault(e => e.Name == "expirytime");
+                if (expiryTimeKey != null)
+                {
+                    var expiryTimeUtc = DateTimeOffset.FromUnixTimeSeconds(1630256400).DateTime;
+                    if (DateTime.Now > expiryTimeUtc)
+                    {
+                        continue;
+                    }
+                }
                 foreach (KeyValue appId in package.KeyValues["appids"].Children)
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
@@ -377,6 +394,7 @@ namespace DepotDownloader.Steam
         }
         #endregion
 
+        //TODO move this into app handler?
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this app.
         /// </summary>
@@ -387,6 +405,7 @@ namespace DepotDownloader.Steam
             return OwnedAppIds.Contains(appid);
         }
 
+        //TODO move this into depot handler?
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this depot.
         /// </summary>
@@ -396,50 +415,6 @@ namespace DepotDownloader.Steam
         {
             return OwnedDepotIds.Contains(depotId);
         }
-
-        // TODO document
-        // TODO make sure that this isn't actually a performance issue when loading a large # of apps
-        public async Task BulkLoadAppInfos(List<uint> appIds)
-        {
-            var requests = appIds.Select(id => new SteamApps.PICSRequest(id)).ToList();
-
-            var productJob = steamApps.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>());
-            AsyncJobMultiple<SteamApps.PICSProductInfoCallback>.ResultSet resultSet = await productJob.ToTask();
-
-            if (!resultSet.Complete)
-            {
-                //TODO not sure this ever happens
-                throw new Exception(nameof(BulkLoadAppInfos) + " request is incomplete");
-            }
-            //TODO flatten this
-            foreach (var appInfo in resultSet.Results)
-            {
-                foreach (var app_value in appInfo.Apps)
-                {
-                    var app = app_value.Value;
-                    //TODO if an app doesn't have a DepotFromApp value, and doesn't have a manifest, it likely means its not actually used.  Needs more testing
-                    AppInfoShims[app.ID] = new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues);
-                }
-
-                foreach (var app in appInfo.UnknownApps)
-                {
-                    AppInfoShims[app] = null;
-                }
-            }
-        }
-
-        //TODO comment
-        public async Task<AppInfoShim> GetAppInfo(uint appId)
-        {
-            if (AppInfoShims.ContainsKey(appId))
-            {
-                return AppInfoShims[appId];
-            }
-            await BulkLoadAppInfos(new List<uint> { appId });
-            return AppInfoShims[appId];
-        }
-        
-        
 
         #region Callback Waiting methods
 

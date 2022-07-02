@@ -59,7 +59,8 @@ namespace DepotDownloader.Handlers
                 //TODO What other possible exceptions could happen here, that we can recover from?
                 catch (HttpRequestException e)
                 {
-                    if (e.StatusCode == HttpStatusCode.BadGateway)
+                    //TODO handle 503 service unavailable
+                    if (e.StatusCode == HttpStatusCode.BadGateway || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                     {
                         // In the case of a BadGateway, we'll want to retry again with a new server
                     }
@@ -95,7 +96,7 @@ namespace DepotDownloader.Handlers
         /// <exception cref="ManifestException">Throws if no valid manifest code was found</exception>
         private async Task<ManifestRequestCode> GetManifestRequestCode(DepotInfo depot)
         {
-            ulong manifestRequestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContaingAppId, depot.ManifestId.Value, "public");
+            ulong manifestRequestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContainingAppId, depot.ManifestId.Value, "public");
             
             // If we could not get the manifest code, this is a fatal error, as it we can't download the manifest without it.
             if (manifestRequestCode == 0)

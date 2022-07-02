@@ -1,5 +1,4 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -7,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Cysharp.Text;
 using DepotDownloader.Models;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
@@ -30,20 +30,27 @@ namespace DepotDownloader.Handlers
             _cdnPool = cdnPool;
         }
 
-        //TODO comment
-        public async Task DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
+        /// <summary>
+        /// Attempts to download all queued requests.  If all downloads are successful, will return true.
+        /// In the case of any failed downloads, the failed downloads will be retried up to 3 times.  If the downloads fail 3 times, then
+        /// false will be returned
+        /// </summary>
+        /// <param name="ansiConsole"></param>
+        /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
+        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
             if (AppConfig.SkipDownload)
             {
-                return;
+                return true;
             }
+
             int retryCount = 0;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
             await _ansiConsole.CreateSpectreProgress().StartAsync(async ctx =>
             {
                 // Run the initial download
-                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests.ToList());
+                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests);
 
                 // Handle any failed requests
                 while (failedRequests.Any() && retryCount < 3)
@@ -57,17 +64,16 @@ namespace DepotDownloader.Handlers
             // Handling final failed requests
             if (!failedRequests.Any())
             {
-                return;
+                return true;
             }
 
-            _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed chunks"));
-            foreach (var failedRequest in failedRequests)
-            {
-                //TODO format this better
-                _ansiConsole.WriteLine(failedRequest.PreviousError.ToString());
-            }
+            //TODO handle this by returning, so that we can mark this app as not downloaded
+            _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
+            return false;
         }
 
+        //TODO this doesn't always consistently hit 10gbit
+        //TODO doesnt always hit 1gbit on initial download
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
@@ -78,68 +84,51 @@ namespace DepotDownloader.Handlers
             double requestTotalSize = requestsToDownload.Sum(e => e.chunk.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
-            //TODO In the case of an exception, cycle the server being used
-            var cdnServer = _cdnPool.TakeConnection();
-
-            //TODO need to add title task for retries
             var failedRequests = new ConcurrentBag<QueuedRequest>();
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (request, _) =>
+
+            // Breaking up requests into smaller batches, to distribute the load across multiple CDNs.  Steam appears to get better download speeds when doing this.
+            var concurrentBatches = 5;
+            List<QueuedRequest[]> requestBatches = requestsToDownload.Chunk(100).ToList();
+            await Parallel.ForEachAsync(requestBatches, new ParallelOptions { MaxDegreeOfParallelism = concurrentBatches }, async (batch, _) =>
             {
-                try
+                int totalErrors = 0;
+                var cdnServer = _cdnPool.TakeConnection();
+
+                // Running multiple requests in parallel on a single CDN
+                await Parallel.ForEachAsync(batch, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (request, _) =>
                 {
-                    await DownloadChunkAsync(request, progressTask, cdnServer);
-                }
-                catch
+                    var buffer = _bytePool.Rent(1_048_576);
+                    try
+                    {
+                        var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.chunk);
+                        var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                        using Stream responseStream = await response.Content.ReadAsStreamAsync();
+                        response.EnsureSuccessStatusCode();
+
+                        // Don't save the data anywhere, so we don't have to waste time writing it to disk.
+                        while (await responseStream.ReadAsync(buffer, 0, buffer.Length, _) != 0)
+                        {
+                        }
+                    }
+                    catch
+                    {
+                        totalErrors++;
+                        failedRequests.Add(request);
+                    }
+                    _bytePool.Return(buffer);
+                    progressTask.Increment(request.chunk.CompressedLength);
+                });
+
+                // Only return the connection for reuse if there were no errors
+                if (totalErrors == 0)
                 {
-                    failedRequests.Add(request);
+                    _cdnPool.ReturnConnection(cdnServer);
                 }
             });
-            _cdnPool.ReturnConnection(cdnServer);
 
-            // Making sure the progress bar is always set to its max value, some files don't have a size, so the progress bar will appear as unfinished.
+            // Making sure the progress bar is always set to its max value, incase some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
-        }
-
-        //TODO comment
-        //TODO consider making this syncronous
-        private async Task DownloadChunkAsync(QueuedRequest request, ProgressTask progressTask, ServerShim connection)
-        {
-            var totalBytesRead = 0;
-            //TODO bump to 1mb
-            var buffer = _bytePool.Rent(16384);
-
-            try
-            {
-                var uri = new Uri($"http://{connection.Host}/depot/{request.DepotId}/chunk/{request.chunk}");
-                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
-
-                using var responseMessage = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
-                await using Stream responseStream = await responseMessage.Content.ReadAsStreamAsync();
-                responseMessage.EnsureSuccessStatusCode();
-
-                while (true)
-                {
-                    // Dump the received data, so we don't have to waste time writing it to disk.
-                    var read = await responseStream.ReadAsync(buffer, 0, buffer.Length);
-                    if (read == 0)
-                    {
-                        _bytePool.Return(buffer);
-                        progressTask.Increment(totalBytesRead);
-                        break;
-                    }
-                    totalBytesRead += read;
-                }
-            }
-            catch(Exception e)
-            {
-                // Making sure that the current request is marked as "complete" in the progress bar, otherwise the progress bar will never hit 100%
-                progressTask.Increment(request.chunk.UncompressedLength - totalBytesRead);
-                _bytePool.Return(buffer);
-
-                request.PreviousError = e;
-                throw;
-            }
         }
     }
 }

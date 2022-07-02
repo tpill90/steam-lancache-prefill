@@ -48,11 +48,14 @@ namespace DepotDownloader.Steam
             }
             _steamSession.ThrowIfNotConnected();
 
+            // TODO this can take a really long time.  Around 12 seconds
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Getting available CDNs", async _ =>
             {
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)
                 {
+                    //TODO do I need to readd the logic where it weighs CDN servers by their weight?
+                    //TODO need to figure out the logged in user's cell id + get servers from that region first
                     var steamServers = await _steamSession.steamContent.GetServersForSteamPipe();
                     var filteredServers = steamServers.Where(e => e.Protocol == Server.ConnectionProtocol.HTTP)
                                                       .Where(e => e.AllowedAppIds.Length == 0)
@@ -71,7 +74,7 @@ namespace DepotDownloader.Steam
 
                     // Will wait increasingly longer periods when re-trying
                     retryCount++;
-                    await Task.Delay(retryCount * 500);
+                    await Task.Delay(retryCount * 50);
                 }
             });
 
@@ -88,6 +91,8 @@ namespace DepotDownloader.Steam
         /// </summary>
         private void LoadCachedCdnsFromDisk()
         {
+			//TODO it seems like keeping this around for a few days is not likely going to work.  Need to test keeping it around for a few hours, and see how
+            // many 502's are thrown
             var lastWriteTime = File.GetLastWriteTime(_cachedCdnFilePath);
             TimeSpan delta = DateTime.Now.Subtract(lastWriteTime);
 
@@ -108,8 +113,7 @@ namespace DepotDownloader.Steam
         {
             if (_availableServerEndpoints.IsEmpty)
             {
-                _ansiConsole.MarkupLine($"{Red("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes")}");
-                throw new CdnExhaustionException("Available Steam CDN servers exhausted");
+                throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
             _availableServerEndpoints.TryTake(out ServerShim server);
             return server;

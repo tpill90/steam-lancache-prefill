@@ -4,8 +4,6 @@
     //TODO merge with download config
     public class DownloadArguments
     {
-        public string Username { get; set; }
-
         public uint AppId { get; set; }
 
         /* TODO

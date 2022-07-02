@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using ByteSizeLib;
 using CliFx.Infrastructure;
 using Spectre.Console;
 using static DepotDownloader.Utils.SpectreColors;
@@ -57,6 +59,14 @@ namespace DepotDownloader.Utils
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)
         {
             console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}".PadRight(65) + Yellow(elapsed.ToString(@"ss\.FFFF")));
+        }
+    }
+
+    public static class ByteSizeExtensions
+    {
+        public static string ToDecimalString(this ByteSize byteSize)
+        {
+            return byteSize.ToString("0.##", CultureInfo.CurrentCulture, true);
         }
     }
 }

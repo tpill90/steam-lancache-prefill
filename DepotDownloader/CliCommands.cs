@@ -61,31 +61,16 @@ namespace DepotDownloader
                     var appIdsToDownload = new List<uint>();
                     if (DownloadAllOwnedGames)
                     {
+                        //TODO there has to be a better way to know all the owned games, without including the invalid ones. Might be able to use the steam web api to do this.
                         appIdsToDownload.AddRange(steamManager._steam3.OwnedAppIds);
                     }
                     if (AppIds != null)
                     {
                         appIdsToDownload.AddRange(AppIds);
                     }
-                    
-                    var distinctAppIds = appIdsToDownload.Distinct().ToList();
-                    
-                    //TODO prefilter the apps to remove invalid apps.  Then order by name
-                    await steamManager.BulkLoadAppInfos(distinctAppIds);
 
-                    // TODO order these by name?
-                    foreach (var app in distinctAppIds)
-                    {
-                        // TODO need to implement the rest of the cli parameters
-                        var downloadArgs = new DownloadArguments
-                        {
-                            Username = Username,
-                            AppId = app
-                        };
-                        await steamManager.DownloadAppAsync(downloadArgs);
-                    }
-                    ansiConsole.LogMarkupLine($"Skipped {steamManager.unavailableApps} unavailable apps");
-                    ansiConsole.LogMarkupLine($"Prefilled {distinctAppIds.Count - steamManager.unavailableApps}  apps");
+                    await steamManager.DownloadMultipleAppsAsync(appIdsToDownload);
+
                     //TODO prefill needs to include hours + minutes
                     ansiConsole.LogMarkupLine($"Completed prefill in {Yellow(timer.Elapsed.ToString(@"ss\.FFFF"))}");
                 }

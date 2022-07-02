@@ -19,16 +19,18 @@ namespace DepotDownloader.Handlers
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
+        private readonly AppInfoHandler _appInfoHandler;
 
         //TODO document
         //TODO should this have a better type?  Kinda gives you no idea what is being stored here
         private readonly Dictionary<uint, List<ulong>> SuccessfullyDownloadedDepots = new Dictionary<uint, List<ulong>>();
         private readonly string _downloadedDepotsPath = $"{AppConfig.ConfigDir}/successfullyDownloadedDepots.json";
 
-        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
+        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler)
         {
             _ansiConsole = ansiConsole;
             _steam3Session = steam3Session;
+            _appInfoHandler = appInfoHandler;
 
             //TODO measure performance
             if (File.Exists(_downloadedDepotsPath))
@@ -54,7 +56,7 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO document
-        public bool HasDepotBeenPreviouslyDownloaded(DepotInfo depot)
+        private bool HasDepotBeenPreviouslyDownloaded(DepotInfo depot)
         {
             if (!SuccessfullyDownloadedDepots.ContainsKey(depot.DepotId))
             {
@@ -65,8 +67,20 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO document
+        //TODO change this to not filter on previously downloaded depots, but rather previously downloaded apps
+        public bool AppHasUpdatedDepots(List<DepotInfo> depots)
+        {
+            return depots.Any(e => HasDepotBeenPreviouslyDownloaded(e) == false);
+        }
+
+        //TODO document
         public List<DepotInfo> RemoveInvalidDepots(List<DepotInfo> depots)
         {
+            //TODO I don't think this belongs here
+            if (depots == null)
+            {
+                return new List<DepotInfo>();
+            }
             var results = new List<DepotInfo>();
             foreach (var depot in depots)
             {
@@ -76,19 +90,13 @@ namespace DepotDownloader.Handlers
                 }
                 else
                 {
-                    //TODO debugging, validate why this is happening for all games I own
-                    _ansiConsole.MarkupLine("  " + White(depot) + Yellow(" appears to be an invalid depot."));
+                    //TODO reenable, should this be logged to a file or something?
+                    //_ansiConsole.MarkupLine("  " + White(depot) + Yellow(" appears to be an invalid depot."));
                 }
             }
             return results;
         }
-
-        //TODO document
-        public List<DepotInfo> FilterPreviouslyDownloadedDepots(List<DepotInfo> depots)
-        {
-            return depots.Where(e => HasDepotBeenPreviouslyDownloaded(e) == false).ToList();
-        }
-
+        
         //TODO comment
         public List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allAvailableDepots)
         {
@@ -104,10 +112,10 @@ namespace DepotDownloader.Handlers
                         continue;
                     }
                     //TODO should this be handled differently? Return a value saying that this was unsuccessful?  
-                    if (!depot.Name.Contains("low violence") || (depot.LvCache == null && depot.ConfigInfo.LowViolence == false))
-                    {
-                        _ansiConsole.MarkupLine("  " + White(depot) + Yellow(" is not available from this account."));
-                    }
+                    //if (!depot.Name.Contains("low violence") || (depot.LvCache == null && depot.ConfigInfo.LowViolence == false))
+                    //{
+                    //    //_ansiConsole.MarkupLine("  " + White(depot) + Yellow(" is not available from this account."));
+                    //}
                     continue;
                 }
 
@@ -173,14 +181,20 @@ namespace DepotDownloader.Handlers
                 }
 
                 // For depots that are proxied through depotfromapp, we still need to resolve the proxy app id
-                depotInfo.ContaingAppId = app.AppId;
+                depotInfo.ContainingAppId = app.AppId;
+
+                //TODO Can this be simplified and done when the depot object is being built?
+                if (depotInfo.DlcAppId != null)
+                {
+                    depotInfo.ContainingAppId = depotInfo.DlcAppId.Value;
+                }
                 if (depotInfo.DepotFromApp != null)
                 {
-                    depotInfo.ContaingAppId = depotInfo.DepotFromApp.Value;
+                    depotInfo.ContainingAppId = depotInfo.DepotFromApp.Value;
                 }
             }
         }
-
+        
         // TODO document
         private async Task<ulong?> GetLinkedAppManifestId(DepotInfo depot, AppInfoShim app)
         {
@@ -195,7 +209,7 @@ namespace DepotDownloader.Handlers
                 throw new Exception($"App {app.AppId}, Depot {depot.DepotId} has depotfromapp of {parentAppId}!");
             }
 
-            var parentAppInfo = await _steam3Session.GetAppInfo(parentAppId);
+            var parentAppInfo = await _appInfoHandler.GetAppInfo(parentAppId);
             return parentAppInfo.Depots.FirstOrDefault(e => e.DepotId == depot.DepotId).ManifestId;
         }
     }

@@ -19,13 +19,17 @@ namespace DepotDownloader.Models
 
         public long MaxSize { get; set; }
 
-        public uint ContaingAppId { get; set; }
+        public uint ContainingAppId { get; set; }
+
+        //TODO if an app doesn't have a DepotFromApp value, and doesn't have a manifest, it likely means its not actually used.  Needs more testing
         public uint? DepotFromApp { get; set; }
+
+        public uint? DlcAppId { get; set; }
 
         public int? LvCache { get; set; }
 
         //TODO comment
-        public string ManifestFileName => $"{AppConfig.ManifestCacheDir}\\{ContaingAppId}_{DepotId}_{ManifestId}.bin";
+        public string ManifestFileName => $"{AppConfig.ManifestCacheDir}\\{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 
         [UsedImplicitly]
         public DepotInfo()
@@ -67,6 +71,13 @@ namespace DepotDownloader.Models
             if (depotFromAppSection != null)
             {
                 DepotFromApp = UInt32.Parse(depotFromAppSection.Value);
+            }
+
+            // DlcAppId
+            var dlcAppId = c.FirstOrDefault(e => e.Name == "dlcappid");
+            if (dlcAppId != null)
+            {
+                DlcAppId = UInt32.Parse(dlcAppId.Value);
             }
 
             // lvcache

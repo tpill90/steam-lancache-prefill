@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using ByteSizeLib;
-using DepotDownloader.Exceptions;
 using DepotDownloader.Handlers;
 using DepotDownloader.Models;
 using DepotDownloader.Protos;
@@ -18,8 +17,6 @@ using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader
 {
-    //TODO I don't think this needs to be static
-    //TODO needs to be reworked to support multiple apps at the same time
     //TODO document
     public class SteamManager
     {
@@ -32,9 +29,11 @@ namespace DepotDownloader
         public Steam3Session _steam3;
         private Credentials _steam3Credentials;
         private CdnPool _cdnPool;
+
         private DownloadHandler _downloadHandler;
         private ManifestHandler _manifestHandler;
         private DepotHandler _depotHandler;
+        private AppInfoHandler _appInfoHandler;
 
         public SteamManager(IAnsiConsole ansiConsole)
         {
@@ -45,7 +44,6 @@ namespace DepotDownloader
         }
 
         // TODO comment
-        // TODO look into persisting session so that this is faster
         // TODO need to test an account with steam guard
         public async Task Initialize(string username, string password, bool rememberPassword)
         {
@@ -59,19 +57,20 @@ namespace DepotDownloader
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             await _cdnPool.PopulateAvailableServers();
 
-            // Initializing our various classes now that Steam is connected
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
-            _manifestHandler = new ManifestHandler(_cdnPool, _steam3);
-            _depotHandler = new DepotHandler(_ansiConsole, _steam3);
-
             // Loading available licenses(games) for the current user
             _steam3.LoadAccountLicenses();
 
+            // Initializing our various classes now that Steam is connected.
+            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _manifestHandler = new ManifestHandler(_cdnPool, _steam3);
+            _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler);
+            
             _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
-            _ansiConsole.WriteLine();
         }
-        
+
         //TODO wrap in a spectre status?
+        //TODO document
         private void ConnectToSteam(string username, string password, bool shouldRememberPassword)
         {
             Config.RememberPassword = shouldRememberPassword;
@@ -103,7 +102,7 @@ namespace DepotDownloader
                 _steam3.LoginToSteam();
                 _steam3Credentials = _steam3.WaitForCredentials();
             });
-            
+
             if (!_steam3Credentials.IsValid)
             {
                 //TODO better exception type
@@ -112,64 +111,80 @@ namespace DepotDownloader
             }
         }
 
-        //TODO document
-        //TODO wrap in a status spinner
-        //TODO benchmark with a large # of apps
-        public async Task BulkLoadAppInfos(List<uint> appIds)
+        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)
         {
-            await _steam3.BulkLoadAppInfos(appIds);
+            var distinctAppIds = appIdsToDownload.Distinct().OrderBy(e => e).ToList();
+
+            // Need to load the latest app information from steam first
+            await RetrieveAppMetadata(distinctAppIds);
+
+            // Now we will be able to determine which apps can't be downloaded
+            var availableApps = await _appInfoHandler.FilterUnavailableApps(distinctAppIds);
+            
+            foreach (var app in availableApps)
+            {
+                try
+                {
+                    // TODO need to implement the rest of the cli parameters
+                    await DownloadSingleAppAsync(new DownloadArguments { AppId = app.AppId });
+                }
+                catch (Exception e)
+                {
+                    // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
+                    _ansiConsole.MarkupLine(Red("   Unexpected download error : " + e.Message));
+                }
+            }
+            
+            _ansiConsole.LogMarkupLine($"Prefilled {availableApps.Count}  apps");
         }
 
-        public int unavailableApps = 0;
-        public async Task DownloadAppAsync(DownloadArguments downloadArgs)
+        /// <summary>
+        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
+        /// </summary>
+        private async Task RetrieveAppMetadata(List<uint> appIds)
+        {
+            var timer = Stopwatch.StartNew();
+            await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
+            {
+                await _appInfoHandler.BulkLoadAppInfos(appIds);
+                // Once we have our info, we can also load information for related DLC
+
+                //TODO loading this DLC info can be pretty slow
+                await _appInfoHandler.BulkLoadAppInfos(_appInfoHandler.GetOwnedDlcAppIds());
+                await _appInfoHandler.BuildDlcDepotList();
+            });
+            _ansiConsole.LogMarkupLine($"Retrieved info for {Magenta(appIds.Count)} apps", timer.Elapsed);
+        }
+
+        private async Task DownloadSingleAppAsync(DownloadArguments downloadArgs)
         {
             _steam3.ThrowIfNotConnected();
 
-            AppInfoShim appInfo = await _steam3.GetAppInfo(downloadArgs.AppId);
-
-            // Checking for invalid apps
-            if (appInfo.State == "eStateUnAvailable" || (appInfo.Common != null && appInfo.Common.Type != "game"))
-            {
-                //TODO message?
-                unavailableApps++;
-                return;
-            }
-            if (appInfo.Depots == null && appInfo.Common == null)
-            {
-                _ansiConsole.LogMarkupLine(Red("Unknown/Invalid AppID ") + downloadArgs.AppId + Red(".  Skipping..."));
-                return;
-            }
-            _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo.Common.Name)} - {White(appInfo.AppId)}");
-
-            //TODO this doesn't seem to be working correctly for games I don't own
-            if (!_steam3.AccountHasAppAccess(appInfo.AppId))
-            {
-                //TODO handle this better
-                throw new ContentDownloaderException($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account.");
-            }
+            AppInfoShim appInfo = await _appInfoHandler.GetAppInfo(downloadArgs.AppId);
+            _ansiConsole.LogMarkup($"Starting {Cyan(appInfo.Common.Name)} - {White(appInfo.AppId)}");
 
             // Get all depots, and filter out any unavailable depots.
             var allDepots = appInfo.Depots;
-            var filteredDepots = _depotHandler.RemoveInvalidDepots(allDepots);
-            await _depotHandler.BuildLinkedDepotInfo(filteredDepots, appInfo);
-
+            var validDepots = _depotHandler.RemoveInvalidDepots(allDepots);
+            
             // Filter depots based on specified lang/os/architecture/etc
-            filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, filteredDepots);
+            var filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, validDepots);
             if (!filteredDepots.Any())
             {
-                _ansiConsole.MarkupLine(Yellow("  No depots to download, all depots to download were filtered by current settings.  Skipping.."));
+                _ansiConsole.MarkupLine(Yellow("  No depots to download.  Current arguments filtered all depots"));
                 return;
             }
 
-            // Filter depots that have already been downloaded, only want to download what has been updated
-            filteredDepots = _depotHandler.FilterPreviouslyDownloadedDepots(filteredDepots);
-            if (filteredDepots.Count == 0)
+            await _depotHandler.BuildLinkedDepotInfo(filteredDepots, appInfo);
+
+            // We will want to re-download the entire app, if any of the depots have been updated
+            if (!_depotHandler.AppHasUpdatedDepots(filteredDepots))
             {
                 //TODO better message
                 _ansiConsole.MarkupLine(Green("  Up to date!"));
                 return;
             }
-            //_ansiConsole.Write("\n");
+            _ansiConsole.Write("\n");
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
@@ -177,7 +192,7 @@ namespace DepotDownloader
             // Finally run the queued downloads
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
             //TODO total download size is the wrong unit.
-            _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToString())} from {Yellow(filteredDepots.Count)} updated depots");
+            _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToDecimalString())} from {Yellow(chunkDownloadQueue.Count)} chunks");
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
 
             //TODO determine if there were any errors

@@ -29,12 +29,21 @@ namespace DepotDownloader
     // TODO implement logic to get a list of games from a user's collection
     // TODO - Exceptions being thrown causes the application to hang.
     // TODO - Consider adding a flag for not saving manifest cache.  Measure how much the manifest cache could actually end up being after a large # of installs
+    // TODO - Add a command that clears out the manifest cache, and displays how much data was saved
     // TODO - General - Promote this app on r/lanparty and discord once it is finished.
     // TODO finish testing dedicated server downloads
     // TODO - Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
     // TODO - Metrics - Setup and configure Github historical statistics (Downloads, page views, etc).  This will be useful for seeing project usage.
     // TODO Test this app on Linux to ensure that it works correctly
     // TODO - Rewrite the repo's original init commit
+    // TODO - Test out https://github.com/microsoft/infersharpaction
+    // TODO - Possibly add a clear cache command?
+    // TODO - Things I want tested :  Does initial download max your internet speed?  Does cached downloads max your lan speed?
+    // TODO - Add a benchmark for web request allocations, and optimize
+    // TODO - Add a command that lists all available games for a user, and allows them to select which ones to download
+    // TODO - Add analyzers
+    // TODO - When I'm downloading apps, make sure that I'm pulling in their DLC too.  Example, Frostpunk has a base game + DLC that are a separate "app id"
+    // TODO - validate download accuracy using app group in steam
     public class Program
     {
         public static async Task<int> Main()
