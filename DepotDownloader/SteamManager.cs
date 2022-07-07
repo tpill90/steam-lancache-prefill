@@ -215,28 +215,29 @@ namespace DepotDownloader
                     depotManifests.Add(manifest);
                 });
             });
+            
 
-            //TODO benchmark performance
-            var stopwatch = Stopwatch.StartNew();
-            var queue = new List<QueuedRequest>();
+            var chunkQueue = new List<QueuedRequest>();
             // Queueing up chunks for each depot
             foreach (var depotManifest in depotManifests)
             {
                 // A depot will contain multiple files, that are broken up into 1MB chunks
-                var chunks = depotManifest.Files.SelectMany(e => e.Chunks).ToList();
-                var disctint = chunks.DistinctBy(e => e.ChunkID).ToList();
-                var newChunks = disctint.Select(e => new QueuedRequest
+                var dedupedChunks = depotManifest.Files
+                                             .SelectMany(e => e.Chunks)
+                                             // Steam appears to do block level deduplication, so it is possible for multiple files to have the same chunk
+                                             .DistinctBy(e => e.ChunkID)
+                                             .ToList();
+                foreach (var chunk in dedupedChunks)
                 {
-                    DepotId = depotManifest.DepotId,
-                    ChunkID = e.ChunkID,
-                    CompressedLength = e.CompressedLength
-                }).ToList();
-
-                queue.AddRange(newChunks);
+                    chunkQueue.Add(new QueuedRequest
+                    {
+                        DepotId = depotManifest.DepotId,
+                        ChunkID = chunk.ChunkID,
+                        CompressedLength = chunk.CompressedLength
+                    });
+                }
             }
-            stopwatch.Stop();
-            _ansiConsole.LogMarkupLine("Built queue", stopwatch.Elapsed);
-            return queue;
+            return chunkQueue;
         }
     }
 }
