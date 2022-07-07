@@ -1,13 +1,10 @@
-﻿using System;
-using DepotDownloader.Protos;
-
-namespace DepotDownloader.Models
+﻿namespace DepotDownloader.Models
 {
+    //TODO document
     public class QueuedRequest
     {
-        public ProtoManifest.ChunkData chunk;
-        public uint DepotId;
-
-        public Exception PreviousError;
+        public uint DepotId { get; set; }
+        public string ChunkID { get; set; }
+        public uint CompressedLength { get; set; }
     }
 }

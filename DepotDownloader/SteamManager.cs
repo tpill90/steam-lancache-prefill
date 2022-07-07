@@ -180,7 +180,6 @@ namespace DepotDownloader
             // We will want to re-download the entire app, if any of the depots have been updated
             if (!_depotHandler.AppHasUpdatedDepots(filteredDepots))
             {
-                //TODO better message
                 _ansiConsole.MarkupLine(Green("  Up to date!"));
                 return;
             }
@@ -190,7 +189,7 @@ namespace DepotDownloader
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
 
             // Finally run the queued downloads
-            var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.chunk.CompressedLength));
+            var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
             //TODO total download size is the wrong unit.
             _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToDecimalString())} from {Yellow(chunkDownloadQueue.Count)} chunks");
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
@@ -206,37 +205,38 @@ namespace DepotDownloader
         //TODO implement logic that skips depots if they have previously been downloaded
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueue(List<DepotInfo> depots)
         {
-            var chunkQueue = new List<QueuedRequest>();
-            var depotManifests = new ConcurrentBag<ProtoManifest>();
-            
             // Fetch all the manifests for each depot in parallel, as individually they can take a long time, 
+            var depotManifests = new ConcurrentBag<ProtoManifest>();
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
-                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (depot, _) =>
+                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>
                 {
                     var manifest = await _manifestHandler.GetManifestFile(depot);
                     depotManifests.Add(manifest);
                 });
             });
 
+            //TODO benchmark performance
+            var stopwatch = Stopwatch.StartNew();
+            var queue = new List<QueuedRequest>();
             // Queueing up chunks for each depot
             foreach (var depotManifest in depotManifests)
             {
-                // A depot can be made up of multiple files
-                foreach (var file in depotManifest.Files)
+                // A depot will contain multiple files, that are broken up into 1MB chunks
+                var chunks = depotManifest.Files.SelectMany(e => e.Chunks).ToList();
+                var disctint = chunks.DistinctBy(e => e.ChunkID).ToList();
+                var newChunks = disctint.Select(e => new QueuedRequest
                 {
-                    // A file larger than 1MB will need to be downloaded in multiple chunks
-                    foreach (var chunk in file.Chunks)
-                    {
-                        chunkQueue.Add(new QueuedRequest
-                        {
-                            DepotId = depotManifest.DepotId,
-                            chunk = chunk
-                        });
-                    }
-                }
+                    DepotId = depotManifest.DepotId,
+                    ChunkID = e.ChunkID,
+                    CompressedLength = e.CompressedLength
+                }).ToList();
+
+                queue.AddRange(newChunks);
             }
-            return chunkQueue;
+            stopwatch.Stop();
+            _ansiConsole.LogMarkupLine("Built queue", stopwatch.Elapsed);
+            return queue;
         }
     }
 }

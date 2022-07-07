@@ -25,7 +25,7 @@ namespace DepotDownloader.Steam
         private readonly string _cachedCdnFilePath = $"{AppConfig.ConfigDir}/cdnServers.json";
 
         private ConcurrentBag<ServerShim> _availableServerEndpoints = new ConcurrentBag<ServerShim>();
-        private int _minimumServerCount = 15;
+        private int _minimumServerCount = 12;
 
         // TODO is it possible to write unit tests for this class?
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)

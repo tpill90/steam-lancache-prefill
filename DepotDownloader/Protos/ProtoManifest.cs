@@ -72,46 +72,25 @@ namespace DepotDownloader.Protos
         {
             public ChunkData(DepotManifest.ChunkData sourceChunk)
             {
-                ChunkID = sourceChunk.ChunkID;
-                Checksum = sourceChunk.Checksum;
-                Offset = sourceChunk.Offset;
+                ChunkID = HexMate.Convert.ToHexString(sourceChunk.ChunkID, HexFormattingOptions.Lowercase);
                 CompressedLength = sourceChunk.CompressedLength;
-                UncompressedLength = sourceChunk.UncompressedLength;
             }
 
             /// <summary>
             /// Gets the SHA-1 hash chunk id.
             /// </summary>
             [ProtoMember(1)]
-            public byte[] ChunkID { get; private set; }
-
-            /// <summary>
-            /// Gets the expected Adler32 checksum of this chunk.
-            /// </summary>
-            [ProtoMember(2)]
-            public byte[] Checksum { get; private set; }
-
-            /// <summary>
-            /// Gets the chunk offset.
-            /// </summary>
-            [ProtoMember(3)]
-            public ulong Offset { get; private set; }
+            public string ChunkID { get; private set; }
 
             /// <summary>
             /// Gets the compressed length of this chunk.
             /// </summary>
-            [ProtoMember(4)]
+            [ProtoMember(2)]
             public uint CompressedLength { get; private set; }
-
-            /// <summary>
-            /// Gets the decompressed length of this chunk.
-            /// </summary>
-            [ProtoMember(5)]
-            public uint UncompressedLength { get; private set; }
 
             public override string ToString()
             {
-                return HexMate.Convert.ToHexString(ChunkID, HexFormattingOptions.Lowercase);
+                return ChunkID;
             }
         }
 
