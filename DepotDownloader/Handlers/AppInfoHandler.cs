@@ -50,24 +50,34 @@ namespace DepotDownloader.Handlers
         /// <param name="appIds">The list of App Ids to retrieve info for</param>
         public async Task BulkLoadAppInfos(List<uint> appIds)
         {
-            var requests = appIds.Where(e => !LoadedAppInfos.ContainsKey(e) && _steam3Session.AccountHasAppAccess(e))
-                                 .Select(e => new SteamApps.PICSRequest(e))
-                                 .ToList();
-            if (!requests.Any())
+            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e) && _steam3Session.AccountHasAppAccess(e)).ToList();
+            if (!appIdsToLoad.Any())
             {
                 return;
             }
             
+            // Some apps will require an additional "access token" in order to retrieve their app metadata
+            var accessTokensResponse = await _steam3Session.SteamAppsApi.PICSGetAccessTokens(appIds, new List<uint>()).ToTask();
+            var appTokens = accessTokensResponse.AppTokens;
+
+            // Build out the requests
+            var requests = new List<SteamApps.PICSRequest>();
+            foreach (var appId in appIdsToLoad)
+            {
+                var request = new SteamApps.PICSRequest(appId);
+                if (appTokens.ContainsKey(appId))
+                {
+                    request.AccessToken = appTokens[appId];
+                }
+                requests.Add(request);
+            }
+            // Finally request the metadata from steam
             var resultSet = await _steam3Session.SteamAppsApi.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>()).ToTask();
 
             List<PicsProductInfo> appInfos = resultSet.Results.SelectMany(e => e.Apps).Select(e => e.Value).ToList();
             foreach (var app in appInfos)
             {
                 //TODO filter out tools and stuff here?
-                if (LoadedAppInfos.ContainsKey(app.ID))
-                {
-                    continue;
-                }
                 LoadedAppInfos.Add(app.ID, new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues));
             }
         }

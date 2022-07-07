@@ -81,7 +81,7 @@ namespace DepotDownloader.Handlers
         [SuppressMessage("CodeSmell", "ERP022:Unobserved exception in generic exception handler", Justification = "Want to catch all exceptions, regardless of type")]
         private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload)
         {
-            double requestTotalSize = requestsToDownload.Sum(e => e.chunk.CompressedLength);
+            double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
@@ -100,7 +100,7 @@ namespace DepotDownloader.Handlers
                     var buffer = _bytePool.Rent(1_048_576);
                     try
                     {
-                        var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.chunk);
+                        var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkID);
                         var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                         using Stream responseStream = await response.Content.ReadAsStreamAsync();
                         response.EnsureSuccessStatusCode();
@@ -116,7 +116,7 @@ namespace DepotDownloader.Handlers
                         failedRequests.Add(request);
                     }
                     _bytePool.Return(buffer);
-                    progressTask.Increment(request.chunk.CompressedLength);
+                    progressTask.Increment(request.CompressedLength);
                 });
 
                 // Only return the connection for reuse if there were no errors
