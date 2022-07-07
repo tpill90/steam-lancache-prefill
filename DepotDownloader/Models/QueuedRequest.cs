@@ -6,5 +6,10 @@
         public uint DepotId { get; set; }
         public string ChunkID { get; set; }
         public uint CompressedLength { get; set; }
+
+        public override string ToString()
+        {
+            return CompressedLength.ToString();
+        }
     }
 }
