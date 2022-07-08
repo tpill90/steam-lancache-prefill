@@ -86,45 +86,43 @@ namespace DepotDownloader.Handlers
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
+            requestsToDownload = requestsToDownload.OrderByDescending(e => e.CompressedLength).ToList();
+
             // Breaking up requests into smaller batches, to distribute the load across multiple CDNs.  Steam appears to get better download speeds when doing this.
-            var concurrentBatches = 5;
-            List<QueuedRequest[]> requestBatches = requestsToDownload.Chunk(100).ToList();
-            await Parallel.ForEachAsync(requestBatches, new ParallelOptions { MaxDegreeOfParallelism = concurrentBatches }, async (batch, _) =>
+            var concurrentBatches = 1;
+            
+            int totalErrors = 0;
+            var cdnServer = _cdnPool.TakeConnection();
+
+            // Running multiple requests in parallel on a single CDN
+            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 75 }, async (request, _) =>
             {
-                int totalErrors = 0;
-                var cdnServer = _cdnPool.TakeConnection();
-
-                // Running multiple requests in parallel on a single CDN
-                await Parallel.ForEachAsync(batch, new ParallelOptions { MaxDegreeOfParallelism = 8 }, async (request, _) =>
+                var buffer = new byte[4096];
+                try
                 {
-                    var buffer = _bytePool.Rent(1_048_576);
-                    try
-                    {
-                        var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkID);
-                        var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
-                        using Stream responseStream = await response.Content.ReadAsStreamAsync();
-                        response.EnsureSuccessStatusCode();
+                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkID);
+                    var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    using Stream responseStream = await response.Content.ReadAsStreamAsync();
+                    response.EnsureSuccessStatusCode();
 
-                        // Don't save the data anywhere, so we don't have to waste time writing it to disk.
-                        while (await responseStream.ReadAsync(buffer, 0, buffer.Length, _) != 0)
-                        {
-                        }
-                    }
-                    catch
+                    // Don't save the data anywhere, so we don't have to waste time writing it to disk.
+                    while (await responseStream.ReadAsync(buffer, 0, buffer.Length, _) != 0)
                     {
-                        totalErrors++;
-                        failedRequests.Add(request);
                     }
-                    _bytePool.Return(buffer);
-                    progressTask.Increment(request.CompressedLength);
-                });
-
-                // Only return the connection for reuse if there were no errors
-                if (totalErrors == 0)
-                {
-                    _cdnPool.ReturnConnection(cdnServer);
                 }
+                catch
+                {
+                    totalErrors++;
+                    failedRequests.Add(request);
+                }
+                progressTask.Increment(request.CompressedLength);
             });
+
+            // Only return the connection for reuse if there were no errors
+            if (totalErrors == 0)
+            {
+                _cdnPool.ReturnConnection(cdnServer);
+            }
 
             // Making sure the progress bar is always set to its max value, incase some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
