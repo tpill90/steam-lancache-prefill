@@ -89,13 +89,11 @@ namespace DepotDownloader.Handlers
             requestsToDownload = requestsToDownload.OrderByDescending(e => e.CompressedLength).ToList();
 
             // Breaking up requests into smaller batches, to distribute the load across multiple CDNs.  Steam appears to get better download speeds when doing this.
-            var concurrentBatches = 1;
-            
             int totalErrors = 0;
             var cdnServer = _cdnPool.TakeConnection();
 
             // Running multiple requests in parallel on a single CDN
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 75 }, async (request, _) =>
+            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
             {
                 var buffer = new byte[4096];
                 try

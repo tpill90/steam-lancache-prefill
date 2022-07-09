@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using ByteSizeLib;
 using CliFx.Infrastructure;
 using Spectre.Console;
@@ -67,6 +70,14 @@ namespace DepotDownloader.Utils
         public static string ToDecimalString(this ByteSize byteSize)
         {
             return byteSize.ToString("0.##", CultureInfo.CurrentCulture, true);
+        }
+    }
+
+    public static class Extensions
+    {
+        public static ConcurrentBag<T> ToConcurrentBag<T>(this IOrderedEnumerable<T> list)
+        {
+            return new ConcurrentBag<T>(list);
         }
     }
 }

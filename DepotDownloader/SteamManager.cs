@@ -189,10 +189,16 @@ namespace DepotDownloader
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
 
             // Finally run the queued downloads
+            var downloadTimer = Stopwatch.StartNew();
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
             //TODO total download size is the wrong unit.
             _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToDecimalString())} from {Yellow(chunkDownloadQueue.Count)} chunks");
             await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+
+            downloadTimer.Stop();
+            var averageSpeed = ByteSize.FromBytes(totalBytes.Bytes / downloadTimer.Elapsed.TotalSeconds);
+            var averageSpeedBits = $"{(averageSpeed.MegaBytes * 8).ToString("0.##")} Mbit/s";
+            _ansiConsole.LogMarkupLine($"Downloaded in {Yellow(downloadTimer.Elapsed.ToString(@"h\:mm\:ss\.FFFF"))}.  Average speed : {Magenta(averageSpeedBits)}");
 
             //TODO determine if there were any errors
             _depotHandler.MarkDownloadAsSuccessful(filteredDepots);

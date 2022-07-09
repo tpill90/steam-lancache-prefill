@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +10,6 @@ using DepotDownloader.Utils;
 using Spectre.Console;
 using SteamKit2.CDN;
 using Utf8Json;
-using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader.Steam
 {
@@ -25,9 +25,8 @@ namespace DepotDownloader.Steam
         private readonly string _cachedCdnFilePath = $"{AppConfig.ConfigDir}/cdnServers.json";
 
         private ConcurrentBag<ServerShim> _availableServerEndpoints = new ConcurrentBag<ServerShim>();
-        private int _minimumServerCount = 12;
+        private int _minimumServerCount = 7;
 
-        // TODO is it possible to write unit tests for this class?
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
             _ansiConsole = ansiConsole;
@@ -48,14 +47,11 @@ namespace DepotDownloader.Steam
             }
             _steamSession.ThrowIfNotConnected();
 
-            // TODO this can take a really long time.  Around 12 seconds
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Getting available CDNs", async _ =>
             {
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)
                 {
-                    //TODO do I need to readd the logic where it weighs CDN servers by their weight?
-                    //TODO need to figure out the logged in user's cell id + get servers from that region first
                     var steamServers = await _steamSession.steamContent.GetServersForSteamPipe();
                     var filteredServers = steamServers.Where(e => e.Protocol == Server.ConnectionProtocol.HTTP)
                                                       .Where(e => e.AllowedAppIds.Length == 0)
@@ -64,7 +60,9 @@ namespace DepotDownloader.Steam
                                                           Host = e.Host,
                                                           Port = e.Port,
                                                           Protocol = e.Protocol,
-                                                          VHost = e.VHost
+                                                          VHost = e.VHost,
+                                                          Load = e.Load,
+                                                          WeightedLoad = e.WeightedLoad
                                                       })
                                                       .ToList();
                     foreach (var server in filteredServers)
@@ -78,10 +76,13 @@ namespace DepotDownloader.Steam
                 }
             });
 
+            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToConcurrentBag();
+
             if (!_availableServerEndpoints.Any())
             {
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!.  Try again in a few moments...");
             }
+
             await File.WriteAllTextAsync(_cachedCdnFilePath, JsonSerializer.ToJsonString(_availableServerEndpoints));
         }
 
@@ -91,13 +92,12 @@ namespace DepotDownloader.Steam
         /// </summary>
         private void LoadCachedCdnsFromDisk()
         {
-			//TODO it seems like keeping this around for a few days is not likely going to work.  Need to test keeping it around for a few hours, and see how
-            // many 502's are thrown
+			//TODO Test keeping it around for a day, and see how many 502's are thrown
             var lastWriteTime = File.GetLastWriteTime(_cachedCdnFilePath);
             TimeSpan delta = DateTime.Now.Subtract(lastWriteTime);
 
-            // Will only re-use the cache if its less than 3 days old
-            if (delta.TotalDays <= 3)
+            // Will only re-use the cache if its less than 1 day
+            if (delta.TotalDays <= 1)
             {
                 _availableServerEndpoints = JsonSerializer.Deserialize<ConcurrentBag<ServerShim>>(File.ReadAllText(_cachedCdnFilePath));
             }
