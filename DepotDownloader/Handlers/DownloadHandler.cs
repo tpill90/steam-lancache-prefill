@@ -73,7 +73,6 @@ namespace DepotDownloader.Handlers
         }
 
         //TODO this doesn't always consistently hit 10gbit
-        //TODO doesnt always hit 1gbit on initial download
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
@@ -85,8 +84,6 @@ namespace DepotDownloader.Handlers
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
-
-            requestsToDownload = requestsToDownload.OrderByDescending(e => e.CompressedLength).ToList();
 
             // Breaking up requests into smaller batches, to distribute the load across multiple CDNs.  Steam appears to get better download speeds when doing this.
             int totalErrors = 0;

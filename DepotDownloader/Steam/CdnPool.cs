@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,8 +22,8 @@ namespace DepotDownloader.Steam
         private readonly Steam3Session _steamSession;
 
         private readonly string _cachedCdnFilePath = $"{AppConfig.ConfigDir}/cdnServers.json";
-
-        private ConcurrentBag<ServerShim> _availableServerEndpoints = new ConcurrentBag<ServerShim>();
+        
+        private ConcurrentQueue<ServerShim> _availableServerEndpoints = new ConcurrentQueue<ServerShim>();
         private int _minimumServerCount = 7;
 
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
@@ -40,7 +39,8 @@ namespace DepotDownloader.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public async Task PopulateAvailableServers()
         {
-            LoadCachedCdnsFromDisk();
+            // TODO is it possible to cache these at all?  Seems like they frequently run less than full speed
+            //LoadCachedCdnsFromDisk();
             if (_availableServerEndpoints.Count >= _minimumServerCount)
             {
                 return;
@@ -54,7 +54,7 @@ namespace DepotDownloader.Steam
                 {
                     var steamServers = await _steamSession.steamContent.GetServersForSteamPipe();
                     var filteredServers = steamServers.Where(e => e.Protocol == Server.ConnectionProtocol.HTTP)
-                                                      .Where(e => e.AllowedAppIds.Length == 0)
+                                                      .Where(e => e.AllowedAppIds.Length == 0 && e.WeightedLoad < 100)
                                                       .Select(e => new ServerShim
                                                       {
                                                           Host = e.Host,
@@ -67,7 +67,7 @@ namespace DepotDownloader.Steam
                                                       .ToList();
                     foreach (var server in filteredServers)
                     {
-                        _availableServerEndpoints.Add(server);
+                        _availableServerEndpoints.Enqueue(server);
                     }
 
                     // Will wait increasingly longer periods when re-trying
@@ -99,7 +99,7 @@ namespace DepotDownloader.Steam
             // Will only re-use the cache if its less than 1 day
             if (delta.TotalDays <= 1)
             {
-                _availableServerEndpoints = JsonSerializer.Deserialize<ConcurrentBag<ServerShim>>(File.ReadAllText(_cachedCdnFilePath));
+                _availableServerEndpoints = JsonSerializer.Deserialize<ConcurrentQueue<ServerShim>>(File.ReadAllText(_cachedCdnFilePath));
             }
         }
 
@@ -115,7 +115,7 @@ namespace DepotDownloader.Steam
             {
                 throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
-            _availableServerEndpoints.TryTake(out ServerShim server);
+            _availableServerEndpoints.TryDequeue(out ServerShim server);
             return server;
         }
 
@@ -126,7 +126,7 @@ namespace DepotDownloader.Steam
         /// <param name="connection">The connection that will be re-added to the pool.</param>
         public void ReturnConnection(ServerShim connection)
         {
-            _availableServerEndpoints.Add(connection);
+            _availableServerEndpoints.Enqueue(connection);
         }
     }
 }

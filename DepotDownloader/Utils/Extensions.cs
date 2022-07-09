@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using ByteSizeLib;
@@ -75,9 +74,9 @@ namespace DepotDownloader.Utils
 
     public static class Extensions
     {
-        public static ConcurrentBag<T> ToConcurrentBag<T>(this IOrderedEnumerable<T> list)
+        public static ConcurrentQueue<T> ToConcurrentBag<T>(this IOrderedEnumerable<T> list)
         {
-            return new ConcurrentBag<T>(list);
+            return new ConcurrentQueue<T>(list);
         }
     }
 }

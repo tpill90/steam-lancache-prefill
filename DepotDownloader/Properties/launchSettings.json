@@ -6,11 +6,15 @@
     },
     "Accuracy Test": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 440 730 65800 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 440 730 65800 1085660 --remember-password"
     },
     "Game with DLC - FFXV": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 637650 --remember-password"
+    },
+    "Game with Duplicate Chunks - DR4": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 543460 --remember-password"
     },
     "Dota 2 - Multiple Languages": {
       "commandName": "Project",
@@ -23,10 +27,6 @@
     "Unowned Free Game": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 1407200 --remember-password"
-    },
-    "Misc": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 543460 --remember-password"
     }
   }
 }

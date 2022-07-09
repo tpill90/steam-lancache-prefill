@@ -222,7 +222,6 @@ namespace DepotDownloader
                 });
             });
             
-
             var chunkQueue = new List<QueuedRequest>();
             // Queueing up chunks for each depot
             foreach (var depotManifest in depotManifests)
