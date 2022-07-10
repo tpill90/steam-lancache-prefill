@@ -29,10 +29,7 @@ namespace DepotDownloader.Protos
             LoginKeys = new Dictionary<string, string>();
         }
 
-        static bool Loaded
-        {
-            get { return Instance != null; }
-        }
+        static bool Loaded => Instance != null;
 
         public static AccountSettingsStore Instance;
         //TODO test if IsolatedStorage works on Linux

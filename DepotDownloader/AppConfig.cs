@@ -8,10 +8,12 @@ namespace DepotDownloader
     public class AppConfig
     {
         public string SuppliedPassword { get; set; }
-        public bool RememberPassword { get; set; }
+        public bool RememberPassword { get; set; } = true;
 
         public static string ManifestCacheDir => "ManifestCache";
         public static string ConfigDir => ".DepotDownloader";
+
+        public static string AccountSettingsStorePath => "account.config";
 
         //TODO doccument that this is the user's region
         public static int CellID = 0;
@@ -23,7 +25,7 @@ namespace DepotDownloader
         #region Debug
 
         //TODO revert
-        public static bool SkipDownload = false;
+        public static bool SkipDownload = true;
 
         #endregion
     }

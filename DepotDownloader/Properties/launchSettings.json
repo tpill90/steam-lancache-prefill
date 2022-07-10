@@ -27,6 +27,10 @@
     "Unowned Free Game": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 1407200 --remember-password"
+    },
+    "2FA Account": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username tpill_2fa --app 570 --remember-password"
     }
   }
 }

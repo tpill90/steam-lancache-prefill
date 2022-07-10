@@ -27,7 +27,6 @@ namespace DepotDownloader
 
 		//TODO make private again
         public Steam3Session _steam3;
-        private Credentials _steam3Credentials;
         private CdnPool _cdnPool;
 
         private DownloadHandler _downloadHandler;
@@ -41,17 +40,16 @@ namespace DepotDownloader
             // Create required folders
             Directory.CreateDirectory(AppConfig.ConfigDir);
             Directory.CreateDirectory(AppConfig.ManifestCacheDir);
+            _steam3 = new Steam3Session(_ansiConsole);
         }
 
         // TODO comment
         // TODO need to test an account with steam guard
-        public async Task Initialize(string username, string password, bool rememberPassword)
+        public async Task Initialize(string username, bool rememberPassword)
         {
             var timer = Stopwatch.StartNew();
-
-            // capture the supplied password in case we need to re-use it after checking the login key
-            Config.SuppliedPassword = password;
-            ConnectToSteam(username, password, rememberPassword);
+            
+            ConnectToSteam(username);
             
             // Populating available CDN servers
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
@@ -71,44 +69,14 @@ namespace DepotDownloader
 
         //TODO wrap in a spectre status?
         //TODO document
-        private void ConnectToSteam(string username, string password, bool shouldRememberPassword)
+        private void ConnectToSteam(string username)
         {
-            Config.RememberPassword = shouldRememberPassword;
-            string loginKey = null;
+            //_ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam", _ =>
+            //{
+            //});
 
-            if (username != null && Config.RememberPassword)
-            {
-                _ = AccountSettingsStore.Instance.LoginKeys.TryGetValue(username, out loginKey);
-            }
-
-            var logOnDetails = new SteamUser.LogOnDetails
-            {
-                Username = username,
-                Password = loginKey == null ? password : null,
-                ShouldRememberPassword = Config.RememberPassword,
-                LoginKey = loginKey,
-                LoginID = 0x534B32
-            };
-
-            _steam3 = new Steam3Session(logOnDetails, _ansiConsole);
-
-            _ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam", _ =>
-            {
-                _steam3.ConnectToSteam();
-            });
-
-            _ansiConsole.CreateSpectreStatusSpinner().Start("Logging into steam", _ =>
-            {
-                _steam3.LoginToSteam();
-                _steam3Credentials = _steam3.WaitForCredentials();
-            });
-
-            if (!_steam3Credentials.IsValid)
-            {
-                //TODO better exception type
-                _ansiConsole.MarkupLine($"{Red("Error: Login to Steam failed")}");
-                throw new Exception("Unable to get steam3 credentials.");
-            }
+            _steam3.ConfigureLoginDetails(username, Config);
+            _steam3.LoginToSteam();
         }
 
         public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)

@@ -50,12 +50,11 @@ namespace DepotDownloader
                     var timer = Stopwatch.StartNew();
                     var ansiConsole = console.CreateAnsiConsole();
 
-                    AccountSettingsStore.LoadFromFile("account.config");
+                    AccountSettingsStore.LoadFromFile(AppConfig.AccountSettingsStorePath);
                     //TODO remove;
-                    var password = File.ReadAllText(@"C:\Users\Tim\Desktop\password.txt");
 
                     var steamManager = new SteamManager(ansiConsole);
-                    await steamManager.Initialize(Username, password, RememberPassword);
+                    await steamManager.Initialize(Username, RememberPassword);
 
                     //TODO validate that there was at least 1 id passed in
                     var appIdsToDownload = new List<uint>();

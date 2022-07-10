@@ -1,6 +1,7 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
+using Spectre.Console;
 
 namespace DepotDownloader.Utils
 {
@@ -11,8 +12,11 @@ namespace DepotDownloader.Utils
             return Environment.Is64BitOperatingSystem ? "64" : "32";
         }
 
+        //TODO this isnt secure at all
         public static string ReadPassword()
         {
+            //TODO need a far better user interface for this
+            AnsiConsole.WriteLine("Please enter password");
             ConsoleKeyInfo keyInfo;
             var password = new StringBuilder();
 
@@ -43,12 +47,10 @@ namespace DepotDownloader.Utils
             return password.ToString();
         }
 
-        public static byte[] SHAHash(byte[] input)
+        public static byte[] ToShaHash(this byte[] input)
         {
             using var sha = SHA1.Create();
-            var output = sha.ComputeHash(input);
-
-            return output;
+            return sha.ComputeHash(input);
         }
         
     }
