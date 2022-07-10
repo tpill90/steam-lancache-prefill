@@ -54,7 +54,7 @@ namespace DepotDownloader
                     //TODO remove;
 
                     var steamManager = new SteamManager(ansiConsole);
-                    await steamManager.Initialize(Username, RememberPassword);
+                    await steamManager.Initialize(Username);
 
                     //TODO validate that there was at least 1 id passed in
                     var appIdsToDownload = new List<uint>();

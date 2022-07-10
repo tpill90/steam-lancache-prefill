@@ -45,11 +45,11 @@ namespace DepotDownloader
 
         // TODO comment
         // TODO need to test an account with steam guard
-        public async Task Initialize(string username, bool rememberPassword)
+        public async Task Initialize(string username)
         {
             var timer = Stopwatch.StartNew();
             
-            ConnectToSteam(username);
+            _steam3.LoginToSteam(username, Config);
             
             // Populating available CDN servers
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
@@ -65,18 +65,6 @@ namespace DepotDownloader
             _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler);
             
             _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
-        }
-
-        //TODO wrap in a spectre status?
-        //TODO document
-        private void ConnectToSteam(string username)
-        {
-            //_ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam", _ =>
-            //{
-            //});
-
-            _steam3.ConfigureLoginDetails(username, Config);
-            _steam3.LoginToSteam();
         }
 
         public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)
