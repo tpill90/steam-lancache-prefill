@@ -49,7 +49,7 @@ namespace DepotDownloader
         {
             var timer = Stopwatch.StartNew();
             
-            _steam3.LoginToSteam(username, Config);
+            _steam3.LoginToSteam(username);
             
             // Populating available CDN servers
             _cdnPool = new CdnPool(_ansiConsole, _steam3);

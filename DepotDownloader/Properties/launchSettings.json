@@ -28,9 +28,13 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 1407200 --remember-password"
     },
-    "2FA Account": {
+    "Account - 2FA": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username tpill_2fa --app 570 --remember-password"
+    },
+    "Account - Steamguard": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username tpill_steamguard --app 570 --remember-password"
     }
   }
 }

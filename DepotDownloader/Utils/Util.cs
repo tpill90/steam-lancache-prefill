@@ -44,6 +44,7 @@ namespace DepotDownloader.Utils
                 }
             } while (keyInfo.Key != ConsoleKey.Enter);
 
+            Console.WriteLine();
             return password.ToString();
         }
 

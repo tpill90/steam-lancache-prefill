@@ -7,9 +7,6 @@ namespace DepotDownloader
     //TODO document
     public class AppConfig
     {
-        public string SuppliedPassword { get; set; }
-        public bool RememberPassword { get; set; } = true;
-
         public static string ManifestCacheDir => "ManifestCache";
         public static string ConfigDir => ".DepotDownloader";
 

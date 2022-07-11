@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using DepotDownloader.Models;
+using System.Threading;
 using DepotDownloader.Protos;
 using DepotDownloader.Utils;
 using Spectre.Console;
@@ -27,16 +28,14 @@ namespace DepotDownloader.Steam
         private readonly SteamUser _steamUser;
         public readonly SteamContent steamContent;
         public readonly SteamApps SteamAppsApi;
-
         //TODO not sure if this should be public or not
         public readonly Client CdnClient;
 
-        private readonly CallbackManager callbacks;
+        private readonly CallbackManager _callbackManager;
         
         private SteamUser.LogOnDetails _logonDetails;
         private readonly IAnsiConsole _ansiConsole;
 
-        private readonly object steamLock = new object();
         static readonly TimeSpan STEAM3_TIMEOUT = TimeSpan.FromSeconds(30);
         
         public Steam3Session(IAnsiConsole ansiConsole)
@@ -48,17 +47,40 @@ namespace DepotDownloader.Steam
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             steamContent = _steamClient.GetHandler<SteamContent>();
 
-            callbacks = new CallbackManager(_steamClient);
+            _callbackManager = new CallbackManager(_steamClient);
 
-            callbacks.Subscribe<SteamUser.LoggedOnCallback>(LogOnCallback);
-            callbacks.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
-            callbacks.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
-            callbacks.Subscribe<SteamClient.ConnectedCallback>(ConnectedCallback);
-            callbacks.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
+            _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(LogOnCallback);
+            _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
+            _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
+            _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
+            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(ConnectedCallback);
 
-            callbacks.RunCallbacks();
+            _callbackManager.RunCallbacks();
 
             CdnClient = new Client(_steamClient);
+        }
+
+        // TODO re-wrap with a status spinner, and figure how to handle input/output while it is running
+        // TODO document
+        public void LoginToSteam(string username)
+        {
+            ConfigureLoginDetails(username);
+
+            //TODO I don't like how this is written
+            //TODO add in a limited # of retries
+            while (_logonResult != EResult.OK)
+            {
+                _ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam...", ctx =>
+                {
+                    ConnectToSteam();
+
+                    ctx.Status = "Logging into Steam...";
+                    WaitForLogonCallbackCompletion();
+                });
+                
+                HandleLogonResult();
+            }
+            TryWaitForLoginKey();
         }
 
         #region Connecting to Steam
@@ -72,12 +94,12 @@ namespace DepotDownloader.Steam
             _isConnected = false;
             _connectingToSteamIsRunning = true;
             _connectTime = DateTime.Now;
-            
+
             _steamClient.Connect();
 
             while (_connectingToSteamIsRunning)
             {
-                callbacks.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
             }
         }
 
@@ -92,8 +114,7 @@ namespace DepotDownloader.Steam
         #region Logging into Steam
 
         //TODO document
-        private EResult? _logonResult;
-        public void ConfigureLoginDetails(string username, AppConfig Config)
+        public void ConfigureLoginDetails(string username)
         {
             if (String.IsNullOrEmpty(username))
             {
@@ -103,17 +124,13 @@ namespace DepotDownloader.Steam
 
             string loginKey;
             AccountSettingsStore.Instance.LoginKeys.TryGetValue(username, out loginKey);
-            if (loginKey == null)
-            {
-                // capture the supplied password in case we need to re-use it after checking the login key
-                Config.SuppliedPassword = Util.ReadPassword();
-            }
 
             _logonDetails = new SteamUser.LogOnDetails
             {
                 Username = username,
-                Password = loginKey == null ? Config.SuppliedPassword : null,
-                ShouldRememberPassword = Config.RememberPassword,
+                //TODO should clear out the password once we're done logging in, for security
+                Password = loginKey == null ? Util.ReadPassword() : null,
+                ShouldRememberPassword = true,
                 LoginKey = loginKey,
                 LoginID = 0x534DD2
             };
@@ -123,35 +140,19 @@ namespace DepotDownloader.Steam
             }
         }
 
-        // TODO re-wrap with a status spinner, and figure how to handle input/output while it is running
-        // TODO document
-        public void LoginToSteam(string username, AppConfig Config)
-        {
-            _ansiConsole.CreateSpectreStatusSpinner().Start("Logging into steam", _ =>
-            {
-            });
-
-            ConfigureLoginDetails(username, Config);
-            
-            while (_logonResult != EResult.OK)
-            {
-                ConnectToSteam();
-
-                _logonResult = null;
-                _steamUser.LogOn(_logonDetails);
-                WaitForLogonCallbackCompletion();
-            }
-            
-            TryWaitForLoginKey();
-        }
-
         //TODO document
-        public void WaitForLogonCallbackCompletion()
+        private EResult? _logonResult;
+        private void WaitForLogonCallbackCompletion()
         {
+            var loginStartTime = DateTime.Now;
+            _logonResult = null;
+            _steamUser.LogOn(_logonDetails);
+
+            // Waiting for the logon callback to complete
             while (_logonResult == null)
             {
-                callbacks.RunWaitCallbacks(TimeSpan.FromSeconds(1));
-                if (DateTime.Now - _connectTime > STEAM3_TIMEOUT && !_isConnected)
+                _callbackManager.RunWaitCallbacks(timeout: TimeSpan.FromSeconds(3));
+                if (DateTime.Now - loginStartTime > TimeSpan.FromSeconds(10))
                 {
                     //TODO better exception
                     _ansiConsole.WriteLine("Timeout connecting to Steam3.");
@@ -160,84 +161,71 @@ namespace DepotDownloader.Steam
             }
         }
 
-        //TODO this needs thorough testing
-        private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
+        //TODO document
+        private void HandleLogonResult()
         {
-            _logonResult = loggedOn.Result;
-            var isSteamGuard = loggedOn.Result == EResult.AccountLogonDenied;
-            var is2FA = loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor;
-            var isLoginKey = SteamManager.Config.RememberPassword && _logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
-
-            if (isSteamGuard || is2FA || isLoginKey)
+            // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
+            if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
-                if (!isLoginKey)
-                {
-                    _ansiConsole.WriteLine("This account is protected by Steam Guard.");
-                }
+                _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Yellow("2FA required for login.") +
+                                                                                         $"  Please enter your {Cyan("Steam Guard code")} from your authenticator app : "));
+                return;
+            }
+            if (loggedOn.Result == EResult.TwoFactorCodeMismatch)
+            {
+                _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Red("Login failed. Incorrect Steam Guard code") +
+                                                                                         "  Please try again : "));
+                return;
+            }
 
-                if (is2FA)
-                {
-                    do
-                    {
-                        _ansiConsole.Write("Please enter your 2 factor auth code from your authenticator app: ");
-                        _logonDetails.TwoFactorCode = Console.ReadLine();
-                    } while (string.Empty == _logonDetails.TwoFactorCode);
-                    return;
-                }
-                else if (isLoginKey)
-                {
-                    AccountSettingsStore.Instance.LoginKeys.Remove(_logonDetails.Username);
-                    AccountSettingsStore.Save();
+            var loginKeyExpired = _logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
+            if (loginKeyExpired)
+            {
+                AccountSettingsStore.Instance.LoginKeys.Remove(_logonDetails.Username);
+                AccountSettingsStore.Save();
+                _logonDetails.LoginKey = null;
 
-                    _logonDetails.LoginKey = null;
+                _ansiConsole.Write("Login key was expired. Please enter your password: ");
+                //TODO should clear out the password once we're done logging in, for security
+                _logonDetails.Password = Util.ReadPassword();
+                return;
+            }
 
-                    if (SteamManager.Config.SuppliedPassword != null)
-                    {
-                        // TODO this happening in the middle of a run.  Is there a way to make sure this doesn't happen?
-                        _ansiConsole.WriteLine("Login key was expired. Connecting with supplied password.");
-                        _logonDetails.Password = SteamManager.Config.SuppliedPassword;
-                    }
-                    else
-                    {
-                        _ansiConsole.Write("Login key was expired. Please enter your password: ");
-                        _logonDetails.Password = Util.ReadPassword();
-                    }
-                }
-                else
-                {
-                    do
-                    {
-                        _ansiConsole.Write("Please enter the authentication code sent to your email address: ");
-                        _logonDetails.AuthCode = Console.ReadLine();
-                    } while (string.Empty == _logonDetails.AuthCode);
-                }
-
-                _ansiConsole.Write("Retrying Steam3 connection...");
-
+            // SteamGuard code required
+            if (loggedOn.Result == EResult.AccountLogonDenied)
+            {
+                _logonDetails.AuthCode = _ansiConsole.Prompt(new TextPrompt<string>(Yellow("This account is protected by Steam Guard.") +
+                                                                                    "  Please enter the code sent to your email address:  "));
                 return;
             }
 
             if (loggedOn.Result == EResult.ServiceUnavailable)
             {
-                //TODO better message
-                _ansiConsole.WriteLine($"Unable to login to Steam3: {loggedOn.Result}");
-                throw new Exception("aborted");
+                _ansiConsole.WriteLine($"{Red("Unable to login to Steam")} : Service is unavailable");
+                //TODO better exception type
+                throw new Exception($"{Red("Unable to login to Steam")} : Service is unavailable");
             }
 
             if (loggedOn.Result != EResult.OK)
             {
-                Console.WriteLine("Unable to login to Steam3: {0}", loggedOn.Result);
+                _ansiConsole.WriteLine($"Unable to login to Steam3: {loggedOn.Result}");
                 throw new Exception("aborted");
             }
 
             _ansiConsole.LogMarkupLine($"Logged '{Cyan(_logonDetails.Username)}' into Steam3...");
-          
+
             //TODO test this
-            AppConfig.CellID = (int)loggedOn.CellID;
+            AppConfig.CellID = (int) loggedOn.CellID;
         }
 
+        private SteamUser.LoggedOnCallback loggedOn;
+        //TODO this needs thorough testing
+        private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
+        {
+            _logonResult = loggedOn.Result;
+            this.loggedOn = loggedOn;
+        }
         
-
         bool _receivedLoginKey;
         //TODO cleanup + comment
         public void TryWaitForLoginKey()
@@ -258,7 +246,7 @@ namespace DepotDownloader.Steam
                 {
                     return;
                 }
-                callbacks.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
+                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
             }
         }
 
@@ -324,7 +312,7 @@ namespace DepotDownloader.Steam
             while (_loadAccountLicensesIsRunning)
             {
                 // in order for the callbacks to get routed, they need to be handled by the manager
-                callbacks.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
             }
         }
 
