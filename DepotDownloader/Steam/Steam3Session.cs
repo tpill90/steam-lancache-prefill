@@ -36,8 +36,6 @@ namespace DepotDownloader.Steam
         private SteamUser.LogOnDetails _logonDetails;
         private readonly IAnsiConsole _ansiConsole;
 
-        static readonly TimeSpan STEAM3_TIMEOUT = TimeSpan.FromSeconds(30);
-        
         public Steam3Session(IAnsiConsole ansiConsole)
         {
             _ansiConsole = ansiConsole;
@@ -53,7 +51,6 @@ namespace DepotDownloader.Steam
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
-            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(ConnectedCallback);
 
             _callbackManager.RunCallbacks();
 
@@ -76,7 +73,7 @@ namespace DepotDownloader.Steam
                     ConnectToSteam();
 
                     ctx.Status = "Logging into Steam...";
-                    logonResult = WaitForLogonCallbackCompletion();
+                    logonResult = AttemptSteamLogin();
                 });
 
                 if (HandleLogonResult(logonResult))
@@ -87,23 +84,15 @@ namespace DepotDownloader.Steam
             TryWaitForLoginKey();
         }
 
-        #region Connecting to Steam
- 
         public void ConnectToSteam()
         {
             _steamClient.Connect();
 
             while (!_steamClient.IsConnected)
             {
-                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
             }
         }
-
-        private void ConnectedCallback(SteamClient.ConnectedCallback connected)
-        {
-        }
-
-        #endregion
 
         #region Logging into Steam
 
@@ -135,19 +124,17 @@ namespace DepotDownloader.Steam
         }
 
         //TODO document
-        private SteamUser.LoggedOnCallback WaitForLogonCallbackCompletion()
+        private SteamUser.LoggedOnCallback _loggedOnCallbackResult;
+        private SteamUser.LoggedOnCallback AttemptSteamLogin()
         {
             var loginStartTime = DateTime.Now;
+            _loggedOnCallbackResult = null;
             _steamUser.LogOn(_logonDetails);
 
             // Waiting for the logon callback to complete
-            while (true)
+            while (_loggedOnCallbackResult == null)
             {
-                var result = _steamClient.WaitForCallback(true, timeout: TimeSpan.FromSeconds(3)) as SteamUser.LoggedOnCallback;
-                if (result != null)
-                {
-                    return result;
-                }
+                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromSeconds(1));
                 if (DateTime.Now - loginStartTime > TimeSpan.FromSeconds(30))
                 {
                     //TODO better exception
@@ -155,6 +142,13 @@ namespace DepotDownloader.Steam
                     throw new Exception("aborted");
                 }
             }
+            return _loggedOnCallbackResult;
+        }
+
+        //TODO this needs thorough testing
+        private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
+        {
+            _loggedOnCallbackResult = loggedOn;
         }
 
         //TODO document
@@ -214,11 +208,6 @@ namespace DepotDownloader.Steam
             //TODO test this
             AppConfig.CellID = (int) loggedOn.CellID;
             return true;
-        }
-
-        //TODO this needs thorough testing
-        private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
-        {
         }
         
         bool _receivedLoginKey;
