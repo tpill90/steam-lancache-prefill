@@ -68,36 +68,32 @@ namespace DepotDownloader.Steam
 
             //TODO I don't like how this is written
             //TODO add in a limited # of retries
-            while (_logonResult != EResult.OK)
+            while (true)
             {
+                SteamUser.LoggedOnCallback logonResult = null;
                 _ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam...", ctx =>
                 {
                     ConnectToSteam();
 
                     ctx.Status = "Logging into Steam...";
-                    WaitForLogonCallbackCompletion();
+                    logonResult = WaitForLogonCallbackCompletion();
                 });
-                
-                HandleLogonResult();
+
+                if (HandleLogonResult(logonResult))
+                {
+                    break;
+                }
             }
             TryWaitForLoginKey();
         }
 
         #region Connecting to Steam
-
-        private bool _isConnected;
-        private bool _connectingToSteamIsRunning;
-        DateTime _connectTime;
-
+ 
         public void ConnectToSteam()
         {
-            _isConnected = false;
-            _connectingToSteamIsRunning = true;
-            _connectTime = DateTime.Now;
-
             _steamClient.Connect();
 
-            while (_connectingToSteamIsRunning)
+            while (!_steamClient.IsConnected)
             {
                 _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
             }
@@ -105,8 +101,6 @@ namespace DepotDownloader.Steam
 
         private void ConnectedCallback(SteamClient.ConnectedCallback connected)
         {
-            _connectingToSteamIsRunning = false;
-            _isConnected = true;
         }
 
         #endregion
@@ -141,18 +135,20 @@ namespace DepotDownloader.Steam
         }
 
         //TODO document
-        private EResult? _logonResult;
-        private void WaitForLogonCallbackCompletion()
+        private SteamUser.LoggedOnCallback WaitForLogonCallbackCompletion()
         {
             var loginStartTime = DateTime.Now;
-            _logonResult = null;
             _steamUser.LogOn(_logonDetails);
 
             // Waiting for the logon callback to complete
-            while (_logonResult == null)
+            while (true)
             {
-                _callbackManager.RunWaitCallbacks(timeout: TimeSpan.FromSeconds(3));
-                if (DateTime.Now - loginStartTime > TimeSpan.FromSeconds(10))
+                var result = _steamClient.WaitForCallback(true, timeout: TimeSpan.FromSeconds(3)) as SteamUser.LoggedOnCallback;
+                if (result != null)
+                {
+                    return result;
+                }
+                if (DateTime.Now - loginStartTime > TimeSpan.FromSeconds(30))
                 {
                     //TODO better exception
                     _ansiConsole.WriteLine("Timeout connecting to Steam3.");
@@ -162,20 +158,21 @@ namespace DepotDownloader.Steam
         }
 
         //TODO document
-        private void HandleLogonResult()
+        private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
+            var loggedOn = logonResult;
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
             if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
                 _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Yellow("2FA required for login.") +
                                                                                          $"  Please enter your {Cyan("Steam Guard code")} from your authenticator app : "));
-                return;
+                return false;
             }
             if (loggedOn.Result == EResult.TwoFactorCodeMismatch)
             {
                 _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Red("Login failed. Incorrect Steam Guard code") +
                                                                                          "  Please try again : "));
-                return;
+                return false;
             }
 
             var loginKeyExpired = _logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
@@ -188,7 +185,7 @@ namespace DepotDownloader.Steam
                 _ansiConsole.Write("Login key was expired. Please enter your password: ");
                 //TODO should clear out the password once we're done logging in, for security
                 _logonDetails.Password = Util.ReadPassword();
-                return;
+                return false;
             }
 
             // SteamGuard code required
@@ -196,7 +193,7 @@ namespace DepotDownloader.Steam
             {
                 _logonDetails.AuthCode = _ansiConsole.Prompt(new TextPrompt<string>(Yellow("This account is protected by Steam Guard.") +
                                                                                     "  Please enter the code sent to your email address:  "));
-                return;
+                return false;
             }
 
             if (loggedOn.Result == EResult.ServiceUnavailable)
@@ -216,14 +213,12 @@ namespace DepotDownloader.Steam
 
             //TODO test this
             AppConfig.CellID = (int) loggedOn.CellID;
+            return true;
         }
 
-        private SteamUser.LoggedOnCallback loggedOn;
         //TODO this needs thorough testing
         private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
         {
-            _logonResult = loggedOn.Result;
-            this.loggedOn = loggedOn;
         }
         
         bool _receivedLoginKey;
