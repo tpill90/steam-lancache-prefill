@@ -12,7 +12,6 @@ using DepotDownloader.Protos;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
-using SteamKit2;
 using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader
@@ -21,9 +20,6 @@ namespace DepotDownloader
     public class SteamManager
     {
         private readonly IAnsiConsole _ansiConsole;
-
-        //TODO remove static
-        public static AppConfig Config = new AppConfig();
 
 		//TODO make private again
         public Steam3Session _steam3;

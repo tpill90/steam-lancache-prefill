@@ -49,7 +49,6 @@ namespace DepotDownloader.Steam
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
-            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(connected => { });
 
             _callbackManager.RunCallbacks();
 

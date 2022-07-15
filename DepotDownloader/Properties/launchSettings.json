@@ -2,39 +2,39 @@
   "profiles": {
     "Download All": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --all --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --all"
     },
     "Accuracy Test": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 440 730 65800 1085660 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 440 730 65800 1085660"
     },
     "Game with DLC - FFXV": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 637650 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 637650"
     },
     "Game with Duplicate Chunks - DR4": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 543460 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 543460"
     },
     "Dota 2 - Multiple Languages": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 570"
     },
     "Huge Game - Destiny 2": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 1085660 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 1085660"
     },
     "Unowned Free Game": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 1407200 --remember-password"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 1407200"
     },
     "Account - 2FA": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username tpill_2fa --app 570 --remember-password"
+      "commandLineArgs": "prefill --username tpill_2fa --app 570"
     },
     "Account - Steamguard": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username tpill_steamguard --app 570 --remember-password"
+      "commandLineArgs": "prefill --username tpill_steamguard --app 570"
     }
   }
 }

@@ -22,7 +22,7 @@ namespace DepotDownloader
         #region Debug
 
         //TODO revert
-        public static bool SkipDownload = true;
+        public static bool SkipDownload = false;
 
         #endregion
     }

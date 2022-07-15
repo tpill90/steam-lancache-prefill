@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -22,8 +21,6 @@ namespace DepotDownloader.Handlers
         private readonly CdnPool _cdnPool;
         private readonly HttpClient _client = new HttpClient();
         
-        private readonly ArrayPool<byte> _bytePool = ArrayPool<byte>.Shared;
-
         public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
         {
             _ansiConsole = ansiConsole;

@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
@@ -14,7 +12,6 @@ using Spectre.Console;
 using static DepotDownloader.Utils.SpectreColors;
 
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
-
 namespace DepotDownloader
 {
     [UsedImplicitly]
@@ -34,10 +31,6 @@ namespace DepotDownloader
             //TODO required
             [CommandOption("username")]
             public string Username { get; init; }
-
-            //TODO document + description
-            [CommandOption("remember-password")]
-            public bool RememberPassword { get; init; }
 
             //TODO document + description
             [CommandOption("all")]
