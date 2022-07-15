@@ -39,8 +39,11 @@ namespace DepotDownloader
             _steam3 = new Steam3Session(_ansiConsole);
         }
 
-        // TODO comment
-        // TODO need to test an account with steam guard
+        /// <summary>
+        /// Logs the user into the Steam network, and retrieves available CDN servers and account licenses.
+        ///
+        /// Required to be called first before using SteamManager class.
+        /// </summary>
         public async Task Initialize(string username)
         {
             var timer = Stopwatch.StartNew();
@@ -63,7 +66,7 @@ namespace DepotDownloader
             _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
         }
 
-        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)
+        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload, DownloadArguments downloadArgs)
         {
             var distinctAppIds = appIdsToDownload.Distinct().OrderBy(e => e).ToList();
 
@@ -78,7 +81,7 @@ namespace DepotDownloader
                 try
                 {
                     // TODO need to implement the rest of the cli parameters
-                    await DownloadSingleAppAsync(new DownloadArguments { AppId = app.AppId });
+                    await DownloadSingleAppAsync(app.AppId, downloadArgs);
                 }
                 catch (Exception e)
                 {
@@ -90,33 +93,15 @@ namespace DepotDownloader
             _ansiConsole.LogMarkupLine($"Prefilled {availableApps.Count}  apps");
         }
 
-        /// <summary>
-        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
-        /// </summary>
-        private async Task RetrieveAppMetadata(List<uint> appIds)
+        private async Task DownloadSingleAppAsync(uint appId, DownloadArguments downloadArgs)
         {
-            var timer = Stopwatch.StartNew();
-            await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
-            {
-                await _appInfoHandler.BulkLoadAppInfos(appIds);
-                // Once we have our info, we can also load information for related DLC
-
-                //TODO loading this DLC info can be pretty slow
-                await _appInfoHandler.BulkLoadAppInfos(_appInfoHandler.GetOwnedDlcAppIds());
-                await _appInfoHandler.BuildDlcDepotList();
-            });
-            _ansiConsole.LogMarkupLine($"Retrieved info for {Magenta(appIds.Count)} apps", timer.Elapsed);
-        }
-
-        private async Task DownloadSingleAppAsync(DownloadArguments downloadArgs)
-        {
-            AppInfoShim appInfo = await _appInfoHandler.GetAppInfo(downloadArgs.AppId);
+            AppInfoShim appInfo = await _appInfoHandler.GetAppInfo(appId);
             _ansiConsole.LogMarkup($"Starting {Cyan(appInfo.Common.Name)} - {White(appInfo.AppId)}");
 
             // Get all depots, and filter out any unavailable depots.
             var allDepots = appInfo.Depots;
             var validDepots = _depotHandler.RemoveInvalidDepots(allDepots);
-            
+
             // Filter depots based on specified lang/os/architecture/etc
             var filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, validDepots);
             if (!filteredDepots.Any())
@@ -154,6 +139,23 @@ namespace DepotDownloader
             _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
 
             _ansiConsole.WriteLine();
+        }
+
+        /// <summary>
+        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
+        /// </summary>
+        private async Task RetrieveAppMetadata(List<uint> appIds)
+        {
+            var timer = Stopwatch.StartNew();
+            await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
+            {
+                await _appInfoHandler.BulkLoadAppInfos(appIds);
+                // Once we have our info, we can also load information for related DLC
+                
+                await _appInfoHandler.BulkLoadAppInfos(_appInfoHandler.GetOwnedDlcAppIds());
+                await _appInfoHandler.BuildDlcDepotList();
+            });
+            _ansiConsole.LogMarkupLine($"Retrieved info for {Magenta(appIds.Count)} apps", timer.Elapsed);
         }
 
         //TODO document

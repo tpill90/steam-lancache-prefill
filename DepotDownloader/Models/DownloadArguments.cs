@@ -4,8 +4,6 @@
     //TODO merge with download config
     public class DownloadArguments
     {
-        public uint AppId { get; set; }
-
         /* TODO
                 Need to validate all the possible values for this? Assuming it is windows/macos/linux.  But might be different than expected
                 User input should be validated.
@@ -20,5 +18,7 @@
         public bool DownloadAllLanguages { get; set; }
 
         public bool LowViolence { get; set; }
+
+        public bool Force { get; set; }
     }
 }
