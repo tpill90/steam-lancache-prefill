@@ -15,23 +15,23 @@ namespace Benchmark
         public static async Task Main(string[] args)
         {
             await Setup();
-            await BenchmarkDownload();
+            //await BenchmarkDownload();
         }
 
         private static List<QueuedRequest> _queuedRequests;
         private static CdnPool _cdnPool = new CdnPool(new TestConsole(), null);
 
         //TODO move this into a util class
-        public static async Task BenchmarkDownload()
-        {
+        //public static async Task BenchmarkDownload()
+        //{
 
-            var totalBytes = ByteSize.FromBytes(_queuedRequests.Sum(e => e.chunk.CompressedLength));
-            //TODO total download size is the wrong unit.
-            AnsiConsole.Console.LogMarkupLine($"Downloading {Magenta(totalBytes.ToString())}");
+        //    var totalBytes = ByteSize.FromBytes(_queuedRequests.Sum(e => e.chunk.CompressedLength));
+        //    //TODO total download size is the wrong unit.
+        //    AnsiConsole.Console.LogMarkupLine($"Downloading {Magenta(totalBytes.ToString())}");
 
-            var downloadHandler = new DownloadHandler(AnsiConsole.Console, _cdnPool);
-            await downloadHandler.DownloadQueuedChunksAsync(_queuedRequests);
-        }
+        //    var downloadHandler = new DownloadHandler(AnsiConsole.Console, _cdnPool);
+        //    await downloadHandler.DownloadQueuedChunksAsync(_queuedRequests);
+        //}
 
         public static async Task Setup()
         {
@@ -51,18 +51,18 @@ namespace Benchmark
                     continue;
                 }
                 // A depot can be made up of multiple files
-                foreach (var file in manifest.Files)
-                {
-                    // A file larger than 1MB will need to be downloaded in multiple chunks
-                    foreach (var chunk in file.Chunks)
-                    {
-                        _queuedRequests.Add(new QueuedRequest
-                        {
-                            DepotId = depotId,
-                            chunk = chunk
-                        });
-                    }
-                }
+                //foreach (var file in manifest.Files)
+                //{
+                //    // A file larger than 1MB will need to be downloaded in multiple chunks
+                //    foreach (var chunk in file.Chunks)
+                //    {
+                //        _queuedRequests.Add(new QueuedRequest
+                //        {
+                //            DepotId = depotId,
+                //            chunk = chunk
+                //        });
+                //    }
+                //}
             }
 
             await _cdnPool.PopulateAvailableServers();
