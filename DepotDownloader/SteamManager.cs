@@ -114,8 +114,6 @@ namespace DepotDownloader
 
         private async Task DownloadSingleAppAsync(DownloadArguments downloadArgs)
         {
-            _steam3.ThrowIfNotConnected();
-
             AppInfoShim appInfo = await _appInfoHandler.GetAppInfo(downloadArgs.AppId);
             _ansiConsole.LogMarkup($"Starting {Cyan(appInfo.Common.Name)} - {White(appInfo.AppId)}");
 

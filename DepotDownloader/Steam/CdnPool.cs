@@ -45,7 +45,6 @@ namespace DepotDownloader.Steam
             {
                 return;
             }
-            _steamSession.ThrowIfNotConnected();
 
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Getting available CDNs", async _ =>
             {

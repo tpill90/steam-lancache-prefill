@@ -8,9 +8,11 @@ using ProtoBuf;
 
 namespace DepotDownloader.Protos
 {
+    //TODO document this whole class
     [ProtoContract]
     class AccountSettingsStore
     {
+        //TODO document what this is for
         [ProtoMember(1, IsRequired = false)]
         public Dictionary<string, byte[]> SentryData { get; private set; }
 

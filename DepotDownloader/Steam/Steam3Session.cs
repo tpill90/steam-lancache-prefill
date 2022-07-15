@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using DepotDownloader.Protos;
 using DepotDownloader.Utils;
 using Spectre.Console;
@@ -47,10 +45,11 @@ namespace DepotDownloader.Steam
 
             _callbackManager = new CallbackManager(_steamClient);
 
-            _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(LogOnCallback);
+            _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
+            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(connected => { });
 
             _callbackManager.RunCallbacks();
 
@@ -84,18 +83,17 @@ namespace DepotDownloader.Steam
             TryWaitForLoginKey();
         }
 
-        public void ConnectToSteam()
-        {
-            _steamClient.Connect();
-
-            while (!_steamClient.IsConnected)
-            {
-                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
-            }
-        }
-
         #region Logging into Steam
 
+        private void ConnectToSteam()
+        {
+            _steamClient.Connect();
+            while (!_steamClient.IsConnected)
+            {
+                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+            }
+        }
+        
         //TODO document
         public void ConfigureLoginDetails(string username)
         {
@@ -117,6 +115,7 @@ namespace DepotDownloader.Steam
                 LoginKey = loginKey,
                 LoginID = 0x534DD2
             };
+            // Sentry file is required when using Steam Guard w\ email
             if (AccountSettingsStore.Instance.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
             {
                 _logonDetails.SentryFileHash = bytes.ToShaHash();
@@ -127,15 +126,16 @@ namespace DepotDownloader.Steam
         private SteamUser.LoggedOnCallback _loggedOnCallbackResult;
         private SteamUser.LoggedOnCallback AttemptSteamLogin()
         {
-            var loginStartTime = DateTime.Now;
+            var loginTimeoutAfter = DateTime.Now.AddSeconds(30);
+
             _loggedOnCallbackResult = null;
             _steamUser.LogOn(_logonDetails);
 
-            // Waiting for the logon callback to complete
+            // Busy waiting for the callback to complete, then we can return the callback value synchronously
             while (_loggedOnCallbackResult == null)
             {
-                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromSeconds(1));
-                if (DateTime.Now - loginStartTime > TimeSpan.FromSeconds(30))
+                _callbackManager.RunWaitCallbacks(timeout: TimeSpan.FromSeconds(3));
+                if (DateTime.Now > loginTimeoutAfter)
                 {
                     //TODO better exception
                     _ansiConsole.WriteLine("Timeout connecting to Steam3.");
@@ -145,13 +145,8 @@ namespace DepotDownloader.Steam
             return _loggedOnCallbackResult;
         }
 
-        //TODO this needs thorough testing
-        private void LogOnCallback(SteamUser.LoggedOnCallback loggedOn)
-        {
-            _loggedOnCallbackResult = loggedOn;
-        }
-
         //TODO document
+        //TODO handle InvalidPassword
         private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
             var loggedOn = logonResult;
@@ -242,26 +237,21 @@ namespace DepotDownloader.Steam
             _steamUser.AcceptNewLoginKey(loginKey);
             _receivedLoginKey = true;
         }
-
-        public void ThrowIfNotConnected()
-        {
-            //TODO should probably handle this better than just throwing
-            if (!_steamClient.IsConnected)
-            {
-                //TODO better exception type and message
-                throw new Exception("Steam session not connected");
-            }
-        }
-
+        
         #endregion
 
         #region Other Auth Methods
         
+        /// <summary>
+        /// The UpdateMachineAuth event will be triggered once the user has logged in with either Steam Guard or 2FA enabled.
+        /// This callback handler will save a "sentry file" for future logins, that will allow an existing Steam session to be reused,
+        /// without requiring a password.
+        ///
+        /// Despite the fact that this will be triggered for both Steam Guard + 2FA, the sentry file is only required for re-login when using an
+        /// account with Steam Guard enabled.
+        /// </summary>
         private void UpdateMachineAuthCallback(SteamUser.UpdateMachineAuthCallback machineAuth)
         {
-            var hash = Util.ToShaHash(machineAuth.Data);
-            Console.WriteLine("Got Machine Auth: {0} {1} {2} {3}", machineAuth.FileName, machineAuth.Offset, machineAuth.BytesToWrite, machineAuth.Data.Length, hash);
-
             AccountSettingsStore.Instance.SentryData[_logonDetails.Username] = machineAuth.Data;
             AccountSettingsStore.Save();
 
@@ -271,17 +261,13 @@ namespace DepotDownloader.Steam
                 FileName = machineAuth.FileName,
                 FileSize = machineAuth.BytesToWrite,
                 Offset = machineAuth.Offset,
-
-                SentryFileHash = hash, // should be the sha1 hash of the sentry file we just wrote
-
-                OneTimePassword = machineAuth.OneTimePassword, // not sure on this one yet, since we've had no examples of steam using OTPs
-
-                LastError = 0, // result from win32 GetLastError
+                // should be the sha1 hash of the sentry file we just received
+                SentryFileHash = machineAuth.Data.ToShaHash(),
+                OneTimePassword = machineAuth.OneTimePassword,
+                LastError = 0,
                 Result = EResult.OK,
-                JobID = machineAuth.JobID, // so we respond to the correct server job
+                JobID = machineAuth.JobID
             };
-
-            // send off our response
             _steamUser.SendMachineAuthResponse(authResponse);
         }
         
@@ -290,12 +276,10 @@ namespace DepotDownloader.Steam
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
-
         public void LoadAccountLicenses()
         {
             while (_loadAccountLicensesIsRunning)
             {
-                // in order for the callbacks to get routed, they need to be handled by the manager
                 _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
             }
         }
@@ -308,8 +292,6 @@ namespace DepotDownloader.Steam
                 //TODO handle
                 _ansiConsole.WriteLine($"Unable to get license list: {licenseList.Result}");
                 throw new Exception("aborted");
-
-                return;
             }
 
             OwnedPackageLicenses = licenseList.LicenseList.Select(x => x.PackageID)
