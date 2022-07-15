@@ -1,3 +1,4 @@
+using System.IO;
 using AutoMapper;
 using DepotDownloader.Models;
 using SteamKit2.CDN;
@@ -13,7 +14,7 @@ namespace DepotDownloader
         //TODO find usages of this, and use Path.Combine for cross platform compatibility
         public static string ConfigDir => "SteamPrefillConfig";
 
-        public static string AccountSettingsStorePath => "account.config";
+        public static string AccountSettingsStorePath => Path.Combine(ConfigDir, "account.config");
 
         //TODO doccument that this is the user's region
         public static int CellID = 0;

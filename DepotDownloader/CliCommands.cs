@@ -46,7 +46,7 @@ namespace DepotDownloader
                 var ansiConsole = console.CreateAnsiConsole();
                 try
                 {
-                    AccountSettingsStore.LoadFromFile(AppConfig.AccountSettingsStorePath);
+                    AccountSettingsStore.LoadFromFile();
 
                     var steamManager = new SteamManager(ansiConsole);
                     await steamManager.Initialize(Username);

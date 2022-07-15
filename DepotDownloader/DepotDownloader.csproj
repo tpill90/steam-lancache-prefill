@@ -44,7 +44,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\External\SpectreConsole\src\Spectre.Console.Testing\Spectre.Console.Testing.csproj" />
     <ProjectReference Include="..\External\SpectreConsole\src\Spectre.Console\Spectre.Console.csproj" />
   </ItemGroup>
 </Project>

@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DepotDownloader\DepotDownloader.csproj" />
+    <ProjectReference Include="..\External\SpectreConsole\src\Spectre.Console.Testing\Spectre.Console.Testing.csproj" />
   </ItemGroup>
 
 </Project>
