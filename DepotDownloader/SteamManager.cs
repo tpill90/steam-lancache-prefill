@@ -113,7 +113,7 @@ namespace DepotDownloader
             await _depotHandler.BuildLinkedDepotInfo(filteredDepots, appInfo);
 
             // We will want to re-download the entire app, if any of the depots have been updated
-            if (!_depotHandler.AppHasUpdatedDepots(filteredDepots))
+            if (downloadArgs.Force == false && !_depotHandler.AppHasUpdatedDepots(filteredDepots))
             {
                 _ansiConsole.MarkupLine(Green("  Up to date!"));
                 return;
@@ -126,18 +126,19 @@ namespace DepotDownloader
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
-            //TODO total download size is the wrong unit.
             _ansiConsole.LogMarkupLine($"Downloading {Magenta(totalBytes.ToDecimalString())} from {Yellow(chunkDownloadQueue.Count)} chunks");
-            await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+
+            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+            if (downloadSuccessful)
+            {
+                _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
+            }
 
             downloadTimer.Stop();
             var averageSpeed = ByteSize.FromBytes(totalBytes.Bytes / downloadTimer.Elapsed.TotalSeconds);
             var averageSpeedBits = $"{(averageSpeed.MegaBytes * 8).ToString("0.##")} Mbit/s";
             _ansiConsole.LogMarkupLine($"Downloaded in {Yellow(downloadTimer.Elapsed.ToString(@"h\:mm\:ss\.FFFF"))}.  Average speed : {Magenta(averageSpeedBits)}");
-
-            //TODO determine if there were any errors
-            _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
-
+            
             _ansiConsole.WriteLine();
         }
 

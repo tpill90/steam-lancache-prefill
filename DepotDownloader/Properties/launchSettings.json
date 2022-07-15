@@ -14,11 +14,11 @@
     },
     "Game with Duplicate Chunks - DR4": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 543460"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 543460 --force"
     },
     "Dota 2 - Multiple Languages": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 570"
+      "commandLineArgs": "prefill --username bearingbreaker92 --app 570  --force"
     },
     "Huge Game - Destiny 2": {
       "commandName": "Project",

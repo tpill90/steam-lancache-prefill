@@ -32,7 +32,6 @@ namespace DepotDownloader.Handlers
         /// In the case of any failed downloads, the failed downloads will be retried up to 3 times.  If the downloads fail 3 times, then
         /// false will be returned
         /// </summary>
-        /// <param name="ansiConsole"></param>
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {

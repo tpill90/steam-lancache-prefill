@@ -36,19 +36,22 @@ namespace DepotDownloader
             [CommandOption("all")]
             public bool DownloadAllOwnedGames { get; init; }
 
+            //TODO document + description
+            [CommandOption(name: "force", shortName: 'f')]
+            public bool Force { get; init; }
+
             public async ValueTask ExecuteAsync(IConsole console)
             {
+                var timer = Stopwatch.StartNew();
+                var ansiConsole = console.CreateAnsiConsole();
                 try
                 {
-                    var timer = Stopwatch.StartNew();
-                    var ansiConsole = console.CreateAnsiConsole();
-
                     AccountSettingsStore.LoadFromFile(AppConfig.AccountSettingsStorePath);
-                    //TODO remove;
 
                     var steamManager = new SteamManager(ansiConsole);
                     await steamManager.Initialize(Username);
 
+                    // Determining which app ids to download
                     //TODO validate that there was at least 1 id passed in
                     var appIdsToDownload = new List<uint>();
                     if (DownloadAllOwnedGames)
@@ -61,7 +64,13 @@ namespace DepotDownloader
                         appIdsToDownload.AddRange(AppIds);
                     }
 
-                    await steamManager.DownloadMultipleAppsAsync(appIdsToDownload);
+                    // Configure DownloadArgs
+                    var downloadArgs = new DownloadArguments
+                    {
+                        Force = Force
+                    };
+
+                    await steamManager.DownloadMultipleAppsAsync(appIdsToDownload, downloadArgs);
 
                     //TODO prefill needs to include hours + minutes
                     ansiConsole.LogMarkupLine($"Completed prefill in {Yellow(timer.Elapsed.ToString(@"ss\.FFFF"))}");
@@ -69,7 +78,7 @@ namespace DepotDownloader
                 catch (Exception e)
                 {
                     //TODO handle
-                    AnsiConsole.WriteException(e);
+                    ansiConsole.WriteException(e);
                 }
                 // TODO this feels like a hack, but for whatever reason the application hangs if you don't explicitly call the logout method
                 Environment.Exit(0);
