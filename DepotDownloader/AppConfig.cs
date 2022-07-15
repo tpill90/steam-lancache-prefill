@@ -11,7 +11,7 @@ namespace DepotDownloader
         public static string ManifestCacheDir => "ManifestCache";
 
         //TODO find usages of this, and use Path.Combine for cross platform compatibility
-        public static string ConfigDir => ".DepotDownloader";
+        public static string ConfigDir => "SteamPrefillConfig";
 
         public static string AccountSettingsStorePath => "account.config";
 
