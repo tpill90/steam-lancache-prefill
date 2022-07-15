@@ -51,6 +51,3 @@ dotnet_diagnostic.cs4014.severity = error
 
 # IDE0090 : 'new' expression can be simplified
 csharp_style_implicit_object_creation_when_type_is_apparent = false
-
-# AsyncFixer01: Unnecessary async/await usage
-dotnet_diagnostic.AsyncFixer01.severity = none

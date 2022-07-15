@@ -1,0 +1,40 @@
+{
+  "profiles": {
+    "Select Apps": {
+      "commandName": "Project",
+      "commandLineArgs": "select-apps"
+    },
+    "Download None": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill"
+    },
+    "Download All": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --all"
+    },
+    "Game with DLC - FFXV": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --app 637650"
+    },
+    "Game with Duplicate Chunks - DR4": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --app 543460 --force"
+    },
+    "Dota 2 - Multiple Languages": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --app 570 --force"
+    },
+    "Unowned Free Game": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --app 1407200"
+    },
+    "Account - 2FA": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username tpill_2fa --app 570"
+    },
+    "Account - Steamguard": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username tpill_steamguard --app 570"
+    }
+  }
+}
