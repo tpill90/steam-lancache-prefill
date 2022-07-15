@@ -7,7 +7,10 @@ namespace DepotDownloader
     //TODO document
     public class AppConfig
     {
+        //TODO this doesn't get put into the right directory on linux
         public static string ManifestCacheDir => "ManifestCache";
+
+        //TODO find usages of this, and use Path.Combine for cross platform compatibility
         public static string ConfigDir => ".DepotDownloader";
 
         public static string AccountSettingsStorePath => "account.config";
