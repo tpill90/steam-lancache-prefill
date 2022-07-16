@@ -9,6 +9,7 @@ using ByteSizeLib;
 using DepotDownloader.Handlers;
 using DepotDownloader.Models;
 using DepotDownloader.Protos;
+using DepotDownloader.Settings;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
@@ -37,6 +38,8 @@ namespace DepotDownloader
             Directory.CreateDirectory(AppConfig.ConfigDir);
             Directory.CreateDirectory(AppConfig.ManifestCacheDir);
             _steam3 = new Steam3Session(_ansiConsole);
+
+            AccountSettingsStore.LoadFromFile();
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using DepotDownloader.Settings;
 using JetBrains.Annotations;
 using SteamKit2;
 

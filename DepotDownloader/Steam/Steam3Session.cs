@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using DepotDownloader.Protos;
+using DepotDownloader.Settings;
 using DepotDownloader.Utils;
 using Spectre.Console;
 using SteamKit2;

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using DepotDownloader.Models;
+using DepotDownloader.Settings;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;

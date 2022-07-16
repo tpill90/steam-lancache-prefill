@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DepotDownloader.Exceptions;
 using DepotDownloader.Models;
+using DepotDownloader.Settings;
 using DepotDownloader.Utils;
 using Spectre.Console;
 using SteamKit2.CDN;

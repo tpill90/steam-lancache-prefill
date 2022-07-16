@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Infrastructure;
-using DepotDownloader.Protos;
 using DepotDownloader.Utils;
 using JetBrains.Annotations;
 using Spectre.Console;
@@ -46,8 +45,6 @@ namespace DepotDownloader
                 var ansiConsole = console.CreateAnsiConsole();
                 try
                 {
-                    AccountSettingsStore.LoadFromFile();
-
                     var steamManager = new SteamManager(ansiConsole);
                     await steamManager.Initialize(Username);
 

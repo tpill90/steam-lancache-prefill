@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Cysharp.Text;
 using DepotDownloader.Models;
+using DepotDownloader.Settings;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
