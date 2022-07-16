@@ -144,7 +144,7 @@ namespace DepotDownloader
         /// </summary>
         private async Task RetrieveAppMetadata(List<uint> appIds)
         {
-            var timer = new AutoTimer(_ansiConsole, $"Retrieved info for {Magenta(appIds.Count)} apps");
+            using var timer = new AutoTimer(_ansiConsole, $"Retrieved info for {Magenta(appIds.Count)} apps");
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 await _appInfoHandler.BulkLoadAppInfos(appIds);
@@ -181,12 +181,7 @@ namespace DepotDownloader
                                              .ToList();
                 foreach (var chunk in dedupedChunks)
                 {
-                    chunkQueue.Add(new QueuedRequest
-                    {
-                        DepotId = depotManifest.DepotId,
-                        ChunkID = chunk.ChunkID,
-                        CompressedLength = chunk.CompressedLength
-                    });
+                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk));
                 }
             }
             return chunkQueue;

@@ -91,7 +91,7 @@ namespace DepotDownloader.Handlers
                 var buffer = new byte[4096];
                 try
                 {
-                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkID);
+                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkId);
                     var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
                     using Stream responseStream = await response.Content.ReadAsStreamAsync();
                     response.EnsureSuccessStatusCode();

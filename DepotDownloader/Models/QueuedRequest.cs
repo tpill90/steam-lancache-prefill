@@ -1,15 +1,22 @@
-﻿namespace DepotDownloader.Models
+﻿using DepotDownloader.Protos;
+
+namespace DepotDownloader.Models
 {
-    //TODO document
     public class QueuedRequest
     {
-        public uint DepotId { get; set; }
-        public string ChunkID { get; set; }
-        public uint CompressedLength { get; set; }
+        public uint DepotId { get; }
+        public string ChunkId { get; }
 
-        public override string ToString()
+        /// <summary>
+        /// The content-length of the data to be requested.
+        /// </summary>
+        public uint CompressedLength { get; }
+
+        public QueuedRequest(ProtoManifest depotManifest, ProtoManifest.ChunkData chunk)
         {
-            return CompressedLength.ToString();
+            DepotId = depotManifest.DepotId;
+            ChunkId = chunk.ChunkID;
+            CompressedLength = chunk.CompressedLength;
         }
     }
 }
