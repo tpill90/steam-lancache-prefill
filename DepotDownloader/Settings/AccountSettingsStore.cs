@@ -1,33 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using ProtoBuf;
-using Spectre.Console;
 
-namespace DepotDownloader.Protos
+namespace DepotDownloader.Settings
 {
-    //TODO document this whole class
+    /// <summary>
+    /// Keeps track of the session tokens returned by Steam, that allow for subsequent logins without passwords.
+    /// </summary>
     [ProtoContract]
     public class AccountSettingsStore
     {
-        //TODO document what this is for
-        [ProtoMember(1, IsRequired = false)]
+        /// <summary>
+        /// SentryData is returned by Steam when logging in with Steam Guard w\ email.
+        /// This data is required to be passed along in every subsequent login, in order to re-use an existing session.
+        /// </summary>
+        [ProtoMember(1)]
         public Dictionary<string, byte[]> SentryData { get; private set; }
         
-        [ProtoMember(2, IsRequired = false)]
+        [ProtoMember(2)]
         public Dictionary<string, string> LoginKeys { get; private set; }
 
         public static AccountSettingsStore Instance;
+        static bool Loaded => Instance != null;
 
         private AccountSettingsStore()
         {
             SentryData = new Dictionary<string, byte[]>();
             LoginKeys = new Dictionary<string, string>();
         }
-
-        static bool Loaded => Instance != null;
 
         public static void LoadFromFile()
         {
@@ -36,7 +37,6 @@ namespace DepotDownloader.Protos
                 throw new Exception("Config already loaded");
             }
 
-            var timer = Stopwatch.StartNew();
             if (!File.Exists(AppConfig.AccountSettingsStorePath))
             {
                 Instance = new AccountSettingsStore();
@@ -45,16 +45,16 @@ namespace DepotDownloader.Protos
 
             using var fileStream = File.Open(AppConfig.AccountSettingsStorePath, FileMode.Open, FileAccess.Read);
             Instance = Serializer.Deserialize<AccountSettingsStore>(fileStream);
-            AnsiConsole.WriteLine(timer.ElapsedMilliseconds);
         }
 
         public static void Save()
         {
             if (!Loaded)
+            {
                 throw new Exception("Saved config before loading");
+            }
 
             using var fs = File.Open(AppConfig.AccountSettingsStorePath, FileMode.Create, FileAccess.Write);
-            //using var ds = new DeflateStream(fs, CompressionMode.Compress);
             Serializer.Serialize(fs, Instance);
         }
     }

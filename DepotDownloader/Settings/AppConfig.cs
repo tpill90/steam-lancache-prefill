@@ -3,7 +3,7 @@ using AutoMapper;
 using DepotDownloader.Models;
 using SteamKit2.CDN;
 
-namespace DepotDownloader
+namespace DepotDownloader.Settings
 {
     //TODO document
     public class AppConfig
@@ -18,7 +18,7 @@ namespace DepotDownloader
 
         //TODO doccument that this is the user's region
         public static int CellID = 0;
-        
+
         public static Mapper AutoMapper = new Mapper(new MapperConfiguration(cfg =>
                 cfg.CreateMap<ServerShim, Server>()
         ));
