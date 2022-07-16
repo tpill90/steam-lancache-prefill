@@ -22,14 +22,13 @@ namespace DepotDownloader
     {
         private readonly IAnsiConsole _ansiConsole;
 
-		//TODO make private again
-        public Steam3Session _steam3;
-        private CdnPool _cdnPool;
+        private readonly Steam3Session _steam3;
+        private readonly CdnPool _cdnPool;
 
-        private DownloadHandler _downloadHandler;
-        private ManifestHandler _manifestHandler;
-        private DepotHandler _depotHandler;
-        private AppInfoHandler _appInfoHandler;
+        private readonly DownloadHandler _downloadHandler;
+        private readonly ManifestHandler _manifestHandler;
+        private readonly DepotHandler _depotHandler;
+        private readonly AppInfoHandler _appInfoHandler;
 
         public SteamManager(IAnsiConsole ansiConsole)
         {
@@ -37,7 +36,13 @@ namespace DepotDownloader
             // Create required folders
             Directory.CreateDirectory(AppConfig.ConfigDir);
             Directory.CreateDirectory(AppConfig.ManifestCacheDir);
+
             _steam3 = new Steam3Session(_ansiConsole);
+            _cdnPool = new CdnPool(_ansiConsole, _steam3);
+            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _manifestHandler = new ManifestHandler(_cdnPool, _steam3);
+            _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler);
 
             AccountSettingsStore.LoadFromFile();
         }
@@ -49,24 +54,13 @@ namespace DepotDownloader
         /// </summary>
         public async Task Initialize(string username)
         {
-            var timer = Stopwatch.StartNew();
+            using var timer = new AutoTimer(_ansiConsole, "Initialization complete...");
             
             _steam3.LoginToSteam(username);
-            
-            // Populating available CDN servers
-            _cdnPool = new CdnPool(_ansiConsole, _steam3);
             await _cdnPool.PopulateAvailableServers();
 
             // Loading available licenses(games) for the current user
             _steam3.LoadAccountLicenses();
-
-            // Initializing our various classes now that Steam is connected.
-            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
-            _manifestHandler = new ManifestHandler(_cdnPool, _steam3);
-            _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler);
-            
-            _ansiConsole.LogMarkupLine("Initialization complete...", timer.Elapsed);
         }
 
         public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload, DownloadArguments downloadArgs)
@@ -83,16 +77,14 @@ namespace DepotDownloader
             {
                 try
                 {
-                    // TODO need to implement the rest of the cli parameters
                     await DownloadSingleAppAsync(app.AppId, downloadArgs);
                 }
                 catch (Exception e)
                 {
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
-                    _ansiConsole.MarkupLine(Red("   Unexpected download error : " + e.Message));
+                    _ansiConsole.MarkupLine(Red($"   Unexpected download error : {e.Message}"));
                 }
             }
-            
             _ansiConsole.LogMarkupLine($"Prefilled {availableApps.Count}  apps");
         }
 
@@ -150,7 +142,7 @@ namespace DepotDownloader
         /// </summary>
         private async Task RetrieveAppMetadata(List<uint> appIds)
         {
-            var timer = Stopwatch.StartNew();
+            var timer = new AutoTimer(_ansiConsole, $"Retrieved info for {Magenta(appIds.Count)} apps");
             await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 await _appInfoHandler.BulkLoadAppInfos(appIds);
@@ -159,12 +151,9 @@ namespace DepotDownloader
                 await _appInfoHandler.BulkLoadAppInfos(_appInfoHandler.GetOwnedDlcAppIds());
                 await _appInfoHandler.BuildDlcDepotList();
             });
-            _ansiConsole.LogMarkupLine($"Retrieved info for {Magenta(appIds.Count)} apps", timer.Elapsed);
         }
 
         //TODO document
-        //TODO cleanup
-        //TODO implement logic that skips depots if they have previously been downloaded
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueue(List<DepotInfo> depots)
         {
             // Fetch all the manifests for each depot in parallel, as individually they can take a long time, 
@@ -199,6 +188,12 @@ namespace DepotDownloader
                 }
             }
             return chunkQueue;
+        }
+
+        public HashSet<uint> GetAllUserAppIds()
+        {
+            //TODO there has to be a better way to know all the owned games, without including the invalid ones. Might be able to use the steam web api to do this.
+            return _steam3.OwnedAppIds;
         }
     }
 }

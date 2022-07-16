@@ -53,8 +53,7 @@ namespace DepotDownloader
                     var appIdsToDownload = new List<uint>();
                     if (DownloadAllOwnedGames)
                     {
-                        //TODO there has to be a better way to know all the owned games, without including the invalid ones. Might be able to use the steam web api to do this.
-                        appIdsToDownload.AddRange(steamManager._steam3.OwnedAppIds);
+                        appIdsToDownload.AddRange(steamManager.GetAllUserAppIds());
                     }
                     if (AppIds != null)
                     {
