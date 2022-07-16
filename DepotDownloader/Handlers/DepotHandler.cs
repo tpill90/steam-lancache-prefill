@@ -140,7 +140,7 @@ namespace DepotDownloader.Handlers
                 if (!string.IsNullOrWhiteSpace(configInfo.Architecture))
                 {
                     // TODO test this condition
-                    if (configInfo.Architecture != (downloadArgs.Architecture ?? Util.GetSteamArch()))
+                    if (configInfo.Architecture != downloadArgs.Architecture)
                     {
                         continue;
                     }

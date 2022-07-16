@@ -10,11 +10,15 @@
                 Default behavior should be to download windows, or the current operating system
         */
         public string OperatingSystem { get; set; } = "windows";
+        
         public bool DownloadAllPlatforms { get; set; }
 
-        public string Architecture { get; set; }
+        //TODO enum
+        public string Architecture { get; set; } = "64";
 
+        //TODO enum
         public string Language { get; set; } = "english";
+
         public bool DownloadAllLanguages { get; set; }
 
         public bool LowViolence { get; set; }

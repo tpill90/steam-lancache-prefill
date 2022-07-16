@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using DepotDownloader.Protos;
 using DepotDownloader.Settings;
 using DepotDownloader.Utils;
 using Spectre.Console;
@@ -77,6 +76,7 @@ namespace DepotDownloader.Steam
 
                 if (HandleLogonResult(logonResult))
                 {
+                    // Continue on successful login
                     break;
                 }
             }
@@ -105,12 +105,11 @@ namespace DepotDownloader.Steam
 
             string loginKey;
             AccountSettingsStore.Instance.LoginKeys.TryGetValue(username, out loginKey);
-
+            
             _logonDetails = new SteamUser.LogOnDetails
             {
                 Username = username,
-                //TODO should clear out the password once we're done logging in, for security
-                Password = loginKey == null ? Util.ReadPassword() : null,
+                Password = loginKey == null ? _ansiConsole.ReadPassword() : null,
                 ShouldRememberPassword = true,
                 LoginKey = loginKey,
                 LoginID = 0x534DD2
@@ -118,7 +117,7 @@ namespace DepotDownloader.Steam
             // Sentry file is required when using Steam Guard w\ email
             if (AccountSettingsStore.Instance.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
             {
-                _logonDetails.SentryFileHash = bytes.ToShaHash();
+                _logonDetails.SentryFileHash = bytes.ToSha1();
             }
         }
 
@@ -146,10 +145,10 @@ namespace DepotDownloader.Steam
         }
 
         //TODO document
-        //TODO handle InvalidPassword
         private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
             var loggedOn = logonResult;
+
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
             if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
@@ -170,10 +169,12 @@ namespace DepotDownloader.Steam
                 AccountSettingsStore.Instance.LoginKeys.Remove(_logonDetails.Username);
                 AccountSettingsStore.Save();
                 _logonDetails.LoginKey = null;
-
-                _ansiConsole.Write("Login key was expired. Please enter your password: ");
-                //TODO should clear out the password once we're done logging in, for security
-                _logonDetails.Password = Util.ReadPassword();
+                _logonDetails.Password = _ansiConsole.ReadPassword("Steam session expired!  Password re-entry required!");
+                return false;
+            }
+            if (loggedOn.Result == EResult.InvalidPassword)
+            {
+                _logonDetails.Password = _ansiConsole.ReadPassword($"{Red("Invalid password!  Please re-enter your password!")}");
                 return false;
             }
 
@@ -184,14 +185,12 @@ namespace DepotDownloader.Steam
                                                                                     "  Please enter the code sent to your email address:  "));
                 return false;
             }
-
             if (loggedOn.Result == EResult.ServiceUnavailable)
             {
                 _ansiConsole.WriteLine($"{Red("Unable to login to Steam")} : Service is unavailable");
                 //TODO better exception type
                 throw new Exception($"{Red("Unable to login to Steam")} : Service is unavailable");
             }
-
             if (loggedOn.Result != EResult.OK)
             {
                 _ansiConsole.WriteLine($"Unable to login to Steam3: {loggedOn.Result}");
@@ -200,6 +199,13 @@ namespace DepotDownloader.Steam
 
             _ansiConsole.LogMarkupLine($"Logged '{Cyan(_logonDetails.Username)}' into Steam3...");
 
+            // Forcing a garbage collect to remove stored password from memory
+            if (_logonDetails.Password != null)
+            {
+                _logonDetails.Password = null;
+                GC.Collect(3, GCCollectionMode.Forced);
+            }
+            
             return true;
         }
         
@@ -260,7 +266,7 @@ namespace DepotDownloader.Steam
                 FileSize = machineAuth.BytesToWrite,
                 Offset = machineAuth.Offset,
                 // should be the sha1 hash of the sentry file we just received
-                SentryFileHash = machineAuth.Data.ToShaHash(),
+                SentryFileHash = machineAuth.Data.ToSha1(),
                 OneTimePassword = machineAuth.OneTimePassword,
                 LastError = 0,
                 Result = EResult.OK,
@@ -321,12 +327,6 @@ namespace DepotDownloader.Steam
             var packageRequests = packageIds.Select(package => new SteamApps.PICSRequest(package)).ToList();
             //TODO async
             var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
-            if (!jobResult.Complete)
-            {
-                //TODO not sure this ever happens
-                throw new Exception("Job not complete");
-            }
-
             var packages = jobResult.Results.SelectMany(e => e.Packages)
                                     .Select(e => e.Value)
                                     .ToList();

@@ -48,6 +48,15 @@ namespace DepotDownloader.Utils
             return spectreProgress;
         }
 
+        public static string ReadPassword(this IAnsiConsole console, string prompt = null)
+        {
+            var defaultPrompt = $"Please enter your Steam password, to login to Steam. {Yellow("(Password won't be saved)")}";
+            return console.Prompt(
+                new TextPrompt<string>(prompt ?? defaultPrompt)
+                    .PromptStyle("white")
+                    .Secret());
+        }
+
         public static void LogMarkup(this IAnsiConsole console, string message)
         {
             console.Markup($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");
