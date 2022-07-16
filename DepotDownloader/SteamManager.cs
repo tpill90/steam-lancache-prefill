@@ -57,6 +57,8 @@ namespace DepotDownloader
             using var timer = new AutoTimer(_ansiConsole, "Initialization complete...");
             
             _steam3.LoginToSteam(username);
+
+            //TODO only load available servers if there is anything to download
             await _cdnPool.PopulateAvailableServers();
 
             // Loading available licenses(games) for the current user

@@ -8,6 +8,7 @@ using DepotDownloader.Models;
 using DepotDownloader.Protos;
 using DepotDownloader.Steam;
 using SteamKit2;
+using SteamKit2.CDN;
 
 namespace DepotDownloader.Handlers
 {
@@ -52,9 +53,8 @@ namespace DepotDownloader.Handlers
             {
                 try
                 {
-                    ServerShim server = _cdnPool.TakeConnection();
-                    manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, 
-                        manifestRequestCode.Code, server.ToSteamKitServer());
+                    Server server = _cdnPool.TakeConnection();
+                    manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
                     _cdnPool.ReturnConnection(server);
                 }
                 //TODO What other possible exceptions could happen here, that we can recover from?
