@@ -5,7 +5,7 @@ namespace DepotDownloader.Settings
     //TODO document
     public static class AppConfig
     {
-        public static string AccountSettingsStorePath => Path.Combine(ConfigDir, "account.config");
+        public static string AccountSettingsStorePath => $"{ConfigDir}/account.config";
 
         /// <summary>
         /// Downloaded manifests are saved into this directory, to speedup future prefill runs

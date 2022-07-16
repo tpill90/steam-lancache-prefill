@@ -200,8 +200,6 @@ namespace DepotDownloader.Steam
 
             _ansiConsole.LogMarkupLine($"Logged '{Cyan(_logonDetails.Username)}' into Steam3...");
 
-            //TODO test this
-            AppConfig.CellID = (int) loggedOn.CellID;
             return true;
         }
         
