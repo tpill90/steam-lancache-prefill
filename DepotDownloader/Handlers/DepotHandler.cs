@@ -24,7 +24,7 @@ namespace DepotDownloader.Handlers
         //TODO document
         //TODO should this have a better type?  Kinda gives you no idea what is being stored here
         private readonly Dictionary<uint, List<ulong>> SuccessfullyDownloadedDepots = new Dictionary<uint, List<ulong>>();
-        private readonly string _downloadedDepotsPath = Path.Combine(AppConfig.ConfigDir, "successfullyDownloadedDepots.json");
+        private readonly string _downloadedDepotsPath = $"{AppConfig.ConfigDir}/successfullyDownloadedDepots.json";
 
         public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler)
         {

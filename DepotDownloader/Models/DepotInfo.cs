@@ -30,7 +30,7 @@ namespace DepotDownloader.Models
         public int? LvCache { get; set; }
 
         //TODO comment
-        public string ManifestFileName => Path.Combine(AppConfig.ManifestCacheDir, $"{ContainingAppId}_{DepotId}_{ManifestId}.bin");
+        public string ManifestFileName => $"{AppConfig.ManifestCacheDir}/{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 
         [UsedImplicitly]
         public DepotInfo()

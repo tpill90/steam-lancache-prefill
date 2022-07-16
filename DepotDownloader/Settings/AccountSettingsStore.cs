@@ -18,6 +18,11 @@ namespace DepotDownloader.Settings
         [ProtoMember(1)]
         public Dictionary<string, byte[]> SentryData { get; private set; }
         
+        /// <summary>
+        /// Upon a successful login to Steam, a "Login Key" will be returned to use on subsequent logins.
+        /// This login key can be considered a "session token", and can be used on subsequent logins to avoid entering a password.
+        /// These keys will be unique to each user.
+        /// </summary>
         [ProtoMember(2)]
         public Dictionary<string, string> LoginKeys { get; private set; }
 

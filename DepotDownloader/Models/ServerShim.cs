@@ -1,4 +1,5 @@
-﻿using DepotDownloader.Settings;
+﻿using AutoMapper;
+using DepotDownloader.Settings;
 using SteamKit2.CDN;
 
 namespace DepotDownloader.Models
@@ -27,12 +28,17 @@ namespace DepotDownloader.Models
         //TODO document
         public Server ToSteamKitServer()
         {
-            return AppConfig.AutoMapper.Map<Server>(this);
+            return AutoMapper.Map<Server>(this);
         }
 
         public override string ToString()
         {
             return $"{Host} - Cell: {CellId} Load: {Load} - Weighted Load: {WeightedLoad}";
         }
+
+        //TODO document
+        public static readonly Mapper AutoMapper = new Mapper(new MapperConfiguration(cfg =>
+            cfg.CreateMap<ServerShim, Server>()
+        ));
     }
 }
