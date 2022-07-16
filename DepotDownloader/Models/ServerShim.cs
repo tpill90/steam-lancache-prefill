@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DepotDownloader.Settings;
 using SteamKit2.CDN;
 
 namespace DepotDownloader.Models

@@ -64,7 +64,6 @@ namespace DepotDownloader.Handlers
                 return true;
             }
 
-            //TODO handle this by returning, so that we can mark this app as not downloaded
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }

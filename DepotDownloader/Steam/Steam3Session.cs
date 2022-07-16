@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DepotDownloader.Exceptions;
 using DepotDownloader.Settings;
 using DepotDownloader.Utils;
 using Spectre.Console;
@@ -54,16 +55,15 @@ namespace DepotDownloader.Steam
 
             CdnClient = new Client(_steamClient);
         }
-
-        // TODO re-wrap with a status spinner, and figure how to handle input/output while it is running
+        
         // TODO document
         public void LoginToSteam(string username)
         {
             ConfigureLoginDetails(username);
 
-            //TODO I don't like how this is written
-            //TODO add in a limited # of retries
-            while (true)
+            int retryCount = 0;
+            bool logonSuccess = false;
+            while (!logonSuccess)
             {
                 SteamUser.LoggedOnCallback logonResult = null;
                 _ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam...", ctx =>
@@ -74,12 +74,15 @@ namespace DepotDownloader.Steam
                     logonResult = AttemptSteamLogin();
                 });
 
-                if (HandleLogonResult(logonResult))
+                logonSuccess = HandleLogonResult(logonResult);
+
+                retryCount++;
+                if (retryCount == 5)
                 {
-                    // Continue on successful login
-                    break;
+                    throw new SteamLoginException("Unable to login to Steam!  Try again in a few moments...");
                 }
             }
+            
             TryWaitForLoginKey();
         }
 
@@ -136,9 +139,7 @@ namespace DepotDownloader.Steam
                 _callbackManager.RunWaitCallbacks(timeout: TimeSpan.FromSeconds(3));
                 if (DateTime.Now > loginTimeoutAfter)
                 {
-                    //TODO better exception
-                    _ansiConsole.WriteLine("Timeout connecting to Steam3.");
-                    throw new Exception("aborted");
+                    throw new SteamLoginException("Timeout connecting to Steam3.");
                 }
             }
             return _loggedOnCallbackResult;
@@ -187,14 +188,11 @@ namespace DepotDownloader.Steam
             }
             if (loggedOn.Result == EResult.ServiceUnavailable)
             {
-                _ansiConsole.WriteLine($"{Red("Unable to login to Steam")} : Service is unavailable");
-                //TODO better exception type
-                throw new Exception($"{Red("Unable to login to Steam")} : Service is unavailable");
+                throw new SteamLoginException($"{Red("Unable to login to Steam")} : Service is unavailable");
             }
             if (loggedOn.Result != EResult.OK)
             {
-                _ansiConsole.WriteLine($"Unable to login to Steam3: {loggedOn.Result}");
-                throw new Exception("aborted");
+                throw new SteamLoginException($"Unable to login to Steam.  An unknown error occurred : {loggedOn.Result}");
             }
 
             _ansiConsole.LogMarkupLine($"Logged '{Cyan(_logonDetails.Username)}' into Steam3...");

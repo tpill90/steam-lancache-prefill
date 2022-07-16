@@ -19,9 +19,7 @@ namespace DepotDownloader.Handlers
 
         // TODO make private
         public Dictionary<uint, AppInfoShim> LoadedAppInfos { get; private set; } = new Dictionary<uint, AppInfoShim>();
-
         
-
         public AppInfoHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
         {
             _ansiConsole = ansiConsole;
