@@ -314,7 +314,7 @@ namespace DepotDownloader.Steam
             var ownedDepotIdsPath = $"{AppConfig.ConfigDir}/OwnedDepotIds.json";
 
             // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
-            if (File.Exists(packageCountPath) && File.ReadAllText(packageCountPath) == packageIds.Count.ToString())
+            if (File.Exists(packageCountPath) && File.ReadAllText(packageCountPath) == licenseList.Count.ToString())
             {
                 if (File.Exists(ownedAppIdsPath) && File.Exists(ownedDepotIdsPath))
                 {
@@ -324,7 +324,7 @@ namespace DepotDownloader.Steam
                 }
             }
             
-            var packageRequests = packageIds.Select(package => new SteamApps.PICSRequest(package)).ToList();
+            var packageRequests = licenseList.Select(package => new SteamApps.PICSRequest(package.PackageID)).ToList();
             //TODO async
             var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
             var packages = jobResult.Results.SelectMany(e => e.Packages)
