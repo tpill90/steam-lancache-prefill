@@ -66,7 +66,7 @@ namespace DepotDownloader.Steam
             while (!logonSuccess)
             {
                 SteamUser.LoggedOnCallback logonResult = null;
-                _ansiConsole.CreateSpectreStatusSpinner().Start("Connecting to Steam...", ctx =>
+                _ansiConsole.StatusSpinner().Start("Connecting to Steam...", ctx =>
                 {
                     ConnectToSteam();
 
@@ -82,8 +82,12 @@ namespace DepotDownloader.Steam
                     throw new SteamLoginException("Unable to login to Steam!  Try again in a few moments...");
                 }
             }
+
+            _ansiConsole.StatusSpinner().Start("asd", ctx =>
+            {
+                TryWaitForLoginKey();
+            });
             
-            TryWaitForLoginKey();
         }
 
         #region Logging into Steam
@@ -209,6 +213,7 @@ namespace DepotDownloader.Steam
         
         bool _receivedLoginKey;
         //TODO cleanup + comment
+        //TODO this takes a long time. ~5s
         public void TryWaitForLoginKey()
         {
             if (_logonDetails.LoginKey != null)
@@ -280,10 +285,13 @@ namespace DepotDownloader.Steam
         private bool _loadAccountLicensesIsRunning = true;
         public void LoadAccountLicenses()
         {
-            while (_loadAccountLicensesIsRunning)
+            _ansiConsole.StatusSpinner().Start("Retreiving owned apps...", context =>
             {
-                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
-            }
+                while (_loadAccountLicensesIsRunning)
+                {
+                    _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                }
+            });
         }
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)

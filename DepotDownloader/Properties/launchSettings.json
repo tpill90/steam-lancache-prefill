@@ -4,6 +4,10 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --all"
     },
+    "Select Apps": {
+      "commandName": "Project",
+      "commandLineArgs": "select-apps --username bearingbreaker92"
+    },
     "Accuracy Test": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 570 440 730 65800 1085660"

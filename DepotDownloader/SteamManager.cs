@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,6 +13,7 @@ using DepotDownloader.Settings;
 using DepotDownloader.Steam;
 using DepotDownloader.Utils;
 using Spectre.Console;
+using Utf8Json;
 using static DepotDownloader.Utils.SpectreColors;
 
 namespace DepotDownloader
@@ -143,6 +144,7 @@ namespace DepotDownloader
         /// </summary>
         private async Task RetrieveAppMetadata(List<uint> appIds)
         {
+            //TODO is there a way to speed this up by cacheing any of the data locally?  For example, we could filter out tools ahead of time, to reduce the # of items requested
             using var timer = new AutoTimer(_ansiConsole, $"Retrieved info for {Magenta(appIds.Count)} apps");
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
@@ -193,13 +195,43 @@ namespace DepotDownloader
         }
 
         //TODO better name
+        //TODO is there any way to possibly speed this up, without having to query steam?
+        //TODO once apps are selected, they should be used by default, in addition to any additional params passed by the user
+        private string _selectedAppsPath = $"{AppConfig.ConfigDir}/selectedAppsToPrefill.json";
         public async Task SelectApps()
         {
-            // Need to load the latest app information from steam first
-            await RetrieveAppMetadata(_steam3.OwnedAppIds.ToList());
+            var allApps = _steam3.OwnedAppIds.ToList();
 
-            // Now we will be able to determine which apps can't be downloaded
-            //var availableApps = await _appInfoHandler.FilterUnavailableApps(distinctAppIds);
+            // Need to load the latest app information from steam, so that we have an updated list of all owned games
+            await RetrieveAppMetadata(allApps);
+            var availableApps = await _appInfoHandler.FilterUnavailableApps(allApps);
+
+            AnsiConsole.Write(new Rule());
+
+            var multiSelect = new MultiSelectionPrompt<AppInfoShim>()
+                              .Title("Please select apps to prefill..")
+                              .NotRequired()
+                              .PageSize(25)
+                              .MoreChoicesText(Grey("(Use ↑/↓ to navigate.  Page Up/Page Down skips pages)"))
+                              .InstructionsText("[grey](Press [blue]<space>[/] to toggle an app, " + $"{Green("<enter>")} to accept)[/]")
+                              .AddChoices(availableApps);
+
+            // Restoring previously selected items
+            if (File.Exists(_selectedAppsPath))
+            {
+                var previouslySelectedIds = JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(_selectedAppsPath));
+                foreach (var id in previouslySelectedIds)
+                {
+                    var appInfo = availableApps.First(e => e.AppId == id);
+                    multiSelect.Select(appInfo);
+                }
+            }
+                
+
+            var selectedApps = AnsiConsole.Prompt(multiSelect);
+
+            File.WriteAllText(_selectedAppsPath, JsonSerializer.ToJsonString(selectedApps.Select(e => e.AppId)));
+            Debugger.Break();
         }
     }
 }

@@ -17,6 +17,11 @@
             return $"[green]{inputObj}[/]";
         }
 
+        public static string Grey(object inputObj)
+        {
+            return $"[grey]{inputObj}[/]";
+        }
+      
         public static string Magenta(object inputObj)
         {
             return $"[fuchsia]{inputObj}[/]";

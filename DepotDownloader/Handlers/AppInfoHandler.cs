@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using DepotDownloader.Models;
@@ -108,6 +110,7 @@ namespace DepotDownloader.Handlers
         }
 
         // TODO document
+        //TODO need to filter out apps that don't support the specified operating system
         public async Task<List<AppInfoShim>> FilterUnavailableApps(List<uint> appIds)
         {
             var result = new List<AppInfoShim>();

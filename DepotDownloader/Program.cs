@@ -38,6 +38,7 @@ namespace DepotDownloader
     // TODO - Add a benchmark for web request allocations, and optimize
     // TODO - Add a command that lists all available games for a user, and allows them to select which ones to download
     // TODO - Should there be an option to configure your username, so that you don't need to pass it in all the time?
+    // TODO - should probably add file system logging, so that I can help people diagnose why things arent working for them
     public class Program
     {
         public static async Task<int> Main()
