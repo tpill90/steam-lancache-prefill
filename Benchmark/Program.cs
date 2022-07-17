@@ -1,12 +1,12 @@
 ﻿using ByteSizeLib;
-using DepotDownloader.Handlers;
-using DepotDownloader.Models;
-using DepotDownloader.Protos;
-using DepotDownloader.Steam;
-using DepotDownloader.Utils;
+using SteamPrefill.Handlers;
+using SteamPrefill.Models;
+using SteamPrefill.Protos;
+using SteamPrefill.Steam;
+using SteamPrefill.Utils;
 using Spectre.Console;
 using Spectre.Console.Testing;
-using static DepotDownloader.Utils.SpectreColors;
+using static SteamPrefill.Utils.SpectreColors;
 
 namespace Benchmark
 {
@@ -37,7 +37,7 @@ namespace Benchmark
         {
             _queuedRequests = new List<QueuedRequest>();
 
-            var manifestFolder = @"C:\Users\Tim\Dropbox\Programming\dotnet-public\SteamPrefill\DepotDownloader\bin\Release\net6.0\ManifestCache\";
+            var manifestFolder = @"C:\Users\Tim\Dropbox\Programming\dotnet-public\SteamPrefill\SteamPrefill\bin\Release\net6.0\ManifestCache\";
             var allFiles = Directory.GetFiles(manifestFolder).ToList();
 
             var skip = 0;

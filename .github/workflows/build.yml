@@ -37,6 +37,6 @@ jobs:
         uses: actions/upload-artifact@v2
         if: matrix.configuration == 'Release'
         with:
-          name: DepotDownloader-${{ runner.os }}
+          name: SteamPrefill-${{ runner.os }}
           path: artifacts
           if-no-files-found: error
