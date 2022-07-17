@@ -83,11 +83,10 @@ namespace DepotDownloader.Steam
                 }
             }
 
-            _ansiConsole.StatusSpinner().Start("asd", ctx =>
+            _ansiConsole.StatusSpinner().Start("Saving Steam session...", ctx =>
             {
                 TryWaitForLoginKey();
             });
-            
         }
 
         #region Logging into Steam
@@ -232,7 +231,7 @@ namespace DepotDownloader.Steam
                 {
                     return;
                 }
-                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
+                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromSeconds(3));
             }
         }
 
@@ -292,6 +291,7 @@ namespace DepotDownloader.Steam
                     _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
                 }
             });
+
         }
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)

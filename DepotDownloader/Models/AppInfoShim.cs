@@ -94,7 +94,7 @@ namespace DepotDownloader.Models
 
         public override string ToString()
         {
-            return $"{AppId} - {Common?.Name}";
+            return $"{Common?.Name}";
         }
     }
 }

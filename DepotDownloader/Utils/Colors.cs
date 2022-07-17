@@ -41,5 +41,15 @@
         {
             return $"[gold1]{inputObj}[/]";
         }
+
+        public static string Bold(object inputObj)
+        {
+            return $"[bold]{inputObj}[/]";
+        }
+
+        public static string Underline(object inputObj)
+        {
+            return $"[underline]{inputObj}[/]";
+        }
     }
 }

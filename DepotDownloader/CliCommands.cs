@@ -27,10 +27,11 @@ namespace DepotDownloader
             [CommandOption("app")]
             public IReadOnlyList<uint> AppIds { get; init; }
 
+            //TODO consider storing the username, so you don't have to type it in for everything
             //TODO document + description
             //TODO required
             [CommandOption("username")]
-            public string Username { get; init; }
+            public string Username { get; set; }
 
             //TODO document + description
             [CommandOption("all")]
@@ -42,6 +43,9 @@ namespace DepotDownloader
 
             public async ValueTask ExecuteAsync(IConsole console)
             {
+                //TODO remove 
+                Username = "bearingbreaker92";
+
                 var timer = Stopwatch.StartNew();
                 var ansiConsole = console.CreateAnsiConsole();
                 try
@@ -60,6 +64,9 @@ namespace DepotDownloader
                     {
                         appIdsToDownload.AddRange(AppIds);
                     }
+                    
+                    var userSelectedapps = steamManager.LoadPreviouslySelectedApps();
+                    appIdsToDownload.AddRange(userSelectedapps);
 
                     // Configure DownloadArgs
                     var downloadArgs = new DownloadArguments
@@ -91,12 +98,14 @@ namespace DepotDownloader
             //TODO document + description
             //TODO required
             [CommandOption("username")]
-            public string Username { get; init; }
+            public string Username { get; set; }
 
             //TODO for some reason, when logging in for the first time, it doesn't save the steam session and reprompts you for password each time
             public async ValueTask ExecuteAsync(IConsole console)
             {
-                var timer = Stopwatch.StartNew();
+                //TODO remove 
+                Username = "bearingbreaker92";
+
                 var ansiConsole = console.CreateAnsiConsole();
                 try
                 {
@@ -104,16 +113,13 @@ namespace DepotDownloader
                     steamManager.Initialize(Username);
 
                     await steamManager.SelectApps();
-
-                    
-                    
                 }
                 catch (Exception e)
                 {
-                    //TODO handle
                     ansiConsole.WriteException(e);
                 }
-                // TODO this feels like a hack, but for whatever reason the application hangs if you don't explicitly call the logout method
+
+                // For whatever reason, SteamKit2 prevents the application from closing normally.  Have to put this hack here so the app actually closes.
                 Environment.Exit(0);
             }
         }

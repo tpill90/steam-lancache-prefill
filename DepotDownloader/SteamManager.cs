@@ -56,7 +56,7 @@ namespace DepotDownloader
         public void Initialize(string username)
         {
             using var timer = new AutoTimer(_ansiConsole, "Initialization complete...");
-            
+
             _steam3.LoginToSteam(username);
             
             // Loading available licenses(games) for the current user
@@ -196,7 +196,7 @@ namespace DepotDownloader
 
         //TODO better name
         //TODO is there any way to possibly speed this up, without having to query steam?
-        //TODO once apps are selected, they should be used by default, in addition to any additional params passed by the user
+        //TODO document
         private string _selectedAppsPath = $"{AppConfig.ConfigDir}/selectedAppsToPrefill.json";
         public async Task SelectApps()
         {
@@ -209,29 +209,34 @@ namespace DepotDownloader
             AnsiConsole.Write(new Rule());
 
             var multiSelect = new MultiSelectionPrompt<AppInfoShim>()
-                              .Title("Please select apps to prefill..")
+                              .Title(Underline(White("Select apps to prefill...")))
                               .NotRequired()
-                              .PageSize(25)
+                              .PageSize(35)
                               .MoreChoicesText(Grey("(Use ↑/↓ to navigate.  Page Up/Page Down skips pages)"))
                               .InstructionsText("[grey](Press [blue]<space>[/] to toggle an app, " + $"{Green("<enter>")} to accept)[/]")
                               .AddChoices(availableApps);
 
             // Restoring previously selected items
-            if (File.Exists(_selectedAppsPath))
+            foreach (var id in LoadPreviouslySelectedApps())
             {
-                var previouslySelectedIds = JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(_selectedAppsPath));
-                foreach (var id in previouslySelectedIds)
-                {
-                    var appInfo = availableApps.First(e => e.AppId == id);
-                    multiSelect.Select(appInfo);
-                }
+                var appInfo = availableApps.First(e => e.AppId == id);
+                multiSelect.Select(appInfo);
             }
                 
-
             var selectedApps = AnsiConsole.Prompt(multiSelect);
-
             File.WriteAllText(_selectedAppsPath, JsonSerializer.ToJsonString(selectedApps.Select(e => e.AppId)));
-            Debugger.Break();
+
+            _ansiConsole.MarkupLine($"Selected {Magenta(selectedApps.Count)} apps to prefill!  ");
+            _ansiConsole.MarkupLine($"Selected apps will automatically be included by the {Yellow("prefill")} command.");
+        }
+
+        public List<uint> LoadPreviouslySelectedApps()
+        {
+            if (File.Exists(_selectedAppsPath))
+            {
+                return JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(_selectedAppsPath));
+            }
+            return new List<uint>();
         }
     }
 }

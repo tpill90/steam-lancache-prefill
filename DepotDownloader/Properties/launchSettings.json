@@ -1,16 +1,16 @@
 {
   "profiles": {
-    "Download All": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --all"
-    },
     "Select Apps": {
       "commandName": "Project",
       "commandLineArgs": "select-apps --username bearingbreaker92"
     },
-    "Accuracy Test": {
+    "Download None": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 570 440 730 65800 1085660"
+      "commandLineArgs": "prefill --username bearingbreaker92"
+    },
+    "Download All": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --username bearingbreaker92 --all"
     },
     "Game with DLC - FFXV": {
       "commandName": "Project",
@@ -23,10 +23,6 @@
     "Dota 2 - Multiple Languages": {
       "commandName": "Project",
       "commandLineArgs": "prefill --username bearingbreaker92 --app 570 --force"
-    },
-    "Huge Game - Destiny 2": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --username bearingbreaker92 --app 1085660"
     },
     "Unowned Free Game": {
       "commandName": "Project",

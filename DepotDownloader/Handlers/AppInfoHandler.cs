@@ -128,7 +128,8 @@ namespace DepotDownloader.Handlers
                 // Checking for invalid apps
                 if (appInfo.Depots == null && appInfo.Common == null)
                 {
-                    _ansiConsole.LogMarkupLine(Red("Unknown/Invalid AppID ") + appId + Red(".  Skipping..."));
+                    //TODO log this to a file, or see if it keeps happening after finding an alternative way to list user apps
+                    //_ansiConsole.LogMarkupLine(Red("Unknown/Invalid AppID ") + appId + Red(".  Skipping..."));
                     continue;
                 }
                 //TODO this doesn't seem to be working correctly for games I don't own
