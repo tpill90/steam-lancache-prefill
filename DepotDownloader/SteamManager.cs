@@ -149,8 +149,8 @@ namespace DepotDownloader
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 await _appInfoHandler.BulkLoadAppInfos(appIds);
+
                 // Once we have our info, we can also load information for related DLC
-                
                 await _appInfoHandler.BulkLoadAppInfos(_appInfoHandler.GetOwnedDlcAppIds());
                 await _appInfoHandler.BuildDlcDepotList();
             });

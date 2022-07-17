@@ -15,9 +15,6 @@ namespace DepotDownloader.Steam
 {
     public class Steam3Session
     {
-        //TODO document
-        private List<uint> OwnedPackageLicenses { get; set; }
-
         // TODO this is all games owned + dlc. Could this possibly be filtered?
         // TODO make this private again
         public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
@@ -225,6 +222,7 @@ namespace DepotDownloader.Steam
             {
                 if (DateTime.Now >= totalWaitPeriod)
                 {
+                    _ansiConsole.MarkupLine(Red("Failed to save login key"));
                     return;
                 }
                 if (_receivedLoginKey)
@@ -282,6 +280,8 @@ namespace DepotDownloader.Steam
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
+        //TODO rename to WaitForLicenses or something similar
+        //TODO document when this runs
         public void LoadAccountLicenses()
         {
             _ansiConsole.StatusSpinner().Start("Retreiving owned apps...", context =>
@@ -291,7 +291,6 @@ namespace DepotDownloader.Steam
                     _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
                 }
             });
-
         }
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)
@@ -303,16 +302,11 @@ namespace DepotDownloader.Steam
                 _ansiConsole.WriteLine($"Unable to get license list: {licenseList.Result}");
                 throw new Exception("aborted");
             }
-
-            OwnedPackageLicenses = licenseList.LicenseList.Select(x => x.PackageID)
-                                              .Distinct()
-                                              .ToList();
-
-            LoadPackageInfo(OwnedPackageLicenses);
+            LoadPackageInfo(licenseList.LicenseList);
         }
 
         //TODO document
-        private void LoadPackageInfo(List<uint> packageIds)
+        private void LoadPackageInfo(IReadOnlyCollection<SteamApps.LicenseListCallback.License> licenseList)
         {
             // TODO consider turning this into a class, for the sake of readability
             var packageCountPath = $"{AppConfig.ConfigDir}/packageCount.txt";
@@ -361,7 +355,7 @@ namespace DepotDownloader.Steam
 
             File.WriteAllText(ownedAppIdsPath, JsonSerializer.ToJsonString(OwnedAppIds));
             File.WriteAllText(ownedDepotIdsPath, JsonSerializer.ToJsonString(OwnedDepotIds));
-            File.WriteAllText(packageCountPath, packageIds.Count.ToString());
+            File.WriteAllText(packageCountPath, packageRequests.Count.ToString());
         }
         #endregion
 
