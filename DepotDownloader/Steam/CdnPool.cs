@@ -33,7 +33,11 @@ namespace DepotDownloader.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public async Task PopulateAvailableServers()
         {
-            await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Getting available CDNs", async _ =>
+            if (_availableServerEndpoints.Count >= _minimumServerCount)
+            {
+                return;
+            }
+            await _ansiConsole.StatusSpinner().StartAsync("Getting available CDNs", async _ =>
             {
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)

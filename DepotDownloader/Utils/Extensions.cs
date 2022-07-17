@@ -21,7 +21,7 @@ namespace DepotDownloader.Utils
             });
         }
 
-        public static Status CreateSpectreStatusSpinner(this IAnsiConsole ansiConsole)
+        public static Status StatusSpinner(this IAnsiConsole ansiConsole)
         {
             return ansiConsole.Status()
                               .AutoRefresh(true)

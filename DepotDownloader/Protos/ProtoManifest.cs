@@ -106,7 +106,6 @@ namespace DepotDownloader.Protos
         [ProtoMember(4)]
         public uint DepotId { get; private set; }
 
-        //TODO protobuf-net seems kind of slow.  Consider swapping it with something else?
         public static ProtoManifest LoadFromFile(string filename)
         {
             if (!File.Exists(filename))

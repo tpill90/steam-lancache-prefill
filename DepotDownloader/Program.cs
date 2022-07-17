@@ -37,6 +37,7 @@ namespace DepotDownloader
     // TODO - Things I want tested :  Does initial download max your internet speed?  Does cached downloads max your lan speed?
     // TODO - Add a benchmark for web request allocations, and optimize
     // TODO - Add a command that lists all available games for a user, and allows them to select which ones to download
+    // TODO - Should there be an option to configure your username, so that you don't need to pass it in all the time?
     public class Program
     {
         public static async Task<int> Main()

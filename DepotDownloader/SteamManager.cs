@@ -52,15 +52,12 @@ namespace DepotDownloader
         ///
         /// Required to be called first before using SteamManager class.
         /// </summary>
-        public async Task Initialize(string username)
+        public void Initialize(string username)
         {
             using var timer = new AutoTimer(_ansiConsole, "Initialization complete...");
             
             _steam3.LoginToSteam(username);
-
-            //TODO only load available servers if there is anything to download
-            await _cdnPool.PopulateAvailableServers();
-
+            
             // Loading available licenses(games) for the current user
             _steam3.LoadAccountLicenses();
         }
@@ -117,6 +114,8 @@ namespace DepotDownloader
             }
             _ansiConsole.Write("\n");
 
+            await _cdnPool.PopulateAvailableServers();
+
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueue(filteredDepots);
 
@@ -145,7 +144,7 @@ namespace DepotDownloader
         private async Task RetrieveAppMetadata(List<uint> appIds)
         {
             using var timer = new AutoTimer(_ansiConsole, $"Retrieved info for {Magenta(appIds.Count)} apps");
-            await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
+            await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 await _appInfoHandler.BulkLoadAppInfos(appIds);
                 // Once we have our info, we can also load information for related DLC
@@ -160,7 +159,7 @@ namespace DepotDownloader
         {
             // Fetch all the manifests for each depot in parallel, as individually they can take a long time, 
             var depotManifests = new ConcurrentBag<ProtoManifest>();
-            await _ansiConsole.CreateSpectreStatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
+            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
                 await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>
                 {
@@ -191,6 +190,16 @@ namespace DepotDownloader
         {
             //TODO there has to be a better way to know all the owned games, without including the invalid ones. Might be able to use the steam web api to do this.
             return _steam3.OwnedAppIds;
+        }
+
+        //TODO better name
+        public async Task SelectApps()
+        {
+            // Need to load the latest app information from steam first
+            await RetrieveAppMetadata(_steam3.OwnedAppIds.ToList());
+
+            // Now we will be able to determine which apps can't be downloaded
+            //var availableApps = await _appInfoHandler.FilterUnavailableApps(distinctAppIds);
         }
     }
 }

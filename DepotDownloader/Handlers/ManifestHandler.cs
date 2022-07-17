@@ -57,10 +57,8 @@ namespace DepotDownloader.Handlers
                     manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
                     _cdnPool.ReturnConnection(server);
                 }
-                //TODO What other possible exceptions could happen here, that we can recover from?
                 catch (HttpRequestException e)
                 {
-                    //TODO handle 503 service unavailable
                     if (e.StatusCode == HttpStatusCode.BadGateway || e.StatusCode == HttpStatusCode.ServiceUnavailable)
                     {
                         // In the case of a BadGateway, we'll want to retry again with a new server
@@ -79,7 +77,6 @@ namespace DepotDownloader.Handlers
             
             var protoManifest = new ProtoManifest(manifest, depot);
             protoManifest.SaveToFile(depot.ManifestFileName);
-
             return protoManifest;
         }
 
