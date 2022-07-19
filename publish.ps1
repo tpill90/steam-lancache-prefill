@@ -16,6 +16,8 @@ foreach($runtime in @("win-x64"))
     /p:PublishReadyToRun=true `
     /p:PublishTrimmed=true
 
+    Remove-Item publish/SteamPrefill-$runtime/Spectre.Console.xml
+
     Compress-Archive -path publish/SteamPrefill-$runtime publish/$runtime.zip
 
     $folderSize = "{0:N2} MB" -f((Get-ChildItem publish/SteamPrefill-$runtime | Measure-Object -Property Length -sum).sum / 1Mb)
@@ -38,6 +40,8 @@ foreach($runtime in @("linux-x64", "osx-x64"))
     --self-contained true `
     /p:PublishSingleFile=true `
     /p:PublishTrimmed=true
+
+    Remove-Item publish/SteamPrefill-$runtime/Spectre.Console.xml
 
     $folderSize = "{0:N2} MB" -f((Get-ChildItem publish/SteamPrefill-$runtime | Measure-Object -Property Length -sum).sum / 1Mb)
     Write-Host "Published file size : " -NoNewline
