@@ -1,0 +1,7 @@
+bin
+obj
+/publish
+.vs
+*.ak
+lockfile
+/SteamPrefill/SteamPrefill.csproj.user

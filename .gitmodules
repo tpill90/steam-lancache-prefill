@@ -1,0 +1,4 @@
+[submodule "External/SpectreConsole"]
+	path = External/SpectreConsole
+	url = https://github.com/tpill90/spectre.console.git
+	branch = ConfigurableTransferSpeedPrefix
