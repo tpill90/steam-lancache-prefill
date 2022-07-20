@@ -1,5 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -61,8 +62,7 @@ namespace SteamPrefill.Handlers
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }
-
-        //TODO this doesn't always consistently hit 10gbit
+        
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
@@ -85,8 +85,11 @@ namespace SteamPrefill.Handlers
                 var buffer = new byte[4096];
                 try
                 {
-                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkId);
-                    var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    var url = ZString.Format("http://lancache.steamcontent.com/depot/{0}/chunk/{1}", request.DepotId, request.ChunkId);
+                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    requestMessage.Headers.Host = cdnServer.Host;
+                    
+                    var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
                     using Stream responseStream = await response.Content.ReadAsStreamAsync();
                     response.EnsureSuccessStatusCode();
 

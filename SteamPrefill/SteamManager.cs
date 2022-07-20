@@ -169,6 +169,7 @@ namespace SteamPrefill
         {
             // Fetch all the manifests for each depot in parallel, as individually they can take a long time, 
             var depotManifests = new ConcurrentBag<ProtoManifest>();
+            //TODO move this into a function inside of ManifestHandler.  Increase the max degree of parallelism to see if it speeds things up, and use one cdn at a time.
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
                 await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>

@@ -94,3 +94,4 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 
 # External Docs
 * https://steamdb.info/
+* https://steamstat.us/
