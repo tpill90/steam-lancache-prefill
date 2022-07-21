@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
+using Spectre.Console;
 using SteamPrefill.Models;
 using SteamKit2;
 using SteamKit2.CDN;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models.Exceptions;
 using SteamPrefill.Models.Protos;
+using SteamPrefill.Utils;
 
 namespace SteamPrefill.Handlers
 {
@@ -21,16 +23,60 @@ namespace SteamPrefill.Handlers
     /// </summary>
     public class ManifestHandler
     {
+        private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
         private readonly Steam3Session _steam3Session;
 
-        public ManifestHandler(CdnPool cdnPool, Steam3Session steam3Session)
+        public ManifestHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, Steam3Session steam3Session)
         {
+            _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
             _steam3Session = steam3Session;
         }
 
-        //TODO test exception handling here, and in the calling method
+        /// <summary>
+        /// Downloads all of the manifests for a list of specified depots.  Will retry up to 3 times, in the case of errors.
+        /// </summary>
+        /// <exception cref="ManifestException"></exception>
+        public async Task<ConcurrentBag<ProtoManifest>> GetAllManifestsAsync(List<DepotInfo> depots)
+        {
+            var depotManifests = new ConcurrentBag<ProtoManifest>();
+            int retryCount = 0;
+            while (depotManifests.Count != depots.Count && retryCount < 3)
+            {
+                try
+                {
+                    depotManifests = await AttemptManifestDownloadAsync(depots);
+                }
+                catch (Exception)
+                {
+                    // We don't really care why the manifest download failed.  We're going to retry regardless
+                }
+                retryCount++;
+            }
+            if (retryCount == 3)
+            {
+                throw new ManifestException("An unexpected error occured while downloading manifests!  Skipping...");
+            }
+            return depotManifests;
+        }
+        
+        private async Task<ConcurrentBag<ProtoManifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
+        {
+            var depotManifests = new ConcurrentBag<ProtoManifest>();
+            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
+            {
+                Server server = _cdnPool.TakeConnection();
+                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>
+                {
+                    var manifest = await GetSingleManifestAsync(depot, server);
+                    depotManifests.Add(manifest);
+                });
+                _cdnPool.ReturnConnection(server);
+            });
+            return depotManifests;
+        }
+
         /// <summary>
         /// Requests a depot's manifest from Steam's servers, or if it has been requested before,
         /// it will load the manifest from disk.
@@ -38,7 +84,7 @@ namespace SteamPrefill.Handlers
         /// <param name="depot">The depot to download a manifest for</param>
         /// <returns>A manifest file</returns>
         /// <exception cref="ManifestException">Throws if no manifest was returned by Steam</exception>
-        public async Task<ProtoManifest> GetManifestFileAsync(DepotInfo depot)
+        private async Task<ProtoManifest> GetSingleManifestAsync(DepotInfo depot, Server server)
         {
             if (File.Exists(depot.ManifestFileName))
             {
@@ -46,31 +92,8 @@ namespace SteamPrefill.Handlers
             }
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
-
-            DepotManifest manifest = null;
-            var retryCount = 0;
-            while (manifest == null && retryCount < 5)
-            {
-                try
-                {
-                    Server server = _cdnPool.TakeConnection();
-                    manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
-                    _cdnPool.ReturnConnection(server);
-                }
-                catch (HttpRequestException e)
-                {
-                    if (e.StatusCode == HttpStatusCode.BadGateway || e.StatusCode == HttpStatusCode.ServiceUnavailable)
-                    {
-                        // In the case of a BadGateway, we'll want to retry again with a new server
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                retryCount++;
-            }
-            if (manifest == null && retryCount == 5)
+            DepotManifest manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
+            if (manifest == null)
             {
                 throw new ManifestException($"Unable to download manifest for depot {depot.Name} - {depot.DepotId}.  Manifest request received no response.");
             }

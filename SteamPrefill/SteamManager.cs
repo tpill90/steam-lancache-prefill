@@ -41,7 +41,7 @@ namespace SteamPrefill
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
-            _manifestHandler = new ManifestHandler(_cdnPool, _steam3);
+            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
             _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
 
             UserAccountStore.LoadFromFile();
@@ -86,6 +86,7 @@ namespace SteamPrefill
                 {
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
                     _ansiConsole.MarkupLine(Red($"   Unexpected download error : {e.Message}"));
+                    _ansiConsole.MarkupLine("");
                 }
             }
 
@@ -167,17 +168,7 @@ namespace SteamPrefill
         //TODO document
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
         {
-            // Fetch all the manifests for each depot in parallel, as individually they can take a long time, 
-            var depotManifests = new ConcurrentBag<ProtoManifest>();
-            //TODO move this into a function inside of ManifestHandler.  Increase the max degree of parallelism to see if it speeds things up, and use one cdn at a time.
-            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
-            {
-                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>
-                {
-                    var manifest = await _manifestHandler.GetManifestFileAsync(depot);
-                    depotManifests.Add(manifest);
-                });
-            });
+            var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
             
             var chunkQueue = new List<QueuedRequest>();
             // Queueing up chunks for each depot

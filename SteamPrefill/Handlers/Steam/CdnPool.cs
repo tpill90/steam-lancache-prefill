@@ -18,7 +18,7 @@ namespace SteamPrefill.Handlers.Steam
         private readonly Steam3Session _steamSession;
         
         private ConcurrentQueue<Server> _availableServerEndpoints = new ConcurrentQueue<Server>();
-        private int _minimumServerCount = 7;
+        private int _minimumServerCount = 5;
 
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
