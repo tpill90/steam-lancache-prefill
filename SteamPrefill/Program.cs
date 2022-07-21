@@ -28,6 +28,7 @@ namespace SteamPrefill
     // TODO - fix historical github stats metrics build failing
     // TODO - documentation - improve formatting of readme.md
     // TODO - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry
+    // TODO - Remove personal machine build path from being displayed in exceptions when they are thrown
     public class Program
     {
         public static async Task<int> Main()

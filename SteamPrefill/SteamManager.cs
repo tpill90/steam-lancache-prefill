@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,7 +12,7 @@ using SteamPrefill.Settings;
 using SteamPrefill.Utils;
 using Spectre.Console;
 using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Protos;
+using SteamPrefill.Models.Exceptions;
 using Utf8Json;
 using static SteamPrefill.Utils.SpectreColors;
 
@@ -36,7 +35,6 @@ namespace SteamPrefill
         {
             _ansiConsole = ansiConsole;
             
-
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
@@ -81,6 +79,10 @@ namespace SteamPrefill
                 try
                 {
                     await DownloadSingleAppAsync(app.AppId, downloadArgs);
+                }
+                catch (LancacheNotFoundException e)
+                {
+                    throw e;
                 }
                 catch (Exception e)
                 {
