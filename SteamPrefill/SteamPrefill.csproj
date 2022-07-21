@@ -25,6 +25,10 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+   
   <ItemGroup>
     <!-- External -->
     <PackageReference Include="ByteSize" Version="2.1.1" />
