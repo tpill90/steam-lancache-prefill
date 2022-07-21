@@ -4,8 +4,6 @@ using SteamPrefill.Utils;
 
 namespace SteamPrefill
 {
-    // TODO - Tech Debt - Cleanup all warnings
-    // TODO - Tech Debt - Cleanup trim warnings
     // TODO - Build - Fail build on both warnings + trim warnings
     // TODO - Tech debt - Do I need both Utf8Json and protobuf-net for serialization?
     // TODO - Feature - Implement support for filtering by language/operating system/architecture
@@ -29,6 +27,8 @@ namespace SteamPrefill
     // TODO - Document process for updating app
     // TODO - fix historical github stats metrics build failing
     // TODO - documentation - improve formatting of readme.md
+    // TODO - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry
+    // TODO - Remove personal machine build path from being displayed in exceptions when they are thrown
     public class Program
     {
         public static async Task<int> Main()

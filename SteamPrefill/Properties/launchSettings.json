@@ -6,15 +6,15 @@
     },
     "Download None": {
       "commandName": "Project",
-      "commandLineArgs": "prefill"
+      "commandLineArgs": "prefill --force"
     },
     "Download All": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all"
+      "commandLineArgs": "prefill --all --force"
     },
     "Game with DLC - FFXV": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --app 637650"
+      "commandLineArgs": "prefill --app 637650 --force"
     },
     "Game with Duplicate Chunks - DR4": {
       "commandName": "Project",
@@ -26,7 +26,7 @@
     },
     "Unowned Free Game": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --app 1407200"
+      "commandLineArgs": "prefill --app 1407200 --force"
     },
     "Account - 2FA": {
       "commandName": "Project",

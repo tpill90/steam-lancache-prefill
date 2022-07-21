@@ -1,15 +1,17 @@
-﻿using System.Collections.Concurrent;
+﻿using Cysharp.Text;
+using Spectre.Console;
+using SteamPrefill.Handlers.Steam;
+using SteamPrefill.Models;
+using SteamPrefill.Models.Exceptions;
+using SteamPrefill.Utils;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Cysharp.Text;
-using SteamPrefill.Models;
-using SteamPrefill.Utils;
-using Spectre.Console;
-using SteamPrefill.Handlers.Steam;
 using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Handlers
@@ -35,6 +37,8 @@ namespace SteamPrefill.Handlers
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
+            await ValidateLancacheIpAsync();
+
             int retryCount = 0;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
@@ -61,8 +65,7 @@ namespace SteamPrefill.Handlers
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }
-
-        //TODO this doesn't always consistently hit 10gbit
+        
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
@@ -85,8 +88,11 @@ namespace SteamPrefill.Handlers
                 var buffer = new byte[4096];
                 try
                 {
-                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", cdnServer.Host, request.DepotId, request.ChunkId);
-                    var response = await _client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    var url = ZString.Format("http://lancache.steamcontent.com/depot/{0}/chunk/{1}", request.DepotId, request.ChunkId);
+                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    requestMessage.Headers.Host = cdnServer.Host;
+                    
+                    var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
                     using Stream responseStream = await response.Content.ReadAsStreamAsync();
                     response.EnsureSuccessStatusCode();
 
@@ -112,6 +118,47 @@ namespace SteamPrefill.Handlers
             // Making sure the progress bar is always set to its max value, incase some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
+        }
+
+        private bool _lancacheServerResolved;
+        private bool _publicDownloadOverride;
+
+        private async Task ValidateLancacheIpAsync()
+        {
+            // Short circuit if we have already determined that we can connect to a correctly configured Lancache
+            if (_lancacheServerResolved || _publicDownloadOverride)
+            {
+                return;
+            }
+
+            var ipAddresses = await Dns.GetHostAddressesAsync("lancache.steamcontent.com");
+            if (ipAddresses.Any(e => e.IsInternal()))
+            {
+                // If the IP resolves to a private subnet, then we want to query the Lancache server to see if it is actually there.
+                var response = await _client.GetAsync("http://lancache.steamcontent.com/lancache-heartbeat");
+                if (!response.Headers.Contains("X-LanCache-Processed-By"))
+                {
+                    _ansiConsole.MarkupLine(Red($" Error!  {White("lancache.steamcontent.com")} is resolving to a private IP address ({Yellow(ipAddresses.First())}),\n" +
+                                                 " however no Lancache instance can be found at that address.\n" +
+                                                 " This likely means that there is an issue with your configuration.\n" +
+                                                 " Prefill is unable to continue, try again after resolving any configuration issues.\n"));
+                    throw new LancacheNotFoundException($"No Lancache server detected at {ipAddresses.First()}");
+                }
+                _lancacheServerResolved = true;
+                return;
+            }
+
+            // If a public IP address is resolved, then it means that the Lancache is not configured properly, and we would end up downloading from the internet.
+            // This will prompt a user to see if they still want to continue, as downloading from the internet could still be a good download speed test.
+            _ansiConsole.MarkupLine(Yellow($" Warning!  {White("lancache.steamcontent.com")} is resolving to a public IP address ({Yellow(ipAddresses.First())}),\n" +
+                                         " which likely means that there is an issue with your Lancache configuration.\n" +
+                                         " Prefill will download directly from the internet, and will .\n" +
+                                         " Prefill is unable to continue, try again after resolving any configuration issues.\n"));
+
+            _publicDownloadOverride = AnsiConsole.Prompt(new SelectionPrompt<bool>()
+                                                         .Title("Continue anyway?")
+                                                         .AddChoices(true, false)
+                                                         .UseConverter(e => e == false ? "No" : "Yes"));
         }
     }
 }

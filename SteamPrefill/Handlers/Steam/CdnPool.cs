@@ -18,7 +18,7 @@ namespace SteamPrefill.Handlers.Steam
         private readonly Steam3Session _steamSession;
         
         private ConcurrentQueue<Server> _availableServerEndpoints = new ConcurrentQueue<Server>();
-        private int _minimumServerCount = 7;
+        private int _minimumServerCount = 5;
 
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
@@ -42,10 +42,8 @@ namespace SteamPrefill.Handlers.Steam
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)
                 {
-                    var steamServers = await _steamSession.steamContent.GetServersForSteamPipe();
-                    var filteredServers = steamServers.Where(e => e.Protocol == Server.ConnectionProtocol.HTTP)
-                                                      .Where(e => e.AllowedAppIds.Length == 0 && e.WeightedLoad < 100)
-                                                      .ToList();
+                    var allServers = await _steamSession.steamContent.GetServersForSteamPipe();
+                    var filteredServers = allServers.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0).ToList();
                     foreach (var server in filteredServers)
                     {
                         _availableServerEndpoints.Enqueue(server);
@@ -53,7 +51,7 @@ namespace SteamPrefill.Handlers.Steam
 
                     // Will wait increasingly longer periods when re-trying
                     retryCount++;
-                    await Task.Delay(retryCount * 50);
+                    await Task.Delay(retryCount * 100);
                 }
             });
 
