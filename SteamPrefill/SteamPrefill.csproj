@@ -19,6 +19,10 @@
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+   
   <ItemGroup>
     <!-- External -->
     <PackageReference Include="ByteSize" Version="2.1.1" />
