@@ -1,4 +1,5 @@
-﻿using Cysharp.Text;
+﻿using System;
+using Cysharp.Text;
 using Spectre.Console;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models;
@@ -21,12 +22,17 @@ namespace SteamPrefill.Handlers
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
-        private readonly HttpClient _client = new HttpClient();
+        private readonly HttpClient _client;
         
         public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
+
+            _client = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(15)
+            };
         }
 
         /// <summary>
