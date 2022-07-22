@@ -3,49 +3,42 @@ $ErrorActionPreference = "Stop"
 
 Remove-Item publish -Recurse -Force -ErrorAction SilentlyContinue
 
+$csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
+$version = "$($csprojXml.ChildNodes.PropertyGroup.Version)".Trim()
+
+
 # Windows publish
-foreach($runtime in @("win-x64"))
+foreach($runtime in @("win-x64", "linux-x64", "osx-x64"))
 {
+    $publishDir = "publish/SteamPrefill-$version-$runtime"
+
+    $readyToRun = $false
+    if($runtime -eq "win-x64")
+    {
+        $readyToRun = $true
+    }
+    Write-Host $readyToRun -ForegroundColor Yellow
+
     Write-Host "Publishing $runtime" -ForegroundColor Cyan
     dotnet publish .\SteamPrefill\SteamPrefill.csproj `
-    -o publish/SteamPrefill-$runtime `
+    -o $publishDir `
     -c Release `
     --runtime $runtime `
     --self-contained true `
     /p:PublishSingleFile=true `
-    /p:PublishReadyToRun=true `
+    /p:PublishReadyToRun=$readyToRun `
     /p:PublishTrimmed=true
 
-    Remove-Item publish/SteamPrefill-$runtime/Spectre.Console.xml
+    Remove-Item $publishDir/Spectre.Console.xml
 
-    Compress-Archive -path publish/SteamPrefill-$runtime publish/$runtime.zip
+    
+    Compress-Archive -path $publishDir "$publishDir.zip"
 
-    $folderSize = "{0:N2} MB" -f((Get-ChildItem publish/SteamPrefill-$runtime | Measure-Object -Property Length -sum).sum / 1Mb)
+    $folderSize = "{0:N2} MB" -f((Get-ChildItem $publishDir | Measure-Object -Property Length -sum).sum / 1Mb)
     Write-Host "Published file size : " -NoNewline
     Write-Host -ForegroundColor Cyan $folderSize
 
-    $zipSize = "{0:N2} MB" -f((Get-ChildItem publish/$runtime.zip | Measure-Object -Property Length -sum).sum / 1Mb)
+    $zipSize = "{0:N2} MB" -f((Get-ChildItem "$publishDir.zip" | Measure-Object -Property Length -sum).sum / 1Mb)
     Write-Host "Published zip size : " -NoNewline
     Write-Host -ForegroundColor Cyan $zipSize
-}
-
-# Doing linux and osx separatly, they don't support ReadyToRun
-foreach($runtime in @("linux-x64", "osx-x64"))
-{
-    Write-Host "\n\nPublishing $runtime" -ForegroundColor Cyan
-    dotnet publish .\SteamPrefill\SteamPrefill.csproj `
-    -o publish/SteamPrefill-$runtime `
-    -c Release `
-    --runtime $runtime `
-    --self-contained true `
-    /p:PublishSingleFile=true `
-    /p:PublishTrimmed=true
-
-    Remove-Item publish/SteamPrefill-$runtime/Spectre.Console.xml
-
-    $folderSize = "{0:N2} MB" -f((Get-ChildItem publish/SteamPrefill-$runtime | Measure-Object -Property Length -sum).sum / 1Mb)
-    Write-Host "Published file size : " -NoNewline
-    Write-Host -ForegroundColor Cyan $folderSize
-
-    Compress-Archive -path publish/SteamPrefill-$runtime publish/$runtime.zip
 }
