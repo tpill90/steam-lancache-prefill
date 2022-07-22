@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 

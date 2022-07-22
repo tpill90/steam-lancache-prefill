@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using Spectre.Console;
 using SteamKit2;
 
 namespace SteamPrefill.Models
@@ -94,7 +95,7 @@ namespace SteamPrefill.Models
 
         public override string ToString()
         {
-            return $"{Common?.Name}";
+            return $"{Common?.Name.EscapeMarkup()}";
         }
     }
 }
