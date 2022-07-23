@@ -1,19 +1,18 @@
-﻿namespace SteamPrefill.Models
+﻿using SteamPrefill.Models.Enum;
+
+namespace SteamPrefill.Models
 {
-    //TODO document
     public class DownloadArguments
     {
-        public bool Force { get; set; }
+        /// <summary>
+        /// When set to true, always run the download, regardless of if the app has been previously downloaded.
+        /// </summary>
+        public bool Force { get; init; }
 
-        //TODO reimplement these flags
-        // Unimplemented
-        public string OperatingSystem { get; set; } = "windows";
-        public bool DownloadAllPlatforms { get; set; }
-        //TODO enum
-        public string Architecture { get; set; } = "64";
-        //TODO enum
-        public string Language { get; set; } = "english";
-        public bool DownloadAllLanguages { get; set; }
-        public bool LowViolence { get; set; }
+        public OperatingSystem OperatingSystem { get; set; } = OperatingSystem.Windows;
+
+        public Architecture Architecture { get; set; } = Architecture.x64;
+
+        public Language Language { get; set; } = Language.English;
     }
 }

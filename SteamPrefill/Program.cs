@@ -4,32 +4,37 @@ using SteamPrefill.Utils;
 
 namespace SteamPrefill
 {
+    // TODO - Bug - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry
     // TODO - Build - Fail build on both warnings + trim warnings
     // TODO - Tech debt - Do I need both Utf8Json and protobuf-net for serialization?
     // TODO - Feature - Implement support for filtering by language/operating system/architecture
     // TODO - Feature - On the 'select-apps' multi-select, consider implementing the ability to type a letter and skip to games starting with that.
     // TODO - Feature - On the 'select-apps' multi-select, consider adding the ability to filter by typing in a query.
-    // TODO - Metrics - Setup and configure Github historical statistics (Downloads, page views, etc).  This will be useful for seeing project usage.
-    // TODO - Documentation - Update documentation to show why you should be using UTF16.  Include an image showing before/after.  Also possibly do a check on startup?
-    // TODO - Performance - Benchmark allocations, especially during the download.  Write a benchmark.net test for the download stage.
-    // TODO - Performance - Finish reducing allocation warnings in DPA.
-    // TODO - Performance - Figure out why this app isn't consistently hitting 10gbit download speeds.
+    // TODO - Documentation - Explain process for updating app
     // TODO - Feature - Consider adding a flag for not saving manifest cache.  
     // TODO - Feature - Add a command that clears out the manifest cache, and displays how much data was saved
-    // TODO - General - Promote this app on r/lanparty and discord once it is finished.
-    // TODO - Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
+    // TODO - Feature - Implement multi language/operating system/architecture support.
+
     // TODO - should probably add file system logging, so that I can help people diagnose why things arent working for them
     // TODO - Features - Consider which features from lancache-autofill should be ported over to this app - https://github.com/zeropingheroes/lancache-autofill
     // TODO - Features - Design a "benchmark mode" that runs a single/multiple applications in a loop.  If a game's manifests already exist, then there won't even be a need to login to Steam.
     // TODO - Build - Setup build using Github actions.  Should simply compile the application
+    // TODO - General - Promote this app on r/lanparty and discord once it is finished.
+    // TODO - Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
     // TODO - I wish there was a way to color the help text output from CliFx.  Everything is so flat, and cant draw attention to important parts
     // TODO - Test out https://github.com/microsoft/infersharpaction
-    // TODO - Document process for updating app
-    // TODO - fix historical github stats metrics build failing
     // TODO - documentation - improve formatting of readme.md
-    // TODO - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry
-    // TODO - Remove personal machine build path from being displayed in exceptions when they are thrown
-    //TODO - change the publish zip files to be the format {app}-{version}-{os}
+    // TODO - Documentation - Update documentation to show why you should be using UTF16.  Include an image showing before/after.  Also possibly do a check on startup?
+    // TODO - Performance - Benchmark allocations, especially during the download.  Write a benchmark.net test for the download stage.
+    // TODO - Performance - Finish reducing allocation warnings in DPA.
+    // TODO - Performance - Figure out why this app isn't consistently hitting 10gbit download speeds.
+    // TODO - Performance - See if grouping requests in a manner similar to battlenet-prefill (small/large groups) can help with overall download performance
+    // TODO - Accuracy - Should figure out some way to verify that my app is completely downloading the games, in the exact same way steam does
+    // TODO - Bug - Figure out a way to filter out package 0.  It seems that I should be able to filter out apps that are tagged with "mod"
+    // TODO - Feature - Prompt to run prefill after selecting apps
+    // TODO - Feature - Could it be easier to select multiple apps on the select screen, without having to press down + space repeatedly?  
+    //                  Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
+    // TODO - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
     public class Program
     {
         public static async Task<int> Main()

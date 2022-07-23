@@ -1,6 +1,4 @@
-﻿using SteamPrefill.Models.Protos;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     public class QueuedRequest
     {
@@ -12,7 +10,7 @@ namespace SteamPrefill.Models
         /// </summary>
         public uint CompressedLength { get; }
 
-        public QueuedRequest(ProtoManifest depotManifest, ProtoManifest.ChunkData chunk)
+        public QueuedRequest(Manifest depotManifest, ChunkData chunk)
         {
             DepotId = depotManifest.DepotId;
             ChunkId = chunk.ChunkID;

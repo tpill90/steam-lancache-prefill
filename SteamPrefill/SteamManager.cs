@@ -37,7 +37,7 @@ namespace SteamPrefill
             
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
-            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
+            _appInfoHandler = new AppInfoHandler(_steam3);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
             _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
             _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
@@ -54,9 +54,7 @@ namespace SteamPrefill
         public void Initialize()
         {
             _steam3.LoginToSteam();
-            
-            // Loading available licenses(games) for the current user
-            _steam3.LoadAccountLicenses();
+            _steam3.WaitForLicenseCallback();
 
             _isInitialized = true;
             _ansiConsole.LogMarkupLine("Steam session initialization complete!");
@@ -72,9 +70,12 @@ namespace SteamPrefill
             await RetrieveAppMetadataAsync(distinctAppIds);
 
             // Now we will be able to determine which apps can't be downloaded
-            var availableApps = await _appInfoHandler.FilterUnavailableAppsAsync(distinctAppIds);
-            
-            foreach (var app in availableApps)
+            var availableGames = _appInfoHandler.GetAvailableGames();
+
+            // Whitespace divider
+            _ansiConsole.WriteLine();
+
+            foreach (var app in availableGames)
             {
                 try
                 {
@@ -93,30 +94,26 @@ namespace SteamPrefill
             }
 
             _ansiConsole.MarkupLine("");
-            _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableApps.Count)} apps in {LightYellow(timer.FormattedElapsedString())}");
+            _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableGames.Count)} apps in {LightYellow(timer.FormattedElapsedString())}");
         }
 
         private async Task DownloadSingleAppAsync(uint appId, DownloadArguments downloadArgs)
         {
-            AppInfoShim appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+            AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
             _ansiConsole.LogMarkup($"Starting {Cyan(appInfo)}");
 
-            // Get all depots, and filter out any unavailable depots.
-            var allDepots = appInfo.Depots;
-            var validDepots = _depotHandler.RemoveInvalidDepots(allDepots);
-
             // Filter depots based on specified lang/os/architecture/etc
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, validDepots);
+            var filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots);
             if (!filteredDepots.Any())
             {
-                _ansiConsole.MarkupLine(Yellow("  No depots to download.  Current arguments filtered all depots"));
+                _ansiConsole.MarkupLine(LightYellow("  No depots to download.  Current arguments filtered all depots"));
                 return;
             }
 
-            await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots, appInfo);
+            await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
 
             // We will want to re-download the entire app, if any of the depots have been updated
-            if (downloadArgs.Force == false && !_depotHandler.AppHasUpdatedDepots(filteredDepots))
+            if (downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
             {
                 _ansiConsole.MarkupLine(Green("  Up to date!"));
                 return;
@@ -131,9 +128,10 @@ namespace SteamPrefill
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
+
             _ansiConsole.LogMarkup($"Downloading {Magenta(totalBytes.ToDecimalString())}");
 #if DEBUG
-            _ansiConsole.Markup($" from {Yellow(chunkDownloadQueue.Count)} chunks");
+            _ansiConsole.Markup($" from {LightYellow(chunkDownloadQueue.Count)} chunks");
 #endif
             _ansiConsole.MarkupLine("");
 
@@ -147,10 +145,11 @@ namespace SteamPrefill
             // Logging some metrics about the download
             var averageSpeed = ByteSize.FromBytes(totalBytes.Bytes / downloadTimer.Elapsed.TotalSeconds);
             var averageSpeedBits = $"{(averageSpeed.MegaBytes * 8).ToString("0.##")} Mbit/s";
-            _ansiConsole.LogMarkupLine($"Finished in {Yellow(downloadTimer.FormattedElapsedString())} - {Magenta(averageSpeedBits)}");
+            _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormattedElapsedString())} - {Magenta(averageSpeedBits)}");
             _ansiConsole.WriteLine();
         }
 
+        //TODO consider moving this into AppInfoHandler
         /// <summary>
         /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
         /// </summary>
@@ -160,14 +159,13 @@ namespace SteamPrefill
             {
                 await _appInfoHandler.BulkLoadAppInfosAsync(appIds);
 
-                // Once we have our info, we can also load information for related DLC
-                await _appInfoHandler.BulkLoadAppInfosAsync(_appInfoHandler.GetOwnedDlcAppIds());
-                await _appInfoHandler.BuildDlcDepotListAsync();
+                // Once we have loaded all the apps, we can also load information for related DLC
+                await _appInfoHandler.BulkLoadDlcAppInfoAsync();
+                
             });
             _ansiConsole.LogMarkupLine("Retrieved latest app metadata");
         }
-
-        //TODO document
+        
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
         {
             var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
@@ -200,42 +198,44 @@ namespace SteamPrefill
             return _steam3.OwnedAppIds;
         }
 
-        //TODO better name
         //TODO is there any way to possibly speed this up, without having to query steam?
-        //TODO document
-        private readonly string _selectedAppsPath = $"{AppConfig.ConfigDir}/selectedAppsToPrefill.json";
         public async Task SelectAppsAsync()
         {
             var allApps = _steam3.OwnedAppIds.ToList();
 
             // Need to load the latest app information from steam, so that we have an updated list of all owned games
             await RetrieveAppMetadataAsync(allApps);
-            var availableApps = await _appInfoHandler.FilterUnavailableAppsAsync(allApps);
+            var availableGames = _appInfoHandler.GetAvailableGames();
 
+            // Whitespace divider
+            _ansiConsole.WriteLine();
             _ansiConsole.Write(new Rule());
 
-            var multiSelect = new MultiSelectionPrompt<AppInfoShim>()
+            var multiSelect = new MultiSelectionPrompt<AppInfo>()
                               .Title(Underline(White("Select apps to prefill...")))
                               .NotRequired()
                               .PageSize(35)
                               .MoreChoicesText(Grey("(Use ↑/↓ to navigate.  Page Up/Page Down skips pages)"))
                               .InstructionsText(Grey($"(Press {Blue("<space>")} to toggle an app, {Green("<enter>")} to accept)"))
-                              .AddChoices(availableApps);
+                              .AddChoices(availableGames);
 
             // Restoring previously selected items
             foreach (var id in LoadPreviouslySelectedApps())
             {
-                var appInfo = availableApps.First(e => e.AppId == id);
-                multiSelect.Select(appInfo);
+                var appInfo = availableGames.FirstOrDefault(e => e.AppId == id);
+                if (appInfo != null)
+                {
+                    multiSelect.Select(appInfo);
+                }
             }
                 
             var selectedApps = _ansiConsole.Prompt(multiSelect);
-            await File.WriteAllTextAsync(_selectedAppsPath, JsonSerializer.ToJsonString(selectedApps.Select(e => e.AppId)));
+            await File.WriteAllTextAsync(AppConfig.UserSelectedAppsPath, JsonSerializer.ToJsonString(selectedApps.Select(e => e.AppId)));
 
             _ansiConsole.MarkupLine($"Selected {Magenta(selectedApps.Count)} apps to prefill!  ");
             
             var exeCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @".\SteamPrefill.exe" : @"./SteamPrefill";
-            _ansiConsole.MarkupLine("Apps will automatically be included by running " + Yellow($"{exeCommand} prefill"));
+            _ansiConsole.MarkupLine($"Apps will automatically be included by running {LightYellow($"{exeCommand} prefill")}");
         }
 
         private List<uint> _previouslySelectedApps;
@@ -243,9 +243,9 @@ namespace SteamPrefill
         {
             if (_previouslySelectedApps == null)
             {
-                if (File.Exists(_selectedAppsPath))
+                if (File.Exists(AppConfig.UserSelectedAppsPath))
                 {
-                    _previouslySelectedApps = JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(_selectedAppsPath));
+                    _previouslySelectedApps = JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(AppConfig.UserSelectedAppsPath));
                 }
                 else
                 {

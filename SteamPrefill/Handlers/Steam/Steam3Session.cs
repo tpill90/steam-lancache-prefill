@@ -17,16 +17,18 @@ namespace SteamPrefill.Handlers.Steam
     //TODO document this class
     public class Steam3Session
     {
+        //TODO move to settings
         private readonly string _packageCountPath = $"{AppConfig.CacheDir}/packageCount.txt";
         private readonly string _ownedAppIdsPath = $"{AppConfig.CacheDir}/OwnedAppIds.json";
         private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
-        // TODO make this private again
+        
         public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
         private HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
         
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
-        public readonly SteamContent steamContent;
+
+        public readonly SteamContent SteamContent;
         public readonly SteamApps SteamAppsApi;
         //TODO not sure if this should be public or not
         public readonly Client CdnClient;
@@ -43,7 +45,7 @@ namespace SteamPrefill.Handlers.Steam
             _steamClient = new SteamClient();
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
-            steamContent = _steamClient.GetHandler<SteamContent>();
+            SteamContent = _steamClient.GetHandler<SteamContent>();
 
             _callbackManager = new CallbackManager(_steamClient);
             _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
@@ -55,7 +57,6 @@ namespace SteamPrefill.Handlers.Steam
             CdnClient = new Client(_steamClient);
         }
         
-        // TODO document
         public void LoginToSteam()
         {
             ConfigureLoginDetails();
@@ -98,9 +99,8 @@ namespace SteamPrefill.Handlers.Steam
                 _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
             }
         }
-        
-        //TODO document
-        public void ConfigureLoginDetails()
+
+        private void ConfigureLoginDetails()
         {
             var username = UserAccountStore.Instance.GetUsername(_ansiConsole);
 
@@ -121,8 +121,7 @@ namespace SteamPrefill.Handlers.Steam
                 _logonDetails.SentryFileHash = bytes.ToSha1();
             }
         }
-
-        //TODO document
+        
         private SteamUser.LoggedOnCallback _loggedOnCallbackResult;
         private SteamUser.LoggedOnCallback AttemptSteamLogin()
         {
@@ -142,8 +141,7 @@ namespace SteamPrefill.Handlers.Steam
             }
             return _loggedOnCallbackResult;
         }
-
-        //TODO document
+        
         private int _failedLogonAttempts;
         private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
@@ -152,7 +150,7 @@ namespace SteamPrefill.Handlers.Steam
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
             if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
-                _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Yellow("2FA required for login.") +
+                _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(LightYellow("2FA required for login.") +
                                                                                          $"  Please enter your {Cyan("Steam Guard code")} from your authenticator app : "));
                 return false;
             }
@@ -188,7 +186,7 @@ namespace SteamPrefill.Handlers.Steam
             // SteamGuard code required
             if (loggedOn.Result == EResult.AccountLogonDenied)
             {
-                _logonDetails.AuthCode = _ansiConsole.Prompt(new TextPrompt<string>(Yellow("This account is protected by Steam Guard.") +
+                _logonDetails.AuthCode = _ansiConsole.Prompt(new TextPrompt<string>(LightYellow("This account is protected by Steam Guard.") +
                                                                                     "  Please enter the code sent to your email address:  "));
                 return false;
             }
@@ -214,9 +212,8 @@ namespace SteamPrefill.Handlers.Steam
         }
         
         bool _receivedLoginKey;
-        //TODO cleanup + comment
-        //TODO this takes a long time. ~5s
-        public void TryWaitForLoginKey()
+        //TODO This can be fairly flaky.  Sometimes fails to save the login key, for some currently unknown reason.
+        private void TryWaitForLoginKey()
         {
             if (_logonDetails.LoginKey != null)
             {
@@ -286,11 +283,13 @@ namespace SteamPrefill.Handlers.Steam
         #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
-        //TODO rename to WaitForLicenses or something similar
-        //TODO document when this runs
-        public void LoadAccountLicenses()
+        /// <summary>
+        /// Waits for the user's currently owned licenses(games) to be returned.
+        /// The license query is triggered on application startup, and requires busy-waiting to receive the callback
+        /// </summary>
+        public void WaitForLicenseCallback()
         {
-            _ansiConsole.StatusSpinner().Start("Retreiving owned apps...", _ =>
+            _ansiConsole.StatusSpinner().Start("Retrieving owned apps...", _ =>
             {
                 while (_loadAccountLicensesIsRunning)
                 {
@@ -304,14 +303,12 @@ namespace SteamPrefill.Handlers.Steam
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
-                //TODO handle
-                _ansiConsole.WriteLine($"Unable to get license list: {licenseList.Result}");
-                throw new Exception("aborted");
+                _ansiConsole.MarkupLine(Red($"Unexpected error while retrieving license list : {licenseList.Result}"));
+                throw new SteamLoginException("Unable to retrieve user licenses!");
             }
             LoadPackageInfo(licenseList.LicenseList);
         }
 
-        //TODO document
         private void LoadPackageInfo(IReadOnlyCollection<SteamApps.LicenseListCallback.License> licenseList)
         {
             // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
@@ -330,20 +327,21 @@ namespace SteamPrefill.Handlers.Steam
             var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
             var packages = jobResult.Results.SelectMany(e => e.Packages)
                                     .Select(e => e.Value)
+                                    .OrderBy(e => e.ID)
                                     .ToList();
             foreach (var package in packages)
             {
                 // Removing any free weekends that are no longer active
-                //TODO turn this into a property on some class
-                var expiryTimeKey = package.KeyValues["extended"].Children.FirstOrDefault(e => e.Name == "expirytime");
-                if (expiryTimeKey != null)
+                var expiryTime = package.KeyValues["extended"]["expirytime"];
+                if (expiryTime != KeyValue.Invalid)
                 {
-                    var expiryTimeUtc = DateTimeOffset.FromUnixTimeSeconds(1630256400).DateTime;
+                    var expiryTimeUtc = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiryTime.Value)).DateTime;
                     if (DateTime.Now > expiryTimeUtc)
                     {
                         continue;
                     }
                 }
+
                 foreach (KeyValue appId in package.KeyValues["appids"].Children)
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
@@ -361,7 +359,6 @@ namespace SteamPrefill.Handlers.Steam
         }
         #endregion
 
-        //TODO move this into app handler?
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this app.
         /// </summary>
@@ -372,15 +369,16 @@ namespace SteamPrefill.Handlers.Steam
             return OwnedAppIds.Contains(appid);
         }
 
-        //TODO move this into depot handler?
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this depot.
         /// </summary>
         /// <param name="depotId">Id of the depot to check for access</param>
         /// <returns>True if the user has access to the depot</returns>
-        public bool AccountHasDepotAccess(uint depotId)
+        public virtual bool AccountHasDepotAccess(uint depotId)
         {
             return OwnedDepotIds.Contains(depotId);
         }
+
+
     }
 }

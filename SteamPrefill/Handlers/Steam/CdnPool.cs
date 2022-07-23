@@ -42,7 +42,7 @@ namespace SteamPrefill.Handlers.Steam
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)
                 {
-                    var allServers = await _steamSession.steamContent.GetServersForSteamPipe();
+                    var allServers = await _steamSession.SteamContent.GetServersForSteamPipe();
                     var filteredServers = allServers.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0).ToList();
                     foreach (var server in filteredServers)
                     {

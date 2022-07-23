@@ -63,18 +63,26 @@ namespace SteamPrefill.CliCommands
             Environment.Exit(0);
         }
 
-        //TODO document
         private void ValidateSelectedAppIds(SteamManager steamManager)
         {
             var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
-            if (!(DownloadAllOwnedGames ?? default(bool)) && !userSelectedApps.Any())
+
+#if DEBUG
+            if (AppIds != null && AppIds.Any())
             {
-                _ansiConsole.MarkupLine(Red("No apps have been selected for prefill! At least 1 app is required!"));
-                _ansiConsole.MarkupLine(Red($"Use the {Cyan("select-apps")} command to interactively choose which apps to prefill. "));
-                _ansiConsole.MarkupLine("");
-                _ansiConsole.Markup(Red($"Alternatively, the flag {LightYellow("--all")} can be specified to prefill all owned apps"));
-                throw new CommandException(".", 1, true);
+                return;
             }
+#endif
+
+            if ((DownloadAllOwnedGames ?? default(bool)) || userSelectedApps.Any())
+            {
+                return;
+            }
+            _ansiConsole.MarkupLine(Red("No apps have been selected for prefill! At least 1 app is required!"));
+            _ansiConsole.MarkupLine(Red($"Use the {Cyan("select-apps")} command to interactively choose which apps to prefill. "));
+            _ansiConsole.MarkupLine("");
+            _ansiConsole.Markup(Red($"Alternatively, the flag {LightYellow("--all")} can be specified to prefill all owned apps"));
+            throw new CommandException(".", 1, true);
         }
 
         //TODO document
@@ -97,10 +105,11 @@ namespace SteamPrefill.CliCommands
         }
     }
 
-    //TODO document why this hacky workaround is required.
+    
     //TODO possibly consider implementing something similar in CliFx, so that boolean flags don't show 'Default: "False"'
     public class NullableBoolConverter : BindingConverter<bool?>
     {
+        // Required in order to prevent CliFx from showing the unnecessary 'Default: "False"' text for boolean flags
         public override bool? Convert(string rawValue)
         {
             return true;
