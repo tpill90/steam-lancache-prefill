@@ -1,8 +1,8 @@
+using System;
 using System.IO;
 
 namespace SteamPrefill.Settings
 {
-    //TODO document
     public static class AppConfig
     {
         static AppConfig()
@@ -12,14 +12,18 @@ namespace SteamPrefill.Settings
             Directory.CreateDirectory(CacheDir);
         }
 
-        public static string AccountSettingsStorePath => $"{ConfigDir}/account.config";
+        /// <summary>
+        /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
+        /// All data in here should be able to be deleted safely.
+        /// </summary>
+        public static readonly string CacheDir = Path.Combine(AppContext.BaseDirectory, "Cache");
 
         /// <summary>
-        /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs
+        /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
         /// </summary>
-        public static string CacheDir => "Cache";
+        public static readonly string ConfigDir = Path.Combine(AppContext.BaseDirectory, "Config");
 
-        //TODO find usages of this, and use Path.Combine for cross platform compatibility
-        public static string ConfigDir => "Config";
+        public static readonly string AccountSettingsStorePath = Path.Combine(ConfigDir, "account.config");
+        public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
     }
 }

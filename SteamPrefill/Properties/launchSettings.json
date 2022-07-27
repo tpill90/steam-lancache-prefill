@@ -8,7 +8,7 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --force"
     },
-    "Download All": {
+    "Download All - Force": {
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force"
     },
@@ -23,10 +23,6 @@
     "Dota 2 - Multiple Languages": {
       "commandName": "Project",
       "commandLineArgs": "prefill --app 570 --force"
-    },
-    "Unowned Free Game": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --app 1407200 --force"
     },
     "Account - 2FA": {
       "commandName": "Project",

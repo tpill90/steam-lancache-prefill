@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using ProtoBuf;
 using Spectre.Console;
+using SteamPrefill.Utils;
 using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Settings
@@ -52,9 +53,9 @@ namespace SteamPrefill.Settings
             ansiConsole.MarkupLine($"A {Cyan("Steam")} account is required in order to prefill apps!");
             var usernamePrompt = new TextPrompt<string>($"Please enter your {Cyan("Steam account name")} : ")
             {
-                //TODO move this color into the spectre colors class
-                PromptStyle = new Style(Color.MediumPurple1)
+                PromptStyle = new Style(SpectreColors.MediumPurple1)
             };
+            
             CurrentUsername = ansiConsole.Prompt(usernamePrompt);
             return CurrentUsername;
         }

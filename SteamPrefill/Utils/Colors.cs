@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Utils
+﻿using Spectre.Console;
+
+namespace SteamPrefill.Utils
 {
     public static class SpectreColors
     {
@@ -12,10 +14,11 @@
         public static string Olive(object inputObj) => $"[yellow4_1]{inputObj}[/]";
         public static string Red(object inputObj) => $"[red]{inputObj}[/]";
         public static string White(object inputObj) => $"[white]{inputObj}[/]";
-        //TODO replace usages of this with light yellow
         public static string Yellow(object inputObj) => $"[gold1]{inputObj}[/]";
 
         // Text styles
         public static string Underline(object inputObj) => $"[underline]{inputObj}[/]";
+
+        public static Color MediumPurple1 = Color.MediumPurple1;
     }
 }

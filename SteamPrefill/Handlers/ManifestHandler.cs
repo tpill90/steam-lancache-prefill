@@ -9,7 +9,6 @@ using SteamKit2;
 using SteamKit2.CDN;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models.Exceptions;
-using SteamPrefill.Models.Protos;
 using SteamPrefill.Utils;
 
 namespace SteamPrefill.Handlers
@@ -38,9 +37,9 @@ namespace SteamPrefill.Handlers
         /// Downloads all of the manifests for a list of specified depots.  Will retry up to 3 times, in the case of errors.
         /// </summary>
         /// <exception cref="ManifestException"></exception>
-        public async Task<ConcurrentBag<ProtoManifest>> GetAllManifestsAsync(List<DepotInfo> depots)
+        public async Task<ConcurrentBag<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
         {
-            var depotManifests = new ConcurrentBag<ProtoManifest>();
+            var depotManifests = new ConcurrentBag<Manifest>();
             int retryCount = 0;
             while (depotManifests.Count != depots.Count && retryCount < 3)
             {
@@ -61,9 +60,9 @@ namespace SteamPrefill.Handlers
             return depotManifests;
         }
         
-        private async Task<ConcurrentBag<ProtoManifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
+        private async Task<ConcurrentBag<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
         {
-            var depotManifests = new ConcurrentBag<ProtoManifest>();
+            var depotManifests = new ConcurrentBag<Manifest>();
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
                 Server server = _cdnPool.TakeConnection();
@@ -84,11 +83,11 @@ namespace SteamPrefill.Handlers
         /// <param name="depot">The depot to download a manifest for</param>
         /// <returns>A manifest file</returns>
         /// <exception cref="ManifestException">Throws if no manifest was returned by Steam</exception>
-        private async Task<ProtoManifest> GetSingleManifestAsync(DepotInfo depot, Server server)
+        private async Task<Manifest> GetSingleManifestAsync(DepotInfo depot, Server server)
         {
             if (File.Exists(depot.ManifestFileName))
             {
-                return ProtoManifest.LoadFromFile(depot.ManifestFileName);
+                return Manifest.LoadFromFile(depot.ManifestFileName);
             }
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
@@ -98,7 +97,7 @@ namespace SteamPrefill.Handlers
                 throw new ManifestException($"Unable to download manifest for depot {depot.Name} - {depot.DepotId}.  Manifest request received no response.");
             }
             
-            var protoManifest = new ProtoManifest(manifest, depot);
+            var protoManifest = new Manifest(manifest, depot);
             protoManifest.SaveToFile(depot.ManifestFileName);
             return protoManifest;
         }
@@ -117,7 +116,7 @@ namespace SteamPrefill.Handlers
         /// <exception cref="ManifestException">Throws if no valid manifest code was found</exception>
         private async Task<ManifestRequestCode> GetManifestRequestCodeAsync(DepotInfo depot)
         {
-            ulong manifestRequestCode = await _steam3Session.steamContent.GetManifestRequestCode(depot.DepotId, depot.ContainingAppId, depot.ManifestId.Value, "public");
+            ulong manifestRequestCode = await _steam3Session.SteamContent.GetManifestRequestCode(depot.DepotId, depot.ContainingAppId, depot.ManifestId.Value, "public");
             
             // If we could not get the manifest code, this is a fatal error, as it we can't download the manifest without it.
             if (manifestRequestCode == 0)

@@ -17,7 +17,6 @@ foreach($runtime in @("win-x64", "linux-x64", "osx-x64"))
     {
         $readyToRun = $true
     }
-    Write-Host $readyToRun -ForegroundColor Yellow
 
     Write-Host "Publishing $runtime" -ForegroundColor Cyan
     dotnet publish .\SteamPrefill\SteamPrefill.csproj `
@@ -29,9 +28,6 @@ foreach($runtime in @("win-x64", "linux-x64", "osx-x64"))
     /p:PublishReadyToRun=$readyToRun `
     /p:PublishTrimmed=true
 
-    Remove-Item $publishDir/Spectre.Console.xml
-
-    
     Compress-Archive -path $publishDir "$publishDir.zip"
 
     $folderSize = "{0:N2} MB" -f((Get-ChildItem $publishDir | Measure-Object -Property Length -sum).sum / 1Mb)

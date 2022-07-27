@@ -5,3 +5,4 @@ obj
 *.ak
 lockfile
 /SteamPrefill/SteamPrefill.csproj.user
+/SteamPrefill.sln.DotSettings.user

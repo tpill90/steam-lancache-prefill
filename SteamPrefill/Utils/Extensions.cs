@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -8,6 +9,8 @@ using System.Security.Cryptography;
 using ByteSizeLib;
 using CliFx.Infrastructure;
 using Spectre.Console;
+using SteamKit2;
+using SteamPrefill.Models.Enum;
 using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Utils
@@ -45,7 +48,7 @@ namespace SteamPrefill.Utils
                                                  new DownloadedColumn(), 
                                                  new TransferSpeedColumn
                                                  {
-                                                     Prefix = FileSizePrefix.Decimal,
+                                                     Base = FileSizeBase.Decimal,
                                                      DisplayBits = true
                                                  });
             return spectreProgress;
@@ -53,7 +56,7 @@ namespace SteamPrefill.Utils
 
         public static string ReadPassword(this IAnsiConsole console, string promptText = null)
         {
-            var defaultPrompt = $"Please enter your {Cyan("Steam password")}. {Yellow("(Password won't be saved)")} : ";
+            var defaultPrompt = $"Please enter your {Cyan("Steam password")}. {LightYellow("(Password won't be saved)")} : ";
             return console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
                                   .PromptStyle("white")
                                   .Secret());
@@ -138,6 +141,73 @@ namespace SteamPrefill.Utils
                 default:
                     return false;
             }
+        }
+    }
+
+    public static class KeyValueExtensions
+    {
+        /// <summary>
+        /// Attempts to convert and return the value of this instance as an unsigned long.
+        /// If the conversion is invalid, null is returned.
+        /// </summary>
+        /// <returns>The value of this instance as an unsigned long.</returns>
+        public static ulong? AsUnsignedLongNullable(this KeyValue keyValue)
+        {
+            ulong value;
+
+            if (ulong.TryParse(keyValue.Value, out value) == false)
+            {
+                return null;
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Attempts to convert and return the value of this instance as an unsigned int.
+        /// If the conversion is invalid, null is returned.
+        /// </summary>
+        /// <returns>The value of this instance as an unsigned int.</returns>
+        public static uint? AsUnsignedIntNullable(this KeyValue keyValue)
+        {
+            uint value;
+
+            if (uint.TryParse(keyValue.Value, out value) == false)
+            {
+                return null;
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// Attempts to convert and return the value of this instance as an enum.
+        /// If the conversion is invalid, null is returned.
+        /// </summary>
+        public static T AsEnum<T>(this KeyValue keyValue, bool toLower = false) where T : EnumBase<T>
+        {
+            if (keyValue == KeyValue.Invalid)
+            {
+                return null;
+            }
+            if (String.IsNullOrEmpty(keyValue.Value))
+            {
+                return null;
+            }
+            if (toLower)
+            {
+                return EnumBase<T>.Parse(keyValue.Value.ToLower());
+            }
+            return EnumBase<T>.Parse(keyValue.Value);
+        }
+
+        public static List<string> SplitCommaDelimited(this KeyValue keyValue)
+        {
+            if (keyValue == KeyValue.Invalid || String.IsNullOrEmpty(keyValue.Value))
+            {
+                return new List<string>();
+            }
+            return keyValue.Value.Split(",").ToList();
         }
     }
 }

@@ -17,7 +17,6 @@ using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Handlers
 {
-    //TODO document
     public class DownloadHandler
     {
         private readonly IAnsiConsole _ansiConsole;
@@ -144,10 +143,9 @@ namespace SteamPrefill.Handlers
                 var response = await _client.GetAsync("http://lancache.steamcontent.com/lancache-heartbeat");
                 if (!response.Headers.Contains("X-LanCache-Processed-By"))
                 {
-                    _ansiConsole.MarkupLine(Red($" Error!  {White("lancache.steamcontent.com")} is resolving to a private IP address ({Yellow(ipAddresses.First())}),\n" +
-                                                 " however no Lancache instance can be found at that address.\n" +
-                                                 " This likely means that there is an issue with your configuration.\n" +
-                                                 " Prefill is unable to continue, try again after resolving any configuration issues.\n"));
+                    _ansiConsole.MarkupLine(Red($" Error!  {White("lancache.steamcontent.com")} is resolving to a private IP address {Cyan($"({ipAddresses.First()})")},\n" +
+                                                 " however no Lancache can be found at that address.\n" +
+                                                 " Please check your configuration, and try again.\n"));
                     throw new LancacheNotFoundException($"No Lancache server detected at {ipAddresses.First()}");
                 }
                 _lancacheServerResolved = true;
@@ -156,15 +154,13 @@ namespace SteamPrefill.Handlers
 
             // If a public IP address is resolved, then it means that the Lancache is not configured properly, and we would end up downloading from the internet.
             // This will prompt a user to see if they still want to continue, as downloading from the internet could still be a good download speed test.
-            _ansiConsole.MarkupLine(Yellow($" Warning!  {White("lancache.steamcontent.com")} is resolving to a public IP address ({Yellow(ipAddresses.First())}),\n" +
-                                         " which likely means that there is an issue with your Lancache configuration.\n" +
-                                         " Prefill will download directly from the internet, and will .\n" +
-                                         " Prefill is unable to continue, try again after resolving any configuration issues.\n"));
+            _ansiConsole.MarkupLine(LightYellow($" Warning!  {White("lancache.steamcontent.com")} is resolving to a public IP address {Cyan($"({ipAddresses.First()})")}.\n" +
+                                                " Prefill will download directly from the internet, and will not be cached by Lancache.\n"));
 
-            _publicDownloadOverride = AnsiConsole.Prompt(new SelectionPrompt<bool>()
-                                                         .Title("Continue anyway?")
-                                                         .AddChoices(true, false)
-                                                         .UseConverter(e => e == false ? "No" : "Yes"));
+            _publicDownloadOverride = _ansiConsole.Prompt(new SelectionPrompt<bool>()
+                                                          .Title("Continue anyway?")
+                                                          .AddChoices(true, false)
+                                                          .UseConverter(e => e == false ? "No" : "Yes"));
         }
     }
 }

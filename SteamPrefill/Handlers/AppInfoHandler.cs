@@ -1,28 +1,26 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using SteamPrefill.Models;
-using SteamPrefill.Utils;
-using Spectre.Console;
 using SteamKit2;
 using SteamPrefill.Handlers.Steam;
+using SteamPrefill.Models.Enum;
 using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
-using static SteamPrefill.Utils.SpectreColors;
+using SteamPrefill.Models;
 
 namespace SteamPrefill.Handlers
 {
-    //TODO document
+    /// <summary>
+    /// Responsible for retrieving application metadata from Steam
+    /// </summary>
     public class AppInfoHandler
     {
-        private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
 
-        // TODO make private
-        public Dictionary<uint, AppInfoShim> LoadedAppInfos { get; private set; } = new Dictionary<uint, AppInfoShim>();
-        
-        public AppInfoHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
+        private Dictionary<uint, AppInfo> LoadedAppInfos { get; } = new Dictionary<uint, AppInfo>();
+
+        public AppInfoHandler(Steam3Session steam3Session)
         {
-            _ansiConsole = ansiConsole;
             _steam3Session = steam3Session;
         }
 
@@ -30,7 +28,7 @@ namespace SteamPrefill.Handlers
         /// Will return an AppInfo for the specified AppId, that contains various metadata about the app.
         /// If the information for the specified app hasn't already been retrieved, then a request to the Steam network will be made.
         /// </summary>
-        public async Task<AppInfoShim> GetAppInfoAsync(uint appId)
+        public async Task<AppInfo> GetAppInfoAsync(uint appId)
         {
             if (LoadedAppInfos.ContainsKey(appId))
             {
@@ -53,7 +51,7 @@ namespace SteamPrefill.Handlers
             {
                 return;
             }
-            
+
             // Some apps will require an additional "access token" in order to retrieve their app metadata
             var accessTokensResponse = await _steam3Session.SteamAppsApi.PICSGetAccessTokens(appIds, new List<uint>()).ToTask();
             var appTokens = accessTokensResponse.AppTokens;
@@ -75,73 +73,46 @@ namespace SteamPrefill.Handlers
             List<PicsProductInfo> appInfos = resultSet.Results.SelectMany(e => e.Apps).Select(e => e.Value).ToList();
             foreach (var app in appInfos)
             {
-                //TODO filter out tools and stuff here?
-                LoadedAppInfos.Add(app.ID, new AppInfoShim(app.ID, app.ChangeNumber, app.KeyValues));
+                LoadedAppInfos.Add(app.ID, new AppInfo(_steam3Session, app.ID, app.KeyValues));
             }
         }
 
-        //TODO document
-        public List<uint> GetOwnedDlcAppIds()
+        /// <summary>
+        /// Steam stores all DLCs for a game as separate "apps", so they must be loaded after the game's AppInfo has been retrieved,
+        /// and the list of DLC AppIds are known.
+        ///
+        /// Once the DLC apps are loaded, the final combined depot list (both the app + dlc apps) will be built.
+        /// </summary>
+        public async Task BulkLoadDlcAppInfoAsync()
         {
-            return LoadedAppInfos.Values
-                                 .SelectMany(e => e.DlcAppIds)
-                                 .Where(e => _steam3Session.AccountHasAppAccess(e))
-                                 .Distinct()
-                                 .ToList();
-        }
+            var dlcAppIds = LoadedAppInfos.Values.SelectMany(e => e.DlcAppIds).ToList();
+            await BulkLoadAppInfosAsync(dlcAppIds);
 
-        //TODO document
-        public async Task BuildDlcDepotListAsync()
-        {
-            foreach (var app in LoadedAppInfos.Values)
+            // Builds out the list of all depots for each game, including depots from all related DLCs
+            // DLCs are stored as separate "apps", so their info comes back separately.
+            foreach (var app in LoadedAppInfos.Values.Where(e => e.Type == AppType.Game))
             {
-                //TODO I don't like how many times I have to filter down by owned app ids
-                foreach (var dlcId in app.DlcAppIds.Where(e => _steam3Session.AccountHasAppAccess(e)))
+                foreach (var dlcApp in app.DlcAppIds)
                 {
-                    var dlcApp = await GetAppInfoAsync(dlcId);
-                    if (dlcApp.Depots != null)
-                    {
-                        app.Depots.AddRange(dlcApp.Depots);
-                    }
+                    app.Depots.AddRange((await GetAppInfoAsync(dlcApp)).Depots);
                 }
+                app.Depots = app.Depots.DistinctBy(e => e.DepotId).ToList();
             }
         }
 
-        // TODO document
-        //TODO need to filter out apps that don't support the specified operating system
-        public async Task<List<AppInfoShim>> FilterUnavailableAppsAsync(List<uint> appIds)
+        /// <summary>
+        /// Gets a list of all available games.  Will be filtered down to only games that are available, and support Windows.
+        /// </summary>
+        /// <returns>All currently available games for the current user</returns>
+        public List<AppInfo> GetAvailableGames()
         {
-            var result = new List<AppInfoShim>();
-            foreach (var appId in appIds)
-            {
-                var appInfo = await GetAppInfoAsync(appId);
-                if (appInfo.State == "eStateUnAvailable")
-                {
-                    continue;
-                }
-                if (appInfo.Common != null && appInfo.Common.Type.ToLower() != "game")
-                {
-                    continue;
-                }
-                // Checking for invalid apps
-                if (appInfo.Depots == null && appInfo.Common == null)
-                {
-                    //TODO log this to a file, or see if it keeps happening after finding an alternative way to list user apps
-                    //_ansiConsole.LogMarkupLine(Red("Unknown/Invalid AppID ") + appId + Red(".  Skipping..."));
-                    continue;
-                }
-                //TODO this doesn't seem to be working correctly for games I don't own
-                if (!_steam3Session.AccountHasAppAccess(appInfo.AppId))
-                {
-                    _ansiConsole.LogMarkupLine(Red($"App {appInfo.AppId} ({appInfo.Common.Name}) is not available from this account."));
-                    continue;
-                }
-                result.Add(appInfo);
-            }
-            // Whitespace divider
-            _ansiConsole.WriteLine();
+            var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game 
+                                                        && e.State != ReleaseState.eStateUnAvailable 
+                                                        && e.SupportsWindows)
+                                            .OrderBy(e => e.Name)
+                                            .ToList();
 
-            return result.OrderBy(e => e.Common.Name).ToList();
+            return apps;
         }
     }
 }
