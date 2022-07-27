@@ -93,10 +93,16 @@ namespace SteamPrefill.Handlers.Steam
 
         private void ConnectToSteam()
         {
+            var timeoutAfter = DateTime.Now.AddSeconds(30);
+
             _steamClient.Connect();
             while (!_steamClient.IsConnected)
             {
                 _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                if (DateTime.Now > timeoutAfter)
+                {
+                    throw new SteamLoginException("Timeout connecting to Steam...  Try again in a few moments");
+                }
             }
         }
 
@@ -125,7 +131,7 @@ namespace SteamPrefill.Handlers.Steam
         private SteamUser.LoggedOnCallback _loggedOnCallbackResult;
         private SteamUser.LoggedOnCallback AttemptSteamLogin()
         {
-            var loginTimeoutAfter = DateTime.Now.AddSeconds(30);
+            var timeoutAfter = DateTime.Now.AddSeconds(30);
 
             _loggedOnCallbackResult = null;
             _steamUser.LogOn(_logonDetails);
@@ -134,9 +140,9 @@ namespace SteamPrefill.Handlers.Steam
             while (_loggedOnCallbackResult == null)
             {
                 _callbackManager.RunWaitCallbacks(timeout: TimeSpan.FromSeconds(3));
-                if (DateTime.Now > loginTimeoutAfter)
+                if (DateTime.Now > timeoutAfter)
                 {
-                    throw new SteamLoginException("Timeout connecting to Steam3.");
+                    throw new SteamLoginException("Timeout logging into Steam...  Try again in a few moments");
                 }
             }
             return _loggedOnCallbackResult;
