@@ -109,7 +109,7 @@ namespace SteamPrefill.Handlers
             var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game 
                                                         && e.State != ReleaseState.eStateUnAvailable 
                                                         && e.SupportsWindows)
-                                            .OrderBy(e => e.Name)
+                                            .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
                                             .ToList();
 
             return apps;

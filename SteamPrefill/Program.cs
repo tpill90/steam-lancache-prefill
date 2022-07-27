@@ -4,19 +4,17 @@ using SteamPrefill.Utils;
 
 namespace SteamPrefill
 {
+    // TODO - Feature - Implement a DNS override to allow people to be able to run this app on the same machine as the lancache server
     // TODO - Bug - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry
     // TODO - Build - Fail build on both warnings + trim warnings
     // TODO - Tech debt - Do I need both Utf8Json and protobuf-net for serialization?
-    // TODO - Feature - Implement support for filtering by language/operating system/architecture
     // TODO - Feature - On the 'select-apps' multi-select, consider implementing the ability to type a letter and skip to games starting with that.
     // TODO - Feature - On the 'select-apps' multi-select, consider adding the ability to filter by typing in a query.
     // TODO - Documentation - Explain process for updating app
     // TODO - Feature - Consider adding a flag for not saving manifest cache.  
     // TODO - Feature - Add a command that clears out the manifest cache, and displays how much data was saved
-    // TODO - Feature - Implement multi language/operating system/architecture support.
 
     // TODO - should probably add file system logging, so that I can help people diagnose why things arent working for them
-    // TODO - Features - Consider which features from lancache-autofill should be ported over to this app - https://github.com/zeropingheroes/lancache-autofill
     // TODO - Features - Design a "benchmark mode" that runs a single/multiple applications in a loop.  If a game's manifests already exist, then there won't even be a need to login to Steam.
     // TODO - Build - Setup build using Github actions.  Should simply compile the application
     // TODO - General - Promote this app on r/lanparty and discord once it is finished.
@@ -30,8 +28,6 @@ namespace SteamPrefill
     // TODO - Performance - Figure out why this app isn't consistently hitting 10gbit download speeds.
     // TODO - Performance - See if grouping requests in a manner similar to battlenet-prefill (small/large groups) can help with overall download performance
     // TODO - Accuracy - Should figure out some way to verify that my app is completely downloading the games, in the exact same way steam does
-    // TODO - Bug - Figure out a way to filter out package 0.  It seems that I should be able to filter out apps that are tagged with "mod"
-    // TODO - Feature - Prompt to run prefill after selecting apps
     // TODO - Feature - Could it be easier to select multiple apps on the select screen, without having to press down + space repeatedly?  
     //                  Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
     // TODO - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
