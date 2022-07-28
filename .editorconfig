@@ -20,6 +20,8 @@ space_between_attribute_sections = false
 dotnet_diagnostic.CA1002.severity = none
 # CA1014: Mark assemblies with CLSCompliant
 dotnet_diagnostic.CA1014.severity = none
+# CA1031: Modify (method) to catch a more specific allowed exception type, or rethrow the exception
+dotnet_diagnostic.CA1031.severity = none
 # CA1034: Nested types should not be visible
 dotnet_diagnostic.CA1034.severity = none
 # CA1051: Do not declare visible instance fields

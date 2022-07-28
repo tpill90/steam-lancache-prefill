@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using SteamKit2;
 using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enum;
+using SteamPrefill.Models.Enums;
 using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
 using SteamPrefill.Models;
 
@@ -96,7 +97,10 @@ namespace SteamPrefill.Handlers
                 {
                     app.Depots.AddRange((await GetAppInfoAsync(dlcApp)).Depots);
                 }
-                app.Depots = app.Depots.DistinctBy(e => e.DepotId).ToList();
+
+                var distinctDepots = app.Depots.DistinctBy(e => e.DepotId).ToList();
+                app.Depots.Clear();
+                app.Depots.AddRange(distinctDepots);
             }
         }
 

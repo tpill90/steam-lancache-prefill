@@ -43,7 +43,7 @@ namespace SteamPrefill.CliCommands
 
             await UpdateChecker.CheckForUpdatesAsync();
 
-            var steamManager = new SteamManager(_ansiConsole);
+            using var steamManager = new SteamManager(_ansiConsole);
             ValidateSelectedAppIds(steamManager);
             try
             {
@@ -91,7 +91,7 @@ namespace SteamPrefill.CliCommands
             var appIdsToDownload = steamManager.LoadPreviouslySelectedApps();
             if (DownloadAllOwnedGames ?? default(bool))
             {
-                appIdsToDownload.AddRange(steamManager.GetAllUserAppIds());
+                appIdsToDownload.AddRange(steamManager.AllUserAppIds);
             }
 
 #if DEBUG // Experimental, debugging only

@@ -20,7 +20,7 @@ namespace SteamPrefill.CliCommands
             var ansiConsole = console.CreateAnsiConsole();
             try
             {
-                var steamManager = new SteamManager(ansiConsole);
+                using var steamManager = new SteamManager(ansiConsole);
                 steamManager.Initialize();
 
                 await steamManager.SelectAppsAsync();

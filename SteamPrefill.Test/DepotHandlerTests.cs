@@ -2,9 +2,9 @@
 using SteamPrefill.Handlers;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models;
-using SteamPrefill.Models.Enum;
+using SteamPrefill.Models.Enums;
 using Xunit;
-using OperatingSystem = SteamPrefill.Models.Enum.OperatingSystem;
+using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
 
 namespace SteamPrefill.Test
 {
