@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using Spectre.Console;
 using SteamKit2;
 using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enum;
+using SteamPrefill.Models.Enums;
 using SteamPrefill.Utils;
 
 namespace SteamPrefill.Models
@@ -22,14 +22,14 @@ namespace SteamPrefill.Models
         /// <summary>
         /// Includes this app's depots, as well as any depots from its "children" DLC apps
         /// </summary>
-        public List<DepotInfo> Depots { get; set; } = new List<DepotInfo>();
+        public List<DepotInfo> Depots { get; } = new List<DepotInfo>();
 
         public string Name { get; set; }
 
         /// <summary>
         /// Lists Operating Systems supported by this app.  If there is no OS listed, then it is assumed Windows is supported by default
         /// </summary>
-        public List<string> OSList { get; set; }
+        public List<string> OSList { get; }
 
         // Some games simply don't have any OSList at all, so this means that they should always be considered as supported.
         public bool SupportsWindows => !OSList.Any() || OSList.Contains("windows");

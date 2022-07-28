@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Models.Enum
+﻿namespace SteamPrefill.Models.Enums
 {
     public class Architecture : EnumBase<Architecture>
     {

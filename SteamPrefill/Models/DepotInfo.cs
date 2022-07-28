@@ -3,9 +3,9 @@ using System.Linq;
 using SteamPrefill.Settings;
 using JetBrains.Annotations;
 using SteamKit2;
-using SteamPrefill.Models.Enum;
+using SteamPrefill.Models.Enums;
 using SteamPrefill.Utils;
-using OperatingSystem = SteamPrefill.Models.Enum.OperatingSystem;
+using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
 
 namespace SteamPrefill.Models
 {
@@ -25,10 +25,10 @@ namespace SteamPrefill.Models
         public uint ContainingAppId { get; set; }
         public uint? DlcAppId { get; set; }
 
-        public List<OperatingSystem> SupportedOperatingSystems { get; set; } = new List<OperatingSystem>();
-        public Architecture Architecture { get; set; }
-        public List<Language> Languages { get; set; }
-        public bool? LowViolence { get; set; }
+        public List<OperatingSystem> SupportedOperatingSystems { get; init; } = new List<OperatingSystem>();
+        public Architecture Architecture { get; init; }
+        public List<Language> Languages { get; init; }
+        public bool? LowViolence { get; init; }
 
         public string ManifestFileName => $"{AppConfig.CacheDir}/{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 

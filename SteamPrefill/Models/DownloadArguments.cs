@@ -1,4 +1,4 @@
-﻿using SteamPrefill.Models.Enum;
+﻿using SteamPrefill.Models.Enums;
 
 namespace SteamPrefill.Models
 {

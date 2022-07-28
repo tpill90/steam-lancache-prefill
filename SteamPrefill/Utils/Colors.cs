@@ -19,6 +19,6 @@ namespace SteamPrefill.Utils
         // Text styles
         public static string Underline(object inputObj) => $"[underline]{inputObj}[/]";
 
-        public static Color MediumPurple1 = Color.MediumPurple1;
+        public static Color MediumPurple1 => Color.MediumPurple1;
     }
 }

@@ -7,7 +7,6 @@ using SteamPrefill.Models.Exceptions;
 using SteamPrefill.Utils;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -17,7 +16,7 @@ using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Handlers
 {
-    public class DownloadHandler
+    public sealed class DownloadHandler : IDisposable
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
@@ -70,12 +69,13 @@ namespace SteamPrefill.Handlers
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }
-        
+
+
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
         /// <returns>A list of failed requests</returns>
-        [SuppressMessage("CodeSmell", "ERP022:Unobserved exception in generic exception handler", Justification = "Want to catch all exceptions, regardless of type")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
         private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload)
         {
             double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
@@ -84,7 +84,6 @@ namespace SteamPrefill.Handlers
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             // Breaking up requests into smaller batches, to distribute the load across multiple CDNs.  Steam appears to get better download speeds when doing this.
-            int totalErrors = 0;
             var cdnServer = _cdnPool.TakeConnection();
 
             // Running multiple requests in parallel on a single CDN
@@ -108,14 +107,13 @@ namespace SteamPrefill.Handlers
                 }
                 catch
                 {
-                    totalErrors++;
                     failedRequests.Add(request);
                 }
                 progressTask.Increment(request.CompressedLength);
             });
 
             // Only return the connection for reuse if there were no errors
-            if (totalErrors == 0)
+            if (failedRequests.IsEmpty)
             {
                 _cdnPool.ReturnConnection(cdnServer);
             }
@@ -140,7 +138,7 @@ namespace SteamPrefill.Handlers
             if (ipAddresses.Any(e => e.IsInternal()))
             {
                 // If the IP resolves to a private subnet, then we want to query the Lancache server to see if it is actually there.
-                var response = await _client.GetAsync("http://lancache.steamcontent.com/lancache-heartbeat");
+                var response = await _client.GetAsync(new Uri("http://lancache.steamcontent.com/lancache-heartbeat"));
                 if (!response.Headers.Contains("X-LanCache-Processed-By"))
                 {
                     _ansiConsole.MarkupLine(Red($" Error!  {White("lancache.steamcontent.com")} is resolving to a private IP address {Cyan($"({ipAddresses.First()})")},\n" +
@@ -161,6 +159,11 @@ namespace SteamPrefill.Handlers
                                                           .Title("Continue anyway?")
                                                           .AddChoices(true, false)
                                                           .UseConverter(e => e == false ? "No" : "Yes"));
+        }
+
+        public void Dispose()
+        {
+            _client?.Dispose();
         }
     }
 }

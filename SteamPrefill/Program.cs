@@ -5,7 +5,7 @@ using SteamPrefill.Utils;
 namespace SteamPrefill
 {
     // TODO - Feature - Implement a DNS override to allow people to be able to run this app on the same machine as the lancache server
-    // TODO - Bug - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry
+    // TODO - Bug - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry.  Other users report the same
     // TODO - Build - Fail build on both warnings + trim warnings
     // TODO - Tech debt - Do I need both Utf8Json and protobuf-net for serialization?
     // TODO - Feature - On the 'select-apps' multi-select, consider implementing the ability to type a letter and skip to games starting with that.
@@ -23,6 +23,7 @@ namespace SteamPrefill
     // TODO - Test out https://github.com/microsoft/infersharpaction
     // TODO - documentation - improve formatting of readme.md
     // TODO - Documentation - Update documentation to show why you should be using UTF16.  Include an image showing before/after.  Also possibly do a check on startup?
+    // TODO - Documentation - Add this app to Lancache.net documentation
     // TODO - Performance - Benchmark allocations, especially during the download.  Write a benchmark.net test for the download stage.
     // TODO - Performance - Finish reducing allocation warnings in DPA.
     // TODO - Performance - Figure out why this app isn't consistently hitting 10gbit download speeds.
@@ -31,7 +32,7 @@ namespace SteamPrefill
     // TODO - Feature - Could it be easier to select multiple apps on the select screen, without having to press down + space repeatedly?  
     //                  Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
     // TODO - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
-    public class Program
+    public static class Program
     {
         public static async Task<int> Main()
         {

@@ -22,7 +22,7 @@ namespace SteamPrefill.Handlers.Steam
         private readonly string _ownedAppIdsPath = $"{AppConfig.CacheDir}/OwnedAppIds.json";
         private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
         
-        public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
+        public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
         private HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
         
         private readonly SteamClient _steamClient;
@@ -385,6 +385,9 @@ namespace SteamPrefill.Handlers.Steam
             return OwnedDepotIds.Contains(depotId);
         }
 
-
+        public void Dispose()
+        {
+            CdnClient.Dispose();
+        }
     }
 }

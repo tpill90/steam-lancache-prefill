@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Spectre.Console;
 using SteamPrefill.Settings;
@@ -14,7 +15,7 @@ namespace SteamPrefill.Utils
 {
     public static class UpdateChecker
     {
-        private static readonly string _repoName = "tpill90/steam-lancache-prefill";
+        private const string _repoName = "tpill90/steam-lancache-prefill";
         private static readonly string _lastUpdateCheckFile = $"{AppConfig.CacheDir}/lastUpdateCheck.txt";
 
         /// <summary>
@@ -39,11 +40,11 @@ namespace SteamPrefill.Utils
                 // Query Github for a list of all available releases
                 var response = await httpClient.GetStringAsync(new Uri($"https://api.github.com/repos/{_repoName}/releases"));
                 GithubRelease latestRelease = JsonSerializer.Deserialize<List<GithubRelease>>(response)
-                                                      .OrderByDescending(e => e.published_at)
+                                                      .OrderByDescending(e => e.PublishedAt)
                                                       .First();
 
                 // Compare the available releases against our known releases
-                var latestVersion = latestRelease.tag_name.Replace("v", "");
+                var latestVersion = latestRelease.TagName.Replace("v", "");
                 var assemblyVersion = typeof(Program).Assembly.GetName().Version.ToString(3);
                 if (latestVersion != assemblyVersion)
                 {
@@ -93,7 +94,10 @@ namespace SteamPrefill.Utils
 
     public class GithubRelease
     {
-        public string tag_name { get; set; }
-        public DateTime published_at { get; set; }
+        [DataMember(Name = "tag_name")]
+        public string TagName { get; set; }
+
+        [DataMember(Name = "published_at")]
+        public DateTime PublishedAt { get; set; }
     }
 }

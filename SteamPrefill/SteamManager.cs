@@ -19,7 +19,7 @@ using static SteamPrefill.Utils.SpectreColors;
 namespace SteamPrefill
 {
     //TODO document
-    public class SteamManager
+    public sealed class SteamManager : IDisposable
     {
         private readonly IAnsiConsole _ansiConsole;
 
@@ -45,7 +45,6 @@ namespace SteamPrefill
             UserAccountStore.LoadFromFile();
         }
 
-        private bool _isInitialized;
         /// <summary>
         /// Logs the user into the Steam network, and retrieves available CDN servers and account licenses.
         ///
@@ -56,7 +55,6 @@ namespace SteamPrefill
             _steam3.LoginToSteam();
             _steam3.WaitForLicenseCallback();
 
-            _isInitialized = true;
             _ansiConsole.LogMarkupLine("Steam session initialization complete!");
         }
 
@@ -188,15 +186,8 @@ namespace SteamPrefill
             return chunkQueue;
         }
 
-        public HashSet<uint> GetAllUserAppIds()
-        {
-            if (!_isInitialized)
-            {
-                throw new Exception("Steam session not initialized!");
-            }
-            //TODO there has to be a better way to know all the owned games, without including the invalid ones. Might be able to use the steam web api to do this.
-            return _steam3.OwnedAppIds;
-        }
+        //TODO look into seeing if there is a way to avoid having to expose this.  Possibly pass in a download parameter "downloadAll" and then use this internally
+        public HashSet<uint> AllUserAppIds => _steam3.OwnedAppIds;
 
         //TODO is there any way to possibly speed this up, without having to query steam?
         public async Task SelectAppsAsync()
@@ -253,6 +244,11 @@ namespace SteamPrefill
                 }
             }
             return _previouslySelectedApps;
+        }
+
+        public void Dispose()
+        {
+            _downloadHandler.Dispose();
         }
     }
 }

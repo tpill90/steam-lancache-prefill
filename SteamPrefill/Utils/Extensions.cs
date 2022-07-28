@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Net;
@@ -10,7 +11,7 @@ using ByteSizeLib;
 using CliFx.Infrastructure;
 using Spectre.Console;
 using SteamKit2;
-using SteamPrefill.Models.Enum;
+using SteamPrefill.Models.Enums;
 using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Utils
@@ -93,6 +94,7 @@ namespace SteamPrefill.Utils
             return new ConcurrentQueue<T>(list);
         }
 
+        [SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by Steam")]
         public static byte[] ToSha1(this byte[] input)
         {
             using var sha = SHA1.Create();
