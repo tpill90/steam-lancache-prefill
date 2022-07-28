@@ -39,6 +39,8 @@ namespace SteamPrefill.Models
         /// </summary>
         public AppType Type { get; set; }
 
+        public List<Category> Categories { get; init; }
+
         [UsedImplicitly]
         public AppInfo()
         {
@@ -75,6 +77,11 @@ namespace SteamPrefill.Models
                                      .Where(e => steamSession.AccountHasAppAccess(e))
                                      .ToList();
             }
+            
+            Categories = rootKeyValue["common"]["category"]
+                         .Children
+                         .Select(e => (Category)int.Parse(e.Name.Replace("category_", "")))
+                         .ToList();
         }
 
         public override string ToString()

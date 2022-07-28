@@ -105,17 +105,22 @@ namespace SteamPrefill.Handlers
         }
 
         /// <summary>
-        /// Gets a list of all available games.  Will be filtered down to only games that are available, and support Windows.
+        /// Gets a list of all available games, filtering out any unavailable, non-Windows games.
         /// </summary>
         /// <returns>All currently available games for the current user</returns>
         public List<AppInfo> GetAvailableGames()
         {
-            var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game 
-                                                        && e.State != ReleaseState.eStateUnAvailable 
+            var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
+            
+            //TODO test the performance of this on a larger game dataset, like 1000 games
+            var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game
+                                                        && e.State != ReleaseState.eStateUnAvailable
                                                         && e.SupportsWindows)
-                                            .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                                            .ToList();
-
+                                     .Where(e => !excludedAppIds.Contains(e.AppId))
+                                     .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.Mods_HL2))
+                                     .Where(e => !e.Name.Contains("AMD Driver Updater"))
+                                     .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                                     .ToList();
             return apps;
         }
     }
