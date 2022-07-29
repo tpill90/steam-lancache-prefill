@@ -8,6 +8,10 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --force"
     },
+    "DNS Override": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --dns-override 192.168.1.222 --force"
+    },
     "Download All - Force": {
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force"

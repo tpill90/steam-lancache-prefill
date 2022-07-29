@@ -5,6 +5,7 @@ using CliFx.Attributes;
 using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using Spectre.Console;
+using SteamPrefill.Models;
 using SteamPrefill.Utils;
 
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
@@ -20,7 +21,7 @@ namespace SteamPrefill.CliCommands
             var ansiConsole = console.CreateAnsiConsole();
             try
             {
-                using var steamManager = new SteamManager(ansiConsole);
+                using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
                 steamManager.Initialize();
 
                 await steamManager.SelectAppsAsync();

@@ -75,7 +75,7 @@ namespace SteamPrefill.Utils
 
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)
         {
-            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}".PadRight(65) + Yellow(elapsed.ToString(@"ss\.FFFF")));
+            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}".PadRight(65) + LightYellow(elapsed.ToString(@"ss\.FFFF")));
         }
     }
 

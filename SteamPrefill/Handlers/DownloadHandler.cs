@@ -21,11 +21,18 @@ namespace SteamPrefill.Handlers
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
         private readonly HttpClient _client;
-        
-        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
+
+        private readonly string _steamcontentUri = "lancache.steamcontent.com";
+
+        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, DownloadArguments downloadArguments)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
+
+            if (downloadArguments.OverrideLancacheIp != null)
+            {
+                _steamcontentUri = downloadArguments.OverrideLancacheIp.ToString();
+            }
 
             _client = new HttpClient
             {
@@ -92,7 +99,7 @@ namespace SteamPrefill.Handlers
                 var buffer = new byte[4096];
                 try
                 {
-                    var url = ZString.Format("http://lancache.steamcontent.com/depot/{0}/chunk/{1}", request.DepotId, request.ChunkId);
+                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", _steamcontentUri, request.DepotId, request.ChunkId);
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                     requestMessage.Headers.Host = cdnServer.Host;
                     
@@ -134,11 +141,11 @@ namespace SteamPrefill.Handlers
                 return;
             }
 
-            var ipAddresses = await Dns.GetHostAddressesAsync("lancache.steamcontent.com");
+            var ipAddresses = await Dns.GetHostAddressesAsync(_steamcontentUri);
             if (ipAddresses.Any(e => e.IsInternal()))
             {
                 // If the IP resolves to a private subnet, then we want to query the Lancache server to see if it is actually there.
-                var response = await _client.GetAsync(new Uri("http://lancache.steamcontent.com/lancache-heartbeat"));
+                var response = await _client.GetAsync(new Uri($"http://{_steamcontentUri}/lancache-heartbeat"));
                 if (!response.Headers.Contains("X-LanCache-Processed-By"))
                 {
                     _ansiConsole.MarkupLine(Red($" Error!  {White("lancache.steamcontent.com")} is resolving to a private IP address {Cyan($"({ipAddresses.First()})")},\n" +

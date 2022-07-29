@@ -4,7 +4,6 @@ using SteamPrefill.Utils;
 
 namespace SteamPrefill
 {
-    // TODO - Feature - Implement a DNS override to allow people to be able to run this app on the same machine as the lancache server
     // TODO - Bug - Steam doesn't seem to be saving credentials properly in australia.  Keeps requiring password reentry.  Other users report the same
     // TODO - Build - Fail build on both warnings + trim warnings
     // TODO - Tech debt - Do I need both Utf8Json and protobuf-net for serialization?

@@ -22,6 +22,7 @@ namespace SteamPrefill
     public sealed class SteamManager : IDisposable
     {
         private readonly IAnsiConsole _ansiConsole;
+        private readonly DownloadArguments _downloadArgs;
 
         private readonly Steam3Session _steam3;
         private readonly CdnPool _cdnPool;
@@ -31,14 +32,15 @@ namespace SteamPrefill
         private readonly DepotHandler _depotHandler;
         private readonly AppInfoHandler _appInfoHandler;
 
-        public SteamManager(IAnsiConsole ansiConsole)
+        public SteamManager(IAnsiConsole ansiConsole, DownloadArguments downloadArgs)
         {
             _ansiConsole = ansiConsole;
-            
+            _downloadArgs = downloadArgs;
+
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_steam3);
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, _downloadArgs);
             _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
             _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
 
@@ -52,13 +54,15 @@ namespace SteamPrefill
         /// </summary>
         public void Initialize()
         {
+            _ansiConsole.LogMarkupLine("Starting initialization!");
+
             _steam3.LoginToSteam();
             _steam3.WaitForLicenseCallback();
 
             _ansiConsole.LogMarkupLine("Steam session initialization complete!");
         }
 
-        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload, DownloadArguments downloadArgs)
+        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)
         {
             var timer = Stopwatch.StartNew();
 
@@ -77,7 +81,7 @@ namespace SteamPrefill
             {
                 try
                 {
-                    await DownloadSingleAppAsync(app.AppId, downloadArgs);
+                    await DownloadSingleAppAsync(app.AppId);
                 }
                 catch (LancacheNotFoundException e)
                 {
@@ -95,13 +99,13 @@ namespace SteamPrefill
             _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableGames.Count)} apps in {LightYellow(timer.FormattedElapsedString())}");
         }
 
-        private async Task DownloadSingleAppAsync(uint appId, DownloadArguments downloadArgs)
+        private async Task DownloadSingleAppAsync(uint appId)
         {
             AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
             _ansiConsole.LogMarkup($"Starting {Cyan(appInfo)}");
 
             // Filter depots based on specified lang/os/architecture/etc
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(downloadArgs, appInfo.Depots);
+            var filteredDepots = _depotHandler.FilterDepotsToDownload(_downloadArgs, appInfo.Depots);
             if (!filteredDepots.Any())
             {
                 _ansiConsole.MarkupLine(LightYellow("  No depots to download.  Current arguments filtered all depots"));
@@ -111,7 +115,7 @@ namespace SteamPrefill
             await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
 
             // We will want to re-download the entire app, if any of the depots have been updated
-            if (downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
+            if (_downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
             {
                 _ansiConsole.MarkupLine(Green("  Up to date!"));
                 return;
