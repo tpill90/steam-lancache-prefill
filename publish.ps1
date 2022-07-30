@@ -1,23 +1,18 @@
 Set-Location $PSScriptRoot
 $ErrorActionPreference = "Stop"
 
-Remove-Item publish -Recurse -Force -ErrorAction SilentlyContinue
-
 $csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
 $version = "$($csprojXml.ChildNodes.PropertyGroup.Version)".Trim()
 
 Remove-Item .\SteamPrefill\obj -Recurse -Force
+Get-ChildItem publish | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
 #TODO parallelize these builds
 foreach($runtime in @("win-x64", "linux-x64", "osx-x64"))
 {
     $publishDir = "publish/SteamPrefill-$version-$runtime"
 
-    $readyToRun = $false
-    if($runtime -eq "win-x64")
-    {
-        $readyToRun = $true
-    }
+    $readyToRun = $true
 
     Write-Host "Publishing $runtime" -ForegroundColor Cyan
     dotnet publish .\SteamPrefill\SteamPrefill.csproj `

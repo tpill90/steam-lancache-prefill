@@ -17,19 +17,18 @@ namespace SteamPrefill.Test
         {
             _steam3Mock = new Mock<Steam3Session>(null);
             // User will always have access to every depot
-            _steam3Mock.Setup(m => m.AccountHasDepotAccess(It.IsAny<uint>())).Returns(true);
-            _depotHandler = new DepotHandler(_steam3Mock.Object, null);
+            var steam3 = _steam3Mock.Object;
+            steam3.OwnedDepotIds.Add(123);
+
+            _depotHandler = new DepotHandler(steam3, null);
         }
 
         [Fact]
         public void UserDoesNotHaveDepotAccess_DepotIsFiltered()
         {
-            // User will have no access to any depots
-            _steam3Mock.Setup(m => m.AccountHasDepotAccess(It.IsAny<uint>())).Returns(false);
-            
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555 }
+                new DepotInfo { DepotId = 777, ManifestId = 55 }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);

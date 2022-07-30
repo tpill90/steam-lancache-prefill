@@ -27,7 +27,7 @@ namespace SteamPrefill.Models
 
         public List<OperatingSystem> SupportedOperatingSystems { get; init; } = new List<OperatingSystem>();
         public Architecture Architecture { get; init; }
-        public List<Language> Languages { get; init; }
+        public List<Language> Languages { get; init; } = new List<Language>();
         public bool? LowViolence { get; init; }
 
         public string ManifestFileName => $"{AppConfig.CacheDir}/{ContainingAppId}_{DepotId}_{ManifestId}.bin";
