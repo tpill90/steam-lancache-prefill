@@ -1,5 +1,4 @@
-﻿using Moq;
-using SteamPrefill.Handlers;
+﻿using SteamPrefill.Handlers;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models;
 using SteamPrefill.Models.Enums;
@@ -10,14 +9,12 @@ namespace SteamPrefill.Test
 {
     public class DepotHandlerTests
     {
-        private readonly Mock<Steam3Session> _steam3Mock;
         private readonly DepotHandler _depotHandler;
 
         public DepotHandlerTests()
         {
-            _steam3Mock = new Mock<Steam3Session>(null);
+            var steam3 = new Steam3Session(null);
             // User will always have access to every depot
-            var steam3 = _steam3Mock.Object;
             steam3.OwnedDepotIds.Add(123);
 
             _depotHandler = new DepotHandler(steam3, null);
@@ -47,7 +44,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);
             // Since the depot has no metadata, it should always be included
-            Assert.Equal(1, filteredDepots.Count);
+            Assert.Single(filteredDepots);
         }
 
         [Fact]
@@ -61,7 +58,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
             // We are only interested in windows depots, so we should expect the depot to be filtered
-            Assert.Equal(0, filteredDepots.Count);
+            Assert.Empty(filteredDepots);
         }
 
         [Fact]
@@ -75,7 +72,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
             // Since we want windows depots, the depot should be included
-            Assert.Equal(1, filteredDepots.Count);
+            Assert.Single(filteredDepots);
         }
 
         [Fact]
@@ -89,7 +86,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Architecture = Architecture.x86 }, depotList);
             // We are only interested in 32 bit depots, so we should expect the depot to be filtered
-            Assert.Equal(0, filteredDepots.Count);
+            Assert.Empty(filteredDepots);
         }
 
         [Fact]
@@ -103,7 +100,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Architecture = Architecture.x64 }, depotList);
             // Since we want 64 bit depots, then we should expect the depot to be included
-            Assert.Equal(1, filteredDepots.Count);
+            Assert.Single(filteredDepots);
         }
 
         [Fact]
@@ -117,7 +114,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Language = Language.English }, depotList);
             // We are only interested in english depots, so we should expect the depot to be filtered
-            Assert.Equal(0, filteredDepots.Count);
+            Assert.Empty(filteredDepots);
         }
 
         [Fact]
@@ -131,7 +128,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Language = Language.English }, depotList);
             // Since we want english depots, then we should expect the depot to be included
-            Assert.Equal(1, filteredDepots.Count);
+            Assert.Single(filteredDepots);
         }
 
         [Fact]
@@ -144,7 +141,7 @@ namespace SteamPrefill.Test
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);
             // Low violence depots should be expected to be filtered.
-            Assert.Equal(0, filteredDepots.Count);
+            Assert.Empty(filteredDepots);
         }
     }
 }

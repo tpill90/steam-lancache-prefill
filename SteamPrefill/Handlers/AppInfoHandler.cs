@@ -119,7 +119,7 @@ namespace SteamPrefill.Handlers
                                                         && e.State != ReleaseState.eStateUnAvailable
                                                         && e.SupportsWindows)
                                      .Where(e => !excludedAppIds.Contains(e.AppId))
-                                     .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.Mods_HL2))
+                                     .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
                                      .Where(e => !e.Name.Contains("AMD Driver Updater"))
                                      .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
                                      .ToList();

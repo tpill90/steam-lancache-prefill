@@ -54,8 +54,6 @@ namespace SteamPrefill
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, _downloadArgs);
             _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
             _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
-
-            UserAccountStore.LoadFromFile();
         }
 
         /// <summary>
@@ -162,6 +160,7 @@ namespace SteamPrefill
 
             // Logging some metrics about the download
             var averageSpeed = ByteSize.FromBytes(totalBytes.Bytes / downloadTimer.Elapsed.TotalSeconds);
+            //TODO improve formatting
             var averageSpeedBits = $"{(averageSpeed.MegaBytes * 8).ToString("0.##")} Mbit/s";
             _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormattedElapsedString())} - {Magenta(averageSpeedBits)}");
             _ansiConsole.WriteLine();
@@ -269,6 +268,7 @@ namespace SteamPrefill
         public void Dispose()
         {
             _downloadHandler.Dispose();
+            _steam3.Dispose();
         }
     }
 }

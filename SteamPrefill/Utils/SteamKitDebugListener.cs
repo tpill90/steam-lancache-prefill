@@ -1,22 +1,25 @@
 using Spectre.Console;
 using SteamKit2;
 
-/// <summary>
-/// Enable with :
-/// DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
-/// DebugLog.Enabled = true;
-/// </summary>
-public class SteamKitDebugListener : IDebugListener
+namespace SteamPrefill.Utils
 {
-    private readonly IAnsiConsole _ansiConsole;
-
-    public SteamKitDebugListener(IAnsiConsole ansiConsole)
+    /// <summary>
+    /// Enable with :
+    /// DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
+    /// DebugLog.Enabled = true;
+    /// </summary>
+    public class SteamKitDebugListener : IDebugListener
     {
-        _ansiConsole = ansiConsole;
-    }
+        private readonly IAnsiConsole _ansiConsole;
 
-    public void WriteLine(string category, string msg)
-    {
-        _ansiConsole.MarkupLine($"SteamKitDebug - {category}: {msg}");
+        public SteamKitDebugListener(IAnsiConsole ansiConsole)
+        {
+            _ansiConsole = ansiConsole;
+        }
+
+        public void WriteLine(string category, string msg)
+        {
+            _ansiConsole.MarkupLine($"SteamKitDebug - {category}: {msg}");
+        }
     }
 }
