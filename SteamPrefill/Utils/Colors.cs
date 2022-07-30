@@ -7,6 +7,7 @@ namespace SteamPrefill.Utils
         public static string Blue(object inputObj) => $"[blue]{inputObj}[/]";
         public static string Cyan(object inputObj) => $"[rgb(97,214,214)]{inputObj}[/]";
         public static string LightBlue(object inputObj) => $"[deepskyblue3]{inputObj}[/]";
+        public static string LightGreen(object inputObj) => $"[rgb(99,201,101)]{inputObj}[/]";
         public static string LightYellow(object inputObj) => $"[rgb(249,241,165)]{inputObj}[/]";
         public static string Green(object inputObj) => $"[green]{inputObj}[/]";
         public static string Grey(object inputObj) => $"[grey]{inputObj}[/]";

@@ -76,18 +76,17 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 ## Detailed Command Usage
 
 ### prefill
-#### --all
-Downloads all owned apps, useful for prefilling a completely empty cache.  
 
-### -f|--force
-By default, **SteamPrefill** will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.
-
-Running with the flag `--force` will override this behavior, and instead will always run the prefill, re-downloading all files for the specified product.  This flag may be useful for diagnostics, or benchmarking network performance.
+| Option |  | Example | |
+| ------- | --- | --- | --- |
+| --all   |     |     | Downloads all owned apps, useful for prefilling a completely empty cache.  |
+| --force | -f  |     | By default, **SteamPrefill** will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.  <br/><br/> Running with the flag `--force` will override this behavior, and instead will always run the prefill, re-downloading all files for the specified product.  This flag may be useful for diagnostics, or benchmarking network performance.  |
+| --dns-override | -d | 192.168.1.111 | Manually specifies the IP address for the Lancache server, in order to run the prefill on the Lancache server itself. <br/>  _**This is only required if running prefill on the Lancache server.**_  <br/>This should not be used in a typical setup where **SteamPrefill** is running on a client machine, e.g. a gaming machine that Steam is normally used on. <br/>| 
 
 # Need Help?
 If you are running into any issues, feel free to open up a Github issue on this repository.
 
-You can also find us at the [**LanCache.NET** Discord](https://discord.com/invite/BKnBS4u).
+You can also find us at the [**LanCache.NET** Discord](https://discord.com/invite/BKnBS4u), in the `#steam-prefill` channel.
 
 # Other Docs
 * [Development Configuration](/docs/Development.md)

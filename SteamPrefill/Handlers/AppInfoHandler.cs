@@ -47,6 +47,7 @@ namespace SteamPrefill.Handlers
         /// <param name="appIds">The list of App Ids to retrieve info for</param>
         public async Task BulkLoadAppInfosAsync(List<uint> appIds)
         {
+			//TODO move this account has app access call to the filtering step
             var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e) && _steam3Session.AccountHasAppAccess(e)).ToList();
             if (!appIdsToLoad.Any())
             {

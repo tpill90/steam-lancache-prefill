@@ -62,6 +62,7 @@ namespace SteamPrefill.Handlers
         
         private async Task<ConcurrentBag<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
         {
+            //TODO implement a timeout here
             var depotManifests = new ConcurrentBag<Manifest>();
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
 using CliFx.Exceptions;
-using CliFx.Extensibility;
 using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using Spectre.Console;
@@ -30,11 +30,15 @@ namespace SteamPrefill.CliCommands
         [CommandOption("all", Description = "Prefills all currently owned apps", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
-        [CommandOption("force", 
-            shortName: 'f', 
+        [CommandOption("force", 'f', 
             Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.", 
             Converter = typeof(NullableBoolConverter))]
         public bool? Force { get; init; }
+
+        [CommandOption("dns-override", 'd', 
+            Description = "Manually specifies the Lancache IP, used to prefill on the Lancache server.  Ex, '192.168.1.111'", 
+            Converter = typeof(IpAddressConverter))]
+        public IPAddress OverrideLancacheIp { get; init; }
 
         private IAnsiConsole _ansiConsole;
         public async ValueTask ExecuteAsync(IConsole console)
@@ -43,17 +47,21 @@ namespace SteamPrefill.CliCommands
 
             await UpdateChecker.CheckForUpdatesAsync();
 
-            using var steamManager = new SteamManager(_ansiConsole);
+            var downloadArgs = new DownloadArguments
+            {
+                Force = Force ?? default(bool),
+                OverrideLancacheIp = OverrideLancacheIp
+            };
+
+            using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
             ValidateSelectedAppIds(steamManager);
+
             try
             {
                 steamManager.Initialize();
                 List<uint> appIdsToDownload = BuildDownloadAppIdsList(steamManager);
-                var downloadArgs = new DownloadArguments
-                {
-                    Force = Force ?? default(bool)
-                };
-                await steamManager.DownloadMultipleAppsAsync(appIdsToDownload, downloadArgs);
+                
+                await steamManager.DownloadMultipleAppsAsync(appIdsToDownload);
             }
             catch (Exception e)
             {
@@ -86,6 +94,7 @@ namespace SteamPrefill.CliCommands
         }
 
         //TODO document
+        //TODO can probably move this into steam manager itself
         private List<uint> BuildDownloadAppIdsList(SteamManager steamManager)
         {
             var appIdsToDownload = steamManager.LoadPreviouslySelectedApps();
@@ -102,17 +111,6 @@ namespace SteamPrefill.CliCommands
 #endif
 
             return appIdsToDownload;
-        }
-    }
-
-    
-    //TODO possibly consider implementing something similar in CliFx, so that boolean flags don't show 'Default: "False"'
-    public class NullableBoolConverter : BindingConverter<bool?>
-    {
-        // Required in order to prevent CliFx from showing the unnecessary 'Default: "False"' text for boolean flags
-        public override bool? Convert(string rawValue)
-        {
-            return true;
         }
     }
 }
