@@ -6,8 +6,9 @@ Remove-Item publish -Recurse -Force -ErrorAction SilentlyContinue
 $csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
 $version = "$($csprojXml.ChildNodes.PropertyGroup.Version)".Trim()
 
+Remove-Item .\SteamPrefill\obj -Recurse -Force
 
-# Windows publish
+#TODO parallelize these builds
 foreach($runtime in @("win-x64", "linux-x64", "osx-x64"))
 {
     $publishDir = "publish/SteamPrefill-$version-$runtime"

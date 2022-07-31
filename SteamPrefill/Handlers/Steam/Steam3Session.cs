@@ -327,8 +327,22 @@ namespace SteamPrefill.Handlers.Steam
                     return;
                 }
             }
-            
-            var packageRequests = licenseList.Select(package => new SteamApps.PICSRequest(package.PackageID)).ToList();
+
+            Dictionary<uint, ulong> packageTokenDict = licenseList.Where(e => e.AccessToken > 0)
+                                                                  .ToDictionary(e => e.PackageID, e => e.AccessToken);
+            var packageRequests = new List<SteamApps.PICSRequest>();
+            foreach (var license in licenseList)
+            {
+                var request = new SteamApps.PICSRequest(license.PackageID);
+
+                // Some packages require a access token in order to request their apps/depot list
+                if (packageTokenDict.TryGetValue(license.PackageID, out var token))
+                {
+                    request.AccessToken = token;
+                }
+                packageRequests.Add(request);
+            }
+
             //TODO async
             var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
             var packages = jobResult.Results.SelectMany(e => e.Packages)
