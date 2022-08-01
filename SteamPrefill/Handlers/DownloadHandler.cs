@@ -162,6 +162,7 @@ namespace SteamPrefill.Handlers
             _ansiConsole.MarkupLine(LightYellow($" Warning!  {White("lancache.steamcontent.com")} is resolving to a public IP address {Cyan($"({ipAddresses.First()})")}.\n" +
                                                 " Prefill will download directly from the internet, and will not be cached by Lancache.\n"));
 
+            // TODO Setting this to false doesnt skip the download
             _publicDownloadOverride = _ansiConsole.Prompt(new SelectionPrompt<bool>()
                                                           .Title("Continue anyway?")
                                                           .AddChoices(true, false)

@@ -67,8 +67,10 @@ namespace SteamPrefill.CliCommands
             {
                 _ansiConsole.WriteException(e);
             }
-            // For whatever reason, SteamKit2 prevents the application from closing normally.  Have to put this hack here so the app actually closes.
-            Environment.Exit(0);
+            finally
+            {
+                steamManager.Shutdown();
+            }
         }
 
         private void ValidateSelectedAppIds(SteamManager steamManager)

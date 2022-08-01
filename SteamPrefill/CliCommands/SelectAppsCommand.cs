@@ -19,9 +19,10 @@ namespace SteamPrefill.CliCommands
         public async ValueTask ExecuteAsync(IConsole console)
         {
             var ansiConsole = console.CreateAnsiConsole();
+            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
             try
             {
-                using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
+                
                 steamManager.Initialize();
 
                 await steamManager.SelectAppsAsync();
@@ -30,9 +31,10 @@ namespace SteamPrefill.CliCommands
             {
                 ansiConsole.WriteException(e);
             }
-
-            // For whatever reason, SteamKit2 prevents the application from closing normally.  Have to put this hack here so the app actually closes.
-            Environment.Exit(0);
+            finally
+            {
+                steamManager.Shutdown();
+            }
         }
     }
 }
