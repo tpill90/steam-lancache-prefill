@@ -62,6 +62,11 @@ namespace SteamPrefill
             _ansiConsole.LogMarkupLine("Steam session initialization complete!");
         }
 
+        public void Shutdown()
+        {
+            _steam3.Disconnect();
+        }
+
         public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)
         {
             var timer = Stopwatch.StartNew();

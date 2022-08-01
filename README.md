@@ -95,3 +95,5 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 * https://steamdb.info/
 * https://steamstat.us/
 * https://steam.readthedocs.io/en/latest/intro.html
+* https://steamapi.xpaw.me/
+* https://steamapi.xpaw.me/#ISteamDirectory/GetCMList

@@ -48,11 +48,11 @@ namespace SteamPrefill.Handlers.Steam
             SteamContent = _steamClient.GetHandler<SteamContent>();
 
             _callbackManager = new CallbackManager(_steamClient);
+            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(connected => { });
             _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
-            _callbackManager.RunCallbacks();
 
             CdnClient = new Client(_steamClient);
         }
@@ -96,9 +96,10 @@ namespace SteamPrefill.Handlers.Steam
             var timeoutAfter = DateTime.Now.AddSeconds(30);
 
             _steamClient.Connect();
+            _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+
             while (!_steamClient.IsConnected)
             {
-                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
                 if (DateTime.Now > timeoutAfter)
                 {
                     throw new SteamLoginException("Timeout connecting to Steam...  Try again in a few moments");
@@ -226,7 +227,7 @@ namespace SteamPrefill.Handlers.Steam
                 return;
             }
 
-            var totalWaitPeriod = DateTime.Now.AddSeconds(3);
+            var totalWaitPeriod = DateTime.Now.AddSeconds(5);
             while (true)
             {
                 if (DateTime.Now >= totalWaitPeriod)
@@ -238,7 +239,7 @@ namespace SteamPrefill.Handlers.Steam
                 {
                     return;
                 }
-                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromSeconds(3));
+                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
             }
         }
 
@@ -249,6 +250,12 @@ namespace SteamPrefill.Handlers.Steam
 
             _steamUser.AcceptNewLoginKey(loginKey);
             _receivedLoginKey = true;
+        }
+
+        public void Disconnect()
+        {
+            _steamUser.LogOff();
+            _steamClient.Disconnect();
         }
         
         #endregion
