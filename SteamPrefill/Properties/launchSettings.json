@@ -16,11 +16,11 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force"
     },
-    "Game with DLC - FFXV": {
+    "Game by ID": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --app 637650 --force"
+      "commandLineArgs": "prefill --app 590380 --force"
     },
-    "Game with Duplicate Chunks - DR4": {
+    "Game with Duplicate Chunks + DLC - DR4": {
       "commandName": "Project",
       "commandLineArgs": "prefill --app 543460 --force"
     },

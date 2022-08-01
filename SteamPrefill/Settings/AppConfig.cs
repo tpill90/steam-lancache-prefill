@@ -16,7 +16,7 @@ namespace SteamPrefill.Settings
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
         /// </summary>
-        public static readonly string CacheDir = Path.Combine(AppContext.BaseDirectory, "Cache");
+        public static readonly string CacheDir = Path.Combine(AppContext.BaseDirectory, "Cache", "v2");
 
         /// <summary>
         /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
