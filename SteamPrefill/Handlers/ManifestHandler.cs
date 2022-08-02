@@ -92,6 +92,7 @@ namespace SteamPrefill.Handlers
             }
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
+            //TODO see if its possible to remove this dependency on CdnClient
             DepotManifest manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
             if (manifest == null)
             {
