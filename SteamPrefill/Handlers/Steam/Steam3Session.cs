@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security.Authentication;
@@ -16,7 +16,7 @@ using JsonSerializer = Utf8Json.JsonSerializer;
 namespace SteamPrefill.Handlers.Steam
 {
     //TODO document this class
-    public class Steam3Session
+    public sealed class Steam3Session : IDisposable
     {
         //TODO move to settings
         private readonly string _packageCountPath = $"{AppConfig.CacheDir}/packageCount.txt";
@@ -38,6 +38,8 @@ namespace SteamPrefill.Handlers.Steam
         
         private SteamUser.LogOnDetails _logonDetails;
         private readonly IAnsiConsole _ansiConsole;
+
+        private readonly UserAccountStore _userAccountStore;
 
         public Steam3Session(IAnsiConsole ansiConsole)
         {
@@ -62,6 +64,8 @@ namespace SteamPrefill.Handlers.Steam
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
             
             CdnClient = new Client(_steamClient);
+
+            _userAccountStore = UserAccountStore.LoadFromFile();
         }
 
         public void LoginToSteam()
@@ -135,10 +139,10 @@ namespace SteamPrefill.Handlers.Steam
 
         private void ConfigureLoginDetails()
         {
-            var username = UserAccountStore.Instance.GetUsername(_ansiConsole);
+            var username = _userAccountStore.GetUsername(_ansiConsole);
 
             string loginKey;
-            UserAccountStore.Instance.LoginKeys.TryGetValue(username, out loginKey);
+            _userAccountStore.LoginKeys.TryGetValue(username, out loginKey);
             
             _logonDetails = new SteamUser.LogOnDetails
             {
@@ -149,13 +153,15 @@ namespace SteamPrefill.Handlers.Steam
                 LoginID = 0x534DD2
             };
             // Sentry file is required when using Steam Guard w\ email
-            if (UserAccountStore.Instance.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
+            if (_userAccountStore.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
             {
                 _logonDetails.SentryFileHash = bytes.ToSha1();
             }
         }
         
         private SteamUser.LoggedOnCallback _loggedOnCallbackResult;
+
+        [SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "while() loop is not infinite.  _loggedOnCallbackResult is set after logging into Steam")]
         private SteamUser.LoggedOnCallback AttemptSteamLogin()
         {
             var timeoutAfter = DateTime.Now.AddSeconds(30);
@@ -197,7 +203,7 @@ namespace SteamPrefill.Handlers.Steam
             var loginKeyExpired = _logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
             if (loginKeyExpired)
             {
-                UserAccountStore.Instance.LoginKeys.Remove(_logonDetails.Username);
+                _userAccountStore.LoginKeys.Remove(_logonDetails.Username);
                 _logonDetails.LoginKey = null;
                 _logonDetails.Password = _ansiConsole.ReadPassword("Steam session expired!  Password re-entry required!");
                 return false;
@@ -267,8 +273,8 @@ namespace SteamPrefill.Handlers.Steam
 
         private void LoginKeyCallback(SteamUser.LoginKeyCallback loginKey)
         {
-            UserAccountStore.Instance.LoginKeys[_logonDetails.Username] = loginKey.LoginKey;
-            UserAccountStore.Save();
+            _userAccountStore.LoginKeys[_logonDetails.Username] = loginKey.LoginKey;
+            _userAccountStore.Save();
 
             _steamUser.AcceptNewLoginKey(loginKey);
             _receivedLoginKey = true;
@@ -294,8 +300,8 @@ namespace SteamPrefill.Handlers.Steam
         /// </summary>
         private void UpdateMachineAuthCallback(SteamUser.UpdateMachineAuthCallback machineAuth)
         {
-            UserAccountStore.Instance.SentryData[_logonDetails.Username] = machineAuth.Data;
-            UserAccountStore.Save();
+            _userAccountStore.SentryData[_logonDetails.Username] = machineAuth.Data;
+            _userAccountStore.Save();
 
             var authResponse = new SteamUser.MachineAuthDetails
             {
@@ -345,6 +351,7 @@ namespace SteamPrefill.Handlers.Steam
             LoadPackageInfo(licenseList.LicenseList);
         }
 
+        [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "Can't do async here, SteamKit2 doesn't support it.")]
         private void LoadPackageInfo(IReadOnlyCollection<SteamApps.LicenseListCallback.License> licenseList)
         {
             // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
@@ -373,7 +380,6 @@ namespace SteamPrefill.Handlers.Steam
                 packageRequests.Add(request);
             }
 
-            //TODO async
             var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
             var packages = jobResult.Results.SelectMany(e => e.Packages)
                                     .Select(e => e.Value)
@@ -427,6 +433,11 @@ namespace SteamPrefill.Handlers.Steam
         public bool AccountHasDepotAccess(uint depotId)
         {
             return OwnedDepotIds.Contains(depotId);
+        }
+
+        public void Dispose()
+        {
+            CdnClient.Dispose();
         }
     }
 }

@@ -33,9 +33,6 @@ namespace SteamPrefill.Settings
         [ProtoMember(3)]
         public string CurrentUsername { get; private set; }
         
-        public static UserAccountStore Instance;
-        static bool Loaded => Instance != null;
-
         private UserAccountStore()
         {
             SentryData = new Dictionary<string, byte[]>();
@@ -60,32 +57,21 @@ namespace SteamPrefill.Settings
             return CurrentUsername;
         }
 
-        public static void LoadFromFile()
+        public static UserAccountStore LoadFromFile()
         {
-            if (Loaded)
-            {
-                throw new Exception("Config already loaded");
-            }
-
             if (!File.Exists(AppConfig.AccountSettingsStorePath))
             {
-                Instance = new UserAccountStore();
-                return;
+                return new UserAccountStore();
             }
 
             using var fileStream = File.Open(AppConfig.AccountSettingsStorePath, FileMode.Open, FileAccess.Read);
-            Instance = Serializer.Deserialize<UserAccountStore>(fileStream);
+            return Serializer.Deserialize<UserAccountStore>(fileStream);
         }
 
-        public static void Save()
+        public void Save()
         {
-            if (!Loaded)
-            {
-                throw new Exception("Saved config before loading");
-            }
-
             using var fs = File.Open(AppConfig.AccountSettingsStorePath, FileMode.Create, FileAccess.Write);
-            Serializer.Serialize(fs, Instance);
+            Serializer.Serialize(fs, this);
         }
     }
 }
