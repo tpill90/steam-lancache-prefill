@@ -24,7 +24,7 @@ namespace SteamPrefill.Handlers.Steam
         private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
         
         public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
-        private HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
+        public HashSet<uint> OwnedDepotIds { get; private set; } = new HashSet<uint>();
         
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
@@ -424,7 +424,7 @@ namespace SteamPrefill.Handlers.Steam
         /// </summary>
         /// <param name="depotId">Id of the depot to check for access</param>
         /// <returns>True if the user has access to the depot</returns>
-        public virtual bool AccountHasDepotAccess(uint depotId)
+        public bool AccountHasDepotAccess(uint depotId)
         {
             return OwnedDepotIds.Contains(depotId);
         }

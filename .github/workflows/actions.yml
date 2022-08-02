@@ -1,0 +1,25 @@
+name: Pipeline
+on: [push]
+
+permissions:
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Build
+      run: dotnet build --no-restore -c Release
+    - name: Test
+      run: >
+        cd SteamPrefill.Test;
+        dotnet test --no-restore -c Release
