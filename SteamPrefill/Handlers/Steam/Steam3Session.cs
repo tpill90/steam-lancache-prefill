@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Authentication;
@@ -41,22 +42,28 @@ namespace SteamPrefill.Handlers.Steam
         public Steam3Session(IAnsiConsole ansiConsole)
         {
             _ansiConsole = ansiConsole;
-            
+
             _steamClient = new SteamClient();
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             SteamContent = _steamClient.GetHandler<SteamContent>();
 
             _callbackManager = new CallbackManager(_steamClient);
-            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(connected => { });
+
+            // This callback is triggered when SteamKit2 makes a successful connection
+            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(e => _isConnecting = false);
+            // If a connection attempt fails in anyway, SteamKit2 notifies of the failure with a "disconnect"
+            _callbackManager.Subscribe<SteamClient.DisconnectedCallback>(e => _isConnecting = false);
+
             _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
-            _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
 
+            _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
+            
             CdnClient = new Client(_steamClient);
         }
-        
+
         public void LoginToSteam()
         {
             ConfigureLoginDetails();
@@ -65,6 +72,7 @@ namespace SteamPrefill.Handlers.Steam
             bool logonSuccess = false;
             while (!logonSuccess)
             {
+                _callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                 SteamUser.LoggedOnCallback logonResult = null;
                 _ansiConsole.StatusSpinner().Start("Connecting to Steam...", ctx =>
                 {
@@ -89,23 +97,41 @@ namespace SteamPrefill.Handlers.Steam
             });
         }
 
-        #region Logging into Steam
+        #region  Connecting to Steam
 
+        // Used to busy wait until the connection attempt finishes in either a success or failure
+        private bool _isConnecting;
+
+        /// <summary>
+        /// Attempts to establish a connection to the Steam network.
+        /// Retries if necessary until successful connection is established
+        /// </summary>
+        /// <exception cref="SteamConnectionException">Throws if unable to connect to Steam</exception>
         private void ConnectToSteam()
         {
             var timeoutAfter = DateTime.Now.AddSeconds(30);
 
-            _steamClient.Connect();
-            _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
-
+            // Busy waiting until the client has a successful connection established
             while (!_steamClient.IsConnected)
             {
-                if (DateTime.Now > timeoutAfter)
+                _isConnecting = true;
+                _steamClient.Connect();
+                
+                // Busy waiting until SteamKit2 either succeeds/fails the connection attempt
+                while (_isConnecting)
                 {
-                    throw new SteamLoginException("Timeout connecting to Steam...  Try again in a few moments");
+                    _callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
+                    if (DateTime.Now > timeoutAfter)
+                    {
+                        throw new SteamConnectionException("Timeout connecting to Steam...  Try again in a few moments");
+                    }
                 }
             }
         }
+
+        #endregion
+
+        #region Logging into Steam
 
         private void ConfigureLoginDetails()
         {
@@ -140,7 +166,7 @@ namespace SteamPrefill.Handlers.Steam
             // Busy waiting for the callback to complete, then we can return the callback value synchronously
             while (_loggedOnCallbackResult == null)
             {
-                _callbackManager.RunWaitCallbacks(timeout: TimeSpan.FromSeconds(3));
+				_callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                 if (DateTime.Now > timeoutAfter)
                 {
                     throw new SteamLoginException("Timeout logging into Steam...  Try again in a few moments");
@@ -227,19 +253,15 @@ namespace SteamPrefill.Handlers.Steam
                 return;
             }
 
-            var totalWaitPeriod = DateTime.Now.AddSeconds(5);
-            while (true)
+            var totalWaitPeriod = DateTime.Now.AddSeconds(10);
+            while (!_receivedLoginKey)
             {
                 if (DateTime.Now >= totalWaitPeriod)
                 {
                     _ansiConsole.LogMarkupLine(Red("Failed to save Steam session key.  Steam account will not stay logged in..."));
                     return;
                 }
-                if (_receivedLoginKey)
-                {
-                    return;
-                }
-                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
+                _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(50));
             }
         }
 
@@ -306,13 +328,14 @@ namespace SteamPrefill.Handlers.Steam
             {
                 while (_loadAccountLicensesIsRunning)
                 {
-                    _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                    _callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                 }
             });
         }
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)
         {
+            _ansiConsole.LogMarkupLine(LightYellow("LicenseListCallback"));
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
@@ -404,11 +427,6 @@ namespace SteamPrefill.Handlers.Steam
         public virtual bool AccountHasDepotAccess(uint depotId)
         {
             return OwnedDepotIds.Contains(depotId);
-        }
-
-        public void Dispose()
-        {
-            CdnClient.Dispose();
         }
     }
 }

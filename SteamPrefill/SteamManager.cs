@@ -11,6 +11,7 @@ using SteamPrefill.Models;
 using SteamPrefill.Settings;
 using SteamPrefill.Utils;
 using Spectre.Console;
+using SteamKit2;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models.Exceptions;
 using Utf8Json;
@@ -37,6 +38,16 @@ namespace SteamPrefill
             _ansiConsole = ansiConsole;
             _downloadArgs = downloadArgs;
 
+            #if DEBUG
+
+            if (AppConfig.EnableSteamKitDebugLogs)
+            {
+                DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
+                DebugLog.Enabled = true;
+            }
+
+            #endif
+            
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_steam3);
@@ -54,7 +65,7 @@ namespace SteamPrefill
         /// </summary>
         public void Initialize()
         {
-            _ansiConsole.LogMarkupLine("Starting initialization!");
+            _ansiConsole.LogMarkupLine("Starting login!");
 
             _steam3.LoginToSteam();
             _steam3.WaitForLicenseCallback();

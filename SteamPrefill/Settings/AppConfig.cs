@@ -12,6 +12,12 @@ namespace SteamPrefill.Settings
             Directory.CreateDirectory(CacheDir);
         }
 
+        #if DEBUG
+
+        public static bool EnableSteamKitDebugLogs = false;
+
+        #endif
+
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
