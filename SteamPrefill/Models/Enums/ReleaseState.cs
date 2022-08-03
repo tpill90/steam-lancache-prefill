@@ -1,20 +1,16 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
+    /// <summary>
+    /// Steam docs :
+    /// https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
+    /// </summary>
     public class ReleaseState : EnumBase<ReleaseState>
     {
-        public static readonly ReleaseState eStateAvailable = new ReleaseState("eStateAvailable");
-        public static readonly ReleaseState eStateAvailablePreloadable = new ReleaseState("eStateAvailablePreloadable");
-        public static readonly ReleaseState eStateAvailablea = new ReleaseState("eStateAvailablea");
-
-        public static readonly ReleaseState eStateComingAvailable = new ReleaseState("eStateComingAvailable");
-
-        public static readonly ReleaseState eStateComingSoonNoPreload = new ReleaseState("eStateComingSoonNoPreload");
-        public static readonly ReleaseState eStateJustReleased = new ReleaseState("eStateJustReleased");
-
-        public static readonly ReleaseState eStatePreloadOnly = new ReleaseState("eStatePreloadOnly");
-
-        public static readonly ReleaseState eStateTool = new ReleaseState("eStateTool");
-        public static readonly ReleaseState eStateUnAvailable = new ReleaseState("eStateUnAvailable");
+        public static readonly ReleaseState Unknown = new ReleaseState("unknown");
+        public static readonly ReleaseState Unavailable = new ReleaseState("unavailable");
+        public static readonly ReleaseState Prerelease = new ReleaseState("prerelease");
+        public static readonly ReleaseState PreloadOnly = new ReleaseState("preloadonly");
+        public static readonly ReleaseState Released = new ReleaseState("released");
 
         private ReleaseState(string name) : base(name)
         {

@@ -112,11 +112,10 @@ namespace SteamPrefill.Handlers
         public List<AppInfo> GetAvailableGames()
         {
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
-            
+
             //TODO test the performance of this on a larger game dataset, like 1000 games
             var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game
-														//TODO Does unavailable even do anything?  The only game is HL2 Deathmatch
-                                                        && e.State != ReleaseState.eStateUnAvailable
+                                                        && e.ReleaseState != ReleaseState.Unavailable
                                                         && e.SupportsWindows)
                                      .Where(e => !excludedAppIds.Contains(e.AppId))
                                      .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
