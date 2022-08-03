@@ -3,6 +3,7 @@ on: [push]
 
 permissions:
   pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+  security-events: write
 
 jobs:
   build-and-test:
@@ -23,3 +24,25 @@ jobs:
       run: >
         cd SteamPrefill.Test;
         dotnet test --no-restore -c Release
+  infersharp:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Build
+      run: dotnet build -c Debug
+    - name: Run Infer#      
+      uses: microsoft/infersharpaction@v1.3.1
+      id: runinfersharp
+      with:
+        binary-path: SteamPrefill/bin/Debug/net6.0
+        optional-flags: --enable-null-dereference --enable-dotnet-resource-leak --enable-thread-safety-violation
+    - name: Upload SARIF output to GitHub Security Center
+      uses: github/codeql-action/upload-sarif@v1
+      with:
+        sarif_file: infer-out/report.sarif
