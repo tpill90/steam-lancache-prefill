@@ -65,7 +65,7 @@ namespace SteamPrefill.CliCommands
             }
             catch (Exception e)
             {
-                _ansiConsole.WriteException(e);
+                _ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
             }
             finally
             {

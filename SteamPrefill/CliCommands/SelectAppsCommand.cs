@@ -29,7 +29,7 @@ namespace SteamPrefill.CliCommands
             }
             catch (Exception e)
             {
-                ansiConsole.WriteException(e);
+                ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
             }
             finally
             {

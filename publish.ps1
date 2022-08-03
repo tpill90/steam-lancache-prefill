@@ -5,7 +5,7 @@ $csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
 $version = "$($csprojXml.ChildNodes.PropertyGroup.Version)".Trim()
 
 Remove-Item .\SteamPrefill\obj -Recurse -Force
-Get-ChildItem publish | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
+Get-ChildItem publish -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
 #TODO parallelize these builds
 foreach($runtime in @("win-x64", "linux-x64", "osx-x64"))
