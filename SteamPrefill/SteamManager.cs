@@ -19,7 +19,6 @@ using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill
 {
-    //TODO document
     public sealed class SteamManager : IDisposable
     {
         private readonly IAnsiConsole _ansiConsole;
@@ -76,9 +75,16 @@ namespace SteamPrefill
             _steam3.Disconnect();
         }
 
-        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToDownload)
+        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, List<uint> manualIds)
         {
             var timer = Stopwatch.StartNew();
+
+            var appIdsToDownload = LoadPreviouslySelectedApps();
+            appIdsToDownload.AddRange(manualIds);
+            if (downloadAllOwnedGames)
+            {
+                appIdsToDownload.AddRange(_steam3.OwnedAppIds);
+            }
 
             var distinctAppIds = appIdsToDownload.Distinct().OrderBy(e => e).ToList();
 
@@ -110,7 +116,7 @@ namespace SteamPrefill
             }
 
             _ansiConsole.MarkupLine("");
-            _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableGames.Count)} apps in {LightYellow(timer.FormattedElapsedString())}");
+            _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableGames.Count)} apps in {LightYellow(timer.FormatElapsedString())}");
         }
 
         private async Task DownloadSingleAppAsync(uint appId)
@@ -159,10 +165,7 @@ namespace SteamPrefill
             downloadTimer.Stop();
 
             // Logging some metrics about the download
-            var averageSpeed = ByteSize.FromBytes(totalBytes.Bytes / downloadTimer.Elapsed.TotalSeconds);
-            //TODO improve formatting
-            var averageSpeedBits = $"{(averageSpeed.MegaBytes * 8).ToString("0.##")} Mbit/s";
-            _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormattedElapsedString())} - {Magenta(averageSpeedBits)}");
+            _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.ToAverageString(downloadTimer))}");
             _ansiConsole.WriteLine();
         }
 
@@ -204,9 +207,6 @@ namespace SteamPrefill
             }
             return chunkQueue;
         }
-
-        //TODO look into seeing if there is a way to avoid having to expose this.  Possibly pass in a download parameter "downloadAll" and then use this internally
-        public HashSet<uint> AllUserAppIds => _steam3.OwnedAppIds;
 
         //TODO is there any way to possibly speed this up, without having to query steam?
         public async Task SelectAppsAsync()

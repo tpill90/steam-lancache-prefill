@@ -85,6 +85,19 @@ namespace SteamPrefill.Utils
         {
             return byteSize.ToString("0.##", CultureInfo.CurrentCulture, true);
         }
+
+        public static string ToAverageString(this ref ByteSize byteSize, Stopwatch timer)
+        {
+            var averageSpeed = ByteSize.FromBytes(byteSize.Bytes / timer.Elapsed.TotalSeconds);
+
+            var megabits = averageSpeed.MegaBytes * 8;
+            if (megabits < 1000)
+            {
+                return $"{megabits.ToString("0.##")} Mbit/s";
+            }
+
+            return $"{(averageSpeed.GigaBytes * 8).ToString("0.##")} Gbit/s";
+        }
     }
 
     public static class Extensions
@@ -101,7 +114,7 @@ namespace SteamPrefill.Utils
             return sha.ComputeHash(input);
         }
 
-        public static string FormattedElapsedString(this Stopwatch stopwatch)
+        public static string FormatElapsedString(this Stopwatch stopwatch)
         {
             var elapsed = stopwatch.Elapsed;
             if (elapsed.TotalHours > 1)

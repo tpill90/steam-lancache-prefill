@@ -15,10 +15,8 @@ using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace SteamPrefill.Handlers.Steam
 {
-    //TODO document this class
     public sealed class Steam3Session : IDisposable
     {
-        //TODO move to settings
         private readonly string _packageCountPath = $"{AppConfig.CacheDir}/packageCount.txt";
         private readonly string _ownedAppIdsPath = $"{AppConfig.CacheDir}/OwnedAppIds.json";
         private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
@@ -31,7 +29,6 @@ namespace SteamPrefill.Handlers.Steam
 
         public readonly SteamContent SteamContent;
         public readonly SteamApps SteamAppsApi;
-        //TODO not sure if this should be public or not
         public readonly Client CdnClient;
 
         private readonly CallbackManager _callbackManager;
@@ -251,7 +248,6 @@ namespace SteamPrefill.Handlers.Steam
         }
         
         bool _receivedLoginKey;
-        //TODO This can be fairly flaky.  Sometimes fails to save the login key, for some currently unknown reason.
         private void TryWaitForLoginKey()
         {
             if (_logonDetails.LoginKey != null)

@@ -9,22 +9,25 @@ using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
 
 namespace SteamPrefill.Models
 {
-    //TODO document what these fields do.  Not all of them are obvious
-    //TODO setters should be private
     public class DepotInfo
     {
-        public uint DepotId { get; set; }
-        public string Name { get; set; }
+        public uint DepotId { get; init; }
+        public string Name { get; }
 
         public ulong? ManifestId { get; set; }
-        public uint? DepotFromApp { get; set; }
+
+        public uint ContainingAppId { get; }
+
+        /// <summary>
+        /// Determines if a depot is a "linked" depot.  If the current depot is linked, it won't actually have a manifest to download under the current app.
+        /// Instead, the depot will need to be downloaded from the linked app.
+        /// </summary>
+        public uint? DepotFromApp { get; }
+        private uint? DlcAppId { get; }
 
         // If there is no manifest we can't download this depot, and if there is no shared depot then we can't look up a related manifest we could use
         public bool IsInvalidDepot => ManifestId == null && DepotFromApp == null;
-
-        public uint ContainingAppId { get; set; }
-        public uint? DlcAppId { get; set; }
-
+        
         public List<OperatingSystem> SupportedOperatingSystems { get; init; } = new List<OperatingSystem>();
         public Architecture Architecture { get; init; }
         public List<Language> Languages { get; init; } = new List<Language>();
@@ -66,7 +69,9 @@ namespace SteamPrefill.Models
                 LowViolence = true;
             }
 
-            //TODO comment
+            // Determines what app actually owns the depot, by default it is the current app.
+            // However in the case of a linked/DLC app, the depot will need to be downloaded using the referenced app's id
+            
             ContainingAppId = appId;
             if (DlcAppId != null)
             {

@@ -59,9 +59,16 @@ namespace SteamPrefill.CliCommands
             try
             {
                 steamManager.Initialize();
-                List<uint> appIdsToDownload = BuildDownloadAppIdsList(steamManager);
-                
-                await steamManager.DownloadMultipleAppsAsync(appIdsToDownload);
+
+                var manualIds = new List<uint>();
+                #if DEBUG // Experimental, debugging only
+                if (AppIds != null)
+                {
+                    manualIds.AddRange(AppIds);
+                }
+                #endif
+
+                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), manualIds);
             }
             catch (Exception e)
             {
@@ -95,24 +102,5 @@ namespace SteamPrefill.CliCommands
             throw new CommandException(".", 1, true);
         }
 
-        //TODO document
-        //TODO can probably move this into steam manager itself
-        private List<uint> BuildDownloadAppIdsList(SteamManager steamManager)
-        {
-            var appIdsToDownload = steamManager.LoadPreviouslySelectedApps();
-            if (DownloadAllOwnedGames ?? default(bool))
-            {
-                appIdsToDownload.AddRange(steamManager.AllUserAppIds);
-            }
-
-#if DEBUG // Experimental, debugging only
-            if (AppIds != null)
-            {
-                appIdsToDownload.AddRange(AppIds);
-            }
-#endif
-
-            return appIdsToDownload;
-        }
     }
 }
