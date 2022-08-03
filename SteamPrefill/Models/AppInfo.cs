@@ -15,7 +15,7 @@ namespace SteamPrefill.Models
     public class AppInfo
     {
         public uint AppId { get; set; }
-        public ReleaseState State { get; set; }
+        public ReleaseState ReleaseState { get; set; }
 
         public List<uint> DlcAppIds { get; } = new List<uint>();
 
@@ -54,6 +54,7 @@ namespace SteamPrefill.Models
             Name = rootKeyValue["common"]["name"].Value;
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
+            ReleaseState = rootKeyValue["extended"]["releasestate"].AsEnum<ReleaseState>();
 
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {
@@ -66,7 +67,7 @@ namespace SteamPrefill.Models
             }
 
             // Extended Section
-            State = rootKeyValue["extended"]["state"].AsEnum<ReleaseState>();
+            
 
             var listOfDlc = rootKeyValue["extended"]["listofdlc"].Value;
             if (listOfDlc != null)
