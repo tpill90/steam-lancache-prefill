@@ -90,7 +90,6 @@ namespace SteamPrefill.Handlers
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
-            // Breaking up requests into smaller batches, to distribute the load across multiple CDNs.  Steam appears to get better download speeds when doing this.
             var cdnServer = _cdnPool.TakeConnection();
 
             // Running multiple requests in parallel on a single CDN

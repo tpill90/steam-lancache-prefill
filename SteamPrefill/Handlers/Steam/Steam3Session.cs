@@ -341,7 +341,6 @@ namespace SteamPrefill.Handlers.Steam
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)
         {
-            _ansiConsole.LogMarkupLine(LightYellow("LicenseListCallback"));
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
@@ -366,6 +365,7 @@ namespace SteamPrefill.Handlers.Steam
             }
 
             Dictionary<uint, ulong> packageTokenDict = licenseList.Where(e => e.AccessToken > 0)
+                                                                  .DistinctBy(e => e.PackageID)
                                                                   .ToDictionary(e => e.PackageID, e => e.AccessToken);
             var packageRequests = new List<SteamApps.PICSRequest>();
             foreach (var license in licenseList)
@@ -385,6 +385,7 @@ namespace SteamPrefill.Handlers.Steam
                                     .Select(e => e.Value)
                                     .OrderBy(e => e.ID)
                                     .ToList();
+
             foreach (var package in packages)
             {
                 // Removing any free weekends that are no longer active
