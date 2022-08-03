@@ -26,10 +26,11 @@ Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-a
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to a directory of your choice
 3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x .\SteamPrefill`
-4.  (**Windows Only**)  Configure your terminal to use Unicode, for much nicer looking UI output.
-    - Unicode on Windows is not enabled by default, however adding the following to your Powershell `profile.ps1` will enable it.
-    - `[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()`
-    - If you do not already have a Powershell profile created, follow this step-by-step guide https://lazyadmin.nl/powershell/powershell-profile/
+4.  (**Windows Only - Optional**)  Configure your terminal to use Unicode, for much nicer looking UI output.
+    - <img src="https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/docs/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
+    - As the default console in Windows does not support UTF8, Windows Terminal should be installed from the [App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
+    - Unicode on Windows is not enabled by default, however running the following will enable it if it hasn't already been enabled.
+    - `if(!(Test-Path $profile) -or !(gc $profile).Contains("OutputEncoding")) { ac $profile "[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()";  & $profile; }`
 
 ---
 
@@ -69,7 +70,7 @@ Updating any previously prefilled apps can be done by simply re-running the `pre
 
 
 However, if there is a newer version of an app that is available, then **SteamPrefill** will re-download the app.  Due to how Lancache works, this subsequent run should complete much faster than the initial prefill (example below used a 10gbit connection).
-Any data that was previously downloaded, will be retrieved from the Lancache, while any new data from the update will be retreived from the internet.
+Any data that was previously downloaded, will be retrieved from the Lancache, while any new data from the update will be retrieved from the internet.
 
 <img src="https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/docs/Prefill-New-Version-Available.png" width="830" alt="Prefill run when app has an update">
 
