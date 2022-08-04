@@ -49,7 +49,7 @@ namespace SteamPrefill
             
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
-            _appInfoHandler = new AppInfoHandler(_steam3);
+            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, _downloadArgs);
             _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
             _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
@@ -88,8 +88,7 @@ namespace SteamPrefill
 
             var distinctAppIds = appIdsToDownload.Distinct().OrderBy(e => e).ToList();
 
-            // Need to load the latest app information from steam first
-            await RetrieveAppMetadataAsync(distinctAppIds);
+            await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
 
             // Now we will be able to determine which apps can't be downloaded
             var availableGames = _appInfoHandler.GetAvailableGames();
@@ -169,23 +168,8 @@ namespace SteamPrefill
             _ansiConsole.WriteLine();
         }
 
-        //TODO consider moving this into AppInfoHandler
-        /// <summary>
-        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
-        /// </summary>
-        private async Task RetrieveAppMetadataAsync(List<uint> appIds)
-        {
-            await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
-            {
-                await _appInfoHandler.BulkLoadAppInfosAsync(appIds);
-
-                // Once we have loaded all the apps, we can also load information for related DLC
-                await _appInfoHandler.BulkLoadDlcAppInfoAsync();
-                
-            });
-            _ansiConsole.LogMarkupLine("Retrieved latest app metadata");
-        }
         
+
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
         {
             var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
@@ -214,7 +198,7 @@ namespace SteamPrefill
             var allApps = _steam3.OwnedAppIds.ToList();
 
             // Need to load the latest app information from steam, so that we have an updated list of all owned games
-            await RetrieveAppMetadataAsync(allApps);
+            await _appInfoHandler.RetrieveAppMetadataAsync(allApps);
             var availableGames = _appInfoHandler.GetAvailableGames();
 
             // Whitespace divider

@@ -67,8 +67,6 @@ namespace SteamPrefill.Models
             }
 
             // Extended Section
-            
-
             var listOfDlc = rootKeyValue["extended"]["listofdlc"].Value;
             if (listOfDlc != null)
             {

@@ -1,13 +1,18 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Spectre.Console;
 using SteamKit2;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models.Enums;
-using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
 using SteamPrefill.Models;
+using SteamPrefill.Settings;
+using SteamPrefill.Utils;
+using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
+using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace SteamPrefill.Handlers
 {
@@ -16,13 +21,63 @@ namespace SteamPrefill.Handlers
     /// </summary>
     public class AppInfoHandler
     {
+        private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
 
-        private Dictionary<uint, AppInfo> LoadedAppInfos { get; } = new Dictionary<uint, AppInfo>();
+        /// <summary>
+        /// Keeps track of known AppTypes for previously loaded AppInfos
+        /// These types will be used to filter out apps that aren't games or DLC, which will help dramatically in app startup time.
+        /// </summary>
+        private readonly string _cachedAppInfoPath = $"{AppConfig.CacheDir}/cachedAppInfo.json";
+        private readonly Dictionary<uint, CachedAppInfo> _cachedAppInfo = new Dictionary<uint, CachedAppInfo>();
 
-        public AppInfoHandler(Steam3Session steam3Session)
+        private ConcurrentDictionary<uint, AppInfo> LoadedAppInfos { get; } = new ConcurrentDictionary<uint, AppInfo>();
+
+        public AppInfoHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
         {
+            _ansiConsole = ansiConsole;
             _steam3Session = steam3Session;
+
+            if (File.Exists(_cachedAppInfoPath))
+            {
+                _cachedAppInfo = JsonSerializer.Deserialize<Dictionary<uint, CachedAppInfo>>(File.ReadAllText(_cachedAppInfoPath), AppConfig.DefaultJsonResolver);
+            }
+        }
+
+        /// <summary>
+        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
+        /// </summary>
+        public async Task RetrieveAppMetadataAsync(List<uint> appIds)
+        {
+            await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
+            {
+                // Breaking the request into smaller batches that complete faster
+                var batchJobs = appIds.Where(e => AppMetadataShouldBeRetrieved(e))
+                                      .Chunk(100)
+                                      .Select(e => BulkLoadAppInfosAsync(e.ToList()));
+                await Task.WhenAll(batchJobs);
+
+                // Once we have loaded all the apps, we can also load information for related DLC
+                await BulkLoadDlcAppInfoAsync();
+            });
+
+            // Cache loaded AppInfo to speed up future runs
+            var cachedAppInfoDictionary = LoadedAppInfos.Values
+                                                        .Where(e => e.Type != null)
+                                                        .Select(e => new CachedAppInfo(e))
+                                                        .ToDictionary(e => e.AppId, e => e);
+
+            File.WriteAllText(_cachedAppInfoPath, JsonSerializer.ToJsonString(cachedAppInfoDictionary, AppConfig.DefaultJsonResolver));
+        }
+
+        private bool AppMetadataShouldBeRetrieved(uint appId)
+        {
+            if (_cachedAppInfo.TryGetValue(appId, out var cachedApp))
+            {
+                return cachedApp.Type == AppType.Game || cachedApp.Type == AppType.Dlc;
+            }
+            // Unknown apps should always be loaded
+            return true;
         }
 
         /// <summary>
@@ -45,7 +100,7 @@ namespace SteamPrefill.Handlers
         /// than multiple individual requests, as it seems that there is a minimum threshold for how quickly steam will return results.
         /// </summary>
         /// <param name="appIds">The list of App Ids to retrieve info for</param>
-        public async Task BulkLoadAppInfosAsync(List<uint> appIds)
+        private async Task BulkLoadAppInfosAsync(List<uint> appIds)
         {
             var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e) && _steam3Session.AccountHasAppAccess(e)).ToList();
             if (!appIdsToLoad.Any())
@@ -68,13 +123,14 @@ namespace SteamPrefill.Handlers
                 }
                 requests.Add(request);
             }
+
             // Finally request the metadata from steam
             var resultSet = await _steam3Session.SteamAppsApi.PICSGetProductInfo(requests, new List<SteamApps.PICSRequest>()).ToTask();
 
             List<PicsProductInfo> appInfos = resultSet.Results.SelectMany(e => e.Apps).Select(e => e.Value).ToList();
             foreach (var app in appInfos)
             {
-                LoadedAppInfos.Add(app.ID, new AppInfo(_steam3Session, app.ID, app.KeyValues));
+                LoadedAppInfos.TryAdd(app.ID, new AppInfo(_steam3Session, app.ID, app.KeyValues));
             }
         }
 
@@ -84,7 +140,7 @@ namespace SteamPrefill.Handlers
         ///
         /// Once the DLC apps are loaded, the final combined depot list (both the app + dlc apps) will be built.
         /// </summary>
-        public async Task BulkLoadDlcAppInfoAsync()
+        private async Task BulkLoadDlcAppInfoAsync()
         {
             var dlcAppIds = LoadedAppInfos.Values.SelectMany(e => e.DlcAppIds).ToList();
             await BulkLoadAppInfosAsync(dlcAppIds);
@@ -112,7 +168,6 @@ namespace SteamPrefill.Handlers
         {
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
 
-            //TODO test the performance of this on a larger game dataset, like 1000 games
             var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game
                                                         && e.ReleaseState != ReleaseState.Unavailable
                                                         && e.SupportsWindows)
@@ -123,5 +178,28 @@ namespace SteamPrefill.Handlers
                                      .ToList();
             return apps;
         }
+    }
+
+    /// <summary>
+    /// A subset of <see cref="AppInfo"/> that is only ever used for caching known AppTypes for previously loaded AppInfos
+    /// These types will be used to filter out apps that aren't games or DLC, which will help dramatically in app startup time.
+    /// </summary>
+    public class CachedAppInfo
+    {
+        public CachedAppInfo()
+        {
+
+        }
+
+        public CachedAppInfo(AppInfo appInfo)
+        {
+            this.AppId = appInfo.AppId;
+            this.Name = appInfo.Name;
+            this.Type = appInfo.Type;
+        }
+
+        public uint AppId { get; set; }
+        public string Name { get; set; }
+        public AppType Type { get; set; }
     }
 }

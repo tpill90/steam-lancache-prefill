@@ -5,8 +5,11 @@ using SteamPrefill.Utils;
 namespace SteamPrefill
 {
     /* TODO
+     * Is it possible to do prefill with games that are shared from another account?
      * Bug - TryWaitForLoginKey() is flaky.  Steam doesn't seem to be saving credentials properly in australia.
      *       Keeps requiring password reentry.  Other users report the same
+     *       What happens if Lancache is completely disabled?  Do users stay logged in?
+     *       Is there a limit to the # of computers that can be logged in at the same time?  Test logging in with multiple VMs for the same account
      * Build - Fail build on both warnings + trim warnings
      * Documentation - Explain process for updating app
      * Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
