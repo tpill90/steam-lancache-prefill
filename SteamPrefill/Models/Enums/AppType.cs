@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Models.Enums
+﻿using Utf8Json;
+
+namespace SteamPrefill.Models.Enums
 {
     /// <summary>
     /// Steam docs:
@@ -21,6 +23,32 @@
 
         private AppType(string name) : base(name)
         {
+        }
+    }
+
+    /// <summary>
+    /// Used to override the default serialization/deserialization behavior of Utf8Json
+    /// </summary>
+    public sealed class AppTypeFormatter : IJsonFormatter<AppType>, IObjectPropertyNameFormatter<AppType>
+    {
+        public void Serialize(ref JsonWriter writer, AppType value, IJsonFormatterResolver formatterResolver)
+        {
+            writer.WriteString(value.ToString());
+        }
+
+        public AppType Deserialize(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
+        {
+            return AppType.Parse(reader.ReadString());
+        }
+
+        public void SerializeToPropertyName(ref JsonWriter writer, AppType value, IJsonFormatterResolver formatterResolver)
+        {
+            writer.WriteString(value.ToString());
+        }
+
+        public AppType DeserializeFromPropertyName(ref JsonReader reader, IJsonFormatterResolver formatterResolver)
+        {
+            return AppType.Parse(reader.ReadString());
         }
     }
 }

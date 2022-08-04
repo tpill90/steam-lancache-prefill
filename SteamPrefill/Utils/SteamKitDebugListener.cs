@@ -1,3 +1,4 @@
+using System;
 using Spectre.Console;
 using SteamKit2;
 
@@ -14,6 +15,10 @@ namespace SteamPrefill.Utils
 
         public SteamKitDebugListener(IAnsiConsole ansiConsole)
         {
+            if (ansiConsole == null)
+            {
+                throw new ArgumentException("ansiConsole cannot be null");
+            }
             _ansiConsole = ansiConsole;
         }
 

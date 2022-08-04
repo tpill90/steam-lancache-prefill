@@ -14,6 +14,7 @@ using SteamKit2;
 using SteamPrefill.Models.Enums;
 using static SteamPrefill.Utils.SpectreColors;
 
+// TODO split these apart into their own classes
 namespace SteamPrefill.Utils
 {
     public static class AnsiConsoleExtensions
@@ -71,6 +72,11 @@ namespace SteamPrefill.Utils
         public static void LogMarkupLine(this IAnsiConsole console, string message)
         {
             console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");
+        }
+
+        public static void LogMarkupLine(this IAnsiConsole console, string message, Stopwatch stopwatch)
+        {
+            LogMarkupLine(console, message, stopwatch.Elapsed);
         }
 
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)

@@ -1,5 +1,8 @@
 using System;
 using System.IO;
+using SteamPrefill.Models.Enums;
+using Utf8Json;
+using Utf8Json.Resolvers;
 
 namespace SteamPrefill.Settings
 {
@@ -31,5 +34,9 @@ namespace SteamPrefill.Settings
 
         public static readonly string AccountSettingsStorePath = Path.Combine(ConfigDir, "account.config");
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
+
+
+        public static IJsonFormatterResolver DefaultJsonResolver = CompositeResolver.Create(new IJsonFormatter[] { new AppTypeFormatter() }, 
+                                                                                            new[] { StandardResolver.Default });
     }
 }

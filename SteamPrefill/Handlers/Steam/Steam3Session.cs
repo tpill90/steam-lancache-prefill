@@ -17,6 +17,7 @@ namespace SteamPrefill.Handlers.Steam
 {
     public sealed class Steam3Session : IDisposable
     {
+        //TODO I wonder if I should encapsulate this metadata into it's own class
         private readonly string _packageCountPath = $"{AppConfig.CacheDir}/packageCount.txt";
         private readonly string _ownedAppIdsPath = $"{AppConfig.CacheDir}/OwnedAppIds.json";
         private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
@@ -147,7 +148,7 @@ namespace SteamPrefill.Handlers.Steam
                 Password = loginKey == null ? _ansiConsole.ReadPassword() : null,
                 ShouldRememberPassword = true,
                 LoginKey = loginKey,
-                LoginID = 0x534DD2
+                LoginID = null
             };
             // Sentry file is required when using Steam Guard w\ email
             if (_userAccountStore.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
