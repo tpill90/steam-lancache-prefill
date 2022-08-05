@@ -100,3 +100,4 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 * https://steamapi.xpaw.me/#ISteamDirectory/GetCMList
 * https://partner.steamgames.com/doc/api/steam_api?language=english#enums
 * https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
+* https://help.steampowered.com/en/accountdata/SteamLoginHistory
