@@ -5,7 +5,7 @@ using SteamPrefill.Utils;
 namespace SteamPrefill
 {
     /* TODO
-     * Is it possible to do prefill with games that are shared from another account?
+     * Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Bug - TryWaitForLoginKey() is flaky.  Steam doesn't seem to be saving credentials properly in australia.
      *       Keeps requiring password reentry.  Other users report the same
      *       What happens if Lancache is completely disabled?  Do users stay logged in?

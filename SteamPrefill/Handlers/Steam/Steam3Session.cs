@@ -53,7 +53,11 @@ namespace SteamPrefill.Handlers.Steam
             // This callback is triggered when SteamKit2 makes a successful connection
             _callbackManager.Subscribe<SteamClient.ConnectedCallback>(e => _isConnecting = false);
             // If a connection attempt fails in anyway, SteamKit2 notifies of the failure with a "disconnect"
-            _callbackManager.Subscribe<SteamClient.DisconnectedCallback>(e => _isConnecting = false);
+            _callbackManager.Subscribe<SteamClient.DisconnectedCallback>(e =>
+            {
+                _isConnecting = false;
+                _disconnected = true;
+            });
 
             _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
@@ -148,7 +152,7 @@ namespace SteamPrefill.Handlers.Steam
                 Password = loginKey == null ? _ansiConsole.ReadPassword() : null,
                 ShouldRememberPassword = true,
                 LoginKey = loginKey,
-                LoginID = null
+                LoginID = 5995
             };
             // Sentry file is required when using Steam Guard w\ email
             if (_userAccountStore.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
@@ -277,16 +281,25 @@ namespace SteamPrefill.Handlers.Steam
             _receivedLoginKey = true;
         }
 
+        private bool _disconnected;
         public void Disconnect()
         {
-            _steamUser.LogOff();
+            _disconnected = false;
             _steamClient.Disconnect();
+
+            _ansiConsole.StatusSpinner().Start("Disconnecting", context =>
+            {
+                while (!_disconnected)
+                {
+                    _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
+                }
+            });
         }
-        
+
         #endregion
 
         #region Other Auth Methods
-        
+
         /// <summary>
         /// The UpdateMachineAuth event will be triggered once the user has logged in with either Steam Guard or 2FA enabled.
         /// This callback handler will save a "sentry file" for future logins, that will allow an existing Steam session to be reused,
