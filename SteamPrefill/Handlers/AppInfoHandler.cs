@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -49,6 +50,10 @@ namespace SteamPrefill.Handlers
         /// </summary>
         public async Task RetrieveAppMetadataAsync(List<uint> appIds)
         {
+            var timer = Stopwatch.StartNew();
+            var appIdsToLoad = appIds.Where(e => AppMetadataShouldBeRetrieved(e)).ToList();
+            _ansiConsole.MarkupLine($"Loading {SpectreColors.Cyan(appIdsToLoad.Count)} of {SpectreColors.LightYellow(appIds.Count)} AppInfos");
+
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 // Breaking the request into smaller batches that complete faster
@@ -61,17 +66,29 @@ namespace SteamPrefill.Handlers
                 await BulkLoadDlcAppInfoAsync();
             });
 
-            // Cache loaded AppInfo to speed up future runs
-            var cachedAppInfoDictionary = LoadedAppInfos.Values
-                                                        .Where(e => e.Type != null)
-                                                        .Select(e => new CachedAppInfo(e))
-                                                        .ToDictionary(e => e.AppId, e => e);
+            _ansiConsole.LogMarkupLine($"Loaded {SpectreColors.Yellow(LoadedAppInfos.Values.Count)} AppInfos", timer);
 
-            File.WriteAllText(_cachedAppInfoPath, JsonSerializer.ToJsonString(cachedAppInfoDictionary, AppConfig.DefaultJsonResolver));
+            SaveCachedAppInfo();
+        }
+
+        private void SaveCachedAppInfo()
+        {
+            // Add any missing values to our current cache
+            foreach (var appInfo in LoadedAppInfos.Values)
+            {
+                if (!_cachedAppInfo.ContainsKey(appInfo.AppId) && appInfo.Type != null)
+                {
+                    _cachedAppInfo.Add(appInfo.AppId, new CachedAppInfo(appInfo));
+                }
+            }
+
+            // Cache loaded AppInfo to speed up future runs
+            File.WriteAllText(_cachedAppInfoPath, JsonSerializer.ToJsonString(_cachedAppInfo, AppConfig.DefaultJsonResolver));
         }
 
         private bool AppMetadataShouldBeRetrieved(uint appId)
         {
+            return true;
             if (_cachedAppInfo.TryGetValue(appId, out var cachedApp))
             {
                 return cachedApp.Type == AppType.Game || cachedApp.Type == AppType.Dlc;
@@ -161,22 +178,40 @@ namespace SteamPrefill.Handlers
         }
 
         /// <summary>
+        /// Gets a list of available games, filtering out any unavailable, non-Windows games.
+        /// </summary>
+        public async Task<List<AppInfo>> GetAvailableGamesAsync(List<uint> filteredAppIds)
+        {
+            var appInfos = new List<AppInfo>();
+            foreach (var appId in filteredAppIds)
+            {
+                appInfos.Add(await GetAppInfoAsync(appId));
+            }
+            
+            return FilterGames(appInfos);
+        }
+
+        /// <summary>
         /// Gets a list of all available games, filtering out any unavailable, non-Windows games.
         /// </summary>
         /// <returns>All currently available games for the current user</returns>
-        public List<AppInfo> GetAvailableGames()
+        public List<AppInfo> GetAllAvailableGames()
+        {
+            return FilterGames(LoadedAppInfos.Values.ToList());
+        }
+
+        private List<AppInfo> FilterGames(List<AppInfo> appInfos)
         {
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
 
-            var apps = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game
-                                                        && e.ReleaseState != ReleaseState.Unavailable
-                                                        && e.SupportsWindows)
-                                     .Where(e => !excludedAppIds.Contains(e.AppId))
-                                     .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
-                                     .Where(e => !e.Name.Contains("AMD Driver Updater"))
-                                     .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                                     .ToList();
-            return apps;
+            return appInfos.Where(e => e.Type == AppType.Game
+                                       && e.ReleaseState != ReleaseState.Unavailable
+                                       && e.SupportsWindows)
+                           .Where(e => !excludedAppIds.Contains(e.AppId))
+                           .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
+                           .Where(e => !e.Name.Contains("AMD Driver Updater"))
+                           .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                           .ToList();
         }
     }
 
