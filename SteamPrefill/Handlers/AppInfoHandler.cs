@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Spectre.Console;
@@ -10,10 +8,8 @@ using SteamKit2;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models.Enums;
 using SteamPrefill.Models;
-using SteamPrefill.Settings;
 using SteamPrefill.Utils;
 using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
-using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace SteamPrefill.Handlers
 {
@@ -25,24 +21,12 @@ namespace SteamPrefill.Handlers
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
 
-        /// <summary>
-        /// Keeps track of known AppTypes for previously loaded AppInfos
-        /// These types will be used to filter out apps that aren't games or DLC, which will help dramatically in app startup time.
-        /// </summary>
-        private readonly string _cachedAppInfoPath = $"{AppConfig.CacheDir}/cachedAppInfo.json";
-        private readonly Dictionary<uint, CachedAppInfo> _cachedAppInfo = new Dictionary<uint, CachedAppInfo>();
-
         private ConcurrentDictionary<uint, AppInfo> LoadedAppInfos { get; } = new ConcurrentDictionary<uint, AppInfo>();
 
         public AppInfoHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
         {
             _ansiConsole = ansiConsole;
             _steam3Session = steam3Session;
-
-            if (File.Exists(_cachedAppInfoPath))
-            {
-                _cachedAppInfo = JsonSerializer.Deserialize<Dictionary<uint, CachedAppInfo>>(File.ReadAllText(_cachedAppInfoPath), AppConfig.DefaultJsonResolver);
-            }
         }
 
         /// <summary>
@@ -50,51 +34,16 @@ namespace SteamPrefill.Handlers
         /// </summary>
         public async Task RetrieveAppMetadataAsync(List<uint> appIds)
         {
-            var timer = Stopwatch.StartNew();
-            var appIdsToLoad = appIds.Where(e => AppMetadataShouldBeRetrieved(e)).ToList();
-            _ansiConsole.MarkupLine($"Loading {SpectreColors.Cyan(appIdsToLoad.Count)} of {SpectreColors.LightYellow(appIds.Count)} AppInfos");
-
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 // Breaking the request into smaller batches that complete faster
-                var batchJobs = appIds.Where(e => AppMetadataShouldBeRetrieved(e))
-                                      .Chunk(100)
+                var batchJobs = appIds.Chunk(100)
                                       .Select(e => BulkLoadAppInfosAsync(e.ToList()));
                 await Task.WhenAll(batchJobs);
 
                 // Once we have loaded all the apps, we can also load information for related DLC
                 await BulkLoadDlcAppInfoAsync();
             });
-
-            _ansiConsole.LogMarkupLine($"Loaded {SpectreColors.Yellow(LoadedAppInfos.Values.Count)} AppInfos", timer);
-
-            SaveCachedAppInfo();
-        }
-
-        private void SaveCachedAppInfo()
-        {
-            // Add any missing values to our current cache
-            foreach (var appInfo in LoadedAppInfos.Values)
-            {
-                if (!_cachedAppInfo.ContainsKey(appInfo.AppId) && appInfo.Type != null)
-                {
-                    _cachedAppInfo.Add(appInfo.AppId, new CachedAppInfo(appInfo));
-                }
-            }
-
-            // Cache loaded AppInfo to speed up future runs
-            File.WriteAllText(_cachedAppInfoPath, JsonSerializer.ToJsonString(_cachedAppInfo, AppConfig.DefaultJsonResolver));
-        }
-
-        private bool AppMetadataShouldBeRetrieved(uint appId)
-        {
-            return true;
-            if (_cachedAppInfo.TryGetValue(appId, out var cachedApp))
-            {
-                return cachedApp.Type == AppType.Game || cachedApp.Type == AppType.Dlc;
-            }
-            // Unknown apps should always be loaded
-            return true;
         }
 
         /// <summary>

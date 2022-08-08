@@ -55,3 +55,6 @@ dotnet_diagnostic.cs4014.severity = error
 
 # IDE0090 : 'new' expression can be simplified
 csharp_style_implicit_object_creation_when_type_is_apparent = false
+
+# The method does not need to use async/await - Introduces annoying 'return' statements for async methods, that hurt code readability.
+dotnet_diagnostic.AsyncFixer01.severity = none

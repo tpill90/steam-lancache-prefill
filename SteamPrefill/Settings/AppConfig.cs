@@ -17,7 +17,7 @@ namespace SteamPrefill.Settings
 
         #if DEBUG
 
-        public static bool EnableSteamKitDebugLogs = false;
+        public static bool EnableSteamKitDebugLogs => false;
 
         #endif
 
@@ -36,7 +36,7 @@ namespace SteamPrefill.Settings
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
 
 
-        public static IJsonFormatterResolver DefaultJsonResolver = CompositeResolver.Create(new IJsonFormatter[] { new AppTypeFormatter() }, 
+        public static IJsonFormatterResolver DefaultJsonResolver => CompositeResolver.Create(new IJsonFormatter[] { new AppTypeFormatter() }, 
                                                                                             new[] { StandardResolver.Default });
     }
 }
