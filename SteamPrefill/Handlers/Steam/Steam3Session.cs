@@ -274,6 +274,7 @@ namespace SteamPrefill.Handlers.Steam
         private bool _disconnected;
         public void Disconnect()
         {
+            //TODO throw an exception if not connected
             _disconnected = false;
             _steamClient.Disconnect();
 
@@ -389,6 +390,7 @@ namespace SteamPrefill.Handlers.Steam
             foreach (var package in packages)
             {
                 // Removing any free weekends that are no longer active
+                //TODO use AsDateTime
                 var expiryTime = package.KeyValues["extended"]["expirytime"];
                 if (expiryTime != KeyValue.Invalid)
                 {

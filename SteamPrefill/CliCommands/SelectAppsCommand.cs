@@ -12,7 +12,8 @@ namespace SteamPrefill.CliCommands
             using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
             try
             {
-                
+                WriteBetaMessage(ansiConsole);
+
                 steamManager.Initialize();
                 await steamManager.SelectAppsAsync();
 
@@ -33,6 +34,29 @@ namespace SteamPrefill.CliCommands
             {
                 steamManager.Shutdown();
             }
+        }
+
+        private void WriteBetaMessage(IAnsiConsole ansiConsole)
+        {
+            var table = new Table
+            {
+                ShowHeaders = false,
+                Border = TableBorder.Rounded,
+                BorderStyle = new Style(Color.Yellow4)
+            };
+            table.AddColumn("");
+
+            // Add some rows
+            table.AddRow("");
+            table.AddRow($"select-apps is getting a new look!");
+            table.AddRow($"Try it out now with {LightYellow("select-apps-beta")}!");
+            table.AddRow("");
+            table.AddRow("Please direct beta feedback to :  ");
+            table.AddRow(LightBlue("https://github.com/tpill90/steam-lancache-prefill/issues/60"));
+            table.AddRow("");
+
+            // Render the table to the console
+            ansiConsole.Write(table);
         }
     }
 }

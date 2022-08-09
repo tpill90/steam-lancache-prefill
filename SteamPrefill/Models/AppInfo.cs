@@ -1,12 +1,26 @@
-﻿namespace SteamPrefill.Models
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using JetBrains.Annotations;
+using Spectre.Console;
+using SteamKit2;
+using SteamPrefill.Handlers.Steam;
+using SteamPrefill.Models.Enums;
+using SteamPrefill.Utils;
+
+namespace SteamPrefill.Models
 {
     /// <summary>
     /// Represents an application (game, tool, video, server) that can be downloaded from steam
     /// </summary>
     public class AppInfo
     {
+        //TODO remove
+        public bool IsSelected { get; set; }
+
         public uint AppId { get; set; }
         public ReleaseState ReleaseState { get; set; }
+        public DateTime? SteamReleaseDate { get; set; }
 
         public List<uint> DlcAppIds { get; } = new List<uint>();
 
@@ -45,8 +59,10 @@
             Name = rootKeyValue["common"]["name"].Value;
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
+            //TODO alot of games are missing this
+            SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTime();
             ReleaseState = rootKeyValue["extended"]["releasestate"].AsEnum<ReleaseState>();
-
+            
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {
                 // Depots should always have a ID for their name.

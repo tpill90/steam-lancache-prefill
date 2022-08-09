@@ -177,6 +177,16 @@ namespace SteamPrefill
             return chunkQueue;
         }
 
+        public async Task<List<AppInfo>> GetGames()
+        {
+            var allApps = _steam3.OwnedAppIds.ToList();
+
+            // Need to load the latest app information from steam, so that we have an updated list of all owned games
+            await _appInfoHandler.RetrieveAppMetadataAsync(allApps);
+            var availableGames = _appInfoHandler.GetAllAvailableGames();
+            return availableGames;
+        }
+
         //TODO is there any way to possibly speed this up, without having to query steam?
         public async Task SelectAppsAsync()
         {
@@ -193,7 +203,7 @@ namespace SteamPrefill
             var multiSelect = new MultiSelectionPrompt<AppInfo>()
                               .Title(Underline(White("Select apps to prefill...")))
                               .NotRequired()
-                              .PageSize(35)
+                              .PageSize(55)
                               .MoreChoicesText(Grey("(Use ↑/↓ to navigate.  Page Up/Page Down skips pages)"))
                               .InstructionsText(Grey($"(Press {Blue("<space>")} to toggle an app, {Green("<enter>")} to accept)"))
                               .AddChoices(availableGames);
@@ -208,10 +218,17 @@ namespace SteamPrefill
                 }
             }
 
-            List<uint> selectedAppIds = _ansiConsole.Prompt(multiSelect)
-                                                    .Select(e => e.AppId)
+            var selectedApps = _ansiConsole.Prompt(multiSelect)
                                                     .ToList();
-            await File.WriteAllTextAsync(AppConfig.UserSelectedAppsPath, JsonSerializer.Serialize(selectedAppIds, SerializationContext.Default.ListUInt32));
+            SetAppsAsSelected(selectedApps);
+        }
+
+        public void SetAppsAsSelected(List<AppInfo> userSelected)
+        {
+            List<uint> selectedAppIds = userSelected
+                                        .Select(e => e.AppId)
+                                        .ToList();
+            File.WriteAllText(AppConfig.UserSelectedAppsPath, JsonSerializer.Serialize(selectedAppIds, SerializationContext.Default.ListUInt32));
 
             _ansiConsole.MarkupLine($"Selected {Magenta(selectedAppIds.Count)} apps to prefill!  ");
         }

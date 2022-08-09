@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Utils
+﻿namespace LancachePrefill.Common
 {
     public static class UpdateChecker
     {
@@ -27,7 +27,7 @@
 
                 // Query Github for a list of all available releases
                 var response = await httpClient.GetStringAsync(new Uri($"https://api.github.com/repos/{repoName}/releases"));
-                GithubRelease latestRelease = JsonSerializer.Deserialize(response, SerializationContext.Default.ListGithubRelease)
+                GithubRelease latestRelease = JsonSerializer.Deserialize(response, LancachePrefill.Common.SerializationContext.Default.ListGithubRelease)
                                                             .OrderByDescending(e => e.PublishedAt)
                                                             .First();
 
