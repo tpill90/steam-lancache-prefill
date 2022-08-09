@@ -1,8 +1,9 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Add Prefill.Common project
-     * Documentation - Explain process for updating app
+     * Select apps - Cleanup dedicated servers + just cause multiplayer mod + tloader + red orchestra community maps from being displayed
+     * Documentation - Add entry to FAQ explaining that it is possible to run this app on the server, and explain how to do that.
+     * Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Update to dotnet 7 sdk + dotnet 7 target
      
      * Update resharper dotsettings file to match Battlenet Prefill
@@ -48,6 +49,6 @@ namespace SteamPrefill
         public static class OperatingSystem
         {
             public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        }
     }
+}
 }

@@ -8,6 +8,7 @@ namespace SteamPrefill.CliCommands
     {
         public async ValueTask ExecuteAsync(IConsole console)
         {
+            //TODO Add a notification to the user telling them that there is a newer version of select apps to try
             var ansiConsole = console.CreateAnsiConsole();
             using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
             try

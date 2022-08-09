@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Utils
+﻿using LancachePrefill.Common;
+
+namespace SteamPrefill.Utils
 {
     public static class UpdateChecker
     {

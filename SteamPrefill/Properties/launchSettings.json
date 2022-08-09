@@ -4,6 +4,10 @@
       "commandName": "Project",
       "commandLineArgs": "select-apps"
     },
+    "Select Apps Beta": {
+      "commandName": "Project",
+      "commandLineArgs": "select-apps-beta"
+    },
     "Download None": {
       "commandName": "Project",
       "commandLineArgs": "prefill --force"

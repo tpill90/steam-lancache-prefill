@@ -177,6 +177,16 @@ namespace SteamPrefill
             return chunkQueue;
         }
 
+        public async Task<List<AppInfo>> GetGames()
+        {
+            var allApps = _steam3.OwnedAppIds.ToList();
+
+            // Need to load the latest app information from steam, so that we have an updated list of all owned games
+            await _appInfoHandler.RetrieveAppMetadataAsync(allApps);
+            var availableGames = _appInfoHandler.GetAllAvailableGames();
+            return availableGames;
+        }
+
         //TODO is there any way to possibly speed this up, without having to query steam?
         public async Task SelectAppsAsync()
         {
