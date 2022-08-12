@@ -91,7 +91,7 @@ namespace SteamPrefill
             await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
 
             // Now we will be able to determine which apps can't be downloaded
-            var availableGames = _appInfoHandler.GetAvailableGames();
+            var availableGames = await _appInfoHandler.GetAvailableGamesAsync(distinctAppIds);
 
             // Whitespace divider
             _ansiConsole.WriteLine();
@@ -199,7 +199,7 @@ namespace SteamPrefill
 
             // Need to load the latest app information from steam, so that we have an updated list of all owned games
             await _appInfoHandler.RetrieveAppMetadataAsync(allApps);
-            var availableGames = _appInfoHandler.GetAvailableGames();
+            var availableGames = _appInfoHandler.GetAllAvailableGames();
 
             // Whitespace divider
             _ansiConsole.WriteLine();
@@ -227,26 +227,15 @@ namespace SteamPrefill
             await File.WriteAllTextAsync(AppConfig.UserSelectedAppsPath, JsonSerializer.ToJsonString(selectedApps.Select(e => e.AppId)));
 
             _ansiConsole.MarkupLine($"Selected {Magenta(selectedApps.Count)} apps to prefill!  ");
-            
-            var exeCommand = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? @".\SteamPrefill.exe" : @"./SteamPrefill";
-            _ansiConsole.MarkupLine($"Apps will automatically be included by running {LightYellow($"{exeCommand} prefill")}");
         }
 
-        private List<uint> _previouslySelectedApps;
         public List<uint> LoadPreviouslySelectedApps()
         {
-            if (_previouslySelectedApps == null)
+            if (File.Exists(AppConfig.UserSelectedAppsPath))
             {
-                if (File.Exists(AppConfig.UserSelectedAppsPath))
-                {
-                    _previouslySelectedApps = JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(AppConfig.UserSelectedAppsPath));
-                }
-                else
-                {
-                    _previouslySelectedApps = new List<uint>();
-                }
+                return JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(AppConfig.UserSelectedAppsPath));
             }
-            return _previouslySelectedApps;
+            return new List<uint>();
         }
 
         public void Dispose()

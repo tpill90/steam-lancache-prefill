@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using CliFx;
 using CliFx.Attributes;
@@ -24,8 +25,16 @@ namespace SteamPrefill.CliCommands
             {
                 
                 steamManager.Initialize();
-
                 await steamManager.SelectAppsAsync();
+
+                var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
+                                    .Title(SpectreColors.LightYellow("Run prefill now?"))
+                                    .AddChoices(true, false)
+                                    .UseConverter(e => e == false ? "No" : "Yes"));
+                if (runPrefill)
+                {
+                    await steamManager.DownloadMultipleAppsAsync(false, new List<uint>());
+                }
             }
             catch (Exception e)
             {
