@@ -51,7 +51,7 @@ namespace SteamPrefill.Utils
                     WriteUpdateMessage(assemblyVersion, latestVersion);
                 }
 
-                await File.WriteAllTextAsync(_lastUpdateCheckFile, DateTime.Now.ToLongTimeString());
+                await File.WriteAllTextAsync(_lastUpdateCheckFile, DateTime.Now.ToString());
             }
             catch
             {
@@ -65,7 +65,7 @@ namespace SteamPrefill.Utils
         private static bool UpdatesHaveBeenRecentlyChecked()
         {
             var fileInfo = new FileInfo(_lastUpdateCheckFile);
-            return fileInfo.Exists && fileInfo.CreationTime.AddDays(7) > DateTime.UtcNow;
+            return fileInfo.Exists && fileInfo.LastWriteTimeUtc.AddDays(3) > DateTime.UtcNow;
         }
 
         private static void WriteUpdateMessage(string currentVersion, string updateVersion)
