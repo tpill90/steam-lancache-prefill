@@ -1,8 +1,5 @@
 using System;
 using System.IO;
-using SteamPrefill.Models.Enums;
-using Utf8Json;
-using Utf8Json.Resolvers;
 
 namespace SteamPrefill.Settings
 {
@@ -21,6 +18,8 @@ namespace SteamPrefill.Settings
 
         #endif
 
+        public static string SteamCdnUrl => "lancache.steamcontent.com";
+
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
@@ -34,9 +33,5 @@ namespace SteamPrefill.Settings
 
         public static readonly string AccountSettingsStorePath = Path.Combine(ConfigDir, "account.config");
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
-
-
-        public static IJsonFormatterResolver DefaultJsonResolver => CompositeResolver.Create(new IJsonFormatter[] { new AppTypeFormatter() }, 
-                                                                                            new[] { StandardResolver.Default });
     }
 }

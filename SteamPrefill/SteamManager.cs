@@ -106,6 +106,10 @@ namespace SteamPrefill
                 {
                     throw e;
                 }
+                catch (UserCancelledException e)
+                {
+                    throw e;
+                }
                 catch (Exception e)
                 {
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
@@ -167,9 +171,7 @@ namespace SteamPrefill
             _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.ToAverageString(downloadTimer))}");
             _ansiConsole.WriteLine();
         }
-
         
-
         private async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
         {
             var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
