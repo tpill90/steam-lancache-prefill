@@ -74,6 +74,23 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 
 <img src="https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/docs/Prefill-New-Version-Available.png" width="830" alt="Prefill run when app has an update">
 
+## Frequently Asked Questions
+
+### Can I run SteamPrefill on the Lancache server?
+
+You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you reguarly would!
+
+If everything works as expected, you should see a message saying it found the server at `127.0.0.1`
+<img src="https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/docs/AutoDns-Server.png" width="830" alt="Prefill running on Lancache Server">
+
+Running from a Docker container on the Lancache server is also supported!  You should instead see a message saying the server was found at `172.17.0.1`
+<img src="https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/docs/AutoDns-Docker.png" width="830" alt="Prefill running on Lancache Server in Docker">
+
+Running on the Lancache server itself can give you some advantages over running **SteamPrefill** on a client machine, primarily the speed at which you can prefill apps.  
+Since there is no network transfer happening, the `prefill` should only be limited by disk I/O and CPU throughput.  
+For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
+<img src="https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/docs/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
+
 ## Detailed Command Usage
 
 ### prefill
@@ -82,7 +99,6 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 | ------- | --- | --- | --- |
 | --all   |     |     | Downloads all owned apps, useful for prefilling a completely empty cache.  |
 | --force | -f  |     | By default, **SteamPrefill** will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.  <br/><br/> Running with the flag `--force` will override this behavior, and instead will always run the prefill, re-downloading all files for the specified product.  This flag may be useful for diagnostics, or benchmarking network performance.  |
-| --dns-override | -d | 192.168.1.111 | Manually specifies the IP address for the Lancache server, in order to run the prefill on the Lancache server itself. <br/>  _**This is only required if running prefill on the Lancache server.**_  <br/>This should not be used in a typical setup where **SteamPrefill** is running on a client machine, e.g. a gaming machine that Steam is normally used on. <br/>| 
 
 # Need Help?
 If you are running into any issues, feel free to open up a Github issue on this repository.

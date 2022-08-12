@@ -3,15 +3,14 @@ using Cysharp.Text;
 using Spectre.Console;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models;
-using SteamPrefill.Models.Exceptions;
 using SteamPrefill.Utils;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using SteamPrefill.Settings;
 using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Handlers
@@ -22,17 +21,12 @@ namespace SteamPrefill.Handlers
         private readonly CdnPool _cdnPool;
         private readonly HttpClient _client;
 
-        private readonly string _steamcontentUri = "lancache.steamcontent.com";
+        private string _steamcontentUri;
 
         public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, DownloadArguments downloadArguments)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
-
-            if (downloadArguments.OverrideLancacheIp != null)
-            {
-                _steamcontentUri = downloadArguments.OverrideLancacheIp.ToString();
-            }
 
             _client = new HttpClient
             {
@@ -48,8 +42,11 @@ namespace SteamPrefill.Handlers
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
-            await ValidateLancacheIpAsync();
-
+            if (_steamcontentUri == null)
+            {
+                _steamcontentUri = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
+            }
+            
             int retryCount = 0;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
@@ -76,8 +73,7 @@ namespace SteamPrefill.Handlers
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }
-
-
+        
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
@@ -127,45 +123,6 @@ namespace SteamPrefill.Handlers
             // Making sure the progress bar is always set to its max value, incase some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
-        }
-
-        private bool _lancacheServerResolved;
-        private bool _publicDownloadOverride;
-
-        private async Task ValidateLancacheIpAsync()
-        {
-            // Short circuit if we have already determined that we can connect to a correctly configured Lancache
-            if (_lancacheServerResolved || _publicDownloadOverride)
-            {
-                return;
-            }
-
-            var ipAddresses = await Dns.GetHostAddressesAsync(_steamcontentUri);
-            if (ipAddresses.Any(e => e.IsInternal()))
-            {
-                // If the IP resolves to a private subnet, then we want to query the Lancache server to see if it is actually there.
-                var response = await _client.GetAsync(new Uri($"http://{_steamcontentUri}/lancache-heartbeat"));
-                if (!response.Headers.Contains("X-LanCache-Processed-By"))
-                {
-                    _ansiConsole.MarkupLine(Red($" Error!  {White("lancache.steamcontent.com")} is resolving to a private IP address {Cyan($"({ipAddresses.First()})")},\n" +
-                                                 " however no Lancache can be found at that address.\n" +
-                                                 " Please check your configuration, and try again.\n"));
-                    throw new LancacheNotFoundException($"No Lancache server detected at {ipAddresses.First()}");
-                }
-                _lancacheServerResolved = true;
-                return;
-            }
-
-            // If a public IP address is resolved, then it means that the Lancache is not configured properly, and we would end up downloading from the internet.
-            // This will prompt a user to see if they still want to continue, as downloading from the internet could still be a good download speed test.
-            _ansiConsole.MarkupLine(LightYellow($" Warning!  {White("lancache.steamcontent.com")} is resolving to a public IP address {Cyan($"({ipAddresses.First()})")}.\n" +
-                                                " Prefill will download directly from the internet, and will not be cached by Lancache.\n"));
-
-            // TODO Setting this to false doesnt skip the download
-            _publicDownloadOverride = _ansiConsole.Prompt(new SelectionPrompt<bool>()
-                                                          .Title("Continue anyway?")
-                                                          .AddChoices(true, false)
-                                                          .UseConverter(e => e == false ? "No" : "Yes"));
         }
 
         public void Dispose()
