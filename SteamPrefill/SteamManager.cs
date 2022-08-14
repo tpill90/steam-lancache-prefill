@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text.Json;
 using System.Threading.Tasks;
 using ByteSizeLib;
 using SteamPrefill.Handlers;
@@ -13,8 +13,8 @@ using SteamPrefill.Utils;
 using Spectre.Console;
 using SteamKit2;
 using SteamPrefill.Handlers.Steam;
+using SteamPrefill.Models.Enums;
 using SteamPrefill.Models.Exceptions;
-using Utf8Json;
 using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill
@@ -224,18 +224,20 @@ namespace SteamPrefill
                     multiSelect.Select(appInfo);
                 }
             }
-                
-            var selectedApps = _ansiConsole.Prompt(multiSelect);
-            await File.WriteAllTextAsync(AppConfig.UserSelectedAppsPath, JsonSerializer.ToJsonString(selectedApps.Select(e => e.AppId)));
 
-            _ansiConsole.MarkupLine($"Selected {Magenta(selectedApps.Count)} apps to prefill!  ");
+            List<uint> selectedAppIds = _ansiConsole.Prompt(multiSelect)
+                                                    .Select(e => e.AppId)
+                                                    .ToList();
+            await File.WriteAllTextAsync(AppConfig.UserSelectedAppsPath, JsonSerializer.Serialize(selectedAppIds, SerializationContext.Default.ListUInt32));
+
+            _ansiConsole.MarkupLine($"Selected {Magenta(selectedAppIds.Count)} apps to prefill!  ");
         }
 
         public List<uint> LoadPreviouslySelectedApps()
         {
             if (File.Exists(AppConfig.UserSelectedAppsPath))
             {
-                return JsonSerializer.Deserialize<List<uint>>(File.ReadAllText(AppConfig.UserSelectedAppsPath));
+                return JsonSerializer.Deserialize(File.ReadAllText(AppConfig.UserSelectedAppsPath), SerializationContext.Default.ListUInt32);
             }
             return new List<uint>();
         }

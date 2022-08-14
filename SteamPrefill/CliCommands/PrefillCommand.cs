@@ -10,6 +10,7 @@ using CliFx.Infrastructure;
 using JetBrains.Annotations;
 using Spectre.Console;
 using SteamPrefill.Models;
+using SteamPrefill.Settings;
 using SteamPrefill.Utils;
 using static SteamPrefill.Utils.SpectreColors;
 
@@ -45,7 +46,7 @@ namespace SteamPrefill.CliCommands
         {
             _ansiConsole = console.CreateAnsiConsole();
 
-            await UpdateChecker.CheckForUpdatesAsync();
+            await UpdateChecker.CheckForUpdatesAsync(typeof(Program), "tpill90/steam-lancache-prefill", AppConfig.CacheDir);
 
             var downloadArgs = new DownloadArguments
             {

@@ -47,6 +47,7 @@ namespace SteamPrefill.Handlers
         private static async Task<string> DetectLancacheServerAsync(string cdnUrl)
         {
             using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+            // Tries to resolve poisoned DNS record, then localhost, then Docker's host
             var possibleLancacheUrls = new List<string> { cdnUrl, "127.0.0.1", "172.17.0.1" };
 
             foreach (var url in possibleLancacheUrls)

@@ -1,35 +1,18 @@
-$scriptBlock = {
-    function PublishRuntime([string] $runtime, [string] $version)
-    {
-        # All double quotes need to be escaped (""") in this block in order to work correctly with Start-Process
-        $publishDir = """publish/SteamPrefill-$version-$runtime"""
-        
-        Write-Host "Publishing $runtime" -ForegroundColor Cyan
-        dotnet publish .\SteamPrefill\SteamPrefill.csproj `
-        --no-restore `
-        --no-build `
-        -o $publishDir `
-        -c Release `
-        --runtime $runtime `
-        --self-contained true `
-        /p:PublishSingleFile=true `
-        /p:PublishReadyToRun=true `
-        /p:PublishTrimmed=true `
-        --nologo
+Clear-Host
 
-        if($LASTEXITCODE -ne 0)
-        {
-            Read-Host
-        }
+#region Powershell config
 
-        Compress-Archive -path $publishDir """$publishDir.zip"""
-    }
+$ErrorActionPreference = "Stop"
+# Checking to see if dependencies are installed
+if(-Not(Get-Module -Name PSWriteColor))
+{
+    Install-Module PSWriteColor -Scope CurrentUser
 }
 
-Clear-Host
-Set-Location $PSScriptRoot
-$ErrorActionPreference = "Stop"
-$stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
+#endregion
+
+Push-Location $PSScriptRoot
+$totalTimer = [System.Diagnostics.Stopwatch]::StartNew()
 
 $csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
 
@@ -43,39 +26,46 @@ Remove-Item .\SteamPrefill\obj -Recurse -Force -ErrorAction SilentlyContinue
 Get-ChildItem publish -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
 # Running dotnet build for each runtime, otherwise the publish step will fail when ran in parallel
-Write-Host "Starting dotnet build.." -ForegroundColor Yellow
+Write-Host "Starting dotnet publish..." -ForegroundColor Yellow
 foreach($runtime in $targetRuntimes)
 {
     Write-Host ""
     Write-Host "Building " -NoNewline; Write-Host $runtime -ForegroundColor Cyan
-    dotnet build .\SteamPrefill\SteamPrefill.csproj `
+
+    $publishDir = "publish/SteamPrefill-$version-$runtime"
+
+    dotnet publish .\SteamPrefill\SteamPrefill.csproj `
+        --nologo `
+        -o $publishDir `
         -c Release `
         --runtime $runtime `
         --self-contained true `
         /p:PublishSingleFile=true `
-        -v quiet `
-        --nologo
-
-    # Making sure that the compliation is successful before mmoving on to the publishing step
+        /p:PublishReadyToRun=true `
+        /p:PublishTrimmed=true
+        
+    # Making sure that the compliation is successful before mmoving on to the next runtime
     if($LASTEXITCODE -ne 0)
     {
         Write-Host "\nBuild failed.  Skipping publish step until errors are resolved.." -ForegroundColor Red
         return
     }
+
+    Compress-Archive -path $publishDir "$publishDir.zip"
 }
 
-$processes = @()
+# Writing out some metrics about the published files, for fun
 foreach($runtime in $targetRuntimes)
 {
-    $processes += Start-Process powershell.exe `
-                            -ArgumentList "-command", "& {$scriptBlock PublishRuntime '$runtime' '$version'}" `
-                            -PassThru
+    $publishName = "SteamPrefill-$version-$runtime"
+    $folderSize = "{0:N2} MB" -f((Get-ChildItem publish/$publishName | Measure-Object -Property Length -sum).sum / 1Mb)
+    $zipSize = "{0:N2} MB" -f((Get-ChildItem publish/$publishName.zip | Measure-Object -Property Length -sum).sum / 1Mb)
+
+    Write-Color $runtime.PadRight(11), " - Publish: ", $folderSize, " Zip: ", $zipSize -Color Yellow, White, Cyan, White, Cyan
 }
 
-Write-Host "Waiting on publish to complete" -ForegroundColor Yellow
-$processes | Wait-Process
+$totalTimer.Stop()
+Write-Host "Publish took total time: " -NoNewline
+Write-Host $totalTimer.Elapsed.ToString() -ForegroundColor Yellow
 
-
-$stopwatch.Stop()
-Write-Host "Build took: " -NoNewline
-Write-Host $stopwatch.Elapsed.ToString() -ForegroundColor Yellow
+Pop-Location

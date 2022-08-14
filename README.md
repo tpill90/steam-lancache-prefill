@@ -25,7 +25,7 @@ Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-a
 ## Initial Setup
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to a directory of your choice
-3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x .\SteamPrefill`
+3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x ./SteamPrefill`
 4.  (**Windows Only - Optional**)  Configure your terminal to use Unicode, for much nicer looking UI output.
     - <img src="docs/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
     - As the default console in Windows does not support UTF8, Windows Terminal should be installed from the [App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).

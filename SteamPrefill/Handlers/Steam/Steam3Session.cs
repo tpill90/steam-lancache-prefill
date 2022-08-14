@@ -4,14 +4,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Security.Authentication;
+using System.Text.Json;
 using Spectre.Console;
 using SteamKit2;
 using SteamKit2.CDN;
+using SteamPrefill;
 using SteamPrefill.Models.Exceptions;
 using SteamPrefill.Settings;
 using SteamPrefill.Utils;
 using static SteamPrefill.Utils.SpectreColors;
-using JsonSerializer = Utf8Json.JsonSerializer;
 
 namespace SteamPrefill.Handlers.Steam
 {
@@ -368,8 +369,8 @@ namespace SteamPrefill.Handlers.Steam
             {
                 if (File.Exists(_ownedAppIdsPath) && File.Exists(_ownedDepotIdsPath))
                 {
-                    OwnedAppIds = JsonSerializer.Deserialize<HashSet<uint>>(File.ReadAllText(_ownedAppIdsPath));
-                    OwnedDepotIds = JsonSerializer.Deserialize<HashSet<uint>>(File.ReadAllText(_ownedDepotIdsPath));
+                    OwnedAppIds = JsonSerializer.Deserialize(File.ReadAllText(_ownedAppIdsPath), SerializationContext.Default.HashSetUInt32);
+                    OwnedDepotIds = JsonSerializer.Deserialize(File.ReadAllText(_ownedDepotIdsPath), SerializationContext.Default.HashSetUInt32);
                     return;
                 }
             }
@@ -420,8 +421,8 @@ namespace SteamPrefill.Handlers.Steam
             }
 
             // Serializing this data to speedup subsequent runs
-            File.WriteAllText(_ownedAppIdsPath, JsonSerializer.ToJsonString(OwnedAppIds));
-            File.WriteAllText(_ownedDepotIdsPath, JsonSerializer.ToJsonString(OwnedDepotIds));
+            File.WriteAllText(_ownedAppIdsPath, JsonSerializer.Serialize(OwnedAppIds, SerializationContext.Default.HashSetUInt32));
+            File.WriteAllText(_ownedDepotIdsPath, JsonSerializer.Serialize(OwnedDepotIds, SerializationContext.Default.HashSetUInt32));
             File.WriteAllText(_packageCountPath, packageRequests.Count.ToString());
         }
         #endregion
