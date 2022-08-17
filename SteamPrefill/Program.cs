@@ -5,6 +5,17 @@ using SteamPrefill.Utils;
 namespace SteamPrefill
 {
     /* TODO
+     * Add Prefill.Common project
+     * Make sure changes done in battlenet prefill are done here
+     * Update to dotnet 7 sdk + dotnet 7 target
+     * Setup global using file
+     * Update resharper dotsettings file to match Battlenet Prefill
+     * Replace utf8json with System.Text.Json + Source generator
+     * Unparallelize the publish script, take it from BattleNetPrefill
+     * Remove Spectre.Console as a submodule, and add precompiled binary as a reference
+     * Docs - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
+     * Docs - Add an image to the main heading in the readme.  That way people have an image that they can immediately see when they come to the repo
+     * Would it be useful to port the LancacheIpResolver over into its own app, in order to replace the defunct lancache diagnostics/litmus test
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Bug - TryWaitForLoginKey() is flaky.  Steam doesn't seem to be saving credentials properly in australia.
      *       Keeps requiring password reentry.  Other users report the same

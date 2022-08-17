@@ -21,7 +21,10 @@ namespace SteamPrefill.Handlers
         private readonly CdnPool _cdnPool;
         private readonly HttpClient _client;
 
-        private string _steamcontentUri;
+        /// <summary>
+        /// The URL/IP Address where the Lancache has been detected.
+        /// </summary>
+        private string _lancacheAddress;
 
         public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, DownloadArguments downloadArguments)
         {
@@ -42,9 +45,9 @@ namespace SteamPrefill.Handlers
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
-            if (_steamcontentUri == null)
+            if (_lancacheAddress == null)
             {
-                _steamcontentUri = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
+                _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
             }
             
             int retryCount = 0;
@@ -91,10 +94,12 @@ namespace SteamPrefill.Handlers
             // Running multiple requests in parallel on a single CDN
             await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
             {
+                //TODO implement shared buffer pool.  Seems to have a massive performance improvement in BattlenetPrefill when running on the server
+                //byte[] buffer = ArrayPool<byte>.Shared.Rent(524_288);
                 var buffer = new byte[4096];
                 try
                 {
-                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", _steamcontentUri, request.DepotId, request.ChunkId);
+                    var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", _lancacheAddress, request.DepotId, request.ChunkId);
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                     requestMessage.Headers.Host = cdnServer.Host;
                     

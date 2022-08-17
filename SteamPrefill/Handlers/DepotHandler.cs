@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using SteamPrefill.Models;
 using SteamPrefill.Settings;
 using SteamPrefill.Handlers.Steam;
-using Utf8Json;
+using SteamPrefill.Models.Enums;
 
 namespace SteamPrefill.Handlers
 {
@@ -28,7 +29,7 @@ namespace SteamPrefill.Handlers
             
             if (File.Exists(_downloadedDepotsPath))
             {
-                _downloadedDepots = JsonSerializer.Deserialize<Dictionary<uint, HashSet<ulong>>>(File.ReadAllText(_downloadedDepotsPath));
+                _downloadedDepots = JsonSerializer.Deserialize(File.ReadAllText(_downloadedDepotsPath), SerializationContext.Default.DictionaryUInt32HashSetUInt64);
             }
         }
 
@@ -50,7 +51,7 @@ namespace SteamPrefill.Handlers
                     downloadedManifests.Add(depot.ManifestId.Value);
                 }
             }
-            File.WriteAllText(_downloadedDepotsPath, JsonSerializer.ToJsonString(_downloadedDepots));
+            File.WriteAllText(_downloadedDepotsPath, JsonSerializer.Serialize(_downloadedDepots, SerializationContext.Default.DictionaryUInt32HashSetUInt64));
         }
 
         /// <summary>

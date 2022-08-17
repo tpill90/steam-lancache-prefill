@@ -25,4 +25,10 @@
     <ProjectReference Include="..\SteamPrefill\SteamPrefill.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="Spectre.Console">
+      <HintPath>..\lib\Spectre.Console.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
