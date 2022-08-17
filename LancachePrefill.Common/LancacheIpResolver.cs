@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Handlers
+﻿namespace LancachePrefill.Common
 {
     /// <summary>
     /// Attempts to automatically resolve the Lancache's IP address,
@@ -32,7 +32,7 @@
             await DetectPublicIpAsync(cdnUrl);
             return cdnUrl;
         }
-        
+
         private static async Task<string> DetectLancacheServerAsync(string cdnUrl)
         {
             using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
@@ -63,14 +63,14 @@
                         throw new LancacheNotFoundException($"No Lancache server detected at {ipAddresses.First()}");
                     }
                 }
-                catch (Exception e ) when (e is HttpRequestException | e is TaskCanceledException)
+                catch (Exception e) when (e is HttpRequestException | e is TaskCanceledException)
                 {
                     // Catching target machine refused connection + timeout exceptions, so we can try the next address
                 }
             }
             return null;
         }
-        
+
         private static async Task DetectPublicIpAsync(string cdnUrl)
         {
             var ipAddresses = await Dns.GetHostAddressesAsync(cdnUrl);
