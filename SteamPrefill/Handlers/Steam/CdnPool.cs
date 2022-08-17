@@ -1,11 +1,3 @@
-using System.Collections.Concurrent;
-using System.Linq;
-using System.Threading.Tasks;
-using Spectre.Console;
-using SteamKit2.CDN;
-using SteamPrefill.Models.Exceptions;
-using SteamPrefill.Utils;
-
 namespace SteamPrefill.Handlers.Steam
 {
     /// <summary>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using CliFx.Infrastructure;
-using Spectre.Console;
-
-namespace SteamPrefill.Utils
+﻿namespace SteamPrefill.Utils
 {
     public static class AnsiConsoleExtensions
     {

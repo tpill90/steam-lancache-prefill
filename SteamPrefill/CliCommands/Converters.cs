@@ -1,10 +1,4 @@
-﻿using System.Net;
-using CliFx.Exceptions;
-using CliFx.Extensibility;
-using Spectre.Console;
-using static SteamPrefill.Utils.SpectreColors;
-
-namespace SteamPrefill.CliCommands
+﻿namespace SteamPrefill.CliCommands
 {
     public class IpAddressConverter : BindingConverter<IPAddress>
     {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     /// <summary>
     /// Requests a ManifestRequestCode for the specified depot.  Each depot will have a unique code, that gets rotated every 5 minutes.

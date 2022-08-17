@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using ProtoBuf;
-using Spectre.Console;
-using SteamPrefill.Utils;
-using static SteamPrefill.Utils.SpectreColors;
+﻿using ProtoBuf;
 
 namespace SteamPrefill.Settings
 {

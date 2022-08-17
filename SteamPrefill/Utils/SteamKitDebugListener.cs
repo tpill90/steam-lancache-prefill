@@ -1,7 +1,3 @@
-using System;
-using Spectre.Console;
-using SteamKit2;
-
 namespace SteamPrefill.Utils
 {
     /// <summary>

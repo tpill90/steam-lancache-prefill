@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
-using SteamPrefill.Utils;
-
-namespace SteamPrefill
+﻿namespace SteamPrefill
 {
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default)]
     [JsonSerializable(typeof(List<GithubRelease>))]

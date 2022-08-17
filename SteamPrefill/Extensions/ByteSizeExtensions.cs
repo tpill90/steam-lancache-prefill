@@ -1,8 +1,4 @@
-﻿using System.Diagnostics;
-using System.Globalization;
-using ByteSizeLib;
-
-namespace SteamPrefill.Utils
+﻿namespace SteamPrefill.Utils
 {
     public static class ByteSizeExtensions
     {

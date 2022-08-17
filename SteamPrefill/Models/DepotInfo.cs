@@ -1,13 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using SteamPrefill.Settings;
-using JetBrains.Annotations;
-using SteamKit2;
-using SteamPrefill.Models.Enums;
-using SteamPrefill.Utils;
-using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     public class DepotInfo
     {

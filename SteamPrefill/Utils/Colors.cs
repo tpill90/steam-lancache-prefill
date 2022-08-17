@@ -1,6 +1,4 @@
-﻿using Spectre.Console;
-
-namespace SteamPrefill.Utils
+﻿namespace SteamPrefill.Utils
 {
     public static class SpectreColors
     {

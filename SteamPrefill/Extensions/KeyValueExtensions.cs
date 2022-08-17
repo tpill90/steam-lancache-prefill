@@ -1,9 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using SteamKit2;
-using SteamPrefill.Models.Enums;
-
-namespace SteamPrefill.Utils
+﻿namespace SteamPrefill.Utils
 {
     public static class KeyValueExtensions
     {

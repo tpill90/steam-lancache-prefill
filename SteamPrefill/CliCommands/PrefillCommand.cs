@@ -1,20 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
-using CliFx;
-using CliFx.Attributes;
-using CliFx.Exceptions;
-using CliFx.Infrastructure;
-using JetBrains.Annotations;
-using Spectre.Console;
-using SteamPrefill.Models;
-using SteamPrefill.Settings;
-using SteamPrefill.Utils;
-using static SteamPrefill.Utils.SpectreColors;
-
-// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]

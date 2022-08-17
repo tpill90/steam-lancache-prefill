@@ -1,19 +1,4 @@
-﻿using System;
-using Cysharp.Text;
-using Spectre.Console;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models;
-using SteamPrefill.Utils;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
-using SteamPrefill.Settings;
-using static SteamPrefill.Utils.SpectreColors;
-
-namespace SteamPrefill.Handlers
+﻿namespace SteamPrefill.Handlers
 {
     public sealed class DownloadHandler : IDisposable
     {

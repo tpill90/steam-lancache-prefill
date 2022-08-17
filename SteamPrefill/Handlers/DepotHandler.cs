@@ -1,14 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using SteamPrefill.Models;
-using SteamPrefill.Settings;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enums;
-
-namespace SteamPrefill.Handlers
+﻿namespace SteamPrefill.Handlers
 {
     public class DepotHandler
     {

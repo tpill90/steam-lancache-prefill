@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace SteamPrefill.Models.Exceptions
+﻿namespace SteamPrefill.Models.Exceptions
 {
     [Serializable]
     public class SteamLoginException : Exception

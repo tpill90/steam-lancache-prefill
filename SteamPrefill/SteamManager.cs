@@ -1,23 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using ByteSizeLib;
-using SteamPrefill.Handlers;
-using SteamPrefill.Models;
-using SteamPrefill.Settings;
-using SteamPrefill.Utils;
-using Spectre.Console;
-using SteamKit2;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enums;
-using SteamPrefill.Models.Exceptions;
-using static SteamPrefill.Utils.SpectreColors;
-
-namespace SteamPrefill
+﻿namespace SteamPrefill
 {
     public sealed class SteamManager : IDisposable
     {

@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace SteamPrefill.Settings
 {
     public static class AppConfig

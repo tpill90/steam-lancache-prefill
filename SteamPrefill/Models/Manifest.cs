@@ -1,11 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using HexMate;
-using ProtoBuf;
-using SteamKit2;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     [ProtoContract]
     public class Manifest
@@ -80,7 +73,7 @@ namespace SteamPrefill.Models
     {
         public ChunkData(DepotManifest.ChunkData sourceChunk)
         {
-            ChunkID = Convert.ToHexString(sourceChunk.ChunkID, HexFormattingOptions.Lowercase);
+            ChunkID = HexMate.Convert.ToHexString(sourceChunk.ChunkID, HexFormattingOptions.Lowercase);
             CompressedLength = sourceChunk.CompressedLength;
         }
 

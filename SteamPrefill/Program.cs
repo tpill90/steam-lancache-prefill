@@ -1,14 +1,10 @@
-using System.Threading.Tasks;
-using CliFx;
-using SteamPrefill.Utils;
-
 namespace SteamPrefill
 {
     /* TODO
      * Add Prefill.Common project
-     * Make sure changes done in battlenet prefill are done here
+     * Documentation - Explain process for updating app
      * Update to dotnet 7 sdk + dotnet 7 target
-     * Setup global using file
+     
      * Update resharper dotsettings file to match Battlenet Prefill
      * Replace utf8json with System.Text.Json + Source generator
      * Unparallelize the publish script, take it from BattleNetPrefill
@@ -26,10 +22,9 @@ namespace SteamPrefill
                       Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
      * Build - Fail build on both warnings + trim warnings
      * Deprecation - Remove --dns-override in a future version.
-     * Documentation - Explain process for updating app
+     
      * General - Promote this app on r/lanparty.
-     *
-     * Feature - Design a "benchmark mode" that runs a single/multiple applications in a loop.  If a game's manifests already exist, then there won't even be a need to login to Steam.
+     * Update readme to include table of contents.  Make sure the formatting is similar to battlenet prefill
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
      * CliFx - I wish there was a way to color the help text output from CliFx.  Everything is so flat, and cant draw attention to important parts
      */
@@ -48,6 +43,11 @@ namespace SteamPrefill
                          .SetDescription(description)
                          .Build()
                          .RunAsync();
+        }
+
+        public static class OperatingSystem
+        {
+            public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
     }
 }

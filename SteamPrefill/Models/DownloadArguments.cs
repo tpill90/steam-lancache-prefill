@@ -1,6 +1,4 @@
-﻿using SteamPrefill.Models.Enums;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     public class DownloadArguments
     {

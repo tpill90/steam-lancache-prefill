@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Spectre.Console;
-using SteamKit2;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enums;
-using SteamPrefill.Models;
-using SteamPrefill.Utils;
-using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
-
-namespace SteamPrefill.Handlers
+﻿namespace SteamPrefill.Handlers
 {
     /// <summary>
     /// Responsible for retrieving application metadata from Steam

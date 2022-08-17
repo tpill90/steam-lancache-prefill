@@ -1,13 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
-using Spectre.Console;
-using SteamKit2;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enums;
-using SteamPrefill.Utils;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     /// <summary>
     /// Represents an application (game, tool, video, server) that can be downloaded from steam

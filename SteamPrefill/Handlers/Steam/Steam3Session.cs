@@ -1,18 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
 using System.Security.Authentication;
-using System.Text.Json;
-using Spectre.Console;
-using SteamKit2;
-using SteamKit2.CDN;
-using SteamPrefill;
-using SteamPrefill.Models.Exceptions;
-using SteamPrefill.Settings;
-using SteamPrefill.Utils;
-using static SteamPrefill.Utils.SpectreColors;
 
 namespace SteamPrefill.Handlers.Steam
 {

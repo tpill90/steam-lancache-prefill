@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
-using Spectre.Console;
-using SteamPrefill.Models;
-using SteamKit2;
-using SteamKit2.CDN;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Exceptions;
-using SteamPrefill.Utils;
-
-namespace SteamPrefill.Handlers
+﻿namespace SteamPrefill.Handlers
 {
     /// <summary>
     /// Responsible for downloading manifests from Steam, as well as loading previously saved manifests from disk.

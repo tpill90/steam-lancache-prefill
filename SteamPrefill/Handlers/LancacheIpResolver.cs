@@ -1,15 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Spectre.Console;
-using SteamPrefill.Models.Exceptions;
-using SteamPrefill.Utils;
-using static SteamPrefill.Utils.SpectreColors;
-
-namespace SteamPrefill.Handlers
+﻿namespace SteamPrefill.Handlers
 {
     /// <summary>
     /// Attempts to automatically resolve the Lancache's IP address,

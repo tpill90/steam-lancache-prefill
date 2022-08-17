@@ -1,11 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography;
-
-namespace SteamPrefill.Utils
+﻿namespace SteamPrefill.Utils
 {
     public static class Extensions
     {
