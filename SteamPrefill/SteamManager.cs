@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill
+﻿using LancachePrefill.Common.Exceptions;
+
+namespace SteamPrefill
 {
     public sealed class SteamManager : IDisposable
     {

@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Utils
+﻿namespace LancachePrefill.Common.Extensions
 {
     public static class AnsiConsoleExtensions
     {

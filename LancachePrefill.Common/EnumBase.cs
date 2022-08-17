@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Models.Enums
+﻿namespace LancachePrefill.Common
 {
     /// <summary>
     /// This class is intended to be used to create "strongly typed enums", as an alternative to regular "int" enums in C#.
@@ -16,7 +16,7 @@
 
         private static object _lockObject = new object();
 
-
+        
         public static List<T> AllEnumValues
         {
             get

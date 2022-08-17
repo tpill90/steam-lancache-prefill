@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Models.Exceptions
+﻿namespace LancachePrefill.Common.Exceptions
 {
     [Serializable]
     public class UserCancelledException : Exception

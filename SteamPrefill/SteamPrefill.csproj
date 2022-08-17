@@ -66,6 +66,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+   
+  <ItemGroup>
+    <ProjectReference Include="..\LancachePrefill.Common\LancachePrefill.Common.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="Spectre.Console">
