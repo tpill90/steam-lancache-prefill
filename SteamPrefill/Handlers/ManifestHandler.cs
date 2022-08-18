@@ -34,22 +34,23 @@
                 {
                     depotManifests = await AttemptManifestDownloadAsync(depots);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    FileLogger.Log($"An exception occurred while downloading manifests");
+                    FileLogger.Log(e.ToString());
                     // We don't really care why the manifest download failed.  We're going to retry regardless
                 }
                 retryCount++;
             }
             if (retryCount == 3)
             {
-                throw new ManifestException("An unexpected error occured while downloading manifests!  Skipping...");
+                throw new ManifestException("An unexpected error occurred while downloading manifests!  Skipping...");
             }
             return depotManifests;
         }
         
         private async Task<ConcurrentBag<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
         {
-            //TODO implement a timeout here
             var depotManifests = new ConcurrentBag<Manifest>();
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
@@ -73,6 +74,7 @@
         /// <exception cref="ManifestException">Throws if no manifest was returned by Steam</exception>
         private async Task<Manifest> GetSingleManifestAsync(DepotInfo depot, Server server)
         {
+            //TODO implement a timeout here
             if (File.Exists(depot.ManifestFileName))
             {
                 return Manifest.LoadFromFile(depot.ManifestFileName);
@@ -85,7 +87,7 @@
             {
                 throw new ManifestException($"Unable to download manifest for depot {depot.Name} - {depot.DepotId}.  Manifest request received no response.");
             }
-            
+
             var protoManifest = new Manifest(manifest, depot);
             protoManifest.SaveToFile(depot.ManifestFileName);
             return protoManifest;
