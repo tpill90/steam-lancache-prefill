@@ -53,6 +53,9 @@ namespace SteamPrefill.Handlers.Steam
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
             
             CdnClient = new Client(_steamClient);
+            // Configuring SteamKit's HttpClient to timeout in a more reasonable time frame.
+            Client.ResponseBodyTimeout = TimeSpan.FromSeconds(5);
+            Client.RequestTimeout = TimeSpan.FromSeconds(5);
 
             _userAccountStore = UserAccountStore.LoadFromFile();
         }

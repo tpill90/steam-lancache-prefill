@@ -12,6 +12,7 @@
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
         private readonly Steam3Session _steam3Session;
+        private const int MaxRetries = 3;
 
         public ManifestHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, Steam3Session steam3Session)
         {
@@ -26,31 +27,40 @@
         /// <exception cref="ManifestException"></exception>
         public async Task<ConcurrentBag<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
         {
+			int attempts = 0;
             var depotManifests = new ConcurrentBag<Manifest>();
-            int retryCount = 0;
-            while (depotManifests.Count != depots.Count && retryCount < 3)
+            while (depotManifests.Count != depots.Count && attempts < MaxRetries)
             {
                 try
                 {
                     depotManifests = await AttemptManifestDownloadAsync(depots);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    // We don't really care why the manifest download failed.  We're going to retry regardless
+                    // Regardless of the manifest, we're always going to retry multiple times
+                    _ansiConsole.MarkupLine(Red("An error occurred while downloading manifests.  Retrying..."));
+
+                    // Log extended details to disk
+                    FileLogger.Log("An exception occurred while downloading manifests");
+                    FileLogger.Log(e.ToString());
+
+                    // Pausing a short time, in case the error was transient
+                    await Task.Delay(500 * attempts);
                 }
-                retryCount++;
+                attempts++;
             }
-            if (retryCount == 3)
+            if (attempts == MaxRetries)
             {
-                throw new ManifestException("An unexpected error occured while downloading manifests!  Skipping...");
+                throw new ManifestException("An unexpected error occurred while downloading manifests!  Skipping...");
             }
+
             return depotManifests;
         }
         
         private async Task<ConcurrentBag<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
         {
-            //TODO implement a timeout here
             var depotManifests = new ConcurrentBag<Manifest>();
+
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
                 Server server = _cdnPool.TakeConnection();
@@ -79,13 +89,12 @@
             }
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
-            //TODO see if its possible to remove this dependency on CdnClient
             DepotManifest manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
             if (manifest == null)
             {
                 throw new ManifestException($"Unable to download manifest for depot {depot.Name} - {depot.DepotId}.  Manifest request received no response.");
             }
-            
+
             var protoManifest = new Manifest(manifest, depot);
             protoManifest.SaveToFile(depot.ManifestFileName);
             return protoManifest;

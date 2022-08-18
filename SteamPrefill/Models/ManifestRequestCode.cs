@@ -13,5 +13,10 @@
     {
         public ulong Code { get; set; }
         public DateTime RetrievedAt { get; set; }
+
+        public override string ToString()
+        {
+            return Code.ToString();
+        }
     }
 }

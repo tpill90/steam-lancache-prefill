@@ -27,7 +27,7 @@
 
                 // Query Github for a list of all available releases
                 var response = await httpClient.GetStringAsync(new Uri($"https://api.github.com/repos/{repoName}/releases"));
-                GithubRelease latestRelease = JsonSerializer.Deserialize(response, LancachePrefill.Common.SerializationContext.Default.ListGithubRelease)
+                GithubRelease latestRelease = JsonSerializer.Deserialize(response, SerializationContext.Default.ListGithubRelease)
                                                             .OrderByDescending(e => e.PublishedAt)
                                                             .First();
 
@@ -69,6 +69,12 @@
             AnsiConsole.Write(table);
             AnsiConsole.WriteLine();
         }
+    }
+
+    [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default)]
+    [JsonSerializable(typeof(List<GithubRelease>))]
+    internal partial class SerializationContext : JsonSerializerContext
+    {
     }
 
     public class GithubRelease
