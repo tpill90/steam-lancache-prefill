@@ -65,6 +65,15 @@
                 {
                     continue;
                 }
+
+                //TODO I'm not sure this is the right place for this logic
+                // Some EA games have depots that look like they are owned by a linked DLC app,
+                // however the linked App is not actually a valid app that has any public information available
+                // Example of a depot with this issue : https://steamdb.info/depot/1038254/
+                if (depot.DlcAppId != null && !_steam3Session.AccountHasAppAccess(depot.DlcAppId.Value))
+                {
+                    continue;
+                }
                 
                 // Filtering to only specified operating systems
                 if (depot.SupportedOperatingSystems.Any() && !depot.SupportedOperatingSystems.Contains(downloadArgs.OperatingSystem))

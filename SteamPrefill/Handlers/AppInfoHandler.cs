@@ -55,7 +55,10 @@
         /// <param name="appIds">The list of App Ids to retrieve info for</param>
         private async Task BulkLoadAppInfosAsync(List<uint> appIds)
         {
-            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e) && _steam3Session.AccountHasAppAccess(e)).ToList();
+            //TODO need to always load every app, but need to move this filtering elsewhere so it doesn't break things
+            var noAccess = appIds.Where(e => !_steam3Session.AccountHasAppAccess(e)).ToList();
+
+            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e)).ToList();
             if (!appIdsToLoad.Any())
             {
                 return;
