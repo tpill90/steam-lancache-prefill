@@ -1,4 +1,10 @@
-﻿namespace SteamPrefill.Utils
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using SteamKit2;
+using SteamPrefill.Models.Enums;
+
+namespace SteamPrefill.Utils
 {
     public static class KeyValueExtensions
     {
@@ -34,6 +40,18 @@
             }
 
             return value;
+        }
+
+        public static DateTime? AsDateTime(this KeyValue keyValue)
+        {
+            long seconds;
+
+            if (long.TryParse(keyValue.Value, out seconds) == false)
+            {
+                return null;
+            }
+
+            return DateTimeOffset.FromUnixTimeSeconds(seconds).DateTime;
         }
 
         /// <summary>

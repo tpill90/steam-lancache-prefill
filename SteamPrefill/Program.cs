@@ -1,28 +1,21 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Add Prefill.Common project
-     * Documentation - Explain process for updating app
-     * Update to dotnet 7 sdk + dotnet 7 target
-     
-     * Update resharper dotsettings file to match Battlenet Prefill
-     * Replace utf8json with System.Text.Json + Source generator
-     * Unparallelize the publish script, take it from BattleNetPrefill
-     * Remove Spectre.Console as a submodule, and add precompiled binary as a reference
+     * Select apps - Cleanup dedicated servers + just cause multiplayer mod + tloader + red orchestra community maps from being displayed
+     * Documentation - Add entry to FAQ explaining that it is possible to run this app on the server, and explain how to do that.
+     * Cleanup some apps that shouldnt be shown, like Red Orchestra community maps + dedicated server.  Killing Floor Server
+     *
      * Docs - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
-     * Docs - Add an image to the main heading in the readme.  That way people have an image that they can immediately see when they come to the repo
-     * Would it be useful to port the LancacheIpResolver over into its own app, in order to replace the defunct lancache diagnostics/litmus test
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
-     * Bug - TryWaitForLoginKey() is flaky.  Steam doesn't seem to be saving credentials properly in australia.
-     *       Keeps requiring password reentry.  Other users report the same
-     *       What happens if Lancache is completely disabled?  Do users stay logged in?
-     *       Is there a limit to the # of computers that can be logged in at the same time?  Test logging in with multiple VMs for the same account
+     * Update resharper dotsettings file to match Battlenet Prefill
+     * Docs - Add an image to the main heading in the readme.  That way people have an image that they can immediately see when they come to the repo
      * Bug - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
      * Feature - Could it be easier to select multiple apps on the select screen, without having to press down + space repeatedly?  
                       Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
      * Build - Fail build on both warnings + trim warnings
      * Deprecation - Remove --dns-override in a future version.
      
+    * Update to dotnet 7 sdk + dotnet 7 target
      * General - Promote this app on r/lanparty.
      * Update readme to include table of contents.  Make sure the formatting is similar to battlenet prefill
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
@@ -48,6 +41,6 @@ namespace SteamPrefill
         public static class OperatingSystem
         {
             public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
-        }
     }
+}
 }
