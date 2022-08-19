@@ -5,9 +5,9 @@
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
     //TODO update description
+    //TODO update readme with new pictures, as well as new instructions of how to use the features
     [UsedImplicitly]
-    [Command("select-apps-beta", Description = "Displays an interactive list of all owned apps.  " +
-                                          "As many apps as desired can be selected, which will then be used by the 'prefill' command")]
+    [Command("select-apps-beta", Description = "Beta version of select-apps interface redesign")]
     public class SelectAppsBetaCommand : ICommand
     {
         //TODO update docs explaining that there is a beta
@@ -27,14 +27,15 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                 var tui2 = new SelectAppsTui(games);
                 tui2.Run();
 
-                var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
-                                    .Title(LightYellow("Run prefill now?"))
-                                    .AddChoices(true, false)
-                                    .UseConverter(e => e == false ? "No" : "Yes"));
-                if (runPrefill)
-                {
-                    await steamManager.DownloadMultipleAppsAsync(false, new List<uint>());
-                }
+                //TODO reenable
+                //var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
+                //                    .Title(LightYellow("Run prefill now?"))
+                //                    .AddChoices(true, false)
+                //                    .UseConverter(e => e == false ? "No" : "Yes"));
+                //if (runPrefill)
+                //{
+                //    await steamManager.DownloadMultipleAppsAsync(false, new List<uint>());
+                //}
             }
             catch (Exception e)
             {

@@ -19,12 +19,10 @@ namespace SteamPrefill.CliCommands
                 Height = Dim.Fill(),
                 ColorScheme = Colors.TopLevel
             };
-            var top1 = Application.Top;
-            top1.Add(window);
+            Application.Top.Add(window);
 
             #region First Row
 
-            //TODO Do I really need to pass the color scheme to each element?
             var sortLabel = new Label("Sort:")
             {
                 X = 1,
@@ -48,29 +46,31 @@ namespace SteamPrefill.CliCommands
 
             #endregion
 
+            #region Second Row
+
             var searchLabel = new Label("Search: ")
             {
                 X = 1,
-                Y = 3
+                Y = 2
             };
-            window.Add(searchLabel);
-
-            _searchBox = new TextField()
+            _searchBox = new TextField
             {
                 X = Pos.Right(searchLabel) + 1,
-                Y = 3,
+                Y = 2,
                 Width = 50
             };
             _searchBox.TextChanged += SearchBox_OnTextChanged;
-            window.Add(_searchBox);
+            window.Add(searchLabel, _searchBox);
+
+            #endregion
 
             _listView = new ListView
             {
                 X = 1,
-                Y = 5,
+                Y = 4,
                 Height = Dim.Fill(),
                 Width = Dim.Fill(1),
-                ColorScheme = new ColorScheme()
+                ColorScheme = new ColorScheme
                 {
                     Normal = new Attribute(foreground: Color.Gray, background: Color.Black),
                     HotNormal = new Attribute(foreground: Color.Gray, background: Color.Black),
@@ -85,7 +85,7 @@ namespace SteamPrefill.CliCommands
             window.Add(_listView);
 
             //TODO should the different actions have different colors?
-            var statusBar = new StatusBar
+            statusBar = new StatusBar
             {
                 Visible = true,
                 ColorScheme = new ColorScheme
@@ -94,32 +94,7 @@ namespace SteamPrefill.CliCommands
                     HotNormal = new Attribute(foreground: Color.BrightGreen, background: Color.Black),
                 }
             };
-
-            //TODO I don't like that these are hidden
-            statusBar.Items = new StatusItem[] {
-                new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
-                {
-                    Application.RequestStop(top1);
-                    top1.SetNeedsDisplay();
-                }),
-                new StatusItem (Key.CharMask, "~↑/↓/PgUp/PgDn~ to navigate", null),
-                new StatusItem (Key.CharMask, "~Space~ to select", null),
-                new StatusItem (Key.CtrlMask | Key.A, "~CTRL-A~ Select All", () =>
-                {
-                    ListViewDataSource.SetAllSelected(true);
-                    _listView.SetNeedsDisplay();
-                }),
-                new StatusItem (Key.CtrlMask | Key.C, "~CTRL-C~ Clear All", () =>
-                {
-                    ListViewDataSource.SetAllSelected(false);
-                    _listView.SetNeedsDisplay();
-                }),
-                new StatusItem (Key.Enter, "~Enter~ to Save", () =>
-                {
-                    //TODO implement save
-                }),
-            };
-            top1.Add(statusBar);
+            Application.Top.Add(statusBar);
         }
     }
 }

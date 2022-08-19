@@ -12,12 +12,9 @@ namespace SteamPrefill.CliCommands
     //TODO implement sorting by recently played games
     //TODO include more metadata in the list view, like year/minutes played/last played/etc
     //TODO selected rows need some more coloring to differentiate what is selected
-    //TODO the first list item should always be the first thing selected when starting up the Tui
-    //TODO implement scroll bar
     //TODO Can I format the list items to show checked with [X] like the original
     //TODO can the selected items check show as blue
     //TODO get rid of ugly green outline
-    //TODO this needs to be tested on Cmd/Windows Terminal/Linux
     //TODO Search Box - control+a in text box needs to select all text
     //TODO Search Box - Need a way to easily clear current query
     //TODO update readme with new pictures
@@ -26,6 +23,7 @@ namespace SteamPrefill.CliCommands
     {
         private ListView _listView;
         private TextField _searchBox;
+        private StatusBar statusBar;
 
         private AppInfoDataSource ListViewDataSource => (AppInfoDataSource)_listView.Source;
 
@@ -45,6 +43,31 @@ namespace SteamPrefill.CliCommands
             Application.UseSystemConsole = false;
 
             InitLayout(appInfos);
+
+            // Configuring status bar actions
+            statusBar.Items = new StatusItem[] {
+                new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
+                {
+                    Application.RequestStop(Application.Top);
+                    Application.Top.SetNeedsDisplay();
+                }),
+                new StatusItem (Key.CharMask, "~↑/↓/PgUp/PgDn~ to navigate", null),
+                new StatusItem (Key.CharMask, "~Space~ to select", null),
+                new StatusItem (Key.CtrlMask | Key.A, "~CTRL-A~ Select All", () =>
+                {
+                    ListViewDataSource.SetAllSelected(true);
+                    _listView.SetNeedsDisplay();
+                }),
+                new StatusItem (Key.CtrlMask | Key.C, "~CTRL-C~ Clear All", () =>
+                {
+                    ListViewDataSource.SetAllSelected(false);
+                    _listView.SetNeedsDisplay();
+                }),
+                new StatusItem (Key.Enter, "~Enter~ to Save", () =>
+                {
+                    //TODO implement save
+                }),
+            };
         }
 
         public void Run()
