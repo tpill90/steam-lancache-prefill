@@ -1,7 +1,4 @@
-﻿
-using System;
-
-namespace LancachePrefill.Common
+﻿namespace LancachePrefill.Common
 {
     public static class FileLogger
     {

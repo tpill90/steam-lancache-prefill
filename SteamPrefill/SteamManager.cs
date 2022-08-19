@@ -203,7 +203,7 @@ namespace SteamPrefill
             var multiSelect = new MultiSelectionPrompt<AppInfo>()
                               .Title(Underline(White("Select apps to prefill...")))
                               .NotRequired()
-                              .PageSize(35)
+                              .PageSize(45)
                               .MoreChoicesText(Grey("(Use ↑/↓ to navigate.  Page Up/Page Down skips pages)"))
                               .InstructionsText(Grey($"(Press {Blue("<space>")} to toggle an app, {Green("<enter>")} to accept)"))
                               .AddChoices(availableGames);
