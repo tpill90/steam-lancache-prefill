@@ -1,5 +1,6 @@
 ﻿using SteamPrefill.CliCommands.SelectAppsBeta;
 using Terminal.Gui;
+using Terminal.Gui.Graphs;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 
@@ -60,9 +61,17 @@ namespace SteamPrefill.CliCommands
                 Width = 50
             };
             _searchBox.TextChanged += SearchBox_OnTextChanged;
+            _searchBox.AddKeyBinding(Key.CtrlMask | Key.A, Command.SelectAll);
             window.Add(searchLabel, _searchBox);
 
             #endregion
+
+            var lineView = new LineView(Orientation.Horizontal)
+            {
+                Y = 3,
+                Width = Dim.Fill()
+            };
+            window.Add(lineView);
 
             _listView = new ListView
             {

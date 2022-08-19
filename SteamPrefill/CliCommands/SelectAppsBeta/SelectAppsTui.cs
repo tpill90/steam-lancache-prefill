@@ -82,6 +82,7 @@ namespace SteamPrefill.CliCommands
             var searchText = _searchBox.Text.ToString();
 
             ListViewDataSource.FilterItems(searchText);
+            _listView.TopItem = 0;
             _listView.SetNeedsDisplay();
         }
 

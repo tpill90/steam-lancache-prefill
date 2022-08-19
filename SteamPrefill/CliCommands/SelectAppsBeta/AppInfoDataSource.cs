@@ -50,12 +50,13 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
 
         public void FilterItems(string searchText)
         {
-            _currAppInfo = _originalAppInfo.Where(e => e.Name.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            var currAppInfo = _originalAppInfo.Where(e => e.Name.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
+            _currAppInfo = currAppInfo;
         }
 
         public void SortName()
         {
-            _currAppInfo = _currAppInfo.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
+            _currAppInfo = _originalAppInfo.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         private bool _sortYearToggle;
