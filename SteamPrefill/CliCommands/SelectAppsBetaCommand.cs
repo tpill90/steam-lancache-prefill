@@ -1,6 +1,4 @@
 ﻿using Terminal.Gui;
-using Attribute = Terminal.Gui.Attribute;
-using Color = Terminal.Gui.Color;
 
 
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
@@ -13,21 +11,24 @@ namespace SteamPrefill.CliCommands
     public class SelectAppsBetaCommand : ICommand
     {
         //TODO update docs explaining that there is a beta
-        //TODO add a banner to the original select-apps command, letting users know that there is a newer version to test
         public async ValueTask ExecuteAsync(IConsole console)
         {
             var ansiConsole = console.CreateAnsiConsole();
-            //TODO re-enable
             using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
+
             try
             {
-                //TODO re-enable
                 steamManager.Initialize();
-                //await steamManager.SelectAppsAsync();
 
                 var games = await steamManager.GetGames();
+                steamManager.Shutdown();
+
                 Application.Init();
                 var tui2 = new SelectAppsTui(games);
+                tui2.Run();
+                
+
+                //TODO
                 //var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
                 //                    .Title(SpectreColors.LightYellow("Run prefill now?"))
                 //                    .AddChoices(true, false)
@@ -41,16 +42,6 @@ namespace SteamPrefill.CliCommands
             {
                 ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
             }
-            finally
-            {
-                //TODO reenable
-                //steamManager.Shutdown();
-            }
-            
-            //TODO remove
-            await Task.CompletedTask;
-            //var allApps = JsonSerializer.Deserialize<List<AppInfo>>(File.ReadAllText(@"C:\Users\Tim\Desktop\appInfos.json"), AppConfig.DefaultJsonResolver);
-            //var tui = new SelectAppsTui(allApps);
         }
     }
 }

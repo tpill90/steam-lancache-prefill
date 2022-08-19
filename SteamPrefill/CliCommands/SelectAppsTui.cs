@@ -1,12 +1,10 @@
-﻿using System.Text;
-using NStack;
+﻿using NStack;
 using Terminal.Gui;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 
 namespace SteamPrefill.CliCommands
 {
-    //TODO Consolidate all requirements into a single issue https://github.com/tpill90/steam-lancache-prefill/issues/60
     //TODO Enter to finish selection
     //TODO Switching between sorting methods doesn't default to descending
     //TODO Finish search implementation
@@ -22,12 +20,15 @@ namespace SteamPrefill.CliCommands
     //TODO Search Box - control+a in text box needs to select all text
     //TODO Search Box - Need a way to easily clear current query
     //TODO update readme with new pictures
-    public class SelectAppsTui
+    //TODO it looks like the year being displayed is not the actual original release year, but rather when the game was added to steam.  Look at the EA games
+    public partial class SelectAppsTui
     {
         private ListView _listView;
         private AppInfoDataSource _listViewDataSource => ((AppInfoDataSource)_listView.Source);
 
         private TextField searchBox;
+
+        public Toplevel top;
 
         readonly ColorScheme _elementColorScheme = new ColorScheme
         {
@@ -47,11 +48,18 @@ namespace SteamPrefill.CliCommands
             InitLayout(appInfos);
         }
 
+        public void Run()
+        {
+            Application.Run(top);
+            Application.Shutdown();
+        }
+
+
         //TODO determine if this dispose is required
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
+        [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private void InitLayout(List<AppInfo> appInfos)
         {
-            var top = Application.Top;
+            top = Application.Top;
 
             var window = new Window("")
             {
@@ -99,7 +107,7 @@ namespace SteamPrefill.CliCommands
                 },
                 AllowsMarking = true,
                 AllowsMultipleSelection = true,
-                
+
             };
             _listView.RowRender += ListView_RowRender;
             _listView.Source = new AppInfoDataSource(appInfos);
@@ -118,7 +126,8 @@ namespace SteamPrefill.CliCommands
             statusBar.Items = new StatusItem[] {
                 new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
                 {
-                    Application.RequestStop();
+                    Application.RequestStop(top);
+                    top.SetNeedsDisplay();
                 }),
                 new StatusItem (Key.CharMask, "~↑/↓/PgUp/PgDn~ to navigate", null),
                 new StatusItem (Key.CharMask, "~Space~ to select", null),
@@ -139,12 +148,10 @@ namespace SteamPrefill.CliCommands
             };
             top.Add(statusBar);
 
-            //TODO move to a different method
-            Application.Run(top);
+
         }
 
         //TODO determine if this dispose is required
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private void SetupFirstRow(Window window)
         {
             //TODO Do I really need to pass the color scheme to each element?
