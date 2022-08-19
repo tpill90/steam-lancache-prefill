@@ -2,7 +2,7 @@
 using NStack;
 using Terminal.Gui;
 
-namespace SteamPrefill.CliCommands
+namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
     internal class AppInfoDataSource : IListDataSource
     {
@@ -76,8 +76,8 @@ namespace SteamPrefill.CliCommands
         //TODO better name
         private string FormatItemString(AppInfo item)
         {
-            var nameColumn = String.Format($"{{0,{-45}}}", item.Name);
-            var formattedReleaseDate = String.Format($"{{0,{-20}}}", item.SteamReleaseDate?.Date.ToString("yyyy"));
+            var nameColumn = string.Format($"{{0,{-45}}}", item.Name);
+            var formattedReleaseDate = string.Format($"{{0,{-20}}}", item.SteamReleaseDate?.Date.ToString("yyyy"));
             var formattedType = item.Type.Name;
 
             return $"{nameColumn} {formattedReleaseDate} {formattedType}";

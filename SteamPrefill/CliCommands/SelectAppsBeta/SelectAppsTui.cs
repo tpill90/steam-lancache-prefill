@@ -3,6 +3,7 @@ using NStack;
 using Terminal.Gui;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
+using SteamPrefill.CliCommands.SelectAppsBeta;
 
 namespace SteamPrefill.CliCommands
 {

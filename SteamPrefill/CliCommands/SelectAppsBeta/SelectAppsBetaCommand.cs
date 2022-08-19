@@ -2,7 +2,7 @@
 
 
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
-namespace SteamPrefill.CliCommands
+namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
     //TODO update description
     [UsedImplicitly]
@@ -28,7 +28,7 @@ namespace SteamPrefill.CliCommands
                 tui2.Run();
 
                 var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
-                                    .Title(SpectreColors.LightYellow("Run prefill now?"))
+                                    .Title(LightYellow("Run prefill now?"))
                                     .AddChoices(true, false)
                                     .UseConverter(e => e == false ? "No" : "Yes"));
                 if (runPrefill)
