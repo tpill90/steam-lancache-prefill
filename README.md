@@ -7,10 +7,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-autofill) project.
 
----
- 
-## Features
-
+# Features
 * Select apps to prefill through an interactive menu.  
 * Supports login with Steam Guard, and Steam Guard Mobile Authenticator
 * No installation required! A completely self-contained, portable application.
@@ -20,7 +17,13 @@ Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-a
 * Completely implemented from scratch, has no dependency on `SteamCMD`!
 * No Steam API key required!  
 
----
+# Table of contents
+- [Initial Setup](#initial-setup)
+- [Getting Started](#getting-started)
+- [Frequently Asked Questions](#frequently-asked-questions)
+- [Detailed Command Usage](#detailed-command-usage)
+- [Updating](#updating)
+- [Need Help?](#need-help)
 
 ## Initial Setup
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
@@ -32,11 +35,9 @@ Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-a
     - Unicode on Windows is not enabled by default, however running the following will enable it if it hasn't already been enabled.
     - `if(!(Test-Path $profile) -or !(gc $profile).Contains("OutputEncoding")) { ac $profile "[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()";  & $profile; }`
 
----
+# Getting Started
 
-## Getting Started
-
-### Selecting what to prefill
+## Selecting what to prefill
 
 Prior to prefilling for the first time, you will have to decide which apps should be prefilled.  This will be done using an interactive menu, for selecting what to prefill from all of your currently owned apps. To display the interactive menu, run the following command
 ```powershell
@@ -49,7 +50,7 @@ Once logged into Steam, all of your currently owned apps will be displayed for s
 
 These selections will be saved permanently, and can be freely updated at any time by simply rerunning `select-apps` again at any time.
 
-### Initial prefill
+## Initial prefill
 
 Now that a prefill app list has been created, we can now move onto our initial prefill run by using 
 ```powershell
@@ -60,7 +61,7 @@ The `prefill` command will automatically pickup the prefill app list, and begin 
 
 <img src="docs/Initial-Prefill.png" width="830" alt="Initial Prefill">
 
-### Updating previously prefilled apps
+## Updating previously prefilled apps
 
 Updating any previously prefilled apps can be done by simply re-running the `prefill` command, which will use same prefill app list as before.
 
@@ -74,9 +75,9 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 
 <img src="docs/Prefill-New-Version-Available.png" width="830" alt="Prefill run when app has an update">
 
-## Frequently Asked Questions
+# Frequently Asked Questions
 
-### Can I run SteamPrefill on the Lancache server?
+## Can I run SteamPrefill on the Lancache server?
 
 You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you reguarly would!
 
@@ -91,14 +92,24 @@ Since there is no network transfer happening, the `prefill` should only be limit
 For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
 <img src="docs/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
 
-## Detailed Command Usage
+# Detailed Command Usage
 
-### prefill
+## prefill
 
 | Option |  | Example | |
 | ------- | --- | --- | --- |
 | --all   |     |     | Downloads all owned apps, useful for prefilling a completely empty cache.  |
 | --force | -f  |     | By default, **SteamPrefill** will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.  <br/><br/> Running with the flag `--force` will override this behavior, and instead will always run the prefill, re-downloading all files for the specified product.  This flag may be useful for diagnostics, or benchmarking network performance.  |
+
+# Updating
+**SteamPrefill** will automatically check for updates, and notify you when an update is available :
+
+<img src="docs/img/UpdateAvailable.png" width="675" alt="Update available message">
+
+To update:
+1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
+2.  Unzip to the directory where **SteamPrefill** is currently installed, overwriting the previous executable.
+3.  Thats it!  You're all up to date!
 
 # Need Help?
 If you are running into any issues, feel free to open up a Github issue on this repository.

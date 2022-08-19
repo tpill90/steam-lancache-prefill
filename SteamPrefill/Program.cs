@@ -2,7 +2,6 @@ namespace SteamPrefill
 {
     /* TODO
      * Select apps - Cleanup dedicated servers + just cause multiplayer mod + tloader + red orchestra community maps from being displayed
-     * Documentation - Add entry to FAQ explaining that it is possible to run this app on the server, and explain how to do that.
      * Cleanup some apps that shouldnt be shown, like Red Orchestra community maps + dedicated server.  Killing Floor Server
      *
      * Docs - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
