@@ -26,17 +26,15 @@ namespace SteamPrefill.CliCommands
                 Application.Init();
                 var tui2 = new SelectAppsTui(games);
                 tui2.Run();
-                
 
-                //TODO
-                //var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
-                //                    .Title(SpectreColors.LightYellow("Run prefill now?"))
-                //                    .AddChoices(true, false)
-                //                    .UseConverter(e => e == false ? "No" : "Yes"));
-                //if (runPrefill)
-                //{
-                //    await steamManager.DownloadMultipleAppsAsync(false, new List<uint>());
-                //}
+                var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
+                                    .Title(SpectreColors.LightYellow("Run prefill now?"))
+                                    .AddChoices(true, false)
+                                    .UseConverter(e => e == false ? "No" : "Yes"));
+                if (runPrefill)
+                {
+                    await steamManager.DownloadMultipleAppsAsync(false, new List<uint>());
+                }
             }
             catch (Exception e)
             {

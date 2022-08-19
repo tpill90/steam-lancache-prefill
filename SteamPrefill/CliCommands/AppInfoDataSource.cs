@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections;
 using NStack;
-using SteamPrefill.Models;
 using Terminal.Gui;
 
 namespace SteamPrefill.CliCommands
@@ -43,14 +39,6 @@ namespace SteamPrefill.CliCommands
             }
         }
 
-        public void ToggleNone()
-        {
-            for (int i = 0; i < _currAppInfo.Count; i++)
-            {
-                _currAppInfo[i].IsSelected = false;
-            }
-        }
-
         //TODO comment
         public void SetAllSelected(bool isSelected)
         {
@@ -62,22 +50,12 @@ namespace SteamPrefill.CliCommands
 
         public void FilterItems(string searchText)
         {
-            //TODO make this case insensitive
             _currAppInfo = _originalAppInfo.Where(e => e.Name.Contains(searchText, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
 
-        private bool _sortNameToggle;
         public void SortName()
         {
-            if (_sortNameToggle)
-            {
-                _currAppInfo = _currAppInfo.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
-            }
-            else
-            {
-                _currAppInfo = _currAppInfo.OrderByDescending(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
-            }
-            _sortNameToggle = !_sortNameToggle;
+            _currAppInfo = _currAppInfo.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         private bool _sortYearToggle;

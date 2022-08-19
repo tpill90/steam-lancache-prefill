@@ -1,4 +1,5 @@
-﻿using NStack;
+﻿using System.Text;
+using NStack;
 using Terminal.Gui;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
@@ -6,7 +7,6 @@ using Attribute = Terminal.Gui.Attribute;
 namespace SteamPrefill.CliCommands
 {
     //TODO Enter to finish selection
-    //TODO Switching between sorting methods doesn't default to descending
     //TODO Finish search implementation
     //TODO implement sorting by recently played games
     //TODO include more metadata in the list view, like year/minutes played/last played/etc
@@ -24,11 +24,9 @@ namespace SteamPrefill.CliCommands
     public partial class SelectAppsTui
     {
         private ListView _listView;
-        private AppInfoDataSource _listViewDataSource => ((AppInfoDataSource)_listView.Source);
+        private TextField _searchBox;
 
-        private TextField searchBox;
-
-        public Toplevel top;
+        private AppInfoDataSource ListViewDataSource => (AppInfoDataSource)_listView.Source;
 
         readonly ColorScheme _elementColorScheme = new ColorScheme
         {
@@ -50,149 +48,28 @@ namespace SteamPrefill.CliCommands
 
         public void Run()
         {
-            Application.Run(top);
+            _searchBox.SetFocus();
+            Application.Run(Application.Top);
             Application.Shutdown();
         }
 
-
-        //TODO determine if this dispose is required
-        [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
-        private void InitLayout(List<AppInfo> appInfos)
+        private void SearchBox_OnTextChanged(ustring obj)
         {
-            top = Application.Top;
+            var searchText = _searchBox.Text.ToString();
 
-            var window = new Window("")
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill(),
-                ColorScheme = Colors.TopLevel
-                //ColorScheme = new ColorScheme()
-                //{
-                //    Normal = new Attribute(Color.White, Color.Black)
-                //}
-            };
-            top.Add(window);
-
-            SetupFirstRow(window);
-
-            var searchLabel = new Label("Search: ")
-            {
-                X = 1,
-                Y = 3
-            };
-            window.Add(searchLabel);
-
-            searchBox = new TextField()
-            {
-                X = Pos.Right(searchLabel) + 1,
-                Y = 3,
-                Width = 50
-            };
-            searchBox.TextChanged += SearchBoxOnTextChanged;
-            window.Add(searchBox);
-
-            _listView = new ListView
-            {
-                X = 1,
-                Y = 5,
-                Height = Dim.Fill(),
-                Width = Dim.Fill(1),
-                ColorScheme = new ColorScheme()
-                {
-                    Normal = new Attribute(foreground: Color.Gray, background: Color.Black),
-                    HotNormal = new Attribute(foreground: Color.Gray, background: Color.Black),
-                    Focus = new Attribute(foreground: Color.Cyan, background: Color.Black),
-                },
-                AllowsMarking = true,
-                AllowsMultipleSelection = true,
-
-            };
-            _listView.RowRender += ListView_RowRender;
-            _listView.Source = new AppInfoDataSource(appInfos);
-            window.Add(_listView);
-
-            //TODO should the different actions have different colors?
-            var statusBar = new StatusBar
-            {
-                Visible = true,
-                ColorScheme = new ColorScheme
-                {
-                    Normal = new Attribute(Color.White, Color.Black),
-                    HotNormal = new Attribute(foreground: Color.BrightGreen, background: Color.Black),
-                }
-            };
-            statusBar.Items = new StatusItem[] {
-                new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
-                {
-                    Application.RequestStop(top);
-                    top.SetNeedsDisplay();
-                }),
-                new StatusItem (Key.CharMask, "~↑/↓/PgUp/PgDn~ to navigate", null),
-                new StatusItem (Key.CharMask, "~Space~ to select", null),
-                new StatusItem (Key.CtrlMask | Key.A, "~CTRL-A~ Select All", () =>
-                {
-                    _listViewDataSource.SetAllSelected(true);
-                    _listView.SetNeedsDisplay();
-                }),
-                new StatusItem (Key.CtrlMask | Key.C, "~CTRL-C~ Clear All", () =>
-                {
-                    _listViewDataSource.SetAllSelected(false);
-                    _listView.SetNeedsDisplay();
-                }),
-                new StatusItem (Key.Enter, "~Enter~ to Save", () =>
-                {
-                    //TODO implement save
-                }),
-            };
-            top.Add(statusBar);
-
-
-        }
-
-        //TODO determine if this dispose is required
-        private void SetupFirstRow(Window window)
-        {
-            //TODO Do I really need to pass the color scheme to each element?
-            var sortLabel = new Label("Sort:")
-            {
-                X = 1,
-                ColorScheme = _elementColorScheme
-            };
-            var sortNameButton = new Button("Name")
-            {
-                X = Pos.Right(sortLabel) + 1,
-                ColorScheme = _elementColorScheme
-            };
-            sortNameButton.Clicked += SortNameButtonOnClicked;
-
-            var sortYearButton = new Button("Year")
-            {
-                X = Pos.Right(sortNameButton) + 1,
-                ColorScheme = _elementColorScheme
-            };
-            sortYearButton.Clicked += SortYearButtonOnClicked;
-
-            window.Add(sortLabel, sortNameButton, sortYearButton);
-        }
-
-        private void SearchBoxOnTextChanged(ustring obj)
-        {
-            var searchText = searchBox.Text.ToString();
-            _listViewDataSource.FilterItems(searchText);
+            ListViewDataSource.FilterItems(searchText);
             _listView.SetNeedsDisplay();
         }
 
-        private void SortNameButtonOnClicked()
+        private void SortNameButton_OnClicked()
         {
-            ((AppInfoDataSource)_listView.Source).SortName();
+            ListViewDataSource.SortName();
             _listView.SetNeedsDisplay();
         }
 
-        private void SortYearButtonOnClicked()
+        private void SortYearButton_OnClicked()
         {
-            ((AppInfoDataSource)_listView.Source).SortYear();
+            ListViewDataSource.SortYear();
             _listView.SetNeedsDisplay();
         }
 
