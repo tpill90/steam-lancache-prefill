@@ -64,7 +64,7 @@
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
                 Server server = _cdnPool.TakeConnection();
-                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>
+                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 1 }, async (depot, _) =>
                 {
                     var manifest = await GetSingleManifestAsync(depot, server);
                     depotManifests.Add(manifest);
@@ -85,7 +85,7 @@
         {
             if (File.Exists(depot.ManifestFileName))
             {
-                return Manifest.LoadFromFile(depot.ManifestFileName);
+                //return Manifest.LoadFromFile(depot.ManifestFileName);
             }
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
@@ -119,7 +119,7 @@
             // If we could not get the manifest code, this is a fatal error, as it we can't download the manifest without it.
             if (manifestRequestCode == 0)
             {
-                throw new ManifestException($"No manifest request code was returned for {depot.DepotId} {depot.ManifestId.Value}");
+                throw new ManifestException($"No manifest request code was returned for {depot.ContainingAppId} {depot.DepotId} {depot.ManifestId.Value}");
             }
 
             return new ManifestRequestCode
