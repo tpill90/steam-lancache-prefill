@@ -19,13 +19,13 @@
             var elapsed = stopwatch.Elapsed;
             if (elapsed.TotalHours > 1)
             {
-                return elapsed.ToString(@"h\:mm\:ss\.FF");
+                return elapsed.ToString(@"h\:mm\:ss\.ff");
             }
             if (elapsed.TotalMinutes > 1)
             {
-                return elapsed.ToString(@"mm\:ss\.FF");
+                return elapsed.ToString(@"mm\:ss\.ff");
             }
-            return elapsed.ToString(@"ss\.FF");
+            return elapsed.ToString(@"ss\.ffff");
         }
     }
 }

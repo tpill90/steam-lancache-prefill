@@ -1,4 +1,4 @@
-namespace SteamPrefill.Utils
+namespace SteamPrefill.Handlers.Steam
 {
     /// <summary>
     /// Enable with :
