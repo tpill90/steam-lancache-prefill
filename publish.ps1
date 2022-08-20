@@ -51,7 +51,7 @@ foreach($runtime in $targetRuntimes)
         return
     }
 
-    Compress-Archive -path $publishDir "$publishDir.zip"
+    Compress-Archive -path $publishDir "$publishDir.zip" -CompressionLevel Optimal
 }
 
 # Writing out some metrics about the published files, for fun

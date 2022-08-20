@@ -91,7 +91,7 @@
         /// <exception cref="ManifestException">Throws if no manifest was returned by Steam</exception>
         private async Task<Manifest> GetSingleManifestAsync(DepotInfo depot, Server server)
         {
-            if (File.Exists(depot.ManifestFileName))
+            if (!_downloadArguments.NoCache && File.Exists(depot.ManifestFileName))
             {
                 return Manifest.LoadFromFile(depot.ManifestFileName);
             }

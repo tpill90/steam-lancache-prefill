@@ -86,8 +86,6 @@
             // Running multiple requests in parallel on a single CDN
             await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
             {
-                //TODO implement shared buffer pool.  Seems to have a massive performance improvement in BattlenetPrefill when running on the server
-                //byte[] buffer = ArrayPool<byte>.Shared.Rent(524_288);
                 var buffer = new byte[4096];
                 try
                 {

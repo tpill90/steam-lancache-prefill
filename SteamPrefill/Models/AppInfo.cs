@@ -84,7 +84,7 @@
 
         public override string ToString()
         {
-            return $"{Name.EscapeMarkup()} - {AppId}";
+            return $"{Name.EscapeMarkup()}";
         }
     }
 }

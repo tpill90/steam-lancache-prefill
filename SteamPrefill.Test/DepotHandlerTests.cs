@@ -1,4 +1,5 @@
-﻿using SteamPrefill.Handlers;
+﻿using SteamKit2;
+using SteamPrefill.Handlers;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models;
 using SteamPrefill.Models.Enums;
@@ -13,9 +14,11 @@ namespace SteamPrefill.Test
 
         public DepotHandlerTests()
         {
-            var steam3 = new Steam3Session(null);
+            Steam3Session steam3 = new Steam3Session(null);
             // User will always have access to every depot
             steam3.OwnedDepotIds.Add(123);
+            // User will always have access to this app
+            steam3.OwnedAppIds.Add(222);
 
             _depotHandler = new DepotHandler(steam3, null);
         }
@@ -39,7 +42,7 @@ namespace SteamPrefill.Test
             var depotList = new List<DepotInfo>
             {
                 // Depot is being setup without metadata
-                new DepotInfo { DepotId = 123, ManifestId = 5555 }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555 }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);
@@ -53,7 +56,7 @@ namespace SteamPrefill.Test
             // Depot is for macos only
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.MacOS } }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.MacOS } }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
@@ -67,7 +70,7 @@ namespace SteamPrefill.Test
             // Depot is for windows only
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.Windows } }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.Windows } }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
@@ -81,7 +84,7 @@ namespace SteamPrefill.Test
             // Depot is for 64 bit only
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, Architecture = Architecture.x64 }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Architecture = Architecture.x64 }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Architecture = Architecture.x86 }, depotList);
@@ -95,7 +98,7 @@ namespace SteamPrefill.Test
             // Depot is for 64 bit only
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, Architecture = Architecture.x64 }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Architecture = Architecture.x64 }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Architecture = Architecture.x64 }, depotList);
@@ -109,7 +112,7 @@ namespace SteamPrefill.Test
             // Depot is for spanish
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, Languages = new List<Language> { Language.Spanish } }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Languages = new List<Language> { Language.Spanish } }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Language = Language.English }, depotList);
@@ -123,7 +126,7 @@ namespace SteamPrefill.Test
             // Depot is for english
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, Languages = new List<Language> { Language.English } }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Languages = new List<Language> { Language.English } }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Language = Language.English }, depotList);
@@ -136,7 +139,7 @@ namespace SteamPrefill.Test
         {
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 123, ManifestId = 5555, LowViolence = true }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, LowViolence = true }
             };
 
             var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);

@@ -7,7 +7,27 @@
 
         public ulong? ManifestId { get; set; }
 
-        public uint ContainingAppId { get; }
+        /// <summary>
+        /// Determines what app actually owns the depot, by default it is the current app.
+        /// However in the case of a linked/DLC app, the depot will need to be downloaded using the referenced app's id
+        /// </summary>
+        public uint ContainingAppId
+        {
+            get
+            {
+                if (DlcAppId != null)
+                {
+                    return DlcAppId.Value;
+                }
+                if (DepotFromApp != null)
+                {
+                    return DepotFromApp.Value;
+                }
+                return _originalAppId;
+            }
+        }
+
+        private readonly uint _originalAppId;
 
         /// <summary>
         /// Determines if a depot is a "linked" depot.  If the current depot is linked, it won't actually have a manifest to download under the current app.
@@ -36,6 +56,7 @@
         {
             DepotId = uint.Parse(rootKey.Name);
             Name = rootKey["name"].Value;
+            _originalAppId = appId;
 
             ManifestId = rootKey["manifests"]["public"].AsUnsignedLongNullable();
             DepotFromApp = rootKey["depotfromapp"].AsUnsignedIntNullable();
@@ -45,9 +66,9 @@
             if (rootKey["config"]["oslist"] != KeyValue.Invalid)
             {
                 SupportedOperatingSystems = rootKey["config"]["oslist"].Value
-                                                                         .Split(',')
-                                                                         .Select(e => OperatingSystem.Parse(e))
-                                                                         .ToList();
+                                                                       .Split(',')
+                                                                       .Select(e => OperatingSystem.Parse(e))
+                                                                       .ToList();
             }
             Architecture = rootKey["config"]["osarch"].AsEnum<Architecture>();
             
@@ -58,19 +79,6 @@
             if (rootKey["config"]["lowviolence"].Value is "1")
             {
                 LowViolence = true;
-            }
-
-            //TODO move this into a property
-            // Determines what app actually owns the depot, by default it is the current app.
-            // However in the case of a linked/DLC app, the depot will need to be downloaded using the referenced app's id
-            ContainingAppId = appId;
-            if (DlcAppId != null)
-            {
-                ContainingAppId = DlcAppId.Value;
-            }
-            if (DepotFromApp != null)
-            {
-                ContainingAppId = DepotFromApp.Value;
             }
         }
 
