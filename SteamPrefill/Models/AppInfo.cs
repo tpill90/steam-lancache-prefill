@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
-using Spectre.Console;
-using SteamKit2;
-using SteamPrefill.Handlers.Steam;
-using SteamPrefill.Models.Enums;
-using SteamPrefill.Utils;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     /// <summary>
     /// Represents an application (game, tool, video, server) that can be downloaded from steam
@@ -42,7 +32,9 @@ namespace SteamPrefill.Models
         /// <summary>
         /// Specifies the type of app, can be "config", "tool", "game".  This seems to be up to the developer, and isn't 100% consistent.
         /// </summary>
-        public AppType Type { get; set; }
+        public AppType Type { get; }
+
+        public bool IsInvalidApp => Type == null;
 
         public List<Category> Categories { get; init; }
 
@@ -92,7 +84,7 @@ namespace SteamPrefill.Models
 
         public override string ToString()
         {
-            return $"{Name.EscapeMarkup()}";
+            return $"{Name.EscapeMarkup()} - {AppId}";
         }
     }
 }

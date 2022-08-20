@@ -60,9 +60,9 @@
                 LowViolence = true;
             }
 
+            //TODO move this into a property
             // Determines what app actually owns the depot, by default it is the current app.
             // However in the case of a linked/DLC app, the depot will need to be downloaded using the referenced app's id
-            
             ContainingAppId = appId;
             if (DlcAppId != null)
             {
