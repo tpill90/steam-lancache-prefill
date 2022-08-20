@@ -13,6 +13,8 @@ namespace SteamPrefill.Settings
 
         public static bool EnableSteamKitDebugLogs => false;
 
+        public static bool SkipDownloads => false;
+
         #endif
 
         public static string SteamCdnUrl => "lancache.steamcontent.com";

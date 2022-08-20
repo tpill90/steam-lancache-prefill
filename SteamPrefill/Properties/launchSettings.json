@@ -1,5 +1,17 @@
 {
   "profiles": {
+    "Prefill All": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --all --force"
+    },
+    "Prefill No Cache": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --all --force --nocache"
+    },
+    "Prefill Selected": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --force"
+    },
     "Select Apps": {
       "commandName": "Project",
       "commandLineArgs": "select-apps"
@@ -8,37 +20,9 @@
       "commandName": "Project",
       "commandLineArgs": "select-apps-beta"
     },
-    "Download None": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --force"
-    },
-    "DNS Override": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --dns-override 192.168.1.222 --force"
-    },
-    "Download All - Force": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --all --force"
-    },
     "Game by ID": {
       "commandName": "Project",
       "commandLineArgs": "prefill --app 590380 --force"
     },
-    "Game with Duplicate Chunks + DLC - DR4": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --app 543460 --force"
-    },
-    "Dota 2 - Multiple Languages": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --app 570 --force"
-    },
-    "Account - 2FA": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --username tpill_2fa --app 570"
-    },
-    "Account - Steamguard": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --username tpill_steamguard --app 570"
-    }
   }
 }

@@ -3,20 +3,17 @@ namespace SteamPrefill
     /* TODO
      * Select apps - Cleanup dedicated servers + just cause multiplayer mod + tloader + red orchestra community maps from being displayed
      * Cleanup some apps that shouldnt be shown, like Red Orchestra community maps + dedicated server.  Killing Floor Server
-     *
      * Docs - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Update resharper dotsettings file to match Battlenet Prefill
+     *
      * Docs - Add an image to the main heading in the readme.  That way people have an image that they can immediately see when they come to the repo
      * Bug - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
      * Feature - Could it be easier to select multiple apps on the select screen, without having to press down + space repeatedly?  
                       Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
      * Build - Fail build on both warnings + trim warnings
-     * Deprecation - Remove --dns-override in a future version.
-     
-    * Update to dotnet 7 sdk + dotnet 7 target
+     * Update to dotnet 7 sdk + dotnet 7 target
      * General - Promote this app on r/lanparty.
-     * Update readme to include table of contents.  Make sure the formatting is similar to battlenet prefill
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
      * CliFx - I wish there was a way to color the help text output from CliFx.  Everything is so flat, and cant draw attention to important parts
      */
