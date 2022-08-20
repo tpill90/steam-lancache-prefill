@@ -12,13 +12,16 @@
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
         private readonly Steam3Session _steam3Session;
+        private readonly DownloadArguments _downloadArguments;
+
         private const int MaxRetries = 3;
 
-        public ManifestHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, Steam3Session steam3Session)
+        public ManifestHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, Steam3Session steam3Session, DownloadArguments downloadArguments)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
             _steam3Session = steam3Session;
+            _downloadArguments = downloadArguments;
         }
 
         /// <summary>
@@ -27,7 +30,8 @@
         /// <exception cref="ManifestException"></exception>
         public async Task<ConcurrentBag<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
         {
-			int attempts = 0;
+            var manifestTimer = Stopwatch.StartNew();
+            int attempts = 0;
             var depotManifests = new ConcurrentBag<Manifest>();
             while (depotManifests.Count != depots.Count && attempts < MaxRetries)
             {
@@ -53,6 +57,10 @@
             {
                 throw new ManifestException("An unexpected error occurred while downloading manifests!  Skipping...");
             }
+
+#if DEBUG
+            _ansiConsole.LogMarkupLine($"Downloaded {Magenta(depotManifests.Count)} manifests in {LightYellow(manifestTimer.FormatElapsedString())}");
+#endif
 
             return depotManifests;
         }
@@ -96,6 +104,11 @@
             }
 
             var protoManifest = new Manifest(manifest, depot);
+            if (_downloadArguments.NoCache)
+            {
+                return protoManifest;
+            }
+
             protoManifest.SaveToFile(depot.ManifestFileName);
             return protoManifest;
         }

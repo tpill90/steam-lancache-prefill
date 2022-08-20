@@ -33,8 +33,8 @@ namespace SteamPrefill
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, _downloadArgs);
-            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3, downloadArgs);
             _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
         }
 

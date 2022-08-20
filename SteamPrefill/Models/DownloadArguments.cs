@@ -12,5 +12,10 @@
         public Architecture Architecture { get; set; } = Architecture.x64;
 
         public Language Language { get; set; } = Language.English;
+
+        /// <summary>
+        /// When set to true, will avoid saving as much data to disk as possible
+        /// </summary>
+        public bool NoCache { get; set; }
     }
 }

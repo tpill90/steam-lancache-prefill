@@ -15,15 +15,21 @@ namespace SteamPrefill.CliCommands
         [CommandOption("all", Description = "Prefills all currently owned apps", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
+        //TODO remove in a future version
+        [CommandOption("dns-override", 'd',
+            Description = "Deprecated, will be removed in a future version.  Manually specifies the Lancache IP, used to prefill on the Lancache server.  Ex, '192.168.1.111'",
+            Converter = typeof(IpAddressConverter))]
+        public IPAddress OverrideLancacheIp { get; init; }
+
         [CommandOption("force", 'f', 
             Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.", 
             Converter = typeof(NullableBoolConverter))]
         public bool? Force { get; init; }
 
-        [CommandOption("dns-override", 'd', 
-            Description = "Deprecated, will be removed in a future version.  Manually specifies the Lancache IP, used to prefill on the Lancache server.  Ex, '192.168.1.111'", 
-            Converter = typeof(IpAddressConverter))]
-        public IPAddress OverrideLancacheIp { get; init; }
+        [CommandOption("nocache",
+            Description = "Skips using locally cached files.  Saves disk space, at the expense of slower subsequent runs.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? NoLocalCache { get; init; }
 
         private IAnsiConsole _ansiConsole;
         public async ValueTask ExecuteAsync(IConsole console)
@@ -34,7 +40,8 @@ namespace SteamPrefill.CliCommands
 
             var downloadArgs = new DownloadArguments
             {
-                Force = Force ?? default(bool)
+                Force = Force ?? default(bool),
+                NoCache = NoLocalCache ?? default(bool)
             };
 
             if (OverrideLancacheIp != null)

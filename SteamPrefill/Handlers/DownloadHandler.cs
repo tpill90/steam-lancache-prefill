@@ -11,7 +11,7 @@
         /// </summary>
         private string _lancacheAddress;
 
-        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, DownloadArguments downloadArguments)
+        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
@@ -30,6 +30,13 @@
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
+
+#if DEBUG
+            if (AppConfig.SkipDownloads)
+            {
+                return true;
+            }
+#endif
             if (_lancacheAddress == null)
             {
                 _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
