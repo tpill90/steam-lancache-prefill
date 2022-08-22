@@ -65,7 +65,12 @@
                 {
                     continue;
                 }
-                
+                // Sometimes a linked ID can be an unowned app
+                if (!_steam3Session.AccountHasAppAccess(depot.ContainingAppId))
+                {
+                    continue;
+                }
+
                 // Filtering to only specified operating systems
                 if (depot.SupportedOperatingSystems.Any() && !depot.SupportedOperatingSystems.Contains(downloadArgs.OperatingSystem))
                 {
