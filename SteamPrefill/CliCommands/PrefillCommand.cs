@@ -31,6 +31,11 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
+        [CommandOption("unit", 
+            Description = "Specifies which unit to use to display download speed.  Can be either bits/bytes.  Default: bits",
+            Converter = typeof(TransferSpeedUnitConverter))]
+        public TransferSpeedUnit TransferSpeedUnit { get; init; }
+
         private IAnsiConsole _ansiConsole;
         public async ValueTask ExecuteAsync(IConsole console)
         {
@@ -41,7 +46,8 @@ namespace SteamPrefill.CliCommands
             var downloadArgs = new DownloadArguments
             {
                 Force = Force ?? default(bool),
-                NoCache = NoLocalCache ?? default(bool)
+                NoCache = NoLocalCache ?? default(bool),
+                TransferSpeedUnit = TransferSpeedUnit ?? TransferSpeedUnit.Bits
             };
 
             if (OverrideLancacheIp != null)
