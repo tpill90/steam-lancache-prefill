@@ -1,9 +1,8 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Select apps - Cleanup dedicated servers + just cause multiplayer mod + tloader + red orchestra community maps from being displayed
-     * Cleanup some apps that shouldnt be shown, like Red Orchestra community maps + dedicated server.  Killing Floor Server
      * Docs - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
+     * Docs - Add to docs how exactly passwords/credentials are used, and stored.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Update resharper dotsettings file to match Battlenet Prefill
      *

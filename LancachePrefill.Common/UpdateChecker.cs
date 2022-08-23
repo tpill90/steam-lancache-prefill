@@ -62,7 +62,7 @@
             table.AddRow($"A newer version is available {currentVersion} → {Olive(updateVersion)}");
             table.AddRow("");
             table.AddRow("Download at :  ");
-            table.AddRow(LightBlue($"https://api.github.com/repos/{repoName}/releases"));
+            table.AddRow(LightBlue($"https://github.com/{repoName}/releases"));
             table.AddRow("");
 
             // Render the table to the console
