@@ -9,7 +9,6 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
     [Command("select-apps-beta", Description = "Beta version of select-apps interface redesign")]
     public class SelectAppsBetaCommand : ICommand
     {
-        //TODO update docs explaining that there is a beta
         public async ValueTask ExecuteAsync(IConsole console)
         {
             var ansiConsole = console.CreateAnsiConsole();
@@ -18,8 +17,8 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             try
             {
                 steamManager.Initialize();
-
-                var games = await steamManager.GetGames();
+                
+                var games = await steamManager.GetAllAvailableGamesAsync();
 
                 Application.Init();
                 var tui2 = new SelectAppsTui(games, steamManager);

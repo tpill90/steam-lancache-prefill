@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Handlers
+﻿using SteamKit2.Internal;
+
+namespace SteamPrefill.Handlers
 {
     /// <summary>
     /// Responsible for retrieving application metadata from Steam
@@ -8,6 +10,11 @@
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
 
+        private List<CPlayer_GetOwnedGames_Response.Game> _ownedGames;
+
+        /// <summary>
+        /// A dictionary of all app metadata currently retrieved from Steam
+        /// </summary>
         private ConcurrentDictionary<uint, AppInfo> LoadedAppInfos { get; } = new ConcurrentDictionary<uint, AppInfo>();
 
         public AppInfoHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session)
@@ -19,18 +26,34 @@
         /// <summary>
         /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
         /// </summary>
-        public async Task RetrieveAppMetadataAsync(List<uint> appIds)
+        public async Task RetrieveAppMetadataAsync(List<uint> appIds, bool loadDlcApps = true, bool loadRecentlyPlayed = false)
         {
+            var timer = Stopwatch.StartNew();
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
                 // Breaking the request into smaller batches that complete faster
-                var batchJobs = appIds.Chunk(100)
-                                      .Select(e => BulkLoadAppInfosAsync(e.ToList()));
+                var batchJobs = appIds.Chunk(50).Select(e => BulkLoadAppInfosAsync(e.ToList()));
                 await Task.WhenAll(batchJobs);
+                
+                if (loadDlcApps)
+                {
+                    // Once we have loaded all the apps, we can also load information for related DLC
+                    await BulkLoadDlcAppInfoAsync();
+                }
 
-                // Once we have loaded all the apps, we can also load information for related DLC
-                await BulkLoadDlcAppInfoAsync();
+                if (loadRecentlyPlayed)
+                {
+                    // Populating play time
+                    foreach (var app in (await GetUsersOwnedGamesAsync()).Where(e => e.playtime_2weeks > 0))
+                    {
+                        var appInfo = await GetAppInfoAsync((uint)app.appid);
+                        appInfo.MinutesPlayed2Weeks = app.playtime_2weeks;
+                    }
+                }
             });
+#if DEBUG
+            _ansiConsole.LogMarkupLine("Retrieved application metadata", timer.Elapsed);
+#endif
         }
 
         /// <summary>
@@ -46,6 +69,36 @@
 
             await BulkLoadAppInfosAsync(new List<uint> { appId });
             return LoadedAppInfos[appId];
+        }
+
+        /// <summary>
+        /// Gets a list of all games owned by the current user.
+        /// This differs from the list of owned AppIds, as this exclusively contains "games", excluding things like DLC/Tools/etc
+        /// </summary>
+        public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetUsersOwnedGamesAsync()
+        {
+            //TODO Could/Should this data be cached?  Would save 200ms
+            if (_ownedGames != null)
+            {
+                return _ownedGames;
+            }
+
+            var request = new CPlayer_GetOwnedGames_Request
+            {
+                steamid = _steam3Session._steamId,
+                include_appinfo = true,
+                include_free_sub = true,
+                include_played_free_games = true,
+                skip_unvetted_apps = false
+            };
+            var response = await _steam3Session.unifiedPlayerService.SendMessage(e => e.GetOwnedGames(request)).ToTask();
+            if (response.Result != EResult.OK)
+            {
+                throw new Exception("Unexpected error while requesting owned games!");
+            }
+
+            _ownedGames = response.GetDeserializedResponse<CPlayer_GetOwnedGames_Response>().games;
+            return _ownedGames;
         }
 
         /// <summary>
@@ -116,61 +169,26 @@
         /// <summary>
         /// Gets a list of available games, filtering out any unavailable, non-Windows games.
         /// </summary>
-        public async Task<List<AppInfo>> GetAvailableGamesAsync(List<uint> filteredAppIds)
+        public async Task<List<AppInfo>> GetGamesById(List<uint> appIds)
         {
             var appInfos = new List<AppInfo>();
-            foreach (var appId in filteredAppIds)
+            foreach (var appId in appIds)
             {
                 appInfos.Add(await GetAppInfoAsync(appId));
             }
-            
-            return FilterGames(appInfos);
-        }
 
-        /// <summary>
-        /// Gets a list of all available games, filtering out any unavailable, non-Windows games.
-        /// </summary>
-        /// <returns>All currently available games for the current user</returns>
-        public List<AppInfo> GetAllAvailableGames()
-        {
-            return FilterGames(LoadedAppInfos.Values.ToList());
-        }
-
-        private List<AppInfo> FilterGames(List<AppInfo> appInfos)
-        {
+            // Filtering down some exclusions
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
+            var filteredGames = appInfos.Where(e => e.Type == AppType.Game
+                                                    && e.ReleaseState != ReleaseState.Unavailable
+                                                    && e.SupportsWindows)
+                                        .Where(e => !excludedAppIds.Contains(e.AppId))
+                                        .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
+                                        .Where(e => !e.Name.Contains("AMD Driver Updater"))
+                                        .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                                        .ToList();
 
-            return appInfos.Where(e => e.Type == AppType.Game
-                                       && e.ReleaseState != ReleaseState.Unavailable
-                                       && e.SupportsWindows)
-                           .Where(e => !excludedAppIds.Contains(e.AppId))
-                           .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
-                           .Where(e => !e.Name.Contains("AMD Driver Updater"))
-                           .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                           .ToList();
+            return filteredGames;
         }
-    }
-
-    /// <summary>
-    /// A subset of <see cref="AppInfo"/> that is only ever used for caching known AppTypes for previously loaded AppInfos
-    /// These types will be used to filter out apps that aren't games or DLC, which will help dramatically in app startup time.
-    /// </summary>
-    public class CachedAppInfo
-    {
-        public CachedAppInfo()
-        {
-
-        }
-
-        public CachedAppInfo(AppInfo appInfo)
-        {
-            this.AppId = appInfo.AppId;
-            this.Name = appInfo.Name;
-            this.Type = appInfo.Type;
-        }
-
-        public uint AppId { get; set; }
-        public string Name { get; set; }
-        public AppType Type { get; set; }
     }
 }
