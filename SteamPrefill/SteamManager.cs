@@ -67,9 +67,7 @@ namespace SteamPrefill
             appIdsToDownload.AddRange(manualIds);
             if (downloadAllOwnedGames)
             {
-                //TODO This is slower than the previous method, however there might be performance improvements on really large libraries (1300 games)
-                var userOwnedGames = (await _appInfoHandler.GetUsersOwnedGamesAsync()).Select(e => (uint)e.appid);
-                appIdsToDownload.AddRange(userOwnedGames);
+                appIdsToDownload.AddRange(_steam3.OwnedAppIds);
             }
 
             var distinctAppIds = appIdsToDownload.Distinct()
@@ -233,7 +231,7 @@ namespace SteamPrefill
 
         public async Task<List<AppInfo>> GetAllAvailableGamesAsync()
         {
-            var ownedGameIds = (await _appInfoHandler.GetUsersOwnedGamesAsync()).Select(e => (uint)e.appid).ToList();
+            var ownedGameIds = _steam3.OwnedAppIds.ToList();
 
             // Loading app metadata from steam, skipping related DLC apps
             await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);

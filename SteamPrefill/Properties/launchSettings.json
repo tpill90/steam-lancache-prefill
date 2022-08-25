@@ -4,9 +4,13 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force"
     },
-    "Prefill No Cache": {
+    "Prefill All - No Cache": {
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force --nocache"
+    },
+    "Prefill All - No Download": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --all --force --no-download"
     },
     "Prefill Selected": {
       "commandName": "Project",
@@ -23,6 +27,6 @@
     "Game by ID": {
       "commandName": "Project",
       "commandLineArgs": "prefill --app 590380 --force"
-    },
+    }
   }
 }

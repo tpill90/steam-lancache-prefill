@@ -52,7 +52,7 @@ namespace SteamPrefill.Handlers
                 }
             });
 #if DEBUG
-            _ansiConsole.LogMarkupLine("Retrieved application metadata", timer.Elapsed);
+            _ansiConsole.LogMarkupLine($"Loaded metadata for {Magenta(appIds.Count)} apps ", timer.Elapsed);
 #endif
         }
 
@@ -108,7 +108,7 @@ namespace SteamPrefill.Handlers
         /// <param name="appIds">The list of App Ids to retrieve info for</param>
         private async Task BulkLoadAppInfosAsync(List<uint> appIds)
         {
-            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e) && _steam3Session.AccountHasAppAccess(e)).ToList();
+            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e)).ToList();
             if (!appIdsToLoad.Any())
             {
                 return;
@@ -181,7 +181,8 @@ namespace SteamPrefill.Handlers
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
             var filteredGames = appInfos.Where(e => e.Type == AppType.Game
                                                     && e.ReleaseState != ReleaseState.Unavailable
-                                                    && e.SupportsWindows)
+                                                    && e.SupportsWindows
+                                                    && _steam3Session.AccountHasAppAccess(e.AppId))
                                         .Where(e => !excludedAppIds.Contains(e.AppId))
                                         .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
                                         .Where(e => !e.Name.Contains("AMD Driver Updater"))

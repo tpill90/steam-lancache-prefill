@@ -12,6 +12,13 @@ namespace SteamPrefill.CliCommands
 #if DEBUG // Experimental, debugging only
         [CommandOption("app")]
         public IReadOnlyList<uint> AppIds { get; init; }
+
+        [CommandOption("no-download", Converter = typeof(NullableBoolConverter))]
+        public bool? NoDownload
+        {
+            get => _noDownload;
+            init => AppConfig.SkipDownloads = value ?? default(bool);
+        }
 #endif
 
         [CommandOption("all", Description = "Prefills all currently owned apps", Converter = typeof(NullableBoolConverter))]
@@ -39,6 +46,8 @@ namespace SteamPrefill.CliCommands
         public TransferSpeedUnit TransferSpeedUnit { get; init; }
 
         private IAnsiConsole _ansiConsole;
+        private readonly bool? _noDownload;
+
         public async ValueTask ExecuteAsync(IConsole console)
         {
             _ansiConsole = console.CreateAnsiConsole();

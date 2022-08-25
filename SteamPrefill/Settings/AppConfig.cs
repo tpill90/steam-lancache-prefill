@@ -13,7 +13,7 @@ namespace SteamPrefill.Settings
 
         public static bool EnableSteamKitDebugLogs => false;
 
-        public static bool SkipDownloads => false;
+        public static bool SkipDownloads = false;
 
         #endif
 
