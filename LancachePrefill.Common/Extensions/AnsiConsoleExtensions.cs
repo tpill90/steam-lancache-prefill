@@ -1,4 +1,6 @@
-﻿namespace LancachePrefill.Common.Extensions
+﻿using static LancachePrefill.Common.Extensions.TransferSpeedUnit;
+
+namespace LancachePrefill.Common.Extensions
 {
     public static class AnsiConsoleExtensions
     {
@@ -20,8 +22,9 @@
                               .Spinner(Spinner.Known.Dots2);
         }
 
-        public static Progress CreateSpectreProgress(this IAnsiConsole ansiConsole)
+        public static Progress CreateSpectreProgress(this IAnsiConsole ansiConsole, TransferSpeedUnit unit)
         {
+            var displayBits = unit == Bits;
             var spectreProgress = ansiConsole.Progress()
                                              .HideCompleted(true)
                                              .AutoClear(true)
@@ -34,7 +37,7 @@
                                                  new TransferSpeedColumn
                                                  {
                                                      Base = FileSizeBase.Decimal,
-                                                     DisplayBits = true
+                                                     DisplayBits = displayBits
                                                  });
             return spectreProgress;
         }
@@ -65,6 +68,16 @@
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)
         {
             console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}".PadRight(65) + SpectreColors.LightYellow(elapsed.ToString(@"ss\.FFFF")));
+        }
+    }
+
+    public class TransferSpeedUnit : EnumBase<TransferSpeedUnit>
+    {
+        public static readonly TransferSpeedUnit Bits = new TransferSpeedUnit("bits");
+        public static readonly TransferSpeedUnit Bytes = new TransferSpeedUnit("bytes");
+
+        private TransferSpeedUnit(string name) : base(name)
+        {
         }
     }
 }

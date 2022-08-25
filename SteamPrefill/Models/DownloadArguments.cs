@@ -17,5 +17,10 @@
         /// When set to true, will avoid saving as much data to disk as possible
         /// </summary>
         public bool NoCache { get; set; }
+
+        /// <summary>
+        /// Determines which unit to display the download speed in.
+        /// </summary>
+        public TransferSpeedUnit TransferSpeedUnit { get; set; }
     }
 }

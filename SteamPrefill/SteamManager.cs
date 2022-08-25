@@ -147,7 +147,7 @@ namespace SteamPrefill
 #endif
             _ansiConsole.MarkupLine("");
 
-            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
+            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue, _downloadArgs);
             if (downloadSuccessful)
             {
                 _depotHandler.MarkDownloadAsSuccessful(filteredDepots);

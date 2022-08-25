@@ -63,6 +63,19 @@
             throw new FormatException($"{toParse} is not a valid enum value for {typeof(T).Name}!");
         }
 
+        public static bool IsValidEnumValue(string inputValue)
+        {
+            for (var index = 0; index < AllEnumValues.Count; index++)
+            {
+                var type = AllEnumValues[index];
+                if (inputValue == type.Name)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public override string ToString()
         {
             return Name;

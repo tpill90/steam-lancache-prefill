@@ -28,9 +28,8 @@
         /// false will be returned
         /// </summary>
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
-        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
+        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
         {
-
 #if DEBUG
             if (AppConfig.SkipDownloads)
             {
@@ -45,7 +44,7 @@
             int retryCount = 0;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
-            await _ansiConsole.CreateSpectreProgress().StartAsync(async ctx =>
+            await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
                 // Run the initial download
                 failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests);
