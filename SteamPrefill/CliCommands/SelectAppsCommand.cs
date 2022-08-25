@@ -24,7 +24,7 @@ namespace SteamPrefill.CliCommands
                                                     .UseConverter(e => e == false ? "No" : "Yes"));
                 if (runPrefill)
                 {
-                    await steamManager.DownloadMultipleAppsAsync(false, new List<uint>());
+                    await steamManager.DownloadMultipleAppsAsync(false, false, new List<uint>());
                 }
             }
             catch (TimeoutException e)
