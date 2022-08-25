@@ -10,7 +10,26 @@
 
         public uint AppId { get; set; }
         public ReleaseState ReleaseState { get; set; }
+
+        //TODO comment
+        public DateTime? ReleaseDate
+        {
+            get
+            {
+                if (OriginalReleaseDate != null)
+                {
+                    return OriginalReleaseDate;
+                }
+                if (SteamReleaseDate != null)
+                {
+                    return SteamReleaseDate;
+                }
+                return null;
+            }
+        }
+
         public DateTime? SteamReleaseDate { get; set; }
+        public DateTime? OriginalReleaseDate { get; set; }
 
         public List<uint> DlcAppIds { get; } = new List<uint>();
 
@@ -34,7 +53,8 @@
         /// </summary>
         public AppType Type { get; }
 
-        public bool IsInvalidApp => Type == null;
+        public int? MinutesPlayed2Weeks { get; set; }
+        public decimal? HoursPlayed2Weeks => MinutesPlayed2Weeks == null ? null : (decimal)MinutesPlayed2Weeks / 60;
 
         public List<Category> Categories { get; init; }
 
@@ -53,6 +73,7 @@
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
             //TODO alot of games are missing this
             SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTime();
+            OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTime();
             ReleaseState = rootKeyValue["extended"]["releasestate"].AsEnum<ReleaseState>();
             
             if (rootKeyValue["depots"] != KeyValue.Invalid)

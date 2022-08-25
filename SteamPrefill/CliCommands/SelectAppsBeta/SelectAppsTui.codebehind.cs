@@ -2,6 +2,7 @@
 using Terminal.Gui.Graphs;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
+using System.Data;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
@@ -41,7 +42,14 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             };
             sortYearButton.Clicked += SortYear_OnClicked;
 
-            window.Add(sortLabel, sortNameButton, sortYearButton);
+            var sortPlaytimeButton = new Button("Recent Playtime")
+            {
+                X = Pos.Right(sortYearButton) + 1,
+                ColorScheme = _buttonColorScheme
+            };
+            sortPlaytimeButton.Clicked += SortPlaytime_OnClicked;
+
+            window.Add(sortLabel, sortNameButton, sortYearButton, sortPlaytimeButton);
 
             #endregion
 
@@ -71,10 +79,24 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             };
             window.Add(lineView);
 
+            headerLabel = new Label
+            {
+                Y = 4,
+                Width = Dim.Fill()
+            };
+            window.Add(headerLabel);
+
+            var lineView2 = new LineView(Orientation.Horizontal)
+            {
+                Y = 5,
+                Width = Dim.Fill()
+            };
+            window.Add(lineView2);
+
             _listView = new ListView
             {
                 X = 1,
-                Y = 4,
+                Y = 6,
                 Height = Dim.Fill(),
                 Width = Dim.Fill(1),
                 ColorScheme = new ColorScheme

@@ -1,3 +1,5 @@
+using SteamKit2;
+using SteamKit2.Internal;
 using System.Security.Authentication;
 
 namespace SteamPrefill.Handlers.Steam
@@ -12,12 +14,13 @@ namespace SteamPrefill.Handlers.Steam
         public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
         public HashSet<uint> OwnedDepotIds { get; private set; } = new HashSet<uint>();
         
+        // Steam services
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
-
         public readonly SteamContent SteamContent;
         public readonly SteamApps SteamAppsApi;
         public readonly Client CdnClient;
+        public SteamUnifiedMessages.UnifiedService<IPlayer> unifiedPlayerService;
 
         private readonly CallbackManager _callbackManager;
         
@@ -25,6 +28,8 @@ namespace SteamPrefill.Handlers.Steam
         private readonly IAnsiConsole _ansiConsole;
 
         private readonly UserAccountStore _userAccountStore;
+
+        public SteamID _steamId;
 
         public Steam3Session(IAnsiConsole ansiConsole)
         {
@@ -34,6 +39,8 @@ namespace SteamPrefill.Handlers.Steam
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             SteamContent = _steamClient.GetHandler<SteamContent>();
+            SteamUnifiedMessages? steamUnifiedMessages = _steamClient.GetHandler<SteamUnifiedMessages>();
+            unifiedPlayerService = steamUnifiedMessages.CreateService<IPlayer>();
 
             _callbackManager = new CallbackManager(_steamClient);
 
@@ -49,7 +56,6 @@ namespace SteamPrefill.Handlers.Steam
             _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
-
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
             
             CdnClient = new Client(_steamClient);
@@ -176,6 +182,8 @@ namespace SteamPrefill.Handlers.Steam
         private int _failedLogonAttempts;
         private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
+            _steamId = logonResult.ClientSteamID;
+
             var loggedOn = logonResult;
 
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code

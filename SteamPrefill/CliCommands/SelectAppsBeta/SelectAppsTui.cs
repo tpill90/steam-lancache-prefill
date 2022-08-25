@@ -8,16 +8,16 @@ using Rune = System.Rune;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
-    //TODO implement sorting by recently played games
     //TODO include more metadata in the list view, like year/minutes played/last played/etc
     //TODO selected rows need some more coloring to differentiate what is selected
-    //TODO get rid of ugly green outline
-    //TODO it looks like the year being displayed is not the actual original release year, but rather when the game was added to steam.  Look at the EA games
+    //TODO implement sorting by purchase date
+    //TODO need to document in readme how you navigate the ui.  Can use keyboard alt + shift alt.  Or click with a mouse
     public partial class SelectAppsTui
     {
         private ListView _listView;
         private TextField _searchBox;
         private StatusBar _statusBar;
+        private Label headerLabel;
 
         private AppInfoDataSource ListViewDataSource => (AppInfoDataSource)_listView.Source;
 
@@ -47,7 +47,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                     appInfo.IsSelected = true;
                 }
             }
-
+            
             // Configuring status bar actions
             _statusBar.Items = new StatusItem[] {
                 new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
@@ -74,6 +74,8 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                     Application.Top.SetNeedsDisplay();
                 })
             };
+
+            headerLabel.Text = ListViewDataSource.FormatHeaderString();
         }
 
         public void Run()
@@ -104,6 +106,12 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             _listView.SetNeedsDisplay();
         }
 
+        private void SortPlaytime_OnClicked()
+        {
+            ListViewDataSource.SortPlaytime();
+            _listView.SetNeedsDisplay();
+        }
+        
         private void ListView_RowRender(ListViewRowEventArgs obj)
         {
             if (obj.Row == _listView.SelectedItem && _listView.HasFocus)
@@ -172,7 +180,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
 
         public void SortName()
         {
-            _currAppInfo = _originalAppInfo.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
+            _currAppInfo = _currAppInfo.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase).ToList();
         }
 
         private bool _sortYearToggle;
@@ -180,24 +188,30 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
         {
             if (_sortYearToggle)
             {
-                _currAppInfo = _currAppInfo.OrderBy(e => e.SteamReleaseDate).ToList();
+                _currAppInfo = _currAppInfo.OrderBy(e => e.ReleaseDate).ToList();
             }
             else
             {
-                _currAppInfo = _currAppInfo.OrderByDescending(e => e.SteamReleaseDate).ToList();
+                _currAppInfo = _currAppInfo.OrderByDescending(e => e.ReleaseDate).ToList();
             }
             _sortYearToggle = !_sortYearToggle;
         }
 
+        public void SortPlaytime()
+        {
+            _currAppInfo = _currAppInfo.OrderByDescending(e => e.MinutesPlayed2Weeks).ToList();
+        }
 
-        //TODO better name
+        public string FormatHeaderString()
+        {
+            // First column needs to be +3 additional characters, to account for the ' - ' added by the list control
+            return String.Format("{0,-58}{1,8}{2,17}", "   Title", "Released", "Recent Playtime");
+        }
+
         private string FormatItemString(AppInfo item)
         {
-            var nameColumn = string.Format($"{{0,{-45}}}", item.Name);
-            var formattedReleaseDate = string.Format($"{{0,{-20}}}", item.SteamReleaseDate?.Date.ToString("yyyy"));
-            var formattedType = item.Type.Name;
-
-            return $"{nameColumn} {formattedReleaseDate} {formattedType}";
+            var hoursPlayed2Weeks = item.HoursPlayed2Weeks != null ? $"{item.HoursPlayed2Weeks:N1} hours" : null;
+            return string.Format("{0,-55}{1,8}{2,17}", item.Name.Truncate(55), item.ReleaseDate?.Date.ToString("yyyy"), hoursPlayed2Weeks);
         }
 
         public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)

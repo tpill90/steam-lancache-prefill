@@ -1,4 +1,5 @@
 ﻿using LancachePrefill.Common.Exceptions;
+using static SteamKit2.Internal.CCloud_EnumerateUserApps_Response;
 
 namespace SteamPrefill
 {
@@ -66,15 +67,18 @@ namespace SteamPrefill
             appIdsToDownload.AddRange(manualIds);
             if (downloadAllOwnedGames)
             {
-                appIdsToDownload.AddRange(_steam3.OwnedAppIds);
+                //TODO This is slower than the previous method, however there might be performance improvements on really large libraries (1300 games)
+                var userOwnedGames = (await _appInfoHandler.GetUsersOwnedGamesAsync()).Select(e => (uint)e.appid);
+                appIdsToDownload.AddRange(userOwnedGames);
             }
 
-            var distinctAppIds = appIdsToDownload.Distinct().OrderBy(e => e).ToList();
-
+            var distinctAppIds = appIdsToDownload.Distinct()
+                                                 .OrderBy(e => e)
+                                                 .ToList();
             await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
 
             // Now we will be able to determine which apps can't be downloaded
-            var availableGames = await _appInfoHandler.GetAvailableGamesAsync(distinctAppIds);
+            var availableGames = await _appInfoHandler.GetGamesById(distinctAppIds);
 
             // Whitespace divider
             _ansiConsole.WriteLine();
@@ -177,24 +181,9 @@ namespace SteamPrefill
             return chunkQueue;
         }
 
-        public async Task<List<AppInfo>> GetGames()
-        {
-            var allApps = _steam3.OwnedAppIds.ToList();
-
-            // Need to load the latest app information from steam, so that we have an updated list of all owned games
-            await _appInfoHandler.RetrieveAppMetadataAsync(allApps);
-            var availableGames = _appInfoHandler.GetAllAvailableGames();
-            return availableGames;
-        }
-
-        //TODO is there any way to possibly speed this up, without having to query steam?
         public async Task SelectAppsAsync()
         {
-            var allApps = _steam3.OwnedAppIds.ToList();
-
-            // Need to load the latest app information from steam, so that we have an updated list of all owned games
-            await _appInfoHandler.RetrieveAppMetadataAsync(allApps);
-            var availableGames = _appInfoHandler.GetAllAvailableGames();
+            var availableGames = await GetAllAvailableGamesAsync();
 
             // Whitespace divider
             _ansiConsole.WriteLine();
@@ -240,6 +229,16 @@ namespace SteamPrefill
                 return JsonSerializer.Deserialize(File.ReadAllText(AppConfig.UserSelectedAppsPath), SerializationContext.Default.ListUInt32);
             }
             return new List<uint>();
+        }
+
+        public async Task<List<AppInfo>> GetAllAvailableGamesAsync()
+        {
+            var ownedGameIds = (await _appInfoHandler.GetUsersOwnedGamesAsync()).Select(e => (uint)e.appid).ToList();
+
+            // Loading app metadata from steam, skipping related DLC apps
+            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
+            var availableGames = await _appInfoHandler.GetGamesById(ownedGameIds);
+            return availableGames;
         }
 
         public void Dispose()
