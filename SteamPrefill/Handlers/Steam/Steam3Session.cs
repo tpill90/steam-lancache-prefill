@@ -45,7 +45,11 @@ namespace SteamPrefill.Handlers.Steam
             _callbackManager = new CallbackManager(_steamClient);
 
             // This callback is triggered when SteamKit2 makes a successful connection
-            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(e => _isConnecting = false);
+            _callbackManager.Subscribe<SteamClient.ConnectedCallback>(e =>
+            {
+                _isConnecting = false;
+                _disconnected = false;
+            });
             // If a connection attempt fails in anyway, SteamKit2 notifies of the failure with a "disconnect"
             _callbackManager.Subscribe<SteamClient.DisconnectedCallback>(e =>
             {
