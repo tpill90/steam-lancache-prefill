@@ -40,15 +40,25 @@ namespace SteamPrefill.Settings
                 return CurrentUsername;
             }
             
-            // Prompting for Username
-            ansiConsole.MarkupLine($"A {Cyan("Steam")} account is required in order to prefill apps!");
-            var usernamePrompt = new TextPrompt<string>($"Please enter your {Cyan("Steam account name")} : ")
-            {
-                PromptStyle = new Style(SpectreColors.MediumPurple1)
-            };
-            
-            CurrentUsername = ansiConsole.Prompt(usernamePrompt);
+            CurrentUsername = PromptForUsername(ansiConsole)
+                              .WaitAsync(TimeSpan.FromSeconds(30))
+                              .GetAwaiter()
+                              .GetResult();
             return CurrentUsername;
+        }
+
+        private async Task<string> PromptForUsername(IAnsiConsole ansiConsole)
+        {
+            return await Task.Run(() =>
+            {
+                ansiConsole.MarkupLine($"A {Cyan("Steam")} account is required in order to prefill apps!");
+
+                var prompt = new TextPrompt<string>($"Please enter your {Cyan("Steam account name")} : ")
+                {
+                    PromptStyle = new Style(SpectreColors.MediumPurple1)
+                };
+                return ansiConsole.Prompt(prompt);
+            });
         }
 
         public static UserAccountStore LoadFromFile()

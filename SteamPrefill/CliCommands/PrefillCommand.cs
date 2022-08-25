@@ -1,4 +1,6 @@
-﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿using Spectre.Console;
+using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
+// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
@@ -72,6 +74,19 @@ namespace SteamPrefill.CliCommands
                 #endif
 
                 await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), manualIds);
+            }
+            catch (TimeoutException e)
+            {
+                _ansiConsole.MarkupLine("\n");
+                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsername)))
+                {
+                    _ansiConsole.MarkupLine(Red("Timed out while waiting for username entry"));
+                }
+                if (e.StackTrace.Contains(nameof(AnsiConsoleExtensions.ReadPassword)))
+                {
+                    _ansiConsole.MarkupLine(Red("Timed out while waiting for password entry"));
+                }
+                _ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
             }
             catch (Exception e)
             {

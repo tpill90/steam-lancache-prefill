@@ -1,4 +1,5 @@
 ﻿using static LancachePrefill.Common.Extensions.TransferSpeedUnit;
+using Spectre.Console;
 
 namespace LancachePrefill.Common.Extensions
 {
@@ -44,10 +45,14 @@ namespace LancachePrefill.Common.Extensions
 
         public static string ReadPassword(this IAnsiConsole console, string promptText = null)
         {
-            var defaultPrompt = $"Please enter your {SpectreColors.Cyan("Steam password")}. {SpectreColors.LightYellow("(Password won't be saved)")} : ";
-            return console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
-                                  .PromptStyle("white")
-                                  .Secret());
+            var promptTask = Task.Run(() =>
+            {
+                var defaultPrompt = $"Please enter your {Cyan("Steam password")}. {LightYellow("(Password won't be saved)")} : ";
+                return console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
+                                      .PromptStyle("white")
+                                      .Secret());
+            });
+            return promptTask.WaitAsync(TimeSpan.FromSeconds(30)).GetAwaiter().GetResult();
         }
 
         public static void LogMarkup(this IAnsiConsole console, string message)

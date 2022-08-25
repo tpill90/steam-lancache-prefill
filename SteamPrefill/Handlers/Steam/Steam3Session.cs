@@ -279,10 +279,15 @@ namespace SteamPrefill.Handlers.Steam
             _receivedLoginKey = true;
         }
 
-        private bool _disconnected;
+        private bool _disconnected = true;
         public void Disconnect()
         {
-            //TODO throw an exception if not connected
+            if (_disconnected)
+            {
+                _ansiConsole.LogMarkupLine("Already disconnected from Steam");
+                return;
+            }
+
             _disconnected = false;
             _steamClient.Disconnect();
 
