@@ -104,6 +104,22 @@ For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force
 | --recent    | -r  |             | Adds any games played within the last 2 weeks to the download queue.  |
 | --unit      |     | bits, bytes | **(Optional)** Specifies which unit to use to display download speed. **Default : bits**  |
 
+## clear-cache
+Deletes temporary cache files stored in the `/Cache` directory.  
+These files are cached in order to dramatically speed up future `prefill` runs (in some cases 3X faster),
+however in some cases this disk cache can potentially take up a non-trivial amount of storage (~1gb).  
+
+<img src="docs/img/Clear-Cache.png" width="630" alt="Clear cache command">
+
+These cache files will also build up over time, as newer versions of games are released, leaving unused cache data behind that will never be used again.
+
+In the case that you would like to save disk space without having to constantly clear the cache, 
+running `prefill` with the `--nocache` flag specified will prevent the cache files from being written in the first place.
+
+| Option      |     |      |
+| ----------- | --- | ---  |
+| --yes       | -y  | Skips the prompt asking to clear the cache, and immediately begins clearing the cache.     |
+
 # Updating
 **SteamPrefill** will automatically check for updates, and notify you when an update is available :
 
