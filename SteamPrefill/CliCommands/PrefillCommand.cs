@@ -24,12 +24,6 @@ namespace SteamPrefill.CliCommands
         [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
-        //TODO remove in a future version
-        [CommandOption("dns-override", 'd',
-            Description = "Deprecated, will be removed in a future version.  Manually specifies the Lancache IP, used to prefill on the Lancache server.  Ex, '192.168.1.111'",
-            Converter = typeof(IpAddressConverter))]
-        public IPAddress OverrideLancacheIp { get; init; }
-
         [CommandOption("force", 'f', 
             Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.", 
             Converter = typeof(NullableBoolConverter))]
@@ -64,12 +58,6 @@ namespace SteamPrefill.CliCommands
                 NoCache = NoLocalCache ?? default(bool),
                 TransferSpeedUnit = TransferSpeedUnit ?? TransferSpeedUnit.Bits
             };
-
-            if (OverrideLancacheIp != null)
-            {
-                _ansiConsole.MarkupLine(LightYellow($" Warning!  {White("--dns-override")} is no longer required, and will be removed in a future version!\n" +
-                                                    " SteamPrefill will automatically detect the Lancache server IP if running on the same machine.\n"));
-            }
 
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
             ValidateSelectedAppIds(steamManager);

@@ -1,5 +1,6 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public class Language : EnumBase<Language>
     {
         public static readonly Language English = new Language("english");
