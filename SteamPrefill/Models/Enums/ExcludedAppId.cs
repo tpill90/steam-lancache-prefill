@@ -1,5 +1,6 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public enum ExcludedAppId
     {
         // Spacewar is a non-playable game, that is required for Steamworks multiplayer functionality to work

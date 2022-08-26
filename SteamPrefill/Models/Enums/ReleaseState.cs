@@ -4,6 +4,7 @@
     /// Steam docs :
     /// https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
     /// </summary>
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public class ReleaseState : EnumBase<ReleaseState>
     {
         public static readonly ReleaseState Unknown = new ReleaseState("unknown");

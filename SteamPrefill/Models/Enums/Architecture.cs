@@ -1,5 +1,6 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public class Architecture : EnumBase<Architecture>
     {
         public static readonly Architecture unknown = new Architecture("unknown");

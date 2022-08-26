@@ -7,6 +7,7 @@ namespace SteamPrefill
      * Docs - Add to docs how exactly passwords/credentials are used, and stored.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Update resharper dotsettings file to match Battlenet Prefill
+     * Cleanup warnings, resharper code issues, and github code issues
      *
      * Docs - Add an image to the main heading in the readme.  That way people have an image that they can immediately see when they come to the repo
      * Bug - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
