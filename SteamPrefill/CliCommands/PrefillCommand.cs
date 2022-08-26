@@ -1,5 +1,5 @@
-﻿using Spectre.Console;
-using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
+﻿using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
+
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
@@ -10,18 +10,18 @@ namespace SteamPrefill.CliCommands
     {
 
 #if DEBUG // Experimental, debugging only
-        [CommandOption("app")]
+        [CommandOption("app", Description = "Debugging only.")]
         public IReadOnlyList<uint> AppIds { get; init; }
 
-        [CommandOption("no-download", Converter = typeof(NullableBoolConverter))]
+        [CommandOption("no-download", Description = "Debugging only.", Converter = typeof(NullableBoolConverter))]
         public bool? NoDownload
         {
-            get => _noDownload;
+            get => AppConfig.SkipDownloads;
             init => AppConfig.SkipDownloads = value ?? default(bool);
         }
 #endif
 
-        [CommandOption("all", Description = "Prefills all currently owned apps", Converter = typeof(NullableBoolConverter))]
+        [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
         //TODO remove in a future version
@@ -40,13 +40,17 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
+        [CommandOption("recent", 'r',
+            Description = "Prefill will include all games played in the last 2 weeks.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? PrefillRecentGames { get; init; }
+
         [CommandOption("unit", 
             Description = "Specifies which unit to use to display download speed.  Can be either bits/bytes.  Default: bits",
             Converter = typeof(TransferSpeedUnitConverter))]
         public TransferSpeedUnit TransferSpeedUnit { get; init; }
 
         private IAnsiConsole _ansiConsole;
-        private readonly bool? _noDownload;
 
         public async ValueTask ExecuteAsync(IConsole console)
         {
@@ -82,7 +86,7 @@ namespace SteamPrefill.CliCommands
                 }
                 #endif
 
-                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), manualIds);
+                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), PrefillRecentGames ?? default(bool), manualIds);
             }
             catch (TimeoutException e)
             {
@@ -118,7 +122,7 @@ namespace SteamPrefill.CliCommands
             }
 #endif
 
-            if ((DownloadAllOwnedGames ?? default(bool)) || userSelectedApps.Any())
+            if ((DownloadAllOwnedGames ?? default(bool)) || (PrefillRecentGames ?? default(bool)) || userSelectedApps.Any())
             {
                 return;
             }

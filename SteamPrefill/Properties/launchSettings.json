@@ -16,6 +16,10 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --force"
     },
+    "Prefill Recent": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --recent --force --no-download"
+    },
     "Select Apps": {
       "commandName": "Project",
       "commandLineArgs": "select-apps"

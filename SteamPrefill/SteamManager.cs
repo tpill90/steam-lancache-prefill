@@ -59,7 +59,7 @@ namespace SteamPrefill
             _steam3.Disconnect();
         }
 
-        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, List<uint> manualIds)
+        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, List<uint> manualIds)
         {
             var timer = Stopwatch.StartNew();
 
@@ -68,6 +68,11 @@ namespace SteamPrefill
             if (downloadAllOwnedGames)
             {
                 appIdsToDownload.AddRange(_steam3.OwnedAppIds);
+            }
+            if (prefillRecentGames)
+            {
+                var recentGames = await _appInfoHandler.GetRecentlyPlayedGamesAsync();
+                appIdsToDownload.AddRange(recentGames.Select(e => (uint)e.appid));
             }
 
             var distinctAppIds = appIdsToDownload.Distinct()
