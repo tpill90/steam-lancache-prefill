@@ -1,3 +1,57 @@
+$scriptBlock = {
+    function PublishRuntime([string] $runtime, [string] $version, [string] $targetBranch, [string] $originalRepoPath)
+    {
+        # All double quotes need to be escaped (""") in this block in order to work correctly with Start-Process
+        $repoName = """SteamPrefill-$runtime"""
+
+        Write-Host "Starting publish for  " -NoNewline; Write-Host $runtime -ForegroundColor Cyan
+
+        # Cloning
+        Set-Location $env:TEMP
+        if(-Not (Test-Path $repoName))
+        {
+            Write-Host "Cloning " -NoNewline; Write-Host $repoName -ForegroundColor Cyan
+            git clone https://github.com/tpill90/steam-lancache-prefill.git $repoName
+        }
+
+        # Making sure we're on the right branch
+        Set-Location $repoName
+        $currentBranch = (git rev-parse --abbrev-ref HEAD)
+        if(!($currentBranch -eq $targetBranch))
+        {
+            git checkout $targetBranch
+            Write-Host "Switched to $targetBranch branch"
+        }
+
+        #Updating branch
+        Write-Host "Pulling branch" -ForegroundColor Green
+        git pull
+
+        # Git clean
+        Write-Host "Cleaning untracked files from previous build" -ForegroundColor Green
+        git clean -fx -d
+
+        $publishDir = """$originalRepoPath\publish\SteamPrefill-$version-$runtime"""
+        Write-Host """Publishing $runtime""" -ForegroundColor Cyan
+        dotnet publish .\SteamPrefill\SteamPrefill.csproj `
+            --nologo `
+            -o $publishDir `
+            -c Release `
+            --runtime $runtime `
+            --self-contained true `
+            /p:PublishSingleFile=true `
+            /p:PublishReadyToRun=true `
+            /p:PublishTrimmed=true
+
+        if($LASTEXITCODE -ne 0)
+        {
+            Read-Host
+        }
+
+        Compress-Archive -path $publishDir """$publishDir.zip"""
+    }
+}
+
 Clear-Host
 
 #region Powershell config
@@ -11,8 +65,11 @@ if(-Not(Get-Module -Name PSWriteColor))
 
 #endregion
 
-Push-Location $PSScriptRoot
+Set-Location $PSScriptRoot
 $totalTimer = [System.Diagnostics.Stopwatch]::StartNew()
+
+# Clearing out previous build
+Get-ChildItem publish -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
 $csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
 
@@ -20,39 +77,20 @@ $csprojXml = [xml](gc SteamPrefill\SteamPrefill.csproj)
 $version = "$($csprojXml.ChildNodes.PropertyGroup.Version)".Trim()
 # The list of runtimes that will be targeted by the publish
 $targetRuntimes = $csprojXml.ChildNodes.PropertyGroup.RuntimeIdentifiers[0].Split(';')
+$currentBranch = (git rev-parse --abbrev-ref HEAD)
+$repoPath = "$((Get-Location).Path)"
 
-# Empty out the \obj folder, will guarantee a new build will be published each time
-Remove-Item .\SteamPrefill\obj -Recurse -Force -ErrorAction SilentlyContinue
-Get-ChildItem publish -ErrorAction SilentlyContinue | Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
-
-# Running dotnet build for each runtime, otherwise the publish step will fail when ran in parallel
 Write-Host "Starting dotnet publish..." -ForegroundColor Yellow
+$processes = @()
 foreach($runtime in $targetRuntimes)
 {
-    Write-Host ""
-    Write-Host "Building " -NoNewline; Write-Host $runtime -ForegroundColor Cyan
-
-    $publishDir = "publish/SteamPrefill-$version-$runtime"
-
-    dotnet publish .\SteamPrefill\SteamPrefill.csproj `
-        --nologo `
-        -o $publishDir `
-        -c Release `
-        --runtime $runtime `
-        --self-contained true `
-        /p:PublishSingleFile=true `
-        /p:PublishReadyToRun=true `
-        /p:PublishTrimmed=true
-        
-    # Making sure that the compliation is successful before mmoving on to the next runtime
-    if($LASTEXITCODE -ne 0)
-    {
-        Write-Host "\nBuild failed.  Skipping publish step until errors are resolved.." -ForegroundColor Red
-        return
-    }
-
-    Compress-Archive -path $publishDir "$publishDir.zip" -CompressionLevel Optimal
+    $processes += Start-Process powershell.exe `
+                            -ArgumentList "-command", "& {$scriptBlock PublishRuntime '$runtime' '$version' '$currentBranch' '$repoPath'}" `
+                            -PassThru
 }
+
+Write-Host "Waiting on publish to complete" -ForegroundColor Yellow
+$processes | Wait-Process
 
 # Writing out some metrics about the published files, for fun
 foreach($runtime in $targetRuntimes)
@@ -67,5 +105,3 @@ foreach($runtime in $targetRuntimes)
 $totalTimer.Stop()
 Write-Host "Publish took total time: " -NoNewline
 Write-Host $totalTimer.Elapsed.ToString() -ForegroundColor Yellow
-
-Pop-Location
