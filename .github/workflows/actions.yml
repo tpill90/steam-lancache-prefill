@@ -1,4 +1,4 @@
-name: Pipeline
+name: Build-and-test
 on: [push]
 
 permissions:
@@ -10,8 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
@@ -28,8 +26,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Checkout submodules
-      run: git submodule update --init --recursive
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
