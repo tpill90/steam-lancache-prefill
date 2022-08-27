@@ -72,8 +72,8 @@
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
             //TODO alot of games are missing this
-            SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTime();
-            OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTime();
+            SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTimeUtc();
+            OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTimeUtc();
             ReleaseState = rootKeyValue["extended"]["releasestate"].AsEnum<ReleaseState>();
             
             if (rootKeyValue["depots"] != KeyValue.Invalid)

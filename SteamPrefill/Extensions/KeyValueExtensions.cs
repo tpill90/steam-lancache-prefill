@@ -42,7 +42,7 @@ namespace SteamPrefill.Utils
             return value;
         }
 
-        public static DateTime? AsDateTime(this KeyValue keyValue)
+        public static DateTime? AsDateTimeUtc(this KeyValue keyValue)
         {
             long seconds;
 

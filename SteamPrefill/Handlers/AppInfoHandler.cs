@@ -10,7 +10,7 @@ namespace SteamPrefill.Handlers
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steam3Session;
 
-        private List<CPlayer_GetOwnedGames_Response.Game> _recentlyPlayedGames;
+        private List<CPlayer_GetOwnedGames_Response.Game> _ownedGames;
 
         /// <summary>
         /// A dictionary of all app metadata currently retrieved from Steam
@@ -44,7 +44,7 @@ namespace SteamPrefill.Handlers
                 if (loadRecentlyPlayed)
                 {
                     // Populating play time
-                    foreach (var app in (await GetRecentlyPlayedGamesAsync()))
+                    foreach (var app in await GetRecentlyPlayedGamesAsync())
                     {
                         var appInfo = await GetAppInfoAsync((uint)app.appid);
                         appInfo.MinutesPlayed2Weeks = app.playtime_2weeks;
@@ -72,14 +72,15 @@ namespace SteamPrefill.Handlers
         }
 
         /// <summary>
-        /// Gets a list of recently played games by the current user.
+        /// Gets a list of all games owned by the current user.
+        /// This differs from the list of owned AppIds, as this exclusively contains "games", excluding things like DLC/Tools/etc
         /// </summary>
-        public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetRecentlyPlayedGamesAsync()
+        public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetUsersOwnedGamesAsync()
         {
-            //TODO Could/Should this data be cached?  Would save 200ms
-            if (_recentlyPlayedGames != null)
+            //TODO Should this data be cached to disk?  Should it only be updated once per day, or only when the user has a new game? Would save 200ms
+            if (_ownedGames != null)
             {
-                return _recentlyPlayedGames;
+                return _ownedGames;
             }
 
             var request = new CPlayer_GetOwnedGames_Request
@@ -90,18 +91,20 @@ namespace SteamPrefill.Handlers
                 include_played_free_games = true,
                 skip_unvetted_apps = false
             };
-
             var response = await _steam3Session.unifiedPlayerService.SendMessage(e => e.GetOwnedGames(request)).ToTask();
             if (response.Result != EResult.OK)
             {
                 throw new Exception("Unexpected error while requesting owned games!");
             }
 
-            _recentlyPlayedGames = response.GetDeserializedResponse<CPlayer_GetOwnedGames_Response>()
-                                           .games
-                                           .Where(e => e.playtime_2weeks > 0)
-                                           .ToList();
-            return _recentlyPlayedGames;
+            _ownedGames = response.GetDeserializedResponse<CPlayer_GetOwnedGames_Response>().games;
+            return _ownedGames;
+        }
+
+        public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetRecentlyPlayedGamesAsync()
+        {
+            var userOwnedGames = await GetUsersOwnedGamesAsync();
+            return userOwnedGames.Where(e => e.playtime_2weeks > 0).ToList();
         }
 
         /// <summary>
