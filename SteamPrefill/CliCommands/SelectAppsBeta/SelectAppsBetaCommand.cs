@@ -30,7 +30,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                                     .UseConverter(e => e == false ? "No" : "Yes"));
                 if (runPrefill)
                 {
-                    await steamManager.DownloadMultipleAppsAsync(false, false, new List<uint>());
+                    await steamManager.DownloadMultipleAppsAsync(false, false, null, new List<uint>());
                 }
             }
             catch (Exception e)

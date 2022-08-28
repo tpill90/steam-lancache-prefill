@@ -99,9 +99,10 @@ For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force
 | Option      |     | Values      |     |
 | ----------- | --- | ----------- | --- |
 | --all       |     |             | Downloads all owned apps, useful for prefilling a completely empty cache.  |
+| --recent    | -r  |             | Adds any games played within the last 2 weeks to the download queue.  |
+| --top       |     | 1-100       | Downloads the most popular games by player count, over the last 2 weeks.  **Default: 50**  |
 | --force     | -f  |             | By default, **SteamPrefill** will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.  <br/><br/> Running with the flag `--force` will override this behavior, and instead will always run the prefill, re-downloading all files for the specified product.  This flag may be useful for diagnostics, or benchmarking network performance.  |
 | --nocache   |     |             | **SteamPrefill** will cache copies of certain files on disk, in order to dramatically speed up future runs.  These cache files will be stored in the `/Cache` directory in the same directory as **SteamPrefill**.  However, in some scenarios this disk cache can potentially take up a non-trivial amount of storage (~1gb), which may not be ideal for all use cases. |
-| --recent    | -r  |             | Adds any games played within the last 2 weeks to the download queue.  |
 | --unit      |     | bits, bytes | **(Optional)** Specifies which unit to use to display download speed. **Default : bits**  |
 
 ## clear-cache

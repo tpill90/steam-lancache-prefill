@@ -1,5 +1,4 @@
 ﻿using LancachePrefill.Common.Exceptions;
-using static SteamKit2.Internal.CCloud_EnumerateUserApps_Response;
 
 namespace SteamPrefill
 {
@@ -46,12 +45,18 @@ namespace SteamPrefill
         /// </summary>
         public void Initialize()
         {
+            var timer = Stopwatch.StartNew();
             _ansiConsole.LogMarkupLine("Starting login!");
 
             _steam3.LoginToSteam();
             _steam3.WaitForLicenseCallback();
 
+#if DEBUG
+            _ansiConsole.LogMarkupLine("Steam session initialization complete!", timer);
+#else
             _ansiConsole.LogMarkupLine("Steam session initialization complete!");
+#endif
+
         }
 
         public void Shutdown()
@@ -59,7 +64,7 @@ namespace SteamPrefill
             _steam3.Disconnect();
         }
 
-        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, List<uint> manualIds)
+        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames, List<uint> manualIds)
         {
             var timer = Stopwatch.StartNew();
 
@@ -74,18 +79,21 @@ namespace SteamPrefill
                 var recentGames = await _appInfoHandler.GetRecentlyPlayedGamesAsync();
                 appIdsToDownload.AddRange(recentGames.Select(e => (uint)e.appid));
             }
+            if (prefillPopularGames != null)
+            {
+                var popularGames = (await SteamSpy.TopGamesLast2WeeksAsync(_ansiConsole))
+                                    .Take(prefillPopularGames.Value)
+                                    .Select(e => e.appid);
+                appIdsToDownload.AddRange(popularGames);
+            }
 
-            var distinctAppIds = appIdsToDownload.Distinct()
-                                                 .OrderBy(e => e)
-                                                 .ToList();
+            var distinctAppIds = appIdsToDownload.Distinct().ToList();
             await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
-
-            // Now we will be able to determine which apps can't be downloaded
-            var availableGames = await _appInfoHandler.GetGamesById(distinctAppIds);
-
+            
             // Whitespace divider
             _ansiConsole.WriteLine();
 
+            var availableGames = await _appInfoHandler.GetGamesById(distinctAppIds);
             foreach (var app in availableGames)
             {
                 try
@@ -108,8 +116,34 @@ namespace SteamPrefill
                 }
             }
 
+            PrintUnownedApps(distinctAppIds);
+
             _ansiConsole.MarkupLine("");
             _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableGames.Count)} apps in {LightYellow(timer.FormatElapsedString())}");
+        }
+
+        private void PrintUnownedApps(List<uint> distinctAppIds)
+        {
+            // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
+            var unownedApps = distinctAppIds.Where(e => !_steam3.AccountHasAppAccess(e))
+                                            .Select(async e => await _appInfoHandler.GetAppInfoAsync(e))
+                                            .Select(e => e.Result)
+                                            .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                                            .ToList();
+
+            var table = new Table { Border = TableBorder.MinimalHeavyHead };
+            // Header
+            table.AddColumn(new TableColumn(White("App")));
+            
+            // Rows
+            foreach (var app in unownedApps)
+            {
+                table.AddRow($"[link=https://store.steampowered.com/app/{app.AppId}]🔗[/] {White(app.Name)}");
+            }
+
+            _ansiConsole.MarkupLine("");
+            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Count)} unowned apps!  They will be excluded from this prefill run..."));
+            _ansiConsole.Write(table);
         }
 
         private async Task DownloadSingleAppAsync(uint appId)

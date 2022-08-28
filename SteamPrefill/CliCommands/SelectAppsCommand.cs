@@ -19,12 +19,12 @@ namespace SteamPrefill.CliCommands
                 await steamManager.SelectAppsAsync();
 
                 var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
-                                                    .Title(SpectreColors.LightYellow("Run prefill now?"))
+                                                    .Title(LightYellow("Run prefill now?"))
                                                     .AddChoices(true, false)
                                                     .UseConverter(e => e == false ? "No" : "Yes"));
                 if (runPrefill)
                 {
-                    await steamManager.DownloadMultipleAppsAsync(false, false, new List<uint>());
+                    await steamManager.DownloadMultipleAppsAsync(false, false, null, new List<uint>());
                 }
             }
             catch (TimeoutException e)
