@@ -1,6 +1,7 @@
 namespace SteamPrefill
 {
     /* TODO
+     * Login - Seems like 2fa isn't saving login info, possibly only when doing select-apps
      * Docs - Update useful links in docs, add them to a table, with notes.
      * In LancacheIpResolver.cs, change 127.0.0.1 over to say 'localhost' instead.
      * Determine if its possible to detect ipv6, and display a message to the user that ipv6 is not supported

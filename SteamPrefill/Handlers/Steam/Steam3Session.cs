@@ -368,6 +368,7 @@ namespace SteamPrefill.Handlers.Steam
             LoadPackageInfo(licenseList.LicenseList);
         }
 
+        //TODO should this license stuff be broken out into its own class?  And also add in the user owned games as well?
         [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "Can't do async here, SteamKit2 doesn't support it.")]
         private void LoadPackageInfo(IReadOnlyCollection<SteamApps.LicenseListCallback.License> licenseList)
         {
@@ -407,17 +408,16 @@ namespace SteamPrefill.Handlers.Steam
             foreach (var package in packages)
             {
                 // Removing any free weekends that are no longer active
-                //TODO use AsDateTime
-                var expiryTime = package.KeyValues["extended"]["expirytime"];
-                if (expiryTime != KeyValue.Invalid)
+                var freeWeekend = package.KeyValues["extended"]["freeweekend"];
+                if (freeWeekend != KeyValue.Invalid && freeWeekend.AsBoolean())
                 {
-                    var expiryTimeUtc = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expiryTime.Value)).DateTime;
+                    var expiryTimeUtc = package.KeyValues["extended"]["expirytime"].AsDateTimeUtc();
                     if (DateTime.Now > expiryTimeUtc)
                     {
                         continue;
                     }
                 }
-
+               
                 foreach (KeyValue appId in package.KeyValues["appids"].Children)
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
