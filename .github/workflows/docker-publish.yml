@@ -1,0 +1,47 @@
+name: docker-publish
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
+  security-events: write
+
+jobs:
+  docker-publish-x64:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Publish
+      run: >
+        dotnet publish SteamPrefill/SteamPrefill.csproj \
+          --nologo \
+          -o publish \
+          -c Release \
+          --runtime "linux-x64" \
+          --self-contained true \
+          /p:PublishSingleFile=true \
+          /p:PublishReadyToRun=true \
+          /p:PublishTrimmed=true
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Extract metadata for Docker
+      id: meta
+      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
+      with:
+        images: tpilius/steam-lancache-prefill
+    - name: Build and push Docker image
+      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
+      with:
+        context: .
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
