@@ -5,6 +5,8 @@
 
 Automatically fills a [Lancache](https://lancache.net/) with games from Steam, so that subsequent downloads for the same content will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
+<img src="docs/img/Overview.png" width="730" alt="Overview">
+
 Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-autofill) project.
 
 # Features
@@ -29,8 +31,9 @@ Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-a
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to a directory of your choice
 3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x ./SteamPrefill`
-4.  (**Windows Only - Optional**)  Configure your terminal to use Unicode, for much nicer looking UI output.
-    - <img src="docs/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
+4.  (**Alpine Linux**) Install dependencies required by the .NET runtime : [(Alpine Linux Depdencies)](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
+5.  (**Windows Only - Optional**)  Configure your terminal to use Unicode, for much nicer looking UI output.
+    - <img src="docs/img/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
     - As the default console in Windows does not support UTF8, Windows Terminal should be installed from the [App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
     - Unicode on Windows is not enabled by default, however running the following will enable it if it hasn't already been enabled.
     - `if(!(Test-Path $profile) -or !(gc $profile).Contains("OutputEncoding")) { ac $profile "[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()";  & $profile; }`
@@ -46,7 +49,7 @@ Prior to prefilling for the first time, you will have to decide which apps shoul
 
 Once logged into Steam, all of your currently owned apps will be displayed for selection.  Navigating using the arrow keys, select any apps that you are interested in prefilling with **space**.  Once you are satisfied with your selections, save them with **enter**.
 
-<img src="docs/Interactive-App-Selection.png" height="300" alt="Interactive app selection">
+<img src="docs/img/Interactive-App-Selection.png" height="300" alt="Interactive app selection">
 
 These selections will be saved permanently, and can be freely updated at any time by simply rerunning `select-apps` again at any time.
 
@@ -59,7 +62,7 @@ Now that a prefill app list has been created, we can now move onto our initial p
 
 The `prefill` command will automatically pickup the prefill app list, and begin downloading each app.  During the initial run, it is likely that the Lancache is empty, so download speeds should be expected to be around your internet line speed (in the below example, a 1gbit connection was used).  Once the prefill has completed, the Lancache should be fully ready to serve clients cached data.
 
-<img src="docs/Initial-Prefill.png" width="830" alt="Initial Prefill">
+<img src="docs/img/Initial-Prefill.png" width="830" alt="Initial Prefill">
 
 ## Updating previously prefilled apps
 
@@ -67,13 +70,13 @@ Updating any previously prefilled apps can be done by simply re-running the `pre
 
 **SteamPrefill** keeps track of which version of each app was previously prefilled, and will only re-download if there is a newer version of the app available.  Any apps that are currently up to date, will simply be skipped.
 
-<img src="docs/Prefill-Up-To-Date.png" width="730" alt="Prefilled app up to date">
+<img src="docs/img/Prefill-Up-To-Date.png" width="730" alt="Prefilled app up to date">
 
 
 However, if there is a newer version of an app that is available, then **SteamPrefill** will re-download the app.  Due to how Lancache works, this subsequent run should complete much faster than the initial prefill (example below used a 10gbit connection).
 Any data that was previously downloaded, will be retrieved from the Lancache, while any new data from the update will be retrieved from the internet.
 
-<img src="docs/Prefill-New-Version-Available.png" width="830" alt="Prefill run when app has an update">
+<img src="docs/img/Prefill-New-Version-Available.png" width="830" alt="Prefill run when app has an update">
 
 # Frequently Asked Questions
 
@@ -82,15 +85,15 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you reguarly would!
 
 If everything works as expected, you should see a message saying it found the server at `127.0.0.1`
-<img src="docs/AutoDns-Server.png" width="830" alt="Prefill running on Lancache Server">
+<img src="docs/img/AutoDns-Server.png" width="830" alt="Prefill running on Lancache Server">
 
 Running from a Docker container on the Lancache server is also supported!  You should instead see a message saying the server was found at `172.17.0.1`
-<img src="docs/AutoDns-Docker.png" width="830" alt="Prefill running on Lancache Server in Docker">
+<img src="docs/img/AutoDns-Docker.png" width="830" alt="Prefill running on Lancache Server in Docker">
 
 Running on the Lancache server itself can give you some advantages over running **SteamPrefill** on a client machine, primarily the speed at which you can prefill apps.  
 Since there is no network transfer happening, the `prefill` should only be limited by disk I/O and CPU throughput.  
 For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
-<img src="docs/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
+<img src="docs/img/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
 
 # Detailed Command Usage
 
