@@ -53,6 +53,8 @@
         /// </summary>
         public AppType Type { get; }
 
+        public bool IsFreeGame { get; set; }
+
         public int? MinutesPlayed2Weeks { get; set; }
         public decimal? HoursPlayed2Weeks => MinutesPlayed2Weeks == null ? null : (decimal)MinutesPlayed2Weeks / 60;
 
@@ -87,6 +89,7 @@
             }
 
             // Extended Section
+            IsFreeGame = rootKeyValue["extended"]["isfreeapp"].AsBoolean();
             var listOfDlc = rootKeyValue["extended"]["listofdlc"].Value;
             if (listOfDlc != null)
             {

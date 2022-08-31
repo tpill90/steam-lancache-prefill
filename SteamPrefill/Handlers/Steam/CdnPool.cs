@@ -34,6 +34,7 @@ namespace SteamPrefill.Handlers.Steam
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)
                 {
+                    //TODO need to add a timeout to this GetServersForSteamPipe() call
                     var allServers = await _steamSession.SteamContent.GetServersForSteamPipe();
                     var filteredServers = allServers.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0).ToList();
                     foreach (var server in filteredServers)

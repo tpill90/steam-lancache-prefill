@@ -24,6 +24,20 @@ namespace SteamPrefill.CliCommands
         [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
+        [CommandOption("recent", 'r',
+            Description = "Prefill will include all games played in the last 2 weeks.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? PrefillRecentGames { get; init; }
+
+        
+        [CommandOption("top", Description = "Prefills the most popular games by player count, over the last 2 weeks.  Default: 50")]
+        public int? PrefillPopularGames
+        {
+            get => _prefillPopularGames;
+            // Need to use a setter in order to set a default value, so that the default will only be used when the option flag is specified
+            set => _prefillPopularGames = value ?? 50;
+        }
+
         [CommandOption("force", 'f', 
             Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.", 
             Converter = typeof(NullableBoolConverter))]
@@ -34,17 +48,13 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
-        [CommandOption("recent", 'r',
-            Description = "Prefill will include all games played in the last 2 weeks.",
-            Converter = typeof(NullableBoolConverter))]
-        public bool? PrefillRecentGames { get; init; }
-
-        [CommandOption("unit", 
-            Description = "Specifies which unit to use to display download speed.  Can be either bits/bytes.  Default: bits",
+        [CommandOption("unit",
+            Description = "Specifies which unit to use to display download speed.  Can be either bits/bytes.",
             Converter = typeof(TransferSpeedUnitConverter))]
-        public TransferSpeedUnit TransferSpeedUnit { get; init; }
+        public TransferSpeedUnit TransferSpeedUnit { get; init; } = TransferSpeedUnit.Bits;
 
         private IAnsiConsole _ansiConsole;
+        private int? _prefillPopularGames;
 
         public async ValueTask ExecuteAsync(IConsole console)
         {
@@ -56,11 +66,12 @@ namespace SteamPrefill.CliCommands
             {
                 Force = Force ?? default(bool),
                 NoCache = NoLocalCache ?? default(bool),
-                TransferSpeedUnit = TransferSpeedUnit ?? TransferSpeedUnit.Bits
+                TransferSpeedUnit = TransferSpeedUnit
             };
 
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
             ValidateSelectedAppIds(steamManager);
+            ValidatePopularGameCount();
 
             try
             {
@@ -74,7 +85,10 @@ namespace SteamPrefill.CliCommands
                 }
                 #endif
 
-                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), PrefillRecentGames ?? default(bool), manualIds);
+                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), 
+                                                             PrefillRecentGames ?? default(bool),
+                                                             PrefillPopularGames,
+                                                             manualIds);
             }
             catch (TimeoutException e)
             {
@@ -110,16 +124,26 @@ namespace SteamPrefill.CliCommands
             }
 #endif
 
-            if ((DownloadAllOwnedGames ?? default(bool)) || (PrefillRecentGames ?? default(bool)) || userSelectedApps.Any())
+            if ((DownloadAllOwnedGames ?? default(bool)) || (PrefillRecentGames ?? default(bool)) || PrefillPopularGames != null || userSelectedApps.Any())
             {
                 return;
             }
+
             _ansiConsole.MarkupLine(Red("No apps have been selected for prefill! At least 1 app is required!"));
             _ansiConsole.MarkupLine(Red($"Use the {Cyan("select-apps")} command to interactively choose which apps to prefill. "));
             _ansiConsole.MarkupLine("");
             _ansiConsole.Markup(Red($"Alternatively, the flag {LightYellow("--all")} can be specified to prefill all owned apps"));
+            //TODO add --top and --recent to this message
             throw new CommandException(".", 1, true);
         }
 
+        private void ValidatePopularGameCount()
+        {
+            if (PrefillPopularGames != null && PrefillPopularGames < 1 || PrefillPopularGames > 100)
+            {
+                _ansiConsole.Markup(Red($"Value for {LightYellow("--top")} must be in the range 1-100"));
+                throw new CommandException(".", 1, true);
+            }
+        }
     }
 }
