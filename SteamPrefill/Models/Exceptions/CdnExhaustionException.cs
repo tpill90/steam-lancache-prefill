@@ -1,5 +1,6 @@
 ﻿namespace SteamPrefill.Models.Exceptions
 {
+    //TODO Do I need to have [Serializable] on each exception?
     [Serializable]
     public class CdnExhaustionException : Exception
     {

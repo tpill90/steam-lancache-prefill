@@ -100,12 +100,9 @@ namespace SteamPrefill
                 {
                     await DownloadSingleAppAsync(app.AppId);
                 }
-                catch (LancacheNotFoundException e)
+                catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
                 {
-                    throw e;
-                }
-                catch (UserCancelledException e)
-                {
+                    // We'll want to bomb out the entire process for these exceptions, as they mean we can't prefill any apps at all
                     throw e;
                 }
                 catch (Exception e)
