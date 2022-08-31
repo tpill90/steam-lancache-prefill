@@ -12,16 +12,12 @@ namespace SteamPrefill
      * Update resharper dotsettings file to match Battlenet Prefill
      * Cleanup warnings, resharper code issues, and github code issues
      * Docs - The readme could probably use a little bit of care.  Some of the images are way too large
-     *
-     * Docs - Add an image to the main heading in the readme.  That way people have an image that they can immediately see when they come to the repo
+     * Testing - Should invest some time into adding unit tests
      * Bug - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
-     * Feature - Could it be easier to select multiple apps on the select screen, without having to press down + space repeatedly?  
-                      Possibly by holding spacebar + hitting down arrow -> keep selecting as you hit down arrow
      * Build - Fail build on both warnings + trim warnings
      * Update to dotnet 7 sdk + dotnet 7 target
      * General - Promote this app on r/lanparty.
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
-     * CliFx - I wish there was a way to color the help text output from CliFx.  Everything is so flat, and cant draw attention to important parts
      */
     public static class Program
     {
