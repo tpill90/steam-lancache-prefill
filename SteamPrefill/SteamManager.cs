@@ -131,6 +131,11 @@ namespace SteamPrefill
                                             .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
                                             .ToList();
 
+            if (!unownedApps.Any())
+            {
+                return;
+            }
+
             var table = new Table { Border = TableBorder.MinimalHeavyHead };
             // Header
             table.AddColumn(new TableColumn(White("App")));
