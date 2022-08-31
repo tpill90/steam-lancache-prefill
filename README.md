@@ -86,15 +86,32 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you reguarly would!
 
 If everything works as expected, you should see a message saying it found the server at `127.0.0.1`
-<img src="docs/img/AutoDns-Server.png" width="830" alt="Prefill running on Lancache Server">
+
+<img src="docs/img/AutoDns-Server.png" width="580" alt="Prefill running on Lancache Server">
 
 Running from a Docker container on the Lancache server is also supported!  You should instead see a message saying the server was found at `172.17.0.1`
-<img src="docs/img/AutoDns-Docker.png" width="830" alt="Prefill running on Lancache Server in Docker">
+
+<img src="docs/img/AutoDns-Docker.png" width="580" alt="Prefill running on Lancache Server in Docker">
 
 Running on the Lancache server itself can give you some advantages over running **SteamPrefill** on a client machine, primarily the speed at which you can prefill apps.  
 Since there is no network transfer happening, the `prefill` should only be limited by disk I/O and CPU throughput.  
 For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
 <img src="docs/img/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
+
+## How can I limit download speeds?
+
+You may want to limit the download speed of **SteamPrefill** to prevent it from potentially saturating your entire connection,  causing other devices to suffer from massive latency and poor speeds.  This issue is known as bufferbloat, and more detailed information on the issue can be found here: [What is bufferbloat?](https://www.waveform.com/tools/bufferbloat)
+
+**SteamPrefill** does not currently contain any functionality to limit its own download speed, and due to the way that downloads are implemented will likely never be able to throttle its own download speed.  Additionally, even if **SteamPrefill** was able to throttle itself, the same issue would persist with downloads through **Steam**.
+
+One method to limit bandwidth would be to configure *Quality of Service (QOS)* on your router, limiting bandwidth to the Lancache server, or by prioritizing other network traffic.  A general overview of QOS can be found here : [Beginners guide to QOS](https://www.howtogeek.com/75660/the-beginners-guide-to-qos-on-your-router/)
+
+For more brand specific guides(non-exhaustive), see :
+- [Asus](https://www.asus.com/support/FAQ/1013333/)
+- [Netgear](https://kb.netgear.com/25613/How-do-I-enable-Dynamic-QoS-on-my-Nighthawk-router)
+- [Linksys](https://www.linksys.com/support-article?articleNum=137079)
+- [TP-Link](https://www.tp-link.com/us/support/faq/557/)
+
 
 # Detailed Command Usage
 
