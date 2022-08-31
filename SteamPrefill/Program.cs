@@ -1,22 +1,17 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Login - Seems like 2fa isn't saving login info, possibly only when doing select-apps
-     * Select-apps - Prefilling with select apps defaults to bytes not bits
-     * Docs - Update useful links in docs, add them to a table, with notes.
-     * In LancacheIpResolver.cs, change 127.0.0.1 over to say 'localhost' instead.
      * Determine if its possible to detect ipv6, and display a message to the user that ipv6 is not supported
-     * Docs - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
-     * Docs - Add to docs how exactly passwords/credentials are used, and stored.
+     * Documentation - Update useful links in docs, add them to a table, with notes.
+     * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
+     * Documentation - Add to docs how exactly passwords/credentials are used, and stored.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
-     * Update resharper dotsettings file to match Battlenet Prefill
-     * Cleanup warnings, resharper code issues, and github code issues
-     * Docs - The readme could probably use a little bit of care.  Some of the images are way too large
+     * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large
      * Testing - Should invest some time into adding unit tests
      * Bug - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
+     * Cleanup warnings, resharper code issues, and github code issues
      * Build - Fail build on both warnings + trim warnings
      * Update to dotnet 7 sdk + dotnet 7 target
-     * General - Promote this app on r/lanparty.
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
      */
     public static class Program

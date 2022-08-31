@@ -7,12 +7,6 @@
         /// </summary>
         public bool Force { get; init; }
 
-        public OperatingSystem OperatingSystem { get; set; } = OperatingSystem.Windows;
-
-        public Architecture Architecture { get; set; } = Architecture.x64;
-
-        public Language Language { get; set; } = Language.English;
-
         /// <summary>
         /// When set to true, will avoid saving as much data to disk as possible
         /// </summary>
@@ -21,6 +15,10 @@
         /// <summary>
         /// Determines which unit to display the download speed in.
         /// </summary>
-        public TransferSpeedUnit TransferSpeedUnit { get; set; }
+        public TransferSpeedUnit TransferSpeedUnit { get; set; } = TransferSpeedUnit.Bits;
+
+        public OperatingSystem OperatingSystem { get; set; } = OperatingSystem.Windows;
+        public Architecture Architecture { get; set; } = Architecture.x64;
+        public Language Language { get; set; } = Language.English;
     }
 }
