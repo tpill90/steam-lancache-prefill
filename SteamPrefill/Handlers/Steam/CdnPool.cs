@@ -52,7 +52,7 @@ namespace SteamPrefill.Handlers.Steam
 
             if (!_availableServerEndpoints.Any())
             {
-                throw new CdnExhaustionException("Unable to get available CDN servers from Steam!.  Try again in a few moments...");
+                throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
         }
         
