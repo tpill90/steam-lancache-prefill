@@ -73,17 +73,16 @@
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
         /// <returns>A list of failed requests</returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
+        [SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
         private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload)
         {
-            double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
+            double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength); 
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
-            var cdnServer = _cdnPool.TakeConnection();
-
-            // Running multiple requests in parallel on a single CDN
+            // Running as many requests as possible in parallel, evenly distributed across 3 cdns
+            var cdnServers = _cdnPool.TakeConnections(3).ToList();
             await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
             {
                 var buffer = new byte[4096];
@@ -91,7 +90,8 @@
                 {
                     var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", _lancacheAddress, request.DepotId, request.ChunkId);
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-                    requestMessage.Headers.Host = cdnServer.Host;
+                    // Evenly distributes requests across CDNs
+                    requestMessage.Headers.Host = cdnServers[request.ChunkNum % 3].Host;
 
                     var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
                     using Stream responseStream = await response.Content.ReadAsStreamAsync();
@@ -109,13 +109,13 @@
                 progressTask.Increment(request.CompressedLength);
             });
 
-            // Only return the connection for reuse if there were no errors
+            // Only return the connections for reuse if there were no errors
             if (failedRequests.IsEmpty)
             {
-                _cdnPool.ReturnConnection(cdnServer);
+                _cdnPool.ReturnConnections(cdnServers);
             }
 
-            // Making sure the progress bar is always set to its max value, incase some unexpected error leaves the progress bar showing as unfinished
+            // Making sure the progress bar is always set to its max value, in-case some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
         }

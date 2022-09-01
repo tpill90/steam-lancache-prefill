@@ -9,6 +9,7 @@ namespace SteamPrefill
      * Docs - Update useful links in docs, add them to a table, with notes.
      * In LancacheIpResolver.cs, change 127.0.0.1 over to say 'localhost' instead.
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
+     * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
      * Determine if its possible to detect ipv6, and display a message to the user that ipv6 is not supported
      * Documentation - Update useful links in docs, add them to a table, with notes.
      * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.

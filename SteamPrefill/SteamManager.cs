@@ -180,6 +180,8 @@
             var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
             
             var chunkQueue = new List<QueuedRequest>();
+            int chunkNum = 0;
+
             // Queueing up chunks for each depot
             foreach (var depotManifest in depotManifests)
             {
@@ -191,7 +193,7 @@
                                              .ToList();
                 foreach (var chunk in dedupedChunks)
                 {
-                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk));
+                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk, chunkNum++));
                 }
             }
             return chunkQueue;
