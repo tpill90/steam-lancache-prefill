@@ -39,15 +39,34 @@
                 {
                     depotManifests = await AttemptManifestDownloadAsync(depots);
                 }
-                catch (Exception e)
+                catch (SteamKitWebRequestException e)
                 {
-                    // Regardless of the manifest, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("An error occurred while downloading manifests.  Retrying..."));
+                    if (e.Message.Contains("508"))
+                    {
+                        _ansiConsole.MarkupLine(Red("An infinite loop was detected while download manifests.\n" +
+                                                    "This likely means that there is an issue with your network configuration.\n" +
+                                                    "Please check your configuration, and retry again.\n"));
+                        throw new InfiniteLoopException("Infinite loop detected while downloading manifests");
+                    }
+
+                    // Regardless of which manifest failed, we're always going to retry multiple times
+                    _ansiConsole.MarkupLine(Red("An unexpected error occurred while downloading manifests.  Retrying..."));
 
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
                     FileLogger.Log(e.ToString());
+                }
+                catch (Exception e)
+                {
+                    // Regardless of which manifest failed, we're always going to retry multiple times
+                    _ansiConsole.MarkupLine(Red("An unexpected error occurred while downloading manifests.  Retrying..."));
 
+                    // Log extended details to disk
+                    FileLogger.Log("An exception occurred while downloading manifests");
+                    FileLogger.Log(e.ToString());
+                }
+                finally
+                {
                     // Pausing a short time, in case the error was transient
                     await Task.Delay(500 * attempts);
                 }
