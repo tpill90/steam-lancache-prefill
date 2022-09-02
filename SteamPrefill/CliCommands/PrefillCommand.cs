@@ -1,5 +1,6 @@
 ﻿using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
 
+//TODO need to rethink the verbiage between 'app' and 'game' on the user facing docs
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
@@ -48,6 +49,13 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
+        [CommandOption("quiet", Description = "Reduces noisy log output.  Will only output logs for games that have updates.", Converter = typeof(NullableBoolConverter))]
+        public bool? Quiet 
+        {
+            get => AppConfig.QuietLogs;
+            init => AppConfig.QuietLogs = value ?? default(bool);
+        }
+
         [CommandOption("unit",
             Description = "Specifies which unit to use to display download speed.  Can be either bits/bytes.",
             Converter = typeof(TransferSpeedUnitConverter))]
@@ -72,19 +80,19 @@ namespace SteamPrefill.CliCommands
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
             ValidateSelectedAppIds(steamManager);
             ValidatePopularGameCount();
-
+            
             try
             {
                 steamManager.Initialize();
 
                 var manualIds = new List<uint>();
-                #if DEBUG // Experimental, debugging only
+#if DEBUG 
+                // Experimental, debugging only
                 if (AppIds != null)
                 {
                     manualIds.AddRange(AppIds);
                 }
-                #endif
-
+#endif
                 await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), 
                                                              PrefillRecentGames ?? default(bool),
                                                              PrefillPopularGames,

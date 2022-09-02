@@ -1,6 +1,4 @@
-﻿using LancachePrefill.Common.Exceptions;
-
-namespace SteamPrefill
+﻿namespace SteamPrefill
 {
     public sealed class SteamManager : IDisposable
     {
@@ -15,20 +13,20 @@ namespace SteamPrefill
         private readonly DepotHandler _depotHandler;
         private readonly AppInfoHandler _appInfoHandler;
 
+        private PrefillSummaryResult _prefillSummaryResult;
+
         public SteamManager(IAnsiConsole ansiConsole, DownloadArguments downloadArgs)
         {
             _ansiConsole = ansiConsole;
             _downloadArgs = downloadArgs;
 
-            #if DEBUG
-
+#if DEBUG
             if (AppConfig.EnableSteamKitDebugLogs)
             {
                 DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
                 DebugLog.Enabled = true;
             }
-
-            #endif
+#endif
             
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
@@ -66,7 +64,7 @@ namespace SteamPrefill
 
         public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames, List<uint> manualIds)
         {
-            var timer = Stopwatch.StartNew();
+            _prefillSummaryResult = new PrefillSummaryResult();
 
             var appIdsToDownload = LoadPreviouslySelectedApps();
             appIdsToDownload.AddRange(manualIds);
@@ -89,7 +87,7 @@ namespace SteamPrefill
 
             var distinctAppIds = appIdsToDownload.Distinct().ToList();
             await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
-            
+
             // Whitespace divider
             _ansiConsole.WriteLine();
 
@@ -110,54 +108,25 @@ namespace SteamPrefill
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
                     _ansiConsole.MarkupLine(Red($"   Unexpected download error : {e.Message}"));
                     _ansiConsole.MarkupLine("");
+                    _prefillSummaryResult.FailedApps++;
                 }
             }
-
             PrintUnownedApps(distinctAppIds);
 
-            _ansiConsole.MarkupLine("");
-            _ansiConsole.LogMarkupLine($"Prefill complete! Prefilled {Magenta(availableGames.Count)} apps in {LightYellow(timer.FormatElapsedString())}");
-        }
-
-        private void PrintUnownedApps(List<uint> distinctAppIds)
-        {
-            // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
-            var unownedApps = distinctAppIds.Where(e => !_steam3.AccountHasAppAccess(e))
-                                            .Select(async e => await _appInfoHandler.GetAppInfoAsync(e))
-                                            .Select(e => e.Result)
-                                            .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                                            .ToList();
-
-            if (!unownedApps.Any())
-            {
-                return;
-            }
-
-            var table = new Table { Border = TableBorder.MinimalHeavyHead };
-            // Header
-            table.AddColumn(new TableColumn(White("App")));
-            
-            // Rows
-            foreach (var app in unownedApps)
-            {
-                table.AddRow($"[link=https://store.steampowered.com/app/{app.AppId}]🔗[/] {White(app.Name)}");
-            }
-
-            _ansiConsole.MarkupLine("");
-            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Count)} unowned apps!  They will be excluded from this prefill run..."));
-            _ansiConsole.Write(table);
+            _ansiConsole.LogMarkupLine("Prefill complete!");
+            _prefillSummaryResult.RenderSummaryTable(_ansiConsole, availableGames.Count);
         }
 
         private async Task DownloadSingleAppAsync(uint appId)
         {
             AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
-            _ansiConsole.LogMarkup($"Starting {Cyan(appInfo)}");
-
+            
             // Filter depots based on specified lang/os/architecture/etc
             var filteredDepots = _depotHandler.FilterDepotsToDownload(_downloadArgs, appInfo.Depots);
             if (!filteredDepots.Any())
             {
-                _ansiConsole.MarkupLine(LightYellow("  No depots to download.  Current arguments filtered all depots"));
+                //TODO add to summary output?
+                _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {LightYellow("No depots to download.  Current arguments filtered all depots")}");
                 return;
             }
 
@@ -166,10 +135,17 @@ namespace SteamPrefill
             // We will want to re-download the entire app, if any of the depots have been updated
             if (_downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
             {
-                _ansiConsole.MarkupLine(Green("  Up to date!"));
+                _prefillSummaryResult.AlreadyUpToDate++;
+                if (AppConfig.QuietLogs)
+                {
+                    return;
+                }
+
+                _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {Green("  Up to date!")}");
                 return;
             }
-            _ansiConsole.Write("\n");
+
+            _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
 
             await _cdnPool.PopulateAvailableServersAsync();
 
@@ -190,6 +166,7 @@ namespace SteamPrefill
             if (downloadSuccessful)
             {
                 _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
+                _prefillSummaryResult.Updated++;
             }
             downloadTimer.Stop();
 
@@ -278,6 +255,37 @@ namespace SteamPrefill
             await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
             var availableGames = await _appInfoHandler.GetGamesById(ownedGameIds);
             return availableGames;
+        }
+
+        private void PrintUnownedApps(List<uint> distinctAppIds)
+        {
+            // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
+            var unownedApps = distinctAppIds.Where(e => !_steam3.AccountHasAppAccess(e))
+                                            .Select(async e => await _appInfoHandler.GetAppInfoAsync(e))
+                                            .Select(e => e.Result)
+                                            .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                                            .ToList();
+            _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Count;
+
+
+            if (!unownedApps.Any())
+            {
+                return;
+            }
+
+            var table = new Table { Border = TableBorder.MinimalHeavyHead };
+            // Header
+            table.AddColumn(new TableColumn(White("App")));
+
+            // Rows
+            foreach (var app in unownedApps)
+            {
+                table.AddRow($"[link=https://store.steampowered.com/app/{app.AppId}]🔗[/] {White(app.Name)}");
+            }
+
+            _ansiConsole.MarkupLine("");
+            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Count)} unowned apps!  They will be excluded from this prefill run..."));
+            _ansiConsole.Write(table);
         }
 
         public void Dispose()

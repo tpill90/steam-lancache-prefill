@@ -1,6 +1,8 @@
 namespace SteamPrefill
 {
     /* TODO
+     * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
+     * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
      * Login - Seems like 2fa isn't saving login info, possibly only when doing select-apps
      * Select-apps - Prefilling with select apps defaults to bytes not bits
@@ -40,6 +42,6 @@ namespace SteamPrefill
         public static class OperatingSystem
         {
             public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        }
     }
-}
 }

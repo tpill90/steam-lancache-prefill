@@ -3,7 +3,7 @@
     /// <summary>
     /// Represents an application (game, tool, video, server) that can be downloaded from steam
     /// </summary>
-    public class AppInfo
+    public sealed class AppInfo
     {
         //TODO remove
         public bool IsSelected { get; set; }
@@ -72,11 +72,11 @@
 
             Name = rootKeyValue["common"]["name"].Value;
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
-            OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
+            OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited(); 
             //TODO alot of games are missing this
             SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTimeUtc();
             OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTimeUtc();
-            ReleaseState = rootKeyValue["extended"]["releasestate"].AsEnum<ReleaseState>();
+            ReleaseState = rootKeyValue["common"]["releasestate"].AsEnum<ReleaseState>();
             
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {

@@ -13,7 +13,7 @@ global using ProtoBuf;
 global using Spectre.Console;
 global using SteamKit2;
 global using SteamKit2.CDN;
-global using SteamPrefill.CliCommands;
+global using LancachePrefill.Common.Exceptions;
 global using SteamPrefill.Handlers;
 global using SteamPrefill.Handlers.Steam;
 global using SteamPrefill.Models;
