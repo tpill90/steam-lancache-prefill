@@ -16,7 +16,6 @@
         public static string Olive(object inputObj) => $"[yellow4_1]{inputObj}[/]";
         public static string Red(object inputObj) => $"[red]{inputObj}[/]";
         public static string White(object inputObj) => $"[white]{inputObj}[/]";
-        public static string Yellow(object inputObj) => $"[gold1]{inputObj}[/]";
 
         // Text styles
         public static string Bold(object inputObj) => $"[bold]{inputObj}[/]";

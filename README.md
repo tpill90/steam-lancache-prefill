@@ -158,4 +158,6 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 * https://steam.readthedocs.io/en/latest/intro.html
 * https://partner.steamgames.com/doc/api/steam_api?language=english#enums
 * https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
-* https://help.steampowered.com/en/accountdata/SteamLoginHistory
+
+# Acknowledgements 
+- @dlrudie for all your help with debugging and testing!

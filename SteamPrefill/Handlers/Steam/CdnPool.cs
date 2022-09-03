@@ -4,13 +4,14 @@ namespace SteamPrefill.Handlers.Steam
     /// This class is primarily responsible for querying the Steam network for available CDN servers,
     /// and managing the current list of available servers.
     /// </summary>
-    public class CdnPool
+    public sealed class CdnPool
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steamSession;
         
-        private ConcurrentQueue<Server> _availableServerEndpoints = new ConcurrentQueue<Server>();
-        private int _minimumServerCount = 5;
+        private List<Server> _availableServerEndpoints = new List<Server>();
+        private int _minimumServerCount = 10;
+        private int _maxRetries = 10;
 
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
@@ -25,22 +26,24 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public async Task PopulateAvailableServersAsync()
         {
+            //TODO need to add a timeout to this GetServersForSteamPipe() call
             if (_availableServerEndpoints.Count >= _minimumServerCount)
             {
                 return;
             }
+
             await _ansiConsole.StatusSpinner().StartAsync("Getting available CDNs", async _ =>
             {
                 var retryCount = 0;
-                while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < 10)
+                while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
-                    //TODO need to add a timeout to this GetServersForSteamPipe() call
                     var allServers = await _steamSession.SteamContent.GetServersForSteamPipe();
-                    var filteredServers = allServers.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0).ToList();
-                    foreach (var server in filteredServers)
-                    {
-                        _availableServerEndpoints.Enqueue(server);
-                    }
+                    _availableServerEndpoints.AddRange(allServers);
+
+                    // Filtering out non-cacheable cdns, and duplicate hosts
+                    _availableServerEndpoints = _availableServerEndpoints.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0)
+                                                                         .DistinctBy(e => e.Host)
+                                                                         .ToList();
 
                     // Will wait increasingly longer periods when re-trying
                     retryCount++;
@@ -48,12 +51,12 @@ namespace SteamPrefill.Handlers.Steam
                 }
             });
 
-            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToConcurrentBag();
-
             if (!_availableServerEndpoints.Any())
             {
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
+
+            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
         }
         
         /// <summary>
@@ -64,12 +67,21 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public Server TakeConnection()
         {
-            if (_availableServerEndpoints.IsEmpty)
+            if (!_availableServerEndpoints.Any())
             {
                 throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
-            _availableServerEndpoints.TryDequeue(out Server server);
+            var server = _availableServerEndpoints.First();
+            _availableServerEndpoints.RemoveAt(0);
             return server;
+        }
+
+        public IEnumerable<Server> TakeConnections(int connectionCount)
+        {
+            for (int i = 0; i < connectionCount; i++)
+            {
+                yield return TakeConnection();
+            }
         }
 
         /// <summary>
@@ -79,7 +91,16 @@ namespace SteamPrefill.Handlers.Steam
         /// <param name="connection">The connection that will be re-added to the pool.</param>
         public void ReturnConnection(Server connection)
         {
-            _availableServerEndpoints.Enqueue(connection);
+            _availableServerEndpoints.Add(connection);
+            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
+        }
+
+        public void ReturnConnections(List<Server> connections)
+        {
+            foreach (var connection in connections)
+            {
+                ReturnConnection(connection);
+            }
         }
     }
 }
