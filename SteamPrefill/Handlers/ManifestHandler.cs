@@ -50,7 +50,16 @@
                     }
 
                     // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("An unexpected error occurred while downloading manifests.  Retrying..."));
+                    _ansiConsole.MarkupLine(Red("Request for manifests failed.  Retrying..."));
+
+                    // Log extended details to disk
+                    FileLogger.Log("An exception occurred while downloading manifests");
+                    FileLogger.Log(e.ToString());
+                }
+                catch (TimeoutException e)
+                {
+                    // Regardless of which manifest failed, we're always going to retry multiple times
+                    _ansiConsole.MarkupLine(Red("Manifest request timed out.  Retrying..."));
 
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
@@ -95,7 +104,9 @@
                 {
                     var manifest = await GetSingleManifestAsync(depot, server);
                     depotManifests.Add(manifest);
-                });
+                })
+                .WaitAsync(TimeSpan.FromSeconds(10));
+
                 _cdnPool.ReturnConnection(server);
             });
             return depotManifests;
