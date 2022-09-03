@@ -143,6 +143,9 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 # Additional Documentation
 * [Development Configuration](/docs/Development.md)
 
+# Acknowledgements
+- [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
+
 # External Links
 |   Link    |  Description   |  
 | ----------- | ------------ | 
@@ -158,6 +161,3 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 * https://steam.readthedocs.io/en/latest/intro.html
 * https://partner.steamgames.com/doc/api/steam_api?language=english#enums
 * https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
-
-# Acknowledgements 
-- @dlrudie for all your help with debugging and testing!
