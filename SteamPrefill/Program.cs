@@ -1,27 +1,22 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Research - See if CliFx can be swapped out for Typin https://github.com/adambajguz/Typin
-     * Consolidate nuget packages with different versions
-     * Documentation - Add linux command examples to readme.
-     * Feature - Add request validation.  ePic might be interested in getting this implemented.  There is additionally a header in nginx that can be used to purge the cache.
+     * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
-     * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
-     * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
-     * Login - Seems like 2fa isn't saving login info, possibly only when doing select-apps
-     * Select-apps - Prefilling with select apps defaults to bytes not bits
-     * Docs - Update useful links in docs, add them to a table, with notes.
-     * In LancacheIpResolver.cs, change 127.0.0.1 over to say 'localhost' instead.
-     * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
-     * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
+     * Documentation - Add linux command examples to readme.
+     *
+     * Feature - Add request validation.  ePic might be interested in getting this implemented.  There is additionally a header in nginx that can be used to purge the cache.
      * Determine if its possible to detect ipv6, and display a message to the user that ipv6 is not supported
      * Documentation - Update useful links in docs, add them to a table, with notes.
      * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
      * Documentation - Add to docs how exactly passwords/credentials are used, and stored.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large
+     * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
+     * Research - See if CliFx can be swapped out for Typin https://github.com/adambajguz/Typin
+     * Research - Take a look at using MinVer, to automatically tag beta builds - https://www.nuget.org/packages/MinVer
+     *
      * Testing - Should invest some time into adding unit tests
-     * Bug - Should the CdnPool get multiple regions, so that when it fails it tries to check other distinct CDNs.  Maybe this will improve reliability?
      * Cleanup warnings, resharper code issues, and github code issues
      * Build - Fail build on both warnings + trim warnings
      * Update to dotnet 7 sdk + dotnet 7 target
