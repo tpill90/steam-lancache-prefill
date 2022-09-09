@@ -13,6 +13,8 @@
         public static string Grey(object inputObj) => $"[grey]{inputObj}[/]";
         
         public static string Magenta(object inputObj) => $"[rgb(200,85,217)]{inputObj}[/]";
+        public static string MediumPurple(object inputObj) => $"[rgb(175,135,255)]{inputObj}[/]";
+
         public static string Olive(object inputObj) => $"[yellow4_1]{inputObj}[/]";
         public static string Red(object inputObj) => $"[red]{inputObj}[/]";
         public static string White(object inputObj) => $"[white]{inputObj}[/]";

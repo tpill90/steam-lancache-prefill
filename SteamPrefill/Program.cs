@@ -1,6 +1,8 @@
 namespace SteamPrefill
 {
     /* TODO
+     * Documentation - Add linux command examples to readme.
+     * Feature - Add request validation.  ePic might be interested in getting this implemented
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
      * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
