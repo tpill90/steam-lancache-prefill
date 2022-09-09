@@ -111,7 +111,13 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             ListViewDataSource.SortPlaytime();
             _listView.SetNeedsDisplay();
         }
-        
+
+        private void SortSelected_OnClicked()
+        {
+            ListViewDataSource.SortSelected();
+            _listView.SetNeedsDisplay();
+        }
+
         private void ListView_RowRender(ListViewRowEventArgs obj)
         {
             if (obj.Row == _listView.SelectedItem && _listView.HasFocus)
@@ -200,6 +206,13 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
         public void SortPlaytime()
         {
             _currAppInfo = _currAppInfo.OrderByDescending(e => e.MinutesPlayed2Weeks).ToList();
+        }
+
+        public void SortSelected()
+        {
+            _currAppInfo = _currAppInfo.OrderByDescending(e => e.IsSelected)
+                                       .ThenBy(e => e.Name)
+                                       .ToList();
         }
 
         public string FormatHeaderString()

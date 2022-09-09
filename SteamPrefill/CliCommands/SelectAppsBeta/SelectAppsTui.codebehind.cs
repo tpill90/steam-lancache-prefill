@@ -2,7 +2,6 @@
 using Terminal.Gui.Graphs;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
-using System.Data;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
@@ -21,7 +20,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             };
             Application.Top.Add(window);
 
-            #region First Row
+            #region First Row - Sorting
 
             var sortLabel = new Label("Sort:")
             {
@@ -49,7 +48,14 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
             };
             sortPlaytimeButton.Clicked += SortPlaytime_OnClicked;
 
-            window.Add(sortLabel, sortNameButton, sortYearButton, sortPlaytimeButton);
+            var sortSelectedButton = new Button("Selected")
+            {
+                X = Pos.Right(sortPlaytimeButton) + 1,
+                ColorScheme = _buttonColorScheme
+            };
+            sortSelectedButton.Clicked += SortSelected_OnClicked;
+
+            window.Add(sortLabel, sortNameButton, sortYearButton, sortPlaytimeButton, sortSelectedButton);
 
             #endregion
 
