@@ -23,6 +23,14 @@
             _client.DefaultRequestHeaders.Add("User-Agent", "Valve/Steam HTTP Client 1.0");
         }
 
+        public async Task InitializeAsync()
+        {
+            if (_lancacheAddress == null)
+            {
+                _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
+            }
+        }
+
         /// <summary>
         /// Attempts to download all queued requests.  If all downloads are successful, will return true.
         /// In the case of any failed downloads, the failed downloads will be retried up to 3 times.  If the downloads fail 3 times, then
@@ -37,25 +45,21 @@
                 return true;
             }
 #endif
-            if (_lancacheAddress == null)
-            {
-                _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
-            }
+            await InitializeAsync();
 
             int retryCount = 0;
-
             var failedRequests = new ConcurrentBag<QueuedRequest>();
             await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
                 // Run the initial download
-                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests);
+                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs);
 
                 // Handle any failed requests
                 while (failedRequests.Any() && retryCount < 3)
                 {
                     retryCount++;
                     await Task.Delay(2000 * retryCount);
-                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList());
+                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList(), downloadArgs);
                 }
             });
 
@@ -69,12 +73,13 @@
             return false;
         }
 
+
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
         /// <returns>A list of failed requests</returns>
         [SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
-        private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload)
+        public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload, DownloadArguments downloadArgs)
         {
             double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
@@ -82,7 +87,7 @@
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             var cdnServer = _cdnPool.TakeConnection();
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
+            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, async (request, _) =>
             {
                 var buffer = new byte[4096];
                 try

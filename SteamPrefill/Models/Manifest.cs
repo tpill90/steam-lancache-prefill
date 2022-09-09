@@ -1,9 +1,7 @@
-﻿using HexMate;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     [ProtoContract]
-    public class Manifest
+    public sealed class Manifest
     {
         [ProtoMember(1)]
         public List<FileData> Files { get; private set; }
@@ -33,7 +31,7 @@ namespace SteamPrefill.Models
             {
                 return null;
             }
-            using var fs = File.Open(filename, FileMode.Open);
+            using var fs = File.Open(filename, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             return Serializer.Deserialize<Manifest>(fs);
         }
 
@@ -50,13 +48,13 @@ namespace SteamPrefill.Models
     }
 
     [ProtoContract]
-    public class FileData
+    public sealed class FileData
     {
         /// <summary>
         /// Gets the chunks that this file is composed of.
         /// </summary>
         [ProtoMember(1)]
-        public List<ChunkData> Chunks { get; private set; }
+        public List<ChunkData> Chunks { get; }
 
         // Used for deserialization
         private FileData()
@@ -66,34 +64,36 @@ namespace SteamPrefill.Models
 
         public FileData(DepotManifest.FileData sourceData) : this()
         {
-            Chunks = sourceData.Chunks.Select(e => new ChunkData(e)).ToList();
+            Chunks = sourceData.Chunks
+                               .Select(e => new ChunkData(e))
+                               .ToList();
         }
     }
 
     [ProtoContract(SkipConstructor = true)]
-    public class ChunkData
+    public readonly struct ChunkData
     {
+        /// <summary>
+        /// SHA-1 hash of the chunk, used as its Id.
+        /// </summary>
+        [ProtoMember(1)]
+        public readonly string ChunkId;
+
+        /// <summary>
+        /// Steam compresses every chunk individually, this is the resulting compressed size in bytes
+        /// </summary>
+        [ProtoMember(2)]
+        public readonly uint CompressedLength;
+
         public ChunkData(DepotManifest.ChunkData sourceChunk)
         {
-            ChunkID = HexMate.Convert.ToHexString(sourceChunk.ChunkID, HexFormattingOptions.Lowercase);
+            ChunkId = HexMate.Convert.ToHexString(sourceChunk.ChunkID, HexFormattingOptions.Lowercase);
             CompressedLength = sourceChunk.CompressedLength;
         }
 
-        /// <summary>
-        /// Gets the SHA-1 hash chunk id.
-        /// </summary>
-        [ProtoMember(1)]
-        public string ChunkID { get; private set; }
-
-        /// <summary>
-        /// Gets the compressed length of this chunk.
-        /// </summary>
-        [ProtoMember(2)]
-        public uint CompressedLength { get; private set; }
-
         public override string ToString()
         {
-            return ChunkID;
+            return $"{ChunkId} - {CompressedLength}";
         }
     }
 }

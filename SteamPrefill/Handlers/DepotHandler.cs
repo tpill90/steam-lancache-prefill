@@ -128,7 +128,6 @@
             var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
 
             var chunkQueue = new List<QueuedRequest>();
-            int chunkNum = 0;
 
             // Queueing up chunks for each depot
             foreach (var depotManifest in depotManifests)
@@ -137,12 +136,12 @@
                 var dedupedChunks = depotManifest.Files
                                                  .SelectMany(e => e.Chunks)
                                                  // Steam appears to do block level deduplication, so it is possible for multiple files to have the same chunk id
-                                                 .DistinctBy(e => e.ChunkID)
+                                                 .DistinctBy(e => e.ChunkId)
                                                  .ToList();
 
                 foreach (ChunkData chunk in dedupedChunks)
                 {
-                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk, chunkNum++));
+                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk));
                 }
             }
             return chunkQueue;

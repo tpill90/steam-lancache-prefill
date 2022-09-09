@@ -7,6 +7,16 @@
             return !enumerable.Any();
         }
 
+        public static ConcurrentStack<T> ToConcurrentStack<T>(this IEnumerable<T> list)
+        {
+            return new ConcurrentStack<T>(list);
+        }
+
+        public static ConcurrentQueue<T> ToConcurrentQueue<T>(this IOrderedEnumerable<T> list)
+        {
+            return new ConcurrentQueue<T>(list);
+        }
+
         [SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by Steam")]
         public static byte[] ToSha1(this byte[] input)
         {
@@ -26,6 +36,21 @@
                 return elapsed.ToString(@"mm\:ss\.ff");
             }
             return elapsed.ToString(@"ss\.ffff");
+        }
+
+        private static Random rng = new Random();
+
+        public static void Shuffle<T>(this IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = rng.Next(n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
         }
     }
 

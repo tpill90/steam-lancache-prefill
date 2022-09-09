@@ -2,17 +2,15 @@ namespace SteamPrefill
 {
     /* TODO
      * Research - See if this endpoint can give me anything useful in some way clientconfig.akamai.steamstatic.com/appinfo/17390/sha/896ef0a3ad4c4901b78916c76e85cde05cf5f137.txt.gz
-     * Build - Switch to building in Docker containers https://dev.to/mihinduranasinghe/using-docker-containers-in-jobs-github-actions-3eof
      *
      * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
      * Documentation - Add to docs how exactly passwords/credentials are used, and stored.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
      * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large
      * Research - See if CliFx can be swapped out for Typin https://github.com/adambajguz/Typin
-     * Research - Take a look at using MinVer, to automatically tag beta builds - https://www.nuget.org/packages/MinVer
      *
      * Testing - Should invest some time into adding unit tests
-     * Cleanup warnings, resharper code issues, and github code issues
+     * Cleanup warnings, resharper code issues, and github code issues.  Cleanup TODOs
      * Build - Fail build on both warnings + trim warnings
      * Update to dotnet 7 sdk + dotnet 7 target
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project

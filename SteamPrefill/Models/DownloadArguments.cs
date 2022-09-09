@@ -1,6 +1,6 @@
 ﻿namespace SteamPrefill.Models
 {
-    public class DownloadArguments
+    public sealed class DownloadArguments
     {
         /// <summary>
         /// When set to true, always run the download, regardless of if the app has been previously downloaded.
@@ -16,6 +16,9 @@
         /// Determines which unit to display the download speed in.
         /// </summary>
         public TransferSpeedUnit TransferSpeedUnit { get; set; } = TransferSpeedUnit.Bits;
+
+        //TODO comment
+        public int MaxConcurrentRequests { get; set; } = 50;
 
         public OperatingSystem OperatingSystem { get; set; } = OperatingSystem.Windows;
         public Architecture Architecture { get; set; } = Architecture.x64;

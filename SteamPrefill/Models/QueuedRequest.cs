@@ -1,25 +1,33 @@
 ﻿namespace SteamPrefill.Models
 {
-    public sealed class QueuedRequest
+    [ProtoContract(SkipConstructor = true)]
+    public struct QueuedRequest
     {
-        public uint DepotId { get; }
-        public string ChunkId { get; }
+        [ProtoMember(1)]
+        public readonly uint DepotId;
+
+        /// <summary>
+        /// The SHA-1 hash of the chunk's id.
+        /// </summary>
+        [ProtoMember(2)]
+        public string ChunkId;
 
         /// <summary>
         /// The content-length of the data to be requested.
         /// </summary>
-        public uint CompressedLength { get; }
+        [ProtoMember(3)]
+        public readonly uint CompressedLength;
 
-        //TODO comment what this does + why its needed
-        public int ChunkNum { get; }
-
-        public QueuedRequest(Manifest depotManifest, ChunkData chunk, int chunkNum)
+        public QueuedRequest(Manifest depotManifest, ChunkData chunk)
         {
             DepotId = depotManifest.DepotId;
-            ChunkId = chunk.ChunkID;
+            ChunkId = chunk.ChunkId;
             CompressedLength = chunk.CompressedLength;
+        }
 
-            ChunkNum = chunkNum;
+        public override string ToString()
+        {
+            return $"{DepotId} - {ChunkId}";
         }
     }
 }

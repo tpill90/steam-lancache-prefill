@@ -7,7 +7,7 @@
     /// A manifest typically represents a single "version" of a depot, so subsequent updates to the depot will have
     /// a different manifest.
     /// </summary>
-    public class ManifestHandler
+    public sealed class ManifestHandler
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
@@ -28,11 +28,10 @@
         /// Downloads all of the manifests for a list of specified depots.  Will retry up to 3 times, in the case of errors.
         /// </summary>
         /// <exception cref="ManifestException"></exception>
-        public async Task<ConcurrentBag<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
+        public async Task<List<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
         {
-            var manifestTimer = Stopwatch.StartNew();
             int attempts = 0;
-            var depotManifests = new ConcurrentBag<Manifest>();
+            var depotManifests = new List<Manifest>();
             while (depotManifests.Count != depots.Count && attempts < MaxRetries)
             {
                 try
@@ -69,7 +68,7 @@
                 {
                     // Regardless of which manifest failed, we're always going to retry multiple times
                     _ansiConsole.MarkupLine(Red("An unexpected error occurred while downloading manifests.  Retrying..."));
-
+                    
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
                     FileLogger.Log(e.ToString());
@@ -83,32 +82,22 @@
             }
             if (attempts == MaxRetries)
             {
-                throw new ManifestException("An unexpected error occurred while downloading manifests!  Skipping...");
+                throw new ManifestException("Unable to download manifests!  Skipping...");
             }
-
-#if DEBUG
-            _ansiConsole.LogMarkupLine($"Downloaded {Magenta(depotManifests.Count)} manifests in {LightYellow(manifestTimer.FormatElapsedString())}");
-#endif
-
+            
             return depotManifests;
         }
 
-        private async Task<ConcurrentBag<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
+        private async Task<List<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
         {
-            var depotManifests = new ConcurrentBag<Manifest>();
+            Server server = _cdnPool.TakeConnection();
 
-            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
-            {
-                Server server = _cdnPool.TakeConnection();
-                await Parallel.ForEachAsync(depots, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (depot, _) =>
-                {
-                    var manifest = await GetSingleManifestAsync(depot, server);
-                    depotManifests.Add(manifest);
-                })
-                .WaitAsync(TimeSpan.FromSeconds(10));
+            var manifestTasks = depots.Select(async e => await GetSingleManifestAsync(e, server)).ToList();
+            await Task.WhenAll(manifestTasks).WaitAsync(TimeSpan.FromSeconds(10));
 
-                _cdnPool.ReturnConnection(server);
-            });
+            _cdnPool.ReturnConnection(server);
+            var depotManifests = manifestTasks.Select(e => e.Result).ToList();
+            
             return depotManifests;
         }
 
