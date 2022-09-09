@@ -1,9 +1,10 @@
 ﻿namespace SteamPrefill.Handlers
 {
-    public class DepotHandler
+    public sealed class DepotHandler
     {
         private readonly Steam3Session _steam3Session;
         private readonly AppInfoHandler _appInfoHandler;
+        private readonly ManifestHandler _manifestHandler;
 
         /// <summary>
         /// KeyValue store of DepotId/ManifestId, that keeps a history of which manifest version(s) have been downloaded for each depot id.
@@ -12,11 +13,12 @@
         private readonly Dictionary<uint, HashSet<ulong>> _downloadedDepots = new Dictionary<uint, HashSet<ulong>>();
         private readonly string _downloadedDepotsPath = $"{AppConfig.CacheDir}/successfullyDownloadedDepots.json";
 
-        public DepotHandler(Steam3Session steam3Session, AppInfoHandler appInfoHandler)
+        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler,  CdnPool cdnPool, DownloadArguments downloadArgs)
         {
             _steam3Session = steam3Session;
             _appInfoHandler = appInfoHandler;
-            
+            _manifestHandler = new ManifestHandler(ansiConsole, cdnPool, steam3Session, downloadArgs);
+
             if (File.Exists(_downloadedDepotsPath))
             {
                 _downloadedDepots = JsonSerializer.Deserialize(File.ReadAllText(_downloadedDepotsPath), SerializationContext.Default.DictionaryUInt32HashSetUInt64);
@@ -53,7 +55,10 @@
             return depots.All(e => _downloadedDepots.ContainsKey(e.DepotId)
                                    && _downloadedDepots[e.DepotId].Contains(e.ManifestId.Value));
         }
-        
+
+        /// <summary>
+        /// Filters depots based on the language/operating system/cpu architecture specified in the DownloadArguments
+        /// </summary>
         public async Task<List<DepotInfo>> FilterDepotsToDownloadAsync(DownloadArguments downloadArgs, List<DepotInfo> allDepots)
         {
             var filteredDepots = new List<DepotInfo>();
@@ -115,6 +120,32 @@
                 var linkedDepot = linkedApp.Depots.First(e => e.DepotId == depotInfo.DepotId);
                 depotInfo.ManifestId = linkedDepot.ManifestId;
             }
+        }
+
+        //TODO document
+        public async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
+        {
+            var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
+
+            var chunkQueue = new List<QueuedRequest>();
+            int chunkNum = 0;
+
+            // Queueing up chunks for each depot
+            foreach (var depotManifest in depotManifests)
+            {
+                // A depot will contain multiple files, that are broken up into 1MB chunks
+                var dedupedChunks = depotManifest.Files
+                                                 .SelectMany(e => e.Chunks)
+                                                 // Steam appears to do block level deduplication, so it is possible for multiple files to have the same chunk id
+                                                 .DistinctBy(e => e.ChunkID)
+                                                 .ToList();
+
+                foreach (ChunkData chunk in dedupedChunks)
+                {
+                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk, chunkNum++));
+                }
+            }
+            return chunkQueue;
         }
     }
 }

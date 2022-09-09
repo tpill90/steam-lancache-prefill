@@ -50,7 +50,7 @@
 
                 var prompt = new TextPrompt<string>($"Please enter your {Cyan("Steam account name")} : ")
                 {
-                    PromptStyle = new Style(MediumPurple1)
+                    PromptStyle = new Style(SpectreColors.MediumPurple1)
                 };
                 return ansiConsole.Prompt(prompt);
             });

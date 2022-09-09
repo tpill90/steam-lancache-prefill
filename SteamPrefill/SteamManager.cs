@@ -9,11 +9,10 @@
         private readonly CdnPool _cdnPool;
 
         private readonly DownloadHandler _downloadHandler;
-        private readonly ManifestHandler _manifestHandler;
         private readonly DepotHandler _depotHandler;
         private readonly AppInfoHandler _appInfoHandler;
 
-        private PrefillSummaryResult _prefillSummaryResult;
+        private PrefillSummaryResult _prefillSummaryResult = new PrefillSummaryResult();
 
         public SteamManager(IAnsiConsole ansiConsole, DownloadArguments downloadArgs)
         {
@@ -32,9 +31,10 @@
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
-            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3, downloadArgs);
-            _depotHandler = new DepotHandler(_steam3, _appInfoHandler);
+            _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool, downloadArgs);
         }
+
+        #region Startup + Shutdown
 
         /// <summary>
         /// Logs the user into the Steam network, and retrieves available CDN servers and account licenses.
@@ -62,10 +62,18 @@
             _steam3.Disconnect();
         }
 
+        public void Dispose()
+        {
+            _downloadHandler.Dispose();
+            _steam3.Dispose();
+        }
+
+        #endregion
+
+        #region Prefill
+
         public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames, List<uint> manualIds)
         {
-            _prefillSummaryResult = new PrefillSummaryResult();
-
             var appIdsToDownload = LoadPreviouslySelectedApps();
             appIdsToDownload.AddRange(manualIds);
             if (downloadAllOwnedGames)
@@ -150,7 +158,7 @@
             await _cdnPool.PopulateAvailableServersAsync();
 
             // Get the full file list for each depot, and queue up the required chunks
-            var chunkDownloadQueue = await BuildChunkDownloadQueueAsync(filteredDepots);
+            var chunkDownloadQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
 
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
@@ -175,29 +183,9 @@
             _ansiConsole.WriteLine();
         }
         
-        private async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
-        {
-            var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
-            
-            var chunkQueue = new List<QueuedRequest>();
-            int chunkNum = 0;
+        #endregion
 
-            // Queueing up chunks for each depot
-            foreach (var depotManifest in depotManifests)
-            {
-                // A depot will contain multiple files, that are broken up into 1MB chunks
-                var dedupedChunks = depotManifest.Files
-                                             .SelectMany(e => e.Chunks)
-                                             // Steam appears to do block level deduplication, so it is possible for multiple files to have the same chunk
-                                             .DistinctBy(e => e.ChunkID)
-                                             .ToList();
-                foreach (var chunk in dedupedChunks)
-                {
-                    chunkQueue.Add(new QueuedRequest(depotManifest, chunk, chunkNum++));
-                }
-            }
-            return chunkQueue;
-        }
+        #region Select Apps
 
         public void SetAppsAsSelected(List<AppInfo> userSelected)
         {
@@ -217,6 +205,8 @@
             }
             return new List<uint>();
         }
+
+        #endregion
 
         public async Task<List<AppInfo>> GetAllAvailableGamesAsync()
         {
@@ -254,12 +244,6 @@
             _ansiConsole.MarkupLine("");
             _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Length)} unowned apps!  They will be excluded from this prefill run..."));
             _ansiConsole.Write(table);
-        }
-
-        public void Dispose()
-        {
-            _downloadHandler.Dispose();
-            _steam3.Dispose();
         }
     }
 }

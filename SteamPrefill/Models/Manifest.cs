@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Models
+﻿using HexMate;
+
+namespace SteamPrefill.Models
 {
     [ProtoContract]
     public class Manifest

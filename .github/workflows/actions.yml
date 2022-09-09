@@ -17,7 +17,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build --no-restore -c Release
+      run: dotnet build --no-restore -c Release /p:WarningLevel=0
     - name: Test
       run: >
         cd SteamPrefill.Test;

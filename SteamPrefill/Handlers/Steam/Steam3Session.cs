@@ -301,6 +301,7 @@ namespace SteamPrefill.Handlers.Steam
                     _callbackManager.RunWaitAllCallbacks(TimeSpan.FromMilliseconds(100));
                 }
             });
+            _ansiConsole.LogMarkupLine("Disconnected from Steam!");
         }
 
 #endregion
