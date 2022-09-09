@@ -71,6 +71,12 @@
                     continue;
                 }
 
+                AppInfo containingApp = _appInfoHandler.GetAppInfoAsync(depot.ContainingAppId).Result;
+                if (containingApp.IsInvalidApp)
+                {
+                    continue;
+                }
+
                 // Filtering to only specified operating systems
                 if (depot.SupportedOperatingSystems.Any() && !depot.SupportedOperatingSystems.Contains(downloadArgs.OperatingSystem))
                 {
