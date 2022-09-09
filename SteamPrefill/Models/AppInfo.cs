@@ -53,6 +53,8 @@
         /// </summary>
         public AppType Type { get; }
 
+        public bool IsInvalidApp => Type == null;
+
         public bool IsFreeGame { get; set; }
 
         public int? MinutesPlayed2Weeks { get; set; }
