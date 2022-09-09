@@ -1,8 +1,10 @@
 namespace SteamPrefill
 {
     /* TODO
+     * Research - See if CliFx can be swapped out for Typin https://github.com/adambajguz/Typin
+     * Consolidate nuget packages with different versions
      * Documentation - Add linux command examples to readme.
-     * Feature - Add request validation.  ePic might be interested in getting this implemented
+     * Feature - Add request validation.  ePic might be interested in getting this implemented.  There is additionally a header in nginx that can be used to purge the cache.
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
      * FAQ - Add an entry that it is possible to run this on a schedule, by using a cron job.  Have an example of the command.
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
