@@ -60,7 +60,7 @@ namespace SteamPrefill.Handlers
         /// Will return an AppInfo for the specified AppId, that contains various metadata about the app.
         /// If the information for the specified app hasn't already been retrieved, then a request to the Steam network will be made.
         /// </summary>
-        public async Task<AppInfo> GetAppInfoAsync(uint appId)
+        public virtual async Task<AppInfo> GetAppInfoAsync(uint appId)
         {
             if (LoadedAppInfos.ContainsKey(appId))
             {

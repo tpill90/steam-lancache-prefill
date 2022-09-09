@@ -18,26 +18,28 @@
             {
                 _ansiConsole = ansiConsole;
             }
-            string detectedServer = await _ansiConsole.StatusSpinner().StartAsync("Detecting Lancache server...", async context =>
+
+            DetectedServer detectedServer = null;
+            await _ansiConsole.StatusSpinner().StartAsync("Detecting Lancache server...", async _ =>
             {
-                return await DetectLancacheServerAsync(cdnUrl);
+                detectedServer = await DetectLancacheServerAsync(cdnUrl);
             });
 
             if (detectedServer != null)
             {
-                _ansiConsole.LogMarkupLine($"Detected Lancache server at {Cyan(detectedServer)}!");
-                return detectedServer;
+                _ansiConsole.LogMarkupLine($"Detected Lancache server at {Cyan(detectedServer.Url)} [[{MediumPurple(detectedServer.IpAddress)}]]");
+                return detectedServer.IpAddress.ToString();
             }
 
             await DetectPublicIpAsync(cdnUrl);
             return cdnUrl;
         }
 
-        private static async Task<string> DetectLancacheServerAsync(string cdnUrl)
+        private static async Task<DetectedServer> DetectLancacheServerAsync(string cdnUrl)
         {
             using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
             // Tries to resolve poisoned DNS record, then localhost, then Docker's host
-            var possibleLancacheUrls = new List<string> { cdnUrl, "127.0.0.1", "172.17.0.1" };
+            var possibleLancacheUrls = new List<string> { cdnUrl, "localhost", "172.17.0.1" };
 
             foreach (var url in possibleLancacheUrls)
             {
@@ -53,7 +55,7 @@
                     var response = await httpClient.GetAsync(new Uri($"http://{url}/lancache-heartbeat"));
                     if (response.Headers.Contains("X-LanCache-Processed-By"))
                     {
-                        return url;
+                        return new DetectedServer(url, ipAddresses[0]);
                     }
                     else if (!response.Headers.Contains("X-LanCache-Processed-By") && url == cdnUrl)
                     {
@@ -92,6 +94,18 @@
             if (publicDownloadOverride == false)
             {
                 throw new UserCancelledException("User cancelled download!");
+            }
+        }
+
+        private class DetectedServer
+        {
+            public string Url { get; }
+            public IPAddress IpAddress { get; }
+
+            public DetectedServer(string url, IPAddress ipAddress)
+            {
+                Url = url;
+                IpAddress = ipAddress;
             }
         }
     }

@@ -1,4 +1,5 @@
-﻿using SteamKit2;
+﻿using Moq;
+using SteamKit2;
 using SteamPrefill.Handlers;
 using SteamPrefill.Handlers.Steam;
 using SteamPrefill.Models;
@@ -8,7 +9,7 @@ using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
 
 namespace SteamPrefill.Test
 {
-    public class DepotHandlerTests
+    public sealed class DepotHandlerTests
     {
         private readonly DepotHandler _depotHandler;
 
@@ -20,7 +21,22 @@ namespace SteamPrefill.Test
             // User will always have access to this app
             steam3.OwnedAppIds.Add(222);
 
-            _depotHandler = new DepotHandler(steam3, null);
+            // Setting up a "valid" app info object
+            var appKeyValues = new KeyValue
+            {
+                Children = 
+                { 
+                    new KeyValue("common")
+                    {
+                        Children = { new KeyValue("type", "game") }
+                    }
+                }
+            };
+            var appInfoHandlerMock = new Mock<AppInfoHandler>(null, null);
+            appInfoHandlerMock.Setup(e => e.GetAppInfoAsync(It.IsAny<uint>()))
+                          .Returns(Task.FromResult(new AppInfo(steam3, 222, appKeyValues)));
+
+            _depotHandler = new DepotHandler(steam3, appInfoHandlerMock.Object);
         }
 
         [Fact]
