@@ -42,3 +42,35 @@ jobs:
       uses: github/codeql-action/upload-sarif@v1
       with:
         sarif_file: infer-out/report.sarif
+  publish:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
+      fail-fast: false
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Publish
+      # WarningLevel=0 so that the Annotations don't hide the Artifact list
+      run: >
+        dotnet publish SteamPrefill/SteamPrefill.csproj \
+          --nologo \
+          -o publish \
+          -c Release \
+          --runtime "${{ matrix.runtime }}" \
+          --self-contained true \
+          /p:WarningLevel=0 \
+          /p:PublishSingleFile=true 
+    - name: Upload
+      uses: actions/upload-artifact@v3
+      with:
+        # TODO the uploaded file name needs to be improved to include branch name + date
+        name: "${{ matrix.runtime }}"
+        path: publish/
