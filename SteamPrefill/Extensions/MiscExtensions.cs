@@ -2,9 +2,9 @@
 {
     public static class MiscExtensions
     {
-        public static ConcurrentQueue<T> ToConcurrentBag<T>(this IOrderedEnumerable<T> list)
+        public static bool Empty<T>(this IEnumerable<T> enumerable)
         {
-            return new ConcurrentQueue<T>(list);
+            return !enumerable.Any();
         }
 
         [SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by Steam")]
