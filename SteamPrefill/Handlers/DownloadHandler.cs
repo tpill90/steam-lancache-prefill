@@ -83,6 +83,7 @@
 
             // Running as many requests as possible in parallel, evenly distributed across 3 cdns
             var cdnServers = _cdnPool.TakeConnections(3).ToList();
+            var connCount = cdnServers.Count;
             await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
             {
                 var buffer = new byte[4096];
@@ -90,8 +91,8 @@
                 {
                     var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", _lancacheAddress, request.DepotId, request.ChunkId);
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-                    // Evenly distributes requests across CDNs
-                    requestMessage.Headers.Host = cdnServers[request.ChunkNum % 3].Host;
+                    // Evenly distributes requests the available CDNs
+                    requestMessage.Headers.Host = cdnServers[request.ChunkNum % connCount].Host;
 
                     var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
                     using Stream responseStream = await response.Content.ReadAsStreamAsync();

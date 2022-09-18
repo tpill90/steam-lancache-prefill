@@ -51,7 +51,7 @@ namespace SteamPrefill.Handlers.Steam
                 }
             });
 
-            if (!_availableServerEndpoints.Any())
+            if (_availableServerEndpoints.Empty())
             {
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
@@ -67,21 +67,33 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public Server TakeConnection()
         {
-            if (!_availableServerEndpoints.Any())
+            if (_availableServerEndpoints.Empty())
             {
                 throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
+
             var server = _availableServerEndpoints.First();
             _availableServerEndpoints.RemoveAt(0);
             return server;
         }
 
-        public IEnumerable<Server> TakeConnections(int connectionCount)
+        /// <summary>
+        /// Attempts to take multiple available connections from the pool.
+        /// If the desired number of connections is not available, then the remaining available will be returned.
+        /// Once finished with the connection, it should be returned to the pool using <seealso cref="ReturnConnection"/>
+        /// </summary>
+        /// <param name="targetCount">The desired number of servers to be returned.  If the desired amount is not available, the remaining servers will be returned</param>
+        /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
+        public List<Server> TakeConnections(int targetCount)
         {
-            for (int i = 0; i < connectionCount; i++)
+            if (_availableServerEndpoints.Empty())
             {
-                yield return TakeConnection();
+                throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
+
+            var connections = _availableServerEndpoints.Take(targetCount).ToList();
+            _availableServerEndpoints.RemoveRange(0, connections.Count);
+            return connections;
         }
 
         /// <summary>
