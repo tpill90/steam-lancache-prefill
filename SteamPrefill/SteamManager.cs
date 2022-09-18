@@ -91,7 +91,7 @@
             // Whitespace divider
             _ansiConsole.WriteLine();
 
-            var availableGames = await _appInfoHandler.GetGamesById(distinctAppIds);
+            var availableGames = await _appInfoHandler.GetGamesByIdAsync(distinctAppIds);
             foreach (var app in availableGames)
             {
                 try
@@ -101,7 +101,7 @@
                 catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
                 {
                     // We'll want to bomb out the entire process for these exceptions, as they mean we can't prefill any apps at all
-                    throw e;
+                    throw;
                 }
                 catch (Exception e)
                 {
@@ -111,7 +111,7 @@
                     _prefillSummaryResult.FailedApps++;
                 }
             }
-            PrintUnownedApps(distinctAppIds);
+            await PrintUnownedAppsAsync(distinctAppIds);
 
             _ansiConsole.LogMarkupLine("Prefill complete!");
             _prefillSummaryResult.RenderSummaryTable(_ansiConsole, availableGames.Count);
@@ -122,7 +122,7 @@
             AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
             
             // Filter depots based on specified lang/os/architecture/etc
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(_downloadArgs, appInfo.Depots);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
             if (!filteredDepots.Any())
             {
                 //TODO add to summary output?
@@ -255,19 +255,16 @@
 
             // Loading app metadata from steam, skipping related DLC apps
             await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
-            var availableGames = await _appInfoHandler.GetGamesById(ownedGameIds);
+            var availableGames = await _appInfoHandler.GetGamesByIdAsync(ownedGameIds);
             return availableGames;
         }
 
-        private void PrintUnownedApps(List<uint> distinctAppIds)
+        private async Task PrintUnownedAppsAsync(List<uint> distinctAppIds)
         {
             // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
-            var unownedApps = distinctAppIds.Where(e => !_steam3.AccountHasAppAccess(e))
-                                            .Select(async e => await _appInfoHandler.GetAppInfoAsync(e))
-                                            .Select(e => e.Result)
-                                            .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                                            .ToList();
-            _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Count;
+            AppInfo[] unownedApps = await Task.WhenAll(distinctAppIds.Where(e => !_steam3.AccountHasAppAccess(e))
+                                                                      .Select(e => _appInfoHandler.GetAppInfoAsync(e)));
+            _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Length;
 
 
             if (!unownedApps.Any())
@@ -280,13 +277,13 @@
             table.AddColumn(new TableColumn(White("App")));
 
             // Rows
-            foreach (var app in unownedApps)
+            foreach (var app in unownedApps.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase))
             {
                 table.AddRow($"[link=https://store.steampowered.com/app/{app.AppId}]🔗[/] {White(app.Name)}");
             }
 
             _ansiConsole.MarkupLine("");
-            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Count)} unowned apps!  They will be excluded from this prefill run..."));
+            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Length)} unowned apps!  They will be excluded from this prefill run..."));
             _ansiConsole.Write(table);
         }
 

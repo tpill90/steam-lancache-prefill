@@ -1,4 +1,3 @@
-using SteamKit2;
 using SteamKit2.Internal;
 using System.Security.Authentication;
 
@@ -39,7 +38,7 @@ namespace SteamPrefill.Handlers.Steam
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             SteamContent = _steamClient.GetHandler<SteamContent>();
-            SteamUnifiedMessages? steamUnifiedMessages = _steamClient.GetHandler<SteamUnifiedMessages>();
+            SteamUnifiedMessages steamUnifiedMessages = _steamClient.GetHandler<SteamUnifiedMessages>();
             unifiedPlayerService = steamUnifiedMessages.CreateService<IPlayer>();
 
             _callbackManager = new CallbackManager(_steamClient);

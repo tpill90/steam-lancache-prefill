@@ -1,12 +1,10 @@
-﻿using ProtoBuf;
-
-namespace SteamPrefill.Settings
+﻿namespace SteamPrefill.Settings
 {
     /// <summary>
     /// Keeps track of the session tokens returned by Steam, that allow for subsequent logins without passwords.
     /// </summary>
     [ProtoContract]
-    public class UserAccountStore
+    public sealed class UserAccountStore
     {
         /// <summary>
         /// SentryData is returned by Steam when logging in with Steam Guard w\ email.
@@ -40,14 +38,14 @@ namespace SteamPrefill.Settings
                 return CurrentUsername;
             }
             
-            CurrentUsername = PromptForUsername(ansiConsole)
+            CurrentUsername = PromptForUsernameAsync(ansiConsole)
                               .WaitAsync(TimeSpan.FromSeconds(30))
                               .GetAwaiter()
                               .GetResult();
             return CurrentUsername;
         }
 
-        private async Task<string> PromptForUsername(IAnsiConsole ansiConsole)
+        private async Task<string> PromptForUsernameAsync(IAnsiConsole ansiConsole)
         {
             return await Task.Run(() =>
             {
@@ -55,7 +53,7 @@ namespace SteamPrefill.Settings
 
                 var prompt = new TextPrompt<string>($"Please enter your {Cyan("Steam account name")} : ")
                 {
-                    PromptStyle = new Style(SpectreColors.MediumPurple1)
+                    PromptStyle = new Style(MediumPurple1)
                 };
                 return ansiConsole.Prompt(prompt);
             });

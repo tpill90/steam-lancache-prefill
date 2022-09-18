@@ -23,30 +23,24 @@
 
                 return topGames;
             }
-            catch (Exception e)
+            catch
             {
                 ansiConsole.LogMarkupLine(Red("An unexpected error occurred while retrieving most played games from SteamSpy!  Popular games will be excluded from this prefill run."));
                 return new List<SteamSpyApp>();
             }
-            
         }
     }
 
-    public class SteamSpyApp
+    public sealed class SteamSpyApp
     {
         public uint appid { get; set; }
         public string name { get; set; }
-
-        public int average_forever { get; set; }
-        public int average_2weeks { get; set; }
-        public int median_forever { get; set; }
-        public int median_2weeks { get; set; }
 
         public int ccu { get; set; }
 
         public override string ToString()
         {
-            return $"{name} - {average_2weeks}";
+            return $"{name} - {ccu}";
         }
     }
 }

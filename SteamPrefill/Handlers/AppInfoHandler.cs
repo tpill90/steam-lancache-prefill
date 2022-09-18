@@ -175,7 +175,7 @@ namespace SteamPrefill.Handlers
         /// <summary>
         /// Gets a list of available games, filtering out any unavailable, non-Windows games.
         /// </summary>
-        public async Task<List<AppInfo>> GetGamesById(List<uint> appIds)
+        public async Task<List<AppInfo>> GetGamesByIdAsync(List<uint> appIds)
         {
             var appInfos = new List<AppInfo>();
             foreach (var appId in appIds)

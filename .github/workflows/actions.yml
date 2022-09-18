@@ -21,7 +21,7 @@ jobs:
     - name: Test
       run: >
         cd SteamPrefill.Test;
-        dotnet test --no-restore -c Release
+        dotnet test --no-restore -c Release /p:WarningLevel=0
   infersharp:
     runs-on: ubuntu-latest
     steps:
@@ -67,7 +67,9 @@ jobs:
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
           /p:WarningLevel=0 \
-          /p:PublishSingleFile=true 
+          /p:PublishSingleFile=true \
+          /p:PublishReadyToRun=true \
+          /p:PublishTrimmed=true
     - name: Upload
       uses: actions/upload-artifact@v3
       with:

@@ -21,7 +21,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                 var games = await steamManager.GetAllAvailableGamesAsync();
 
                 Application.Init();
-                var tui2 = new SelectAppsTui(games, steamManager);
+                using var tui2 = new SelectAppsTui(games, steamManager);
                 tui2.Run();
 
                 var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
