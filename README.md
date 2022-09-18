@@ -148,7 +148,13 @@ running `prefill` with the `--nocache` flag specified will prevent the cache fil
 
 <img src="docs/img/UpdateAvailable.png" width="675" alt="Update available message">
 
-To update:
+### Automatically updating
+- **Windows**
+    - Run the `.\update.ps1` script in the executable directory
+- **Linux**
+    - Run the `./update.sh` script in the executable directory
+
+### Manually updating:
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to the directory where **SteamPrefill** is currently installed, overwriting the previous executable.
 3.  Thats it!  You're all up to date!
