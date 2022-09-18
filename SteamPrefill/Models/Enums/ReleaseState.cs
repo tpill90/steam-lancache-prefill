@@ -32,6 +32,8 @@
         /// </summary>
         public static readonly ReleaseState Released = new ReleaseState("released");
 
+        public static readonly ReleaseState Disabled = new ReleaseState("disabled");
+
         private ReleaseState(string name) : base(name)
         {
         }
