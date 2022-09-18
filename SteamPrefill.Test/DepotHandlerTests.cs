@@ -40,20 +40,20 @@ namespace SteamPrefill.Test
         }
 
         [Fact]
-        public void UserDoesNotHaveDepotAccess_DepotIsFiltered()
+        public async Task UserDoesNotHaveDepotAccess_DepotIsFiltered()
         {
             var depotList = new List<DepotInfo>
             {
                 new DepotInfo { DepotId = 777, ManifestId = 55 }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments(), depotList);
             // Since the user has no access to any depots, we should expect this result to be empty
             Assert.Empty(filteredDepots);
         }
 
         [Fact]
-        public void DepotHasNoMetadata_DepotIsIncluded()
+        public async Task DepotHasNoMetadata_DepotIsIncluded()
         {
             var depotList = new List<DepotInfo>
             {
@@ -61,13 +61,13 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555 }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments(), depotList);
             // Since the depot has no metadata, it should always be included
             Assert.Single(filteredDepots);
         }
 
         [Fact]
-        public void OperatingSystemDoesntMatch_DepotIsNotIncluded()
+        public async Task OperatingSystemDoesntMatch_DepotIsNotIncluded()
         {
             // Depot is for macos only
             var depotList = new List<DepotInfo>
@@ -75,13 +75,13 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.MacOS } }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
             // We are only interested in windows depots, so we should expect the depot to be filtered
             Assert.Empty(filteredDepots);
         }
 
         [Fact]
-        public void OperatingSystemMatches_DepotIsIncluded()
+        public async Task OperatingSystemMatches_DepotIsIncluded()
         {
             // Depot is for windows only
             var depotList = new List<DepotInfo>
@@ -89,13 +89,13 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.Windows } }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
             // Since we want windows depots, the depot should be included
             Assert.Single(filteredDepots);
         }
 
         [Fact]
-        public void ArchitectureDoesntMatch_DepotIsNotIncluded()
+        public async Task ArchitectureDoesntMatch_DepotIsNotIncluded()
         {
             // Depot is for 64 bit only
             var depotList = new List<DepotInfo>
@@ -103,13 +103,13 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Architecture = Architecture.x64 }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Architecture = Architecture.x86 }, depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { Architecture = Architecture.x86 }, depotList);
             // We are only interested in 32 bit depots, so we should expect the depot to be filtered
             Assert.Empty(filteredDepots);
         }
 
         [Fact]
-        public void ArchitectureMatches_DepotIsIncluded()
+        public async Task ArchitectureMatches_DepotIsIncluded()
         {
             // Depot is for 64 bit only
             var depotList = new List<DepotInfo>
@@ -117,13 +117,13 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Architecture = Architecture.x64 }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Architecture = Architecture.x64 }, depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { Architecture = Architecture.x64 }, depotList);
             // Since we want 64 bit depots, then we should expect the depot to be included
             Assert.Single(filteredDepots);
         }
 
         [Fact]
-        public void LanguageDoesntMatch_DepotIsNotIncluded()
+        public async Task LanguageDoesntMatch_DepotIsNotIncluded()
         {
             // Depot is for spanish
             var depotList = new List<DepotInfo>
@@ -131,13 +131,13 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Languages = new List<Language> { Language.Spanish } }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Language = Language.English }, depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { Language = Language.English }, depotList);
             // We are only interested in english depots, so we should expect the depot to be filtered
             Assert.Empty(filteredDepots);
         }
 
         [Fact]
-        public void LanguageMatches_DepotIsIncluded()
+        public async Task LanguageMatches_DepotIsIncluded()
         {
             // Depot is for english
             var depotList = new List<DepotInfo>
@@ -145,20 +145,20 @@ namespace SteamPrefill.Test
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, Languages = new List<Language> { Language.English } }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments { Language = Language.English }, depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { Language = Language.English }, depotList);
             // Since we want english depots, then we should expect the depot to be included
             Assert.Single(filteredDepots);
         }
 
         [Fact]
-        public void LowViolenceDepots_AreFiltered()
+        public async Task LowViolenceDepots_AreFiltered()
         {
             var depotList = new List<DepotInfo>
             {
                 new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, LowViolence = true }
             };
 
-            var filteredDepots = _depotHandler.FilterDepotsToDownload(new DownloadArguments(), depotList);
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments(), depotList);
             // Low violence depots should be expected to be filtered.
             Assert.Empty(filteredDepots);
         }

@@ -5,7 +5,7 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
-    public partial class SelectAppsTui
+    public sealed partial class SelectAppsTui : IDisposable
     {
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private void InitLayout(List<AppInfo> appInfos)
@@ -130,6 +130,14 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                 }
             };
             Application.Top.Add(_statusBar);
+        }
+
+        public void Dispose()
+        {
+            _listView.Dispose();
+            _searchBox.Dispose();
+            headerLabel.Dispose();
+            _statusBar.Dispose();
         }
     }
 }

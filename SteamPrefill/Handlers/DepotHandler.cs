@@ -54,7 +54,7 @@
                                    && _downloadedDepots[e.DepotId].Contains(e.ManifestId.Value));
         }
         
-        public List<DepotInfo> FilterDepotsToDownload(DownloadArguments downloadArgs, List<DepotInfo> allDepots)
+        public async Task<List<DepotInfo>> FilterDepotsToDownloadAsync(DownloadArguments downloadArgs, List<DepotInfo> allDepots)
         {
             var filteredDepots = new List<DepotInfo>();
 
@@ -71,7 +71,7 @@
                     continue;
                 }
 
-                AppInfo containingApp = _appInfoHandler.GetAppInfoAsync(depot.ContainingAppId).Result;
+                AppInfo containingApp = await _appInfoHandler.GetAppInfoAsync(depot.ContainingAppId);
                 if (containingApp.IsInvalidApp)
                 {
                     continue;
