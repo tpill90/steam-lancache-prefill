@@ -404,7 +404,9 @@ namespace SteamPrefill.Handlers.Steam
                                     .OrderBy(e => e.ID)
                                     .ToList();
 
-            foreach (var package in packages)
+            // Handling packages that are normally purchased or added via cd-key
+            var nonSubscription = packages.Where(e => e.KeyValues["extended"]["mastersubscriptionappid"] == KeyValue.Invalid).ToList();
+            foreach (var package in nonSubscription)
             {
                 // Removing any free weekends that are no longer active
                 var freeWeekend = package.KeyValues["extended"]["freeweekend"];
@@ -417,6 +419,27 @@ namespace SteamPrefill.Handlers.Steam
                     }
                 }
                
+                foreach (KeyValue appId in package.KeyValues["appids"].Children)
+                {
+                    OwnedAppIds.Add(UInt32.Parse(appId.Value));
+                }
+                foreach (KeyValue appId in package.KeyValues["depotids"].Children)
+                {
+                    OwnedDepotIds.Add(UInt32.Parse(appId.Value));
+                }
+            }
+
+            // Handling subscription based packages, like EA Play for example.  The account will continue to "own" the packages, however
+            // the linked "master subscription app" will no longer be available, so these packages can't be downloaded
+            var subscriptionPackages = packages.Where(e => e.KeyValues["extended"]["mastersubscriptionappid"] != KeyValue.Invalid).ToList();
+            foreach (var package in subscriptionPackages)
+            {
+                var masterAppId = UInt32.Parse(package.KeyValues["extended"]["mastersubscriptionappid"].Value);
+                if (!OwnedAppIds.Contains(masterAppId))
+                {
+                    continue;
+                }
+
                 foreach (KeyValue appId in package.KeyValues["appids"].Children)
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
