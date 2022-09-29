@@ -1,4 +1,6 @@
-﻿namespace LancachePrefill.Common
+﻿using System.Net.Sockets;
+
+namespace LancachePrefill.Common
 {
     /// <summary>
     /// Attempts to automatically resolve the Lancache's IP address,
@@ -31,19 +33,26 @@
                 return detectedServer.IpAddress.ToString();
             }
 
+            // If no server was detected, checks for common configuration issues
             await DetectPublicIpAsync(cdnUrl);
-            return cdnUrl;
+            return null;
         }
 
         private static async Task<DetectedServer> DetectLancacheServerAsync(string cdnUrl)
         {
             using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+
             // Tries to resolve poisoned DNS record, then localhost, then Docker's host
             var possibleLancacheUrls = new List<string> { cdnUrl, "localhost", "172.17.0.1" };
 
             foreach (var url in possibleLancacheUrls)
             {
-                var ipAddresses = await Dns.GetHostAddressesAsync(url);
+                // Gets a list of ipv4 addresses
+                var ipAddresses = (await Dns.GetHostAddressesAsync(url))
+                    .Where(e => e.AddressFamily == AddressFamily.InterNetwork)
+                    .ToArray();
+
+                // If there are no public IPs, then continue onto the next url
                 if (!ipAddresses.Any(e => e.IsInternal()))
                 {
                     continue;
@@ -57,7 +66,7 @@
                     {
                         return new DetectedServer(url, ipAddresses[0]);
                     }
-                    else if (!response.Headers.Contains("X-LanCache-Processed-By") && url == cdnUrl)
+                    if (!response.Headers.Contains("X-LanCache-Processed-By") && url == cdnUrl)
                     {
                         _ansiConsole.MarkupLine(Red($" Error!  {White(cdnUrl)} is resolving to a private IP address {Cyan($"({ipAddresses.First()})")},\n" +
                                                     " however no Lancache can be found at that address.\n" +
@@ -97,7 +106,7 @@
             }
         }
 
-        private class DetectedServer
+        private sealed class DetectedServer
         {
             public string Url { get; }
             public IPAddress IpAddress { get; }
