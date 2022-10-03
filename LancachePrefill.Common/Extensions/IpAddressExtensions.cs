@@ -13,10 +13,6 @@
             {
                 return true;
             }
-            if (toTest.ToString() == "::1")
-            {
-                return false;
-            }
 
             byte[] bytes = toTest.GetAddressBytes();
             switch (bytes[0])
