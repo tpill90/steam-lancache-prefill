@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Text;
-using NStack;
-using Terminal.Gui;
+﻿
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 using Rune = System.Rune;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
-    //TODO include more metadata in the list view, like year/minutes played/last played/etc
     //TODO selected rows need some more coloring to differentiate what is selected
     //TODO implement sorting by purchase date
     //TODO need to document in readme how you navigate the ui.  Can use keyboard alt + shift alt.  Or click with a mouse
