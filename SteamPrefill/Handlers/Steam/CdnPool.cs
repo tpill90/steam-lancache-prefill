@@ -33,6 +33,7 @@ namespace SteamPrefill.Handlers.Steam
                 return;
             }
 
+            int totalServers = 0;
             string statusString = string.Concat(Grey("{0}"), White(" Getting available CDNs "), Green("{1}/{2}"));
             await _ansiConsole.StatusSpinner().StartAsync(string.Format(statusString, 0, 0, _minimumServerCount), async task =>
             {
@@ -40,8 +41,9 @@ namespace SteamPrefill.Handlers.Steam
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
                     int countBefore = _availableServerEndpoints.Count;
-                    var availableServers = await _steamSession.SteamContent.GetServersForSteamPipe(cellId);
-                    _availableServerEndpoints.AddRange(availableServers);
+                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(cellId);
+                    totalServers += returnedServers.Count;
+                    _availableServerEndpoints.AddRange(returnedServers);
 #if DEBUG
                     _ansiConsole.MarkupLine(White("Retry ") + Green(retryCount));
                     foreach (Server server in _availableServerEndpoints)
@@ -65,7 +67,7 @@ namespace SteamPrefill.Handlers.Steam
 
             if (_availableServerEndpoints.Empty())
             {
-                throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
+                throw new CdnExhaustionException(string.Format("Unable to get available CDN servers from Steam! (After getting {0} responses) ", totalServers));
             }
 
             _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
