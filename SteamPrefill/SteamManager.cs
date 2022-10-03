@@ -27,7 +27,7 @@
                 DebugLog.Enabled = true;
             }
 #endif
-            
+
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
@@ -145,9 +145,12 @@
                 return;
             }
 
+            //If Download Region Configured -> load
+            uint? cellId = LoadSelectedCellId();
+
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
 
-            await _cdnPool.PopulateAvailableServersAsync();
+            await _cdnPool.PopulateAvailableServersAsync(cellId);
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueueAsync(filteredDepots);
@@ -247,6 +250,15 @@
                 return JsonSerializer.Deserialize(File.ReadAllText(AppConfig.UserSelectedAppsPath), SerializationContext.Default.ListUInt32);
             }
             return new List<uint>();
+        }
+
+        public uint? LoadSelectedCellId()
+        {
+            if (File.Exists(AppConfig.UserSelectedCellId))
+            {
+                return System.Convert.ToUInt32(File.ReadAllText(AppConfig.UserSelectedCellId));
+            }
+            return null;
         }
 
         public async Task<List<AppInfo>> GetAllAvailableGamesAsync()

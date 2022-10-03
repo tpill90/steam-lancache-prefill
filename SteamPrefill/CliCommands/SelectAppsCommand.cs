@@ -22,6 +22,35 @@ namespace SteamPrefill.CliCommands
                                                     .Title(LightYellow("Run prefill now?"))
                                                     .AddChoices(true, false)
                                                     .UseConverter(e => e == false ? "No" : "Yes"));
+
+                uint? cellId = ansiConsole.Prompt(new SelectionPrompt<uint?>()
+                    .Title(LightYellow("Select Download Region:"))
+                    .AddChoices(new uint?[] { 1, 5, 9, null }) //Maybe random from https://github.com/tpill90/steam-lancache-prefill/issues/135#issuecomment-1264783642
+                    .UseConverter(e => {
+                        if (e == 9)
+                        {
+                            return "SEA";
+                        }
+                        else if (e == 5)
+                        {
+                            return "Europe";
+                        }
+                        else if (e == 1)
+                        {
+                            return "Americas";
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }));
+
+                if (cellId.HasValue)
+                {
+                    File.Delete(AppConfig.UserSelectedCellId);
+                    await File.WriteAllTextAsync(AppConfig.UserSelectedCellId, cellId.ToString());
+                }
+
                 if (runPrefill)
                 {
                     await steamManager.DownloadMultipleAppsAsync(false, false, null, new List<uint>());
