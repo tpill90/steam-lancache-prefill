@@ -18,14 +18,13 @@ namespace SteamPrefill.Handlers.Steam
             _ansiConsole = ansiConsole;
             _steamSession = steamSession;
         }
-
+        
         /// <summary>
         /// Gets a list of available CDN servers from the Steam network.
         /// Required to be called prior to using the class.
         /// </summary>
-        /// <param name="cellId">The cellId to get Caching Servers from</param>
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
-        public async Task PopulateAvailableServersAsync(uint? cellId)
+        public async Task PopulateAvailableServersAsync()
         {
             //TODO need to add a timeout to this GetServersForSteamPipe() call
             if (_availableServerEndpoints.Count >= _minimumServerCount)
@@ -33,33 +32,22 @@ namespace SteamPrefill.Handlers.Steam
                 return;
             }
 
-            string statusString = string.Concat(Grey("{0}"), White(" Getting available CDNs "), Green("{1}/{2}"));
-            await _ansiConsole.StatusSpinner().StartAsync(string.Format(statusString, 0, 0, _minimumServerCount), async task =>
+            await _ansiConsole.StatusSpinner().StartAsync("Getting available CDNs", async _ =>
             {
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
-                    int countBefore = _availableServerEndpoints.Count;
-                    var availableServers = await _steamSession.SteamContent.GetServersForSteamPipe(cellId);
-                    _availableServerEndpoints.AddRange(availableServers);
-#if DEBUG
-                    _ansiConsole.MarkupLine(White("Retry ") + Green(retryCount));
-                    foreach (Server server in _availableServerEndpoints)
-                    {
-                        _ansiConsole.MarkupLine(White(string.Format("{0} {1}", MediumPurple(server.Host), White(server.Type))));
-                    }
-#endif
+                    var allServers = await _steamSession.SteamContent.GetServersForSteamPipe();
+                    _availableServerEndpoints.AddRange(allServers);
+
                     // Filtering out non-cacheable cdns, and duplicate hosts
-                    _availableServerEndpoints = _availableServerEndpoints
-                        .Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0) //TODO AllowedAppIds Documentation??
-                        .DistinctBy(e => e.Host)
-                        .ToList();
+                    _availableServerEndpoints = _availableServerEndpoints.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0)
+                                                                         .DistinctBy(e => e.Host)
+                                                                         .ToList();
 
                     // Will wait increasingly longer periods when re-trying
                     retryCount++;
                     await Task.Delay(retryCount * 100);
-                    task.Status(string.Format(statusString, retryCount, _availableServerEndpoints.Count, _minimumServerCount));
-                    task.Refresh();
                 }
             });
 

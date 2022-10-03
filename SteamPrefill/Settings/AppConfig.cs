@@ -35,6 +35,5 @@ namespace SteamPrefill.Settings
 
         public static readonly string AccountSettingsStorePath = Path.Combine(ConfigDir, "account.config");
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
-        public static readonly string UserSelectedCellId = Path.Combine(ConfigDir, "cellId.config");
     }
 }
