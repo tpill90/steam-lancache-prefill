@@ -8,7 +8,6 @@ namespace SteamPrefill.Handlers.Steam
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steamSession;
-        private uint? _cellId;
         
         private List<Server> _availableServerEndpoints = new List<Server>();
         private int _minimumServerCount = 10;
@@ -20,17 +19,12 @@ namespace SteamPrefill.Handlers.Steam
             _steamSession = steamSession;
         }
 
-        public void setCellId(uint? cellId)
-        {
-            _cellId = cellId;
-        }
-
         /// <summary>
         /// Gets a list of available CDN servers from the Steam network.
         /// Required to be called prior to using the class.
         /// </summary>
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
-        public async Task PopulateAvailableServersAsync()
+        public async Task PopulateAvailableServersAsync(uint? cellId)
         {
             //TODO need to add a timeout to this GetServersForSteamPipe() call
             if (_availableServerEndpoints.Count >= _minimumServerCount)
@@ -46,7 +40,7 @@ namespace SteamPrefill.Handlers.Steam
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
                     int countBefore = _availableServerEndpoints.Count;
-                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(_cellId);
+                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(cellId);
                     totalServers += returnedServers.Count;
                     _availableServerEndpoints.AddRange(returnedServers);
 #if DEBUG
@@ -72,7 +66,7 @@ namespace SteamPrefill.Handlers.Steam
 
             if (_availableServerEndpoints.Empty())
             {
-                throw new CdnExhaustionException(string.Format("Unable to get available CDN servers from Steam! (After getting {0} responses) ", totalServers));
+                throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
 
             _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
