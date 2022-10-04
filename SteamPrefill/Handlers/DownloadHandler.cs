@@ -29,7 +29,7 @@
         /// false will be returned
         /// </summary>
         /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
-        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
+        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs, uint cellId)
         {
 #if DEBUG
             if (AppConfig.SkipDownloads)
@@ -43,6 +43,7 @@
             }
             
             int retryCount = 0;
+            int maxRetries = 3;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
             await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
@@ -51,11 +52,18 @@
                 failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests);
 
                 // Handle any failed requests
-                while (failedRequests.Any() && retryCount < 3)
+                if (failedRequests.Any())
                 {
-                    retryCount++;
-                    await Task.Delay(2000 * retryCount);
-                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList());
+                    var task = ctx.AddTask("Retrying Failed Requests", new ProgressTaskSettings() { MaxValue = maxRetries });
+                    while (failedRequests.Any() && retryCount < maxRetries)
+                    {
+                        task.Increment(1);
+                        ctx.Refresh();
+                        retryCount++;
+                        await Task.Delay(2000 * retryCount);
+                        await _cdnPool.PopulateAvailableServersAsync(cellId);
+                        failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList());
+                    }
                 }
             });
 
