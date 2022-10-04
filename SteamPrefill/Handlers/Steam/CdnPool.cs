@@ -82,7 +82,6 @@ namespace SteamPrefill.Handlers.Steam
                     // Will wait increasingly longer periods when re-trying
                     retryCount++;
                     await Task.Delay(retryCount * 100);
-                    task.Status(string.Format(statusString, retryCount, _availableServerEndpoints.Count, _minimumServerCount));
                     task.Refresh();
                 }
             });
