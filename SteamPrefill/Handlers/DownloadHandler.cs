@@ -53,6 +53,8 @@
                 // Handle any failed requests
                 while (failedRequests.Any() && retryCount < 3)
                 {
+                    _ansiConsole.LogMarkup(Red(string.Format("Retrying {0} failed downloads...", failedRequests.Count)));
+                    await _cdnPool.PopulateAvailableServersAsync();
                     retryCount++;
                     await Task.Delay(2000 * retryCount);
                     failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList());
