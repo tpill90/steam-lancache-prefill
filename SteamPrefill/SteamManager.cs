@@ -147,11 +147,10 @@
 
             //If Download Region Configured -> load
             uint? cellId = LoadSelectedCellId();
-            _cdnPool.setCellId(cellId);
 
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
 
-            await _cdnPool.PopulateAvailableServersAsync();
+            await _cdnPool.PopulateAvailableServersAsync(cellId);
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueueAsync(filteredDepots);
