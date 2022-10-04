@@ -145,12 +145,9 @@
                 return;
             }
 
-            //If Download Region Configured -> load
-            uint? cellId = LoadSelectedCellId();
-
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
 
-            await _cdnPool.PopulateAvailableServersAsync(cellId);
+            await _cdnPool.PopulateAvailableServersAsync(_steam3._cellId);
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueueAsync(filteredDepots);

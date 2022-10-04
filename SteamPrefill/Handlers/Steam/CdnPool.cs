@@ -24,7 +24,7 @@ namespace SteamPrefill.Handlers.Steam
         /// Required to be called prior to using the class.
         /// </summary>
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
-        public async Task PopulateAvailableServersAsync(uint? cellId)
+        public async Task PopulateAvailableServersAsync(uint cellId)
         {
             //TODO need to add a timeout to this GetServersForSteamPipe() call
             if (_availableServerEndpoints.Count >= _minimumServerCount)
