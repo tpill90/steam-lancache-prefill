@@ -29,6 +29,7 @@ namespace SteamPrefill.Handlers.Steam
         private readonly UserAccountStore _userAccountStore;
 
         public SteamID _steamId;
+        public uint _cellId;
 
         public Steam3Session(IAnsiConsole ansiConsole)
         {
@@ -189,6 +190,11 @@ namespace SteamPrefill.Handlers.Steam
 
             var loggedOn = logonResult;
 
+            _cellId = logonResult.CellID;
+#if DEBUG
+            _ansiConsole.MarkupLine(string.Concat("CellId ", MediumPurple(_cellId)));
+#endif
+
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
             if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
@@ -303,9 +309,9 @@ namespace SteamPrefill.Handlers.Steam
             });
         }
 
-        #endregion
+#endregion
 
-        #region Other Auth Methods
+#region Other Auth Methods
 
         /// <summary>
         /// The UpdateMachineAuth event will be triggered once the user has logged in with either Steam Guard or 2FA enabled.
@@ -336,9 +342,9 @@ namespace SteamPrefill.Handlers.Steam
             _steamUser.SendMachineAuthResponse(authResponse);
         }
         
-        #endregion
+#endregion
 
-        #region LoadAccountLicenses
+#region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
         /// <summary>
@@ -455,7 +461,7 @@ namespace SteamPrefill.Handlers.Steam
             File.WriteAllText(_ownedDepotIdsPath, JsonSerializer.Serialize(OwnedDepotIds, SerializationContext.Default.HashSetUInt32));
             File.WriteAllText(_packageCountPath, packageRequests.Count.ToString());
         }
-        #endregion
+#endregion
 
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this app.

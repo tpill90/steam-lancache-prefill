@@ -22,6 +22,7 @@ namespace SteamPrefill.CliCommands
                                                     .Title(LightYellow("Run prefill now?"))
                                                     .AddChoices(true, false)
                                                     .UseConverter(e => e == false ? "No" : "Yes"));
+
                 if (runPrefill)
                 {
                     await steamManager.DownloadMultipleAppsAsync(false, false, null, new List<uint>());

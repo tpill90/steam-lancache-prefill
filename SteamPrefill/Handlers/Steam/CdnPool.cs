@@ -18,13 +18,13 @@ namespace SteamPrefill.Handlers.Steam
             _ansiConsole = ansiConsole;
             _steamSession = steamSession;
         }
-        
+
         /// <summary>
         /// Gets a list of available CDN servers from the Steam network.
         /// Required to be called prior to using the class.
         /// </summary>
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
-        public async Task PopulateAvailableServersAsync()
+        public async Task PopulateAvailableServersAsync(uint cellId)
         {
             //TODO need to add a timeout to this GetServersForSteamPipe() call
             if (_availableServerEndpoints.Count >= _minimumServerCount)
@@ -32,19 +32,53 @@ namespace SteamPrefill.Handlers.Steam
                 return;
             }
 
-            await _ansiConsole.StatusSpinner().StartAsync("Getting available CDNs", async _ =>
+            int totalServers = 0;
+#if DEBUG
+            var table = new Table().AddColumns(new[]{
+                                                "Retry",
+                                                "Total Results",
+                                                "_availableServerEndpoints"
+                                                });
+            await _ansiConsole.Live(table).StartAsync(async task =>
+            { 
+#else
+            string statusString = string.Concat(Grey("{0}"), White(" Getting available CDNs "), Green("{1}/{2}"));
+            await _ansiConsole.StatusSpinner().StartAsync(string.Format(statusString, 0, 0, _minimumServerCount), async task =>
             {
+#endif
                 var retryCount = 0;
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
-                    var allServers = await _steamSession.SteamContent.GetServersForSteamPipe();
-                    _availableServerEndpoints.AddRange(allServers);
+                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(cellId);
+                    totalServers += returnedServers.Count;
+                    _availableServerEndpoints.AddRange(returnedServers);
 
                     // Filtering out non-cacheable cdns, and duplicate hosts
-                    _availableServerEndpoints = _availableServerEndpoints.Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0)
-                                                                         .DistinctBy(e => e.Host)
-                                                                         .ToList();
+                    _availableServerEndpoints = _availableServerEndpoints
+                        .Where(e => e.Type == "SteamCache" && e.AllowedAppIds.Length == 0) //TODO AllowedAppIds Documentation??
+                        .DistinctBy(e => e.Host)
+                        .ToList();
 
+#if DEBUG
+                    table.AddRow(new TableRow(new[]{
+                                               new Markup(retryCount.ToString()),
+                                               new Markup(totalServers.ToString()),
+                                               new Markup("")
+                                                }));
+                    foreach (Server s in _availableServerEndpoints)
+                    {
+                        table.AddRow(new TableRow(new[]{
+                                                    new Markup(""),
+                                                    new Markup(""),
+                                                    new Markup(String.Format("{0} {1}", s.Type, MediumPurple(s.Host)))
+                                                }));
+                    }
+                        
+                    
+#else
+                    task.Status(string.Format(statusString, retryCount, _availableServerEndpoints.Count, _minimumServerCount));
+#endif
+                    task.Refresh();
                     // Will wait increasingly longer periods when re-trying
                     retryCount++;
                     await Task.Delay(retryCount * 100);
