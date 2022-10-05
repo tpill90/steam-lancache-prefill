@@ -249,15 +249,6 @@
             return new List<uint>();
         }
 
-        public uint? LoadSelectedCellId()
-        {
-            if (File.Exists(AppConfig.UserSelectedCellId))
-            {
-                return System.Convert.ToUInt32(File.ReadAllText(AppConfig.UserSelectedCellId));
-            }
-            return null;
-        }
-
         public async Task<List<AppInfo>> GetAllAvailableGamesAsync()
         {
             var ownedGameIds = _steam3.OwnedAppIds.ToList();
