@@ -190,11 +190,6 @@ namespace SteamPrefill.Handlers.Steam
 
             var loggedOn = logonResult;
 
-            _cellId = logonResult.CellID;
-#if DEBUG
-            _ansiConsole.MarkupLine(string.Concat("CellId ", MediumPurple(_cellId)));
-#endif
-
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
             if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
             {
@@ -248,7 +243,10 @@ namespace SteamPrefill.Handlers.Steam
             }
 
             _ansiConsole.LogMarkupLine($"Logged into Steam");
-
+            _cellId = logonResult.CellID;
+#if DEBUG
+            _ansiConsole.MarkupLine(string.Concat("CellId ", MediumPurple(_cellId)));
+#endif
             // Forcing a garbage collect to remove stored password from memory
             if (_logonDetails.Password != null)
             {
