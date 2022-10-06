@@ -16,7 +16,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
 
             try
             {
-                steamManager.Initialize();
+                await steamManager.InitializeAsync();
                 
                 var games = await steamManager.GetAllAvailableGamesAsync();
 

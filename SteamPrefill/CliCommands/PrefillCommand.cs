@@ -83,7 +83,7 @@ namespace SteamPrefill.CliCommands
             
             try
             {
-                steamManager.Initialize();
+                await steamManager.InitializeAsync();
 
                 var manualIds = new List<uint>();
 #if DEBUG 
@@ -101,7 +101,7 @@ namespace SteamPrefill.CliCommands
             catch (TimeoutException e)
             {
                 _ansiConsole.MarkupLine("\n");
-                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsername)))
+                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsernameAsync)))
                 {
                     _ansiConsole.MarkupLine(Red("Timed out while waiting for username entry"));
                 }

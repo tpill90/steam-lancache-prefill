@@ -70,9 +70,9 @@ namespace SteamPrefill.Handlers.Steam
             _userAccountStore = UserAccountStore.LoadFromFile();
         }
 
-        public void LoginToSteam()
+        public async Task LoginToSteamAsync()
         {
-            ConfigureLoginDetails();
+            await ConfigureLoginDetailsAsync();
 
             int retryCount = 0;
             bool logonSuccess = false;
@@ -139,9 +139,9 @@ namespace SteamPrefill.Handlers.Steam
 
         #region Logging into Steam
 
-        private void ConfigureLoginDetails()
+        private async Task ConfigureLoginDetailsAsync()
         {
-            var username = _userAccountStore.GetUsername(_ansiConsole);
+            var username = await _userAccountStore.GetUsernameAsync(_ansiConsole);
 
             string loginKey;
             _userAccountStore.LoginKeys.TryGetValue(username, out loginKey);

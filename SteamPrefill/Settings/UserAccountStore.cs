@@ -31,17 +31,14 @@
             LoginKeys = new Dictionary<string, string>();
         }
 
-        public string GetUsername(IAnsiConsole ansiConsole)
+        public async Task<string> GetUsernameAsync(IAnsiConsole ansiConsole)
         {
             if (!String.IsNullOrEmpty(CurrentUsername))
             {
                 return CurrentUsername;
             }
             
-            CurrentUsername = PromptForUsernameAsync(ansiConsole)
-                              .WaitAsync(TimeSpan.FromSeconds(30))
-                              .GetAwaiter()
-                              .GetResult();
+            CurrentUsername = await PromptForUsernameAsync(ansiConsole).WaitAsync(TimeSpan.FromSeconds(30));
             return CurrentUsername;
         }
 

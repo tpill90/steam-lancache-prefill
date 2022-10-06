@@ -15,7 +15,7 @@ namespace SteamPrefill.CliCommands
             {
                 WriteBetaMessage(ansiConsole);
 
-                steamManager.Initialize();
+                await steamManager.InitializeAsync();
                 await steamManager.SelectAppsAsync();
 
                 var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
@@ -31,7 +31,7 @@ namespace SteamPrefill.CliCommands
             catch (TimeoutException e)
             {
                 ansiConsole.MarkupLine("\n");
-                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsername)))
+                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsernameAsync)))
                 {
                     ansiConsole.MarkupLine(Red("Timed out while waiting for username entry"));
                 }
