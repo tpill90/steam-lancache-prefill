@@ -50,7 +50,7 @@
             _steam3.WaitForLicenseCallback();
 
 #if DEBUG
-            _ansiConsole.LogMarkupLine("Steam session initialization complete!", timer);
+            _ansiConsole.LogMarkupLine("Steam session initialization complete!", timer.Elapsed);
 #else
             _ansiConsole.LogMarkupLine("Steam session initialization complete!");
 #endif

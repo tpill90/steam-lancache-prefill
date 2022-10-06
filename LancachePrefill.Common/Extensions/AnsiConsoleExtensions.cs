@@ -42,12 +42,12 @@ namespace LancachePrefill.Common.Extensions
             return spectreProgress;
         }
 
-        public static string ReadPassword(this IAnsiConsole console, string promptText = null)
+        public static string ReadPassword(this IAnsiConsole console, string additionalPrompt = null)
         {
             var promptTask = Task.Run(() =>
             {
-                var defaultPrompt = $"Please enter your {Cyan("Steam password")}. {LightYellow("(Password won't be saved)")} : ";
-                return console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
+                console.MarkupLine(additionalPrompt);
+                return console.Prompt(new TextPrompt<string>($"Please enter your {Cyan("Steam password")}. {LightYellow("(Password won't be saved)")} : ")
                                       .PromptStyle("white")
                                       .Secret());
             });
@@ -64,11 +64,6 @@ namespace LancachePrefill.Common.Extensions
         public static void LogMarkupLine(this IAnsiConsole console, string message)
         {
             console.MarkupLine($"{FormattedTime} {message}");
-        }
-
-        public static void LogMarkupLine(this IAnsiConsole console, string message, Stopwatch stopwatch)
-        {
-            console.LogMarkupLine(message, stopwatch.Elapsed);
         }
 
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)
