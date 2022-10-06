@@ -25,12 +25,9 @@ namespace SteamPrefill.CliCommands
         [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
-        [CommandOption("recent", 'r',
-            Description = "Prefill will include all games played in the last 2 weeks.",
-            Converter = typeof(NullableBoolConverter))]
+        [CommandOption("recent", Description = "Prefill will include all games played in the last 2 weeks.", Converter = typeof(NullableBoolConverter))]
         public bool? PrefillRecentGames { get; init; }
 
-        
         [CommandOption("top", Description = "Prefills the most popular games by player count, over the last 2 weeks.  Default: 50")]
         public int? PrefillPopularGames
         {
@@ -49,11 +46,11 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
-        [CommandOption("quiet", Description = "Reduces noisy log output.  Will only output logs for games that have updates.", Converter = typeof(NullableBoolConverter))]
-        public bool? Quiet 
+        [CommandOption("verbose", Description = "Produces more detailed log output.  Will output logs for games are already up to date.", Converter = typeof(NullableBoolConverter))]
+        public bool? Verbose 
         {
-            get => AppConfig.QuietLogs;
-            init => AppConfig.QuietLogs = value ?? default(bool);
+            get => AppConfig.VerboseLogs;
+            init => AppConfig.VerboseLogs = value ?? default(bool);
         }
 
         [CommandOption("unit",
