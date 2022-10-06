@@ -136,7 +136,7 @@
             if (_downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
             {
                 _prefillSummaryResult.AlreadyUpToDate++;
-                if (AppConfig.QuietLogs)
+                if (!AppConfig.VerboseLogs)
                 {
                     return;
                 }
