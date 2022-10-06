@@ -1,10 +1,11 @@
-﻿
+﻿using Wcwidth;
 using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 using Rune = System.Rune;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta
 {
+    //TODO spend some time cleaning up this code
     //TODO selected rows need some more coloring to differentiate what is selected
     //TODO implement sorting by purchase date
     //TODO need to document in readme how you navigate the ui.  Can use keyboard alt + shift alt.  Or click with a mouse
@@ -128,7 +129,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
         }
     }
 
-    internal class AppInfoDataSource : IListDataSource
+    internal sealed class AppInfoDataSource : IListDataSource
     {
         public int Count => _currAppInfo != null ? _currAppInfo.Count : 0;
 
@@ -219,8 +220,10 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
 
         private string FormatItemString(AppInfo item)
         {
+            var nameFormatted = item.Name.Truncate(55).PadRightUnicode(55);
+            
             var hoursPlayed2Weeks = item.HoursPlayed2Weeks != null ? $"{item.HoursPlayed2Weeks:N1} hours" : null;
-            return string.Format("{0,-55}{1,8}{2,17}", item.Name.Truncate(55), item.ReleaseDate?.Date.ToString("yyyy"), hoursPlayed2Weeks);
+            return string.Format("{0}{1,8}{2,17}", nameFormatted, item.ReleaseDate?.Date.ToString("yyyy"), hoursPlayed2Weeks);
         }
 
         public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)

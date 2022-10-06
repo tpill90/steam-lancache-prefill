@@ -28,10 +28,6 @@
       "commandName": "Project",
       "commandLineArgs": "select-apps"
     },
-    "Select Apps Beta": {
-      "commandName": "Project",
-      "commandLineArgs": "select-apps-beta"
-    },
     "Game by ID": {
       "commandName": "Project",
       "commandLineArgs": "prefill --app 590380 --force"
