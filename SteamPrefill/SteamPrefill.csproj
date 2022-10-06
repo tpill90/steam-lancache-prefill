@@ -17,9 +17,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
 
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
@@ -31,7 +29,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
   </PropertyGroup>
-   
+
+  <!-- Includes Linux update script in publish package -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='linux-x64'">
+    <Content Include="..\scripts\**\update.sh">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Includes Windows update script in publish package -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)'=='win-x64'">
+    <Content Include="..\scripts\**\update.ps1">
+      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
   <ItemGroup>
     <!-- External -->
     <PackageReference Include="ByteSize" Version="2.1.1" />
@@ -41,6 +55,13 @@
     <PackageReference Include="SteamKit2" Version="2.4.1" />
     <PackageReference Include="Terminal.Gui" Version="1.7.2" />
     <PackageReference Include="ZString" Version="2.4.4" />
+
+    <Reference Include="Spectre.Console">
+      <HintPath>..\lib\Spectre.Console.dll</HintPath>
+    </Reference>
+    <Reference Include="Spectre.Console.Cli">
+      <HintPath>..\lib\Spectre.Console.Cli.dll</HintPath>
+    </Reference>
 
     <!-- Debugging Packages -->
     <PackageReference Include="JetBrains.Annotations" Version="2022.1.0" />
@@ -72,12 +93,4 @@
     <ProjectReference Include="..\LancachePrefill.Common\LancachePrefill.Common.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Spectre.Console">
-      <HintPath>..\lib\Spectre.Console.dll</HintPath>
-    </Reference>
-    <Reference Include="Spectre.Console.Cli">
-      <HintPath>..\lib\Spectre.Console.Cli.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 </Project>
