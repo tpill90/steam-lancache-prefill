@@ -44,3 +44,5 @@ global using static LancachePrefill.Common.SpectreColors;
 global using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
 global using Architecture = SteamPrefill.Models.Enums.Architecture;
 global using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
+global using SteamPrefill.CliCommands.SelectAppsBeta;
+global using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;

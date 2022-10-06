@@ -1,7 +1,4 @@
-﻿using SteamPrefill.CliCommands.SelectAppsBeta;
-using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
-
-// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
     //TODO update the readme in general.  Some of the pictures are not as crisp as they should be.  Some are too wide
