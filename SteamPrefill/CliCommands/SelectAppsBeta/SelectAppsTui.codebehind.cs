@@ -1,6 +1,4 @@
-﻿using Terminal.Gui;
-using Terminal.Gui.Graphs;
-using Color = Terminal.Gui.Color;
+﻿using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 
 namespace SteamPrefill.CliCommands.SelectAppsBeta

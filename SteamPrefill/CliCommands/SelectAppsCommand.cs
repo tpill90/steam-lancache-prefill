@@ -1,7 +1,10 @@
-﻿using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
+﻿using SteamPrefill.CliCommands.SelectAppsBeta;
+using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
+
 // ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
+    //TODO update the readme in general.  Some of the pictures are not as crisp as they should be.  Some are too wide
     [UsedImplicitly]
     [Command("select-apps", Description = "Displays an interactive list of all owned apps.  " +
                                           "As many apps as desired can be selected, which will then be used by the 'prefill' command")]
@@ -11,12 +14,21 @@ namespace SteamPrefill.CliCommands
         {
             var ansiConsole = console.CreateAnsiConsole();
             using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
+
             try
             {
-                WriteBetaMessage(ansiConsole);
+                await steamManager.InitializeAsync();
 
-                steamManager.Initialize();
-                await steamManager.SelectAppsAsync();
+                var games = await steamManager.GetAllAvailableGamesAsync();
+
+                Application.Init();
+                using var tui2 = new SelectAppsTui(games, steamManager);
+                tui2.Run();
+
+                // This escape sequence is required when running on linux, otherwise will not be able to use the Spectre selection prompt
+                // See : https://github.com/gui-cs/Terminal.Gui/issues/418
+                await Console.Out.WriteAsync("\x1b[?1h");
+                await Console.Out.FlushAsync();
 
                 var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
                                                     .Title(LightYellow("Run prefill now?"))
@@ -31,7 +43,7 @@ namespace SteamPrefill.CliCommands
             catch (TimeoutException e)
             {
                 ansiConsole.MarkupLine("\n");
-                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsername)))
+                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsernameAsync)))
                 {
                     ansiConsole.MarkupLine(Red("Timed out while waiting for username entry"));
                 }
@@ -49,29 +61,6 @@ namespace SteamPrefill.CliCommands
             {
                 steamManager.Shutdown();
             }
-        }
-
-        private void WriteBetaMessage(IAnsiConsole ansiConsole)
-        {
-            var table = new Table
-            {
-                ShowHeaders = false,
-                Border = TableBorder.Rounded,
-                BorderStyle = new Style(Color.Yellow4)
-            };
-            table.AddColumn("");
-
-            // Add some rows
-            table.AddRow("");
-            table.AddRow($"select-apps is getting a new look!");
-            table.AddRow($"Try it out now with {LightYellow("select-apps-beta")}!");
-            table.AddRow("");
-            table.AddRow("Please direct beta feedback to :  ");
-            table.AddRow(LightBlue("https://github.com/tpill90/steam-lancache-prefill/issues/60"));
-            table.AddRow("");
-
-            // Render the table to the console
-            ansiConsole.Write(table);
         }
     }
 }

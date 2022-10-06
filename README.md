@@ -32,7 +32,7 @@ Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-a
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to a directory of your choice
 3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x ./SteamPrefill`
-4.  (**Alpine Linux**) Install dependencies required by the .NET runtime : [(Alpine Linux Depdencies)](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
+4.  (**Alpine Linux**) Install dependencies required by the .NET runtime : [(Alpine Linux dependencies)](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
 5.  (**Windows Only - Optional**)  Configure your terminal to use Unicode, for much nicer looking UI output.
     - <img src="docs/img/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
     - As the default console in Windows does not support UTF8, Windows Terminal should be installed from the [App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
@@ -50,7 +50,7 @@ Prior to prefilling for the first time, you will have to decide which apps shoul
 
 Once logged into Steam, all of your currently owned apps will be displayed for selection.  Navigating using the arrow keys, select any apps that you are interested in prefilling with **space**.  Once you are satisfied with your selections, save them with **enter**.
 
-<img src="docs/img/Interactive-App-Selection.png" height="300" alt="Interactive app selection">
+<img src="docs/img/Interactive-App-Selection.png" height="350" alt="Interactive app selection">
 
 These selections will be saved permanently, and can be freely updated at any time by simply rerunning `select-apps` again at any time.
 
@@ -61,9 +61,9 @@ Now that a prefill app list has been created, we can now move onto our initial p
 .\SteamPrefill.exe prefill
 ```
 
-The `prefill` command will automatically pickup the prefill app list, and begin downloading each app.  During the initial run, it is likely that the Lancache is empty, so download speeds should be expected to be around your internet line speed (in the below example, a 1gbit connection was used).  Once the prefill has completed, the Lancache should be fully ready to serve clients cached data.
+The `prefill` command will automatically pickup the prefill app list, and begin downloading each app.  During the initial run, it is likely that the Lancache is empty, so download speeds should be expected to be around your internet line speed (in the below example, a 300mbit/s connection was used).  Once the prefill has completed, the Lancache should be fully ready to serve clients cached data.
 
-<img src="docs/img/Initial-Prefill.png" width="830" alt="Initial Prefill">
+<img src="docs/img/Initial-Prefill.png" width="720" alt="Initial Prefill">
 
 ## Updating previously prefilled apps
 
@@ -71,13 +71,13 @@ Updating any previously prefilled apps can be done by simply re-running the `pre
 
 **SteamPrefill** keeps track of which version of each app was previously prefilled, and will only re-download if there is a newer version of the app available.  Any apps that are currently up to date, will simply be skipped.
 
-<img src="docs/img/Prefill-Up-To-Date.png" width="730" alt="Prefilled app up to date">
+<img src="docs/img/Prefill-Up-To-Date.png" width="720" alt="Prefilled app up to date">
 
 
 However, if there is a newer version of an app that is available, then **SteamPrefill** will re-download the app.  Due to how Lancache works, this subsequent run should complete much faster than the initial prefill (example below used a 10gbit connection).
 Any data that was previously downloaded, will be retrieved from the Lancache, while any new data from the update will be retrieved from the internet.
 
-<img src="docs/img/Prefill-New-Version-Available.png" width="830" alt="Prefill run when app has an update">
+<img src="docs/img/Prefill-New-Version-Available.png" width="720" alt="Prefill run when app has an update">
 
 # Frequently Asked Questions
 
@@ -106,7 +106,7 @@ You may want to limit the download speed of **SteamPrefill** to prevent it from 
 
 One method to limit bandwidth would be to configure *Quality of Service (QOS)* on your router, limiting bandwidth to the Lancache server, or by prioritizing other network traffic.  A general overview of QOS can be found here : [Beginners guide to QOS](https://www.howtogeek.com/75660/the-beginners-guide-to-qos-on-your-router/)
 
-For more brand specific guides(non-exhaustive), see :
+For more brand specific guides (non-exhaustive), see :
 - [Asus](https://www.asus.com/support/FAQ/1013333/)
 - [Netgear](https://kb.netgear.com/25613/How-do-I-enable-Dynamic-QoS-on-my-Nighthawk-router)
 - [Linksys](https://www.linksys.com/support-article?articleNum=137079)
@@ -148,7 +148,13 @@ running `prefill` with the `--nocache` flag specified will prevent the cache fil
 
 <img src="docs/img/UpdateAvailable.png" width="675" alt="Update available message">
 
-To update:
+### Automatically updating
+- **Windows**
+    - Run the `.\update.ps1` script in the executable directory
+- **Linux**
+    - Run the `./update.sh` script in the executable directory
+
+### Manually updating:
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to the directory where **SteamPrefill** is currently installed, overwriting the previous executable.
 3.  Thats it!  You're all up to date!

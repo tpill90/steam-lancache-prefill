@@ -1,5 +1,4 @@
 ﻿using static LancachePrefill.Common.Extensions.TransferSpeedUnit;
-using Spectre.Console;
 
 namespace LancachePrefill.Common.Extensions
 {
@@ -55,14 +54,16 @@ namespace LancachePrefill.Common.Extensions
             return promptTask.WaitAsync(TimeSpan.FromSeconds(30)).GetAwaiter().GetResult();
         }
 
+        private static string FormattedTime => $"[[{DateTime.Now.ToString("h:mm:ss tt")}]]";
+
         public static void LogMarkup(this IAnsiConsole console, string message)
         {
-            console.Markup($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");
+            console.Markup($"{FormattedTime} {message}");
         }
 
         public static void LogMarkupLine(this IAnsiConsole console, string message)
         {
-            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}");
+            console.MarkupLine($"{FormattedTime} {message}");
         }
 
         public static void LogMarkupLine(this IAnsiConsole console, string message, Stopwatch stopwatch)
@@ -72,11 +73,16 @@ namespace LancachePrefill.Common.Extensions
 
         public static void LogMarkupLine(this IAnsiConsole console, string message, TimeSpan elapsed)
         {
-            console.MarkupLine($"[[{DateTime.Now.ToString("h:mm:ss tt")}]] {message}".PadRight(65) + SpectreColors.LightYellow(elapsed.ToString(@"ss\.FFFF")));
+            var messageWithTime = $"{FormattedTime} {message}";
+            // Taking the difference between the original message length, and the message length with markup removed.  
+            // Ensures that PadRight will align messages with markup correctly.
+            var paddingDiff = messageWithTime.Length - new Markup(messageWithTime).Length;
+
+            console.MarkupLine(messageWithTime.PadRight(65 + paddingDiff) + LightYellow(elapsed.ToString(@"ss\.FFFF")));
         }
     }
 
-    public class TransferSpeedUnit : EnumBase<TransferSpeedUnit>
+    public sealed class TransferSpeedUnit : EnumBase<TransferSpeedUnit>
     {
         public static readonly TransferSpeedUnit Bits = new TransferSpeedUnit("bits");
         public static readonly TransferSpeedUnit Bytes = new TransferSpeedUnit("bytes");

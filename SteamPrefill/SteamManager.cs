@@ -41,12 +41,12 @@
         ///
         /// Required to be called first before using SteamManager class.
         /// </summary>
-        public void Initialize()
+        public async Task InitializeAsync()
         {
             var timer = Stopwatch.StartNew();
             _ansiConsole.LogMarkupLine("Starting login!");
 
-            _steam3.LoginToSteam();
+            await _steam3.LoginToSteamAsync();
             _steam3.WaitForLicenseCallback();
 
 #if DEBUG
@@ -136,7 +136,7 @@
             if (_downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
             {
                 _prefillSummaryResult.AlreadyUpToDate++;
-                if (AppConfig.QuietLogs)
+                if (!AppConfig.VerboseLogs)
                 {
                     return;
                 }
@@ -197,37 +197,6 @@
                 }
             }
             return chunkQueue;
-        }
-
-        public async Task SelectAppsAsync()
-        {
-            var availableGames = await GetAllAvailableGamesAsync();
-
-            // Whitespace divider
-            _ansiConsole.WriteLine();
-            _ansiConsole.Write(new Rule());
-
-            var multiSelect = new MultiSelectionPrompt<AppInfo>()
-                              .Title(Underline(White("Select apps to prefill...")))
-                              .NotRequired()
-                              .PageSize(55)
-                              .MoreChoicesText(Grey("(Use ↑/↓ to navigate.  Page Up/Page Down skips pages)"))
-                              .InstructionsText(Grey($"(Press {Blue("<space>")} to toggle an app, {Green("<enter>")} to accept)"))
-                              .AddChoices(availableGames);
-
-            // Restoring previously selected items
-            foreach (var id in LoadPreviouslySelectedApps())
-            {
-                var appInfo = availableGames.FirstOrDefault(e => e.AppId == id);
-                if (appInfo != null)
-                {
-                    multiSelect.Select(appInfo);
-                }
-            }
-
-            var selectedApps = _ansiConsole.Prompt(multiSelect)
-                                                    .ToList();
-            SetAppsAsSelected(selectedApps);
         }
 
         public void SetAppsAsSelected(List<AppInfo> userSelected)

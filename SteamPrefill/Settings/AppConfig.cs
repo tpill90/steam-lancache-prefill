@@ -18,7 +18,7 @@ namespace SteamPrefill.Settings
         #endif
 
         //TODO comment
-        public static bool QuietLogs { get; set; }
+        public static bool VerboseLogs { get; set; }
 
         public static string SteamCdnUrl => "lancache.steamcontent.com";
 
