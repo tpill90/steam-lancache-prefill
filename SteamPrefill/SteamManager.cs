@@ -147,7 +147,7 @@
 
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
 
-            await _cdnPool.PopulateAvailableServersAsync(_steam3._cellId);
+            await _cdnPool.PopulateAvailableServersAsync();
 
             // Get the full file list for each depot, and queue up the required chunks
             var chunkDownloadQueue = await BuildChunkDownloadQueueAsync(filteredDepots);

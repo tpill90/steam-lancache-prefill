@@ -29,7 +29,6 @@ namespace SteamPrefill.Handlers.Steam
         private readonly UserAccountStore _userAccountStore;
 
         public SteamID _steamId;
-        public uint _cellId;
 
         public Steam3Session(IAnsiConsole ansiConsole)
         {
@@ -189,11 +188,6 @@ namespace SteamPrefill.Handlers.Steam
             _steamId = logonResult.ClientSteamID;
 
             var loggedOn = logonResult;
-
-            _cellId = logonResult.CellID;
-#if DEBUG
-            _ansiConsole.MarkupLine(string.Concat("CellId ", MediumPurple(_cellId)));
-#endif
 
             // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
             if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
