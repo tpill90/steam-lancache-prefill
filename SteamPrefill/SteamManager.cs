@@ -41,12 +41,12 @@
         ///
         /// Required to be called first before using SteamManager class.
         /// </summary>
-        public void Initialize()
+        public async Task InitializeAsync()
         {
             var timer = Stopwatch.StartNew();
             _ansiConsole.LogMarkupLine("Starting login!");
 
-            _steam3.LoginToSteam();
+            await _steam3.LoginToSteamAsync();
             _steam3.WaitForLicenseCallback();
 
 #if DEBUG
