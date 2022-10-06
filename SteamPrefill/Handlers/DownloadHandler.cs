@@ -42,7 +42,6 @@
                 _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
             }
             
-            int retryCount = 0;
             int maxRetries = 3;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
@@ -55,13 +54,12 @@
                 if (failedRequests.Any())
                 {
                     var task = ctx.AddTask("Retrying Failed Requests", new ProgressTaskSettings() { MaxValue = maxRetries });
-                    while (failedRequests.Any() && retryCount < maxRetries)
+                    for (int retryCount = 0; retryCount < maxRetries && failedRequests.Any(); retryCount++)
                     {
                         task.Increment(1);
                         ctx.Refresh();
-                        retryCount++;
-                        await Task.Delay(2000 * retryCount);
                         await _cdnPool.PopulateAvailableServersAsync(cellId);
+                        await Task.Delay(500 * retryCount);
                         failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList());
                     }
                 }
