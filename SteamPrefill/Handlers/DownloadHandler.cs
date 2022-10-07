@@ -47,21 +47,29 @@
             var failedRequests = new ConcurrentBag<QueuedRequest>();
             await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
+                double requestTotalSize = queuedRequests.Sum(e => e.CompressedLength);
+                var downloadTask = ctx.AddTask("Downloading...", new ProgressTaskSettings { MaxValue = requestTotalSize });
                 // Run the initial download
-                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests);
+                failedRequests = await AttemptDownloadAsync(ctx, queuedRequests, downloadTask);
+
 
                 // Handle any failed requests
                 if (failedRequests.Any())
                 {
-                    var task = ctx.AddTask("Retrying Failed Requests", new ProgressTaskSettings() { MaxValue = maxRetries });
+                    var task = ctx.AddTask("Retrying failed Requests", new ProgressTaskSettings() { MaxValue = maxRetries });
                     for (int retryCount = 0; retryCount < maxRetries && failedRequests.Any(); retryCount++)
                     {
                         task.Increment(1);
-                        ctx.Refresh();
                         await _cdnPool.PopulateAvailableServersAsync(cellId);
                         await Task.Delay(500 * retryCount);
-                        failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList());
+                        failedRequests = await AttemptDownloadAsync(ctx, failedRequests.ToList(), downloadTask);
                     }
+                }
+
+                if (failedRequests.Any())
+                {
+                    downloadTask.Description = "Failed.";
+                    downloadTask.StopTask();
                 }
             });
 
@@ -80,11 +88,8 @@
         /// </summary>
         /// <returns>A list of failed requests</returns>
         [SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
-        private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload)
+        private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, List<QueuedRequest> requestsToDownload, ProgressTask task)
         {
-            double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength); 
-            var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
-
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             // Running as many requests as possible in parallel, evenly distributed across 3 cdns
@@ -108,12 +113,12 @@
                     while (await responseStream.ReadAsync(buffer, 0, buffer.Length, _) != 0)
                     {
                     }
+                    task.Increment(request.CompressedLength); //Increment only on successfull downloads
                 }
                 catch
                 {
                     failedRequests.Add(request);
                 }
-                progressTask.Increment(request.CompressedLength);
             });
 
             // Only return the connections for reuse if there were no errors
@@ -121,9 +126,6 @@
             {
                 _cdnPool.ReturnConnections(cdnServers);
             }
-
-            // Making sure the progress bar is always set to its max value, in-case some unexpected error leaves the progress bar showing as unfinished
-            progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
         }
 
