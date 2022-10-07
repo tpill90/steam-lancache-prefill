@@ -45,4 +45,4 @@ global using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSP
 global using Architecture = SteamPrefill.Models.Enums.Architecture;
 global using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
 global using SteamPrefill.CliCommands.SelectAppsBeta;
-global using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
+global using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;global using Wcwidth;
