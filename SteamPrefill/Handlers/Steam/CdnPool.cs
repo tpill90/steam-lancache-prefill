@@ -26,32 +26,39 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public async Task PopulateAvailableServersAsync()
         {
-            //TODO need to add a timeout to this GetServersForSteamPipe() call
             if (_availableServerEndpoints.Count >= _minimumServerCount)
             {
                 return;
             }
 
+            //TODO not a fan of how deeply nested this is
             await _ansiConsole.StatusSpinner().StartAsync(White(" Getting available CDNs "), async task =>
             {
                 var retryCount = 0;
+
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
-                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe();
-                    _availableServerEndpoints.AddRange(returnedServers);
+                    try
+                    {
+                        var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe()
+                                                                 .WaitAsync(timeout: TimeSpan.FromSeconds(10));
+                        _availableServerEndpoints.AddRange(returnedServers);
 
-                    // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
-                    //TODO documentation on why these server types are included?
-                    _availableServerEndpoints = _availableServerEndpoints
-                                                .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
-                                                .DistinctBy(e => e.Host)
-                                                .ToList();
+                        // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
+                        _availableServerEndpoints = _availableServerEndpoints
+                                                    .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
+                                                    .DistinctBy(e => e.Host)
+                                                    .ToList();
 
-                    task.Status($"{White(" Getting available CDNs ")} {Green($"{_availableServerEndpoints.Count}/{_minimumServerCount}")}");
+                        task.Status($"{White(" Getting available CDNs ")} {Green($"{_availableServerEndpoints.Count}/{_minimumServerCount}")}");
 
-                    // Will wait increasingly longer periods when re-trying
-                    retryCount++;
-                    await Task.Delay(retryCount * 250);
+                        retryCount++;
+                        await Task.Delay(retryCount * 250);
+                    }
+                    catch (TimeoutException e)
+                    {
+                        // Swallowing timeout exceptions, so that we can retry and see if the next attempt succeeds
+                    }
                 }
             });
 
