@@ -51,6 +51,8 @@ namespace SteamPrefill.Handlers.Steam
                 {
                     var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(cellId);
                     totalServers += returnedServers.Count;
+                    FileLogger.Log(FileLogger.LogLevel.DEBUG, string.Format("Try {0} got {1}", retryCount, returnedServers.Count));
+
                     _availableServerEndpoints.AddRange(returnedServers);
 
                     // Filtering out non-cacheable cdns, and duplicate hosts
@@ -60,21 +62,16 @@ namespace SteamPrefill.Handlers.Steam
                         .ToList();
 
 #if DEBUG
-                    table.AddRow(new TableRow(new[]{
-                                               new Markup(retryCount.ToString()),
-                                               new Markup(totalServers.ToString()),
-                                               new Markup("")
-                                                }));
+                    Grid serverGrid = new Grid().AddColumn();
                     foreach (Server s in _availableServerEndpoints)
                     {
-                        table.AddRow(new TableRow(new[]{
-                                                    new Markup(""),
-                                                    new Markup(""),
-                                                    new Markup(String.Format("{0} {1}", s.Type, MediumPurple(s.Host)))
-                                                }));
+                        serverGrid.AddRow(new Markup(string.Format("{0} {1}", s.Type, MediumPurple(s.Host))));
+                        FileLogger.Log(FileLogger.LogLevel.DEBUG, string.Format("{0} {1}", s.Type, s.Host));
                     }
-                        
-                    
+                    table.AddRow(
+                        new Markup(retryCount.ToString()),
+                        new Markup(totalServers.ToString()),
+                        serverGrid);
 #else
                     task.Status(string.Format(statusString, retryCount, _availableServerEndpoints.Count, _minimumServerCount));
 #endif
@@ -83,6 +80,7 @@ namespace SteamPrefill.Handlers.Steam
                     retryCount++;
                     await Task.Delay(retryCount * 100);
                 }
+                FileLogger.Log(FileLogger.LogLevel.DEBUG, string.Format("Results: {0} tries {1} total returned {2} selected", retryCount, totalServers, _availableServerEndpoints.Count));
             });
 
             if (_availableServerEndpoints.Empty())
@@ -101,14 +99,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public Server TakeConnection()
         {
-            if (_availableServerEndpoints.Empty())
-            {
-                throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
-            }
-
-            var server = _availableServerEndpoints.First();
-            _availableServerEndpoints.RemoveAt(0);
-            return server;
+            return TakeConnections(1).First();
         }
 
         /// <summary>
@@ -145,8 +136,9 @@ namespace SteamPrefill.Handlers.Steam
         {
             foreach (var connection in connections)
             {
-                ReturnConnection(connection);
+                _availableServerEndpoints.Add(connection);
             }
+            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
         }
     }
 }

@@ -80,6 +80,7 @@ namespace SteamPrefill.Handlers.Steam
             {
                 _callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                 SteamUser.LoggedOnCallback logonResult = null;
+                FileLogger.Log(FileLogger.LogLevel.INFO, "Logging into Steam...");
                 _ansiConsole.StatusSpinner().Start("Connecting to Steam...", ctx =>
                 {
                     ConnectToSteam();
@@ -93,6 +94,7 @@ namespace SteamPrefill.Handlers.Steam
                 retryCount++;
                 if (retryCount == 5)
                 {
+                    FileLogger.Log(FileLogger.LogLevel.FATAL, "Unable after 5 retries!");
                     throw new SteamLoginException("Unable to login to Steam!  Try again in a few moments...");
                 }
             }
@@ -129,6 +131,7 @@ namespace SteamPrefill.Handlers.Steam
                     _callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                     if (DateTime.Now > timeoutAfter)
                     {
+                        FileLogger.Log(FileLogger.LogLevel.ERROR, "Request timed out");
                         throw new SteamConnectionException("Timeout connecting to Steam...  Try again in a few moments");
                     }
                 }
@@ -177,6 +180,7 @@ namespace SteamPrefill.Handlers.Steam
 				_callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                 if (DateTime.Now > timeoutAfter)
                 {
+                    FileLogger.Log(FileLogger.LogLevel.FATAL, "Request timed out.");
                     throw new SteamLoginException("Timeout logging into Steam...  Try again in a few moments");
                 }
             }
@@ -190,59 +194,60 @@ namespace SteamPrefill.Handlers.Steam
 
             var loggedOn = logonResult;
 
-            // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
-            if (loggedOn.Result == EResult.AccountLoginDeniedNeedTwoFactor)
+            switch (loggedOn.Result)
             {
-                _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(LightYellow("2FA required for login.") +
-                                                                                         $"  Please enter your {Cyan("Steam Guard code")} from your authenticator app : "));
-                return false;
-            }
-            if (loggedOn.Result == EResult.TwoFactorCodeMismatch)
-            {
-                _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Red("Login failed. Incorrect Steam Guard code") +
-                                                                                         "  Please try again : "));
-                return false;
+                case EResult.AccountLoginDeniedNeedTwoFactor: // If the account has 2-Factor login enabled, then we will need to re-login with the supplied code
+                    FileLogger.Log(FileLogger.LogLevel.DEBUG, "2FA required");
+                    _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(LightYellow("2FA required for login.") +
+                                                            $"  Please enter your {Cyan("Steam Guard code")} from your authenticator app : "));
+                    return false;
+                case EResult.TwoFactorCodeMismatch:
+                    FileLogger.Log(FileLogger.LogLevel.DEBUG, "2FA failed");
+                    _logonDetails.TwoFactorCode = _ansiConsole.Prompt(new TextPrompt<string>(Red("Login failed. Incorrect Steam Guard code") +
+                                                                                             "  Please try again : "));
+                    return false;
+                case EResult.InvalidPassword:
+                    if (_logonDetails.LoginKey != null) //Key expired
+                    {
+                        FileLogger.Log(FileLogger.LogLevel.DEBUG, "Expired Session");
+                        _userAccountStore.LoginKeys.Remove(_logonDetails.Username);
+                        _logonDetails.LoginKey = null;
+                        _logonDetails.Password = _ansiConsole.ReadPassword("Steam session expired!  Password re-entry required!");
+                        return false;
+                    }
+                    else
+                    {
+                        _failedLogonAttempts++;
+                        if (_failedLogonAttempts == 3)
+                        {
+                            FileLogger.Log(FileLogger.LogLevel.DEBUG, "Wrong password");
+                            _ansiConsole.LogMarkupLine(Red("Invalid username/password combination!  Check your login credential validity, and try again.."));
+                            throw new AuthenticationException("Invalid username/password");
+                        }
+
+                        _logonDetails.Password = _ansiConsole.ReadPassword($"{Red("Invalid password!  Please re-enter your password!")}");
+                        return false;
+                    }
+                case EResult.AccountLogonDenied: // SteamGuard code required
+                    FileLogger.Log(FileLogger.LogLevel.DEBUG, "2FA (Mail) required");
+                    _logonDetails.AuthCode = _ansiConsole.Prompt(new TextPrompt<string>(LightYellow("This account is protected by Steam Guard.") +
+                                                                                        "  Please enter the code sent to your email address:  "));
+                    return false;
+                case EResult.ServiceUnavailable:
+                    FileLogger.Log(FileLogger.LogLevel.ERROR, "Service Unavailable");
+                    throw new SteamLoginException($"Unable to login to Steam : Service is unavailable");
+                default:
+                    if(loggedOn.Result != EResult.OK)
+                    {
+                        FileLogger.Log(FileLogger.LogLevel.ERROR, $"Unknown Error: {loggedOn.Result}");
+                        throw new SteamLoginException($"Unable to login to Steam.  An unknown error occurred : {loggedOn.Result}");
+                    }
+                    break;
             }
 
-            var loginKeyExpired = _logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
-            if (loginKeyExpired)
-            {
-                _userAccountStore.LoginKeys.Remove(_logonDetails.Username);
-                _logonDetails.LoginKey = null;
-                _logonDetails.Password = _ansiConsole.ReadPassword("Steam session expired!  Password re-entry required!");
-                return false;
-            }
-
-            if (loggedOn.Result == EResult.InvalidPassword)
-            {
-                _failedLogonAttempts++;
-                if (_failedLogonAttempts == 3)
-                {
-                    _ansiConsole.LogMarkupLine(Red("Invalid username/password combination!  Check your login credential validity, and try again.."));
-                    throw new AuthenticationException("Invalid username/password");
-                }
-
-                _logonDetails.Password = _ansiConsole.ReadPassword($"{Red("Invalid password!  Please re-enter your password!")}");
-                return false;
-            }
-
-            // SteamGuard code required
-            if (loggedOn.Result == EResult.AccountLogonDenied)
-            {
-                _logonDetails.AuthCode = _ansiConsole.Prompt(new TextPrompt<string>(LightYellow("This account is protected by Steam Guard.") +
-                                                                                    "  Please enter the code sent to your email address:  "));
-                return false;
-            }
-            if (loggedOn.Result == EResult.ServiceUnavailable)
-            {
-                throw new SteamLoginException($"Unable to login to Steam : Service is unavailable");
-            }
-            if (loggedOn.Result != EResult.OK)
-            {
-                throw new SteamLoginException($"Unable to login to Steam.  An unknown error occurred : {loggedOn.Result}");
-            }
-
+            FileLogger.Log(FileLogger.LogLevel.INFO, "Successfully logged in");
             _ansiConsole.LogMarkupLine($"Logged into Steam");
+
             _cellId = logonResult.CellID;
 #if DEBUG
             _ansiConsole.MarkupLine(string.Concat("CellId ", MediumPurple(_cellId)));
@@ -270,6 +275,7 @@ namespace SteamPrefill.Handlers.Steam
             {
                 if (DateTime.Now >= totalWaitPeriod)
                 {
+                    FileLogger.Log(FileLogger.LogLevel.ERROR, "Steam Session key not saved.");
                     _ansiConsole.LogMarkupLine(Red("Failed to save Steam session key.  Steam account will not stay logged in..."));
                     return;
                 }
@@ -309,7 +315,7 @@ namespace SteamPrefill.Handlers.Steam
 
 #endregion
 
-#region Other Auth Methods
+        #region Other Auth Methods
 
         /// <summary>
         /// The UpdateMachineAuth event will be triggered once the user has logged in with either Steam Guard or 2FA enabled.
@@ -340,9 +346,9 @@ namespace SteamPrefill.Handlers.Steam
             _steamUser.SendMachineAuthResponse(authResponse);
         }
         
-#endregion
+        #endregion
 
-#region LoadAccountLicenses
+        #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
         /// <summary>
@@ -351,6 +357,7 @@ namespace SteamPrefill.Handlers.Steam
         /// </summary>
         public void WaitForLicenseCallback()
         {
+            FileLogger.Log(FileLogger.LogLevel.DEBUG, "Getting licenses...");
             _ansiConsole.StatusSpinner().Start("Retrieving owned apps...", _ =>
             {
                 while (_loadAccountLicensesIsRunning)
@@ -365,6 +372,7 @@ namespace SteamPrefill.Handlers.Steam
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
+                FileLogger.Log(FileLogger.LogLevel.ERROR, $"Unable to retrieve licenses: {licenseList.Result}");
                 _ansiConsole.MarkupLine(Red($"Unexpected error while retrieving license list : {licenseList.Result}"));
                 throw new SteamLoginException("Unable to retrieve user licenses!");
             }
@@ -459,7 +467,7 @@ namespace SteamPrefill.Handlers.Steam
             File.WriteAllText(_ownedDepotIdsPath, JsonSerializer.Serialize(OwnedDepotIds, SerializationContext.Default.HashSetUInt32));
             File.WriteAllText(_packageCountPath, packageRequests.Count.ToString());
         }
-#endregion
+        #endregion
 
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this app.

@@ -71,6 +71,7 @@ namespace LancachePrefill.Common
                         _ansiConsole.MarkupLine(Red($" Error!  {White(cdnUrl)} is resolving to a private IP address {Cyan($"({ipAddresses.First()})")},\n" +
                                                     " however no Lancache can be found at that address.\n" +
                                                     " Please check your configuration, and try again.\n"));
+                        FileLogger.Log(FileLogger.LogLevel.FATAL, string.Format("Config-Error: CDN-URL: {0} Resolved IP: {1}", cdnUrl, ipAddresses.First().ToString()));
                         throw new LancacheNotFoundException($"No Lancache server detected at {ipAddresses.First()}");
                     }
                 }
@@ -94,6 +95,7 @@ namespace LancachePrefill.Common
             // This will prompt a user to see if they still want to continue, as downloading from the internet could still be a good download speed test.
             _ansiConsole.MarkupLine(LightYellow($" Warning!  {White(cdnUrl)} is resolving to a public IP address {Cyan($"({ipAddresses.First()})")}.\n" +
                                                 " Prefill will download directly from the internet, and will not be cached by Lancache.\n"));
+            FileLogger.Log(FileLogger.LogLevel.ERROR, string.Format("LAN-Cache not found at {0} Resolved IP: {1}", cdnUrl, ipAddresses.First().ToString()));
 
             var publicDownloadOverride = _ansiConsole.Prompt(new SelectionPrompt<bool>()
                                                              .Title("Continue anyway?")
@@ -102,6 +104,7 @@ namespace LancachePrefill.Common
 
             if (publicDownloadOverride == false)
             {
+                FileLogger.Log(FileLogger.LogLevel.INFO, "User cancelled download.");
                 throw new UserCancelledException("User cancelled download!");
             }
         }

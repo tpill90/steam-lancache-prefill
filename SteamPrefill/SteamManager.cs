@@ -49,6 +49,7 @@
             await _steam3.LoginToSteamAsync();
             _steam3.WaitForLicenseCallback();
 
+            FileLogger.Log(FileLogger.LogLevel.DEBUG, $"Steam session initialization complete after {timer.Elapsed}");
 #if DEBUG
             _ansiConsole.LogMarkupLine("Steam session initialization complete!", timer.Elapsed);
 #else
@@ -101,11 +102,13 @@
                 catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
                 {
                     // We'll want to bomb out the entire process for these exceptions, as they mean we can't prefill any apps at all
+                    FileLogger.Log(FileLogger.LogLevel.FATAL, e.Message);
                     throw;
                 }
                 catch (Exception e)
                 {
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
+                    FileLogger.Log(FileLogger.LogLevel.ERROR, $"Unexpected download error : {e.Message}");
                     _ansiConsole.MarkupLine(Red($"   Unexpected download error : {e.Message}"));
                     _ansiConsole.MarkupLine("");
                     _prefillSummaryResult.FailedApps++;
@@ -113,6 +116,7 @@
             }
             await PrintUnownedAppsAsync(distinctAppIds);
 
+            FileLogger.Log(FileLogger.LogLevel.INFO, "Prefill complete");
             _ansiConsole.LogMarkupLine("Prefill complete!");
             _prefillSummaryResult.RenderSummaryTable(_ansiConsole, availableGames.Count);
         }
