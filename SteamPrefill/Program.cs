@@ -1,6 +1,7 @@
 namespace SteamPrefill
 {
     /* TODO
+     * Documentation - Add collapsible markdown sections https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
      * Documentation - Add linux command examples to readme.

@@ -1,9 +1,7 @@
-﻿using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConsoleExtensions;
-
-//TODO need to rethink the verbiage between 'app' and 'game' on the user facing docs
-// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
+    //TODO need to rethink the verbiage between 'app' and 'game' on the user facing docs
     [UsedImplicitly]
     [Command("prefill", Description = "Downloads the latest version of one or more specified app(s)." +
                                            "  Automatically includes apps selected using the 'select-apps' command")]
@@ -42,11 +40,11 @@ namespace SteamPrefill.CliCommands
         public bool? Force { get; init; }
 
         [CommandOption("nocache",
-            Description = "Skips using locally cached files.  Saves disk space, at the expense of slower subsequent runs.",
+            Description = "Skips using locally cached files. Saves disk space, at the expense of slower subsequent runs.",
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
-        [CommandOption("verbose", Description = "Produces more detailed log output.  Will output logs for games are already up to date.", Converter = typeof(NullableBoolConverter))]
+        [CommandOption("verbose", Description = "Produces more detailed log output. Will output logs for games are already up to date.", Converter = typeof(NullableBoolConverter))]
         public bool? Verbose 
         {
             get => AppConfig.VerboseLogs;
@@ -58,12 +56,20 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(TransferSpeedUnitConverter))]
         public TransferSpeedUnit TransferSpeedUnit { get; init; } = TransferSpeedUnit.Bits;
 
+        [CommandOption("no-ansi",
+            Description = "Application output will be in plain text.  " +
+                          "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? NoAnsiEscapeSequences { get; init; }
+
         private IAnsiConsole _ansiConsole;
         private int? _prefillPopularGames;
 
         public async ValueTask ExecuteAsync(IConsole console)
         {
             _ansiConsole = console.CreateAnsiConsole();
+            // Property must be set to false in order to disable ansi escape sequences
+            _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
             await UpdateChecker.CheckForUpdatesAsync(typeof(Program), "tpill90/steam-lancache-prefill", AppConfig.CacheDir);
 
