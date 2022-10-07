@@ -65,6 +65,7 @@
                 return true;
             }
 
+            FileLogger.Log(FileLogger.LogLevel.ERROR, $"{failedRequests.Count} failed downloads");
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }
