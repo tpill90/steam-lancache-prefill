@@ -2,6 +2,7 @@ namespace SteamPrefill
 {
     /* TODO
      * Documentation - Add collapsible markdown sections https://gist.github.com/pierrejoubert73/902cc94d79424356a8d20be2b382e1ab
+     * Research - See if this endpoint can give me anything useful in some way clientconfig.akamai.steamstatic.com/appinfo/17390/sha/896ef0a3ad4c4901b78916c76e85cde05cf5f137.txt.gz
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
      * Documentation - Add linux command examples to readme.
@@ -27,17 +28,40 @@ namespace SteamPrefill
     {
         public static async Task<int> Main()
         {
-            var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
-                              "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
-                              "\n" +
-                              "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
-            return await new CliApplicationBuilder()
-                         .AddCommandsFromThisAssembly()
-                         .SetTitle("SteamPrefill")
-                         .SetExecutableName($"SteamPrefill{(OperatingSystem.IsWindows() ? ".exe" : "")}")
-                         .SetDescription(description)
-                         .Build()
-                         .RunAsync();
+            try
+            {
+                var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
+                                  "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
+                                  "\n" +
+                                  "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
+                return await new CliApplicationBuilder()
+                             .AddCommandsFromThisAssembly()
+                             .SetTitle("SteamPrefill")
+                             .SetExecutableName($"SteamPrefill{(OperatingSystem.IsWindows() ? ".exe" : "")}")
+                             .SetDescription(description)
+                             .Build()
+                             .RunAsync();
+            }
+            //TODO dedupe this throughout the codebase
+            catch (TimeoutException e)
+            {
+                AnsiConsole.Console.MarkupLine("\n");
+                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsernameAsync)))
+                {
+                    AnsiConsole.Console.MarkupLine(Red("Timed out while waiting for username entry"));
+                }
+                if (e.StackTrace.Contains(nameof(AnsiConsoleExtensions.ReadPassword)))
+                {
+                    AnsiConsole.Console.MarkupLine(Red("Timed out while waiting for password entry"));
+                }
+                AnsiConsole.Console.WriteException(e, ExceptionFormats.ShortenPaths);
+            }
+            catch (Exception e)
+            {
+                AnsiConsole.Console.WriteException(e, ExceptionFormats.ShortenPaths);
+            }
+
+            return 0;
         }
 
         public static class OperatingSystem

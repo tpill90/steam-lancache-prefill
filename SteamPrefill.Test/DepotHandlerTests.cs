@@ -1,4 +1,5 @@
 ﻿using Moq;
+using Spectre.Console.Testing;
 using SteamKit2;
 using SteamPrefill.Handlers;
 using SteamPrefill.Handlers.Steam;
@@ -36,7 +37,7 @@ namespace SteamPrefill.Test
             appInfoHandlerMock.Setup(e => e.GetAppInfoAsync(It.IsAny<uint>()))
                           .Returns(Task.FromResult(new AppInfo(steam3, 222, appKeyValues)));
 
-            _depotHandler = new DepotHandler(steam3, appInfoHandlerMock.Object);
+            _depotHandler = new DepotHandler(new TestConsole(), steam3, appInfoHandlerMock.Object, null, new DownloadArguments());
         }
 
         [Fact]

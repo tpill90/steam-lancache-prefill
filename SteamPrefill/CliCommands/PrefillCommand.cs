@@ -81,7 +81,7 @@ namespace SteamPrefill.CliCommands
             };
 
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
-            ValidateSelectedAppIds(steamManager);
+            ValidateUserHasSelectedApps(steamManager);
             ValidatePopularGameCount();
             
             try
@@ -124,7 +124,8 @@ namespace SteamPrefill.CliCommands
             }
         }
 
-        private void ValidateSelectedAppIds(SteamManager steamManager)
+        // Validates that the user has selected at least 1 app
+        private void ValidateUserHasSelectedApps(SteamManager steamManager)
         {
             var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
 
