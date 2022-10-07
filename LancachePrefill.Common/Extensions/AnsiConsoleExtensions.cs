@@ -80,6 +80,11 @@ namespace LancachePrefill.Common.Extensions
 
             console.MarkupLine(messageWithTime.PadRight(65 + paddingDiff) + LightYellow(elapsed.ToString(@"ss\.FFFF")));
         }
+
+        public static Markup ToMarkup(this Object obj)
+        {
+            return new Markup(obj.ToString());
+        }
     }
 
     public sealed class TransferSpeedUnit : EnumBase<TransferSpeedUnit>

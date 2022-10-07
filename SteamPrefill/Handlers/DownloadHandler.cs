@@ -81,9 +81,7 @@
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
-            // Running as many requests as possible in parallel, evenly distributed across 3 cdns
-            var cdnServers = _cdnPool.TakeConnections(3).ToList();
-            var connCount = cdnServers.Count;
+            var cdnServer = _cdnPool.TakeConnection();
             await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 50 }, async (request, _) =>
             {
                 var buffer = new byte[4096];
@@ -91,8 +89,7 @@
                 {
                     var url = ZString.Format("http://{0}/depot/{1}/chunk/{2}", _lancacheAddress, request.DepotId, request.ChunkId);
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-                    // Evenly distributes requests the available CDNs
-                    requestMessage.Headers.Host = cdnServers[request.ChunkNum % connCount].Host;
+                    requestMessage.Headers.Host = cdnServer.Host;
 
                     var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
                     using Stream responseStream = await response.Content.ReadAsStreamAsync();
@@ -113,7 +110,7 @@
             // Only return the connections for reuse if there were no errors
             if (failedRequests.IsEmpty)
             {
-                _cdnPool.ReturnConnections(cdnServers);
+                _cdnPool.ReturnConnection(cdnServer);
             }
 
             // Making sure the progress bar is always set to its max value, in-case some unexpected error leaves the progress bar showing as unfinished
