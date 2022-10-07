@@ -74,12 +74,12 @@
 
             Name = rootKeyValue["common"]["name"].Value;
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
-            OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited(); 
+            OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
             //TODO alot of games are missing this
             SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTimeUtc();
             OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTimeUtc();
             ReleaseState = rootKeyValue["common"]["releasestate"].AsEnum<ReleaseState>(toLower: true);
-            
+
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {
                 // Depots should always have a ID for their name.
@@ -101,7 +101,7 @@
                                      .Where(e => steamSession.AccountHasAppAccess(e))
                                      .ToList();
             }
-            
+
             Categories = rootKeyValue["common"]["category"]
                          .Children
                          .Select(e => (Category)int.Parse(e.Name.Replace("category_", "")))

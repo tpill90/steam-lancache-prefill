@@ -9,7 +9,7 @@
         /// The content-length of the data to be requested.
         /// </summary>
         public uint CompressedLength { get; }
-        
+
         //TODO comment what this does + why its needed
         public int ChunkNum { get; }
 

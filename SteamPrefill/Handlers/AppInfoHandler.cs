@@ -34,7 +34,7 @@ namespace SteamPrefill.Handlers
                 // Breaking the request into smaller batches that complete faster
                 var batchJobs = appIds.Chunk(50).Select(e => BulkLoadAppInfosAsync(e.ToList()));
                 await Task.WhenAll(batchJobs);
-                
+
                 if (loadDlcApps)
                 {
                     // Once we have loaded all the apps, we can also load information for related DLC

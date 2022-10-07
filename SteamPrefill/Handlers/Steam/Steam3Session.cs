@@ -9,10 +9,10 @@ namespace SteamPrefill.Handlers.Steam
         private readonly string _packageCountPath = $"{AppConfig.CacheDir}/packageCount.txt";
         private readonly string _ownedAppIdsPath = $"{AppConfig.CacheDir}/OwnedAppIds.json";
         private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
-        
+
         public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
         public HashSet<uint> OwnedDepotIds { get; private set; } = new HashSet<uint>();
-        
+
         // Steam services
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
@@ -22,7 +22,7 @@ namespace SteamPrefill.Handlers.Steam
         public SteamUnifiedMessages.UnifiedService<IPlayer> unifiedPlayerService;
 
         private readonly CallbackManager _callbackManager;
-        
+
         private SteamUser.LogOnDetails _logonDetails;
         private readonly IAnsiConsole _ansiConsole;
 
@@ -60,7 +60,7 @@ namespace SteamPrefill.Handlers.Steam
             _callbackManager.Subscribe<SteamUser.UpdateMachineAuthCallback>(UpdateMachineAuthCallback);
             _callbackManager.Subscribe<SteamUser.LoginKeyCallback>(LoginKeyCallback);
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
-            
+
             CdnClient = new Client(_steamClient);
             // Configuring SteamKit's HttpClient to timeout in a more reasonable time frame.
             Client.ResponseBodyTimeout = TimeSpan.FromSeconds(5);
@@ -121,7 +121,7 @@ namespace SteamPrefill.Handlers.Steam
             {
                 _isConnecting = true;
                 _steamClient.Connect();
-                
+
                 // Busy waiting until SteamKit2 either succeeds/fails the connection attempt
                 while (_isConnecting)
                 {
@@ -144,7 +144,7 @@ namespace SteamPrefill.Handlers.Steam
 
             string loginKey;
             _userAccountStore.LoginKeys.TryGetValue(username, out loginKey);
-            
+
             _logonDetails = new SteamUser.LogOnDetails
             {
                 Username = username,
@@ -159,7 +159,7 @@ namespace SteamPrefill.Handlers.Steam
                 _logonDetails.SentryFileHash = bytes.ToSha1();
             }
         }
-        
+
         private SteamUser.LoggedOnCallback _loggedOnCallbackResult;
 
         [SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "while() loop is not infinite.  _loggedOnCallbackResult is set after logging into Steam")]
@@ -173,7 +173,7 @@ namespace SteamPrefill.Handlers.Steam
             // Busy waiting for the callback to complete, then we can return the callback value synchronously
             while (_loggedOnCallbackResult == null)
             {
-				_callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
+                _callbackManager.RunWaitAllCallbacks(timeout: TimeSpan.FromMilliseconds(50));
                 if (DateTime.Now > timeoutAfter)
                 {
                     throw new SteamLoginException("Timeout logging into Steam...  Try again in a few moments");
@@ -181,7 +181,7 @@ namespace SteamPrefill.Handlers.Steam
             }
             return _loggedOnCallbackResult;
         }
-        
+
         private int _failedLogonAttempts;
         private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
@@ -249,10 +249,10 @@ namespace SteamPrefill.Handlers.Steam
                 _logonDetails.Password = null;
                 GC.Collect(3, GCCollectionMode.Forced);
             }
-            
+
             return true;
         }
-        
+
         bool _receivedLoginKey;
         private void TryWaitForLoginKey()
         {
@@ -304,9 +304,9 @@ namespace SteamPrefill.Handlers.Steam
             _ansiConsole.LogMarkupLine("Disconnected from Steam!");
         }
 
-#endregion
+        #endregion
 
-#region Other Auth Methods
+        #region Other Auth Methods
 
         /// <summary>
         /// The UpdateMachineAuth event will be triggered once the user has logged in with either Steam Guard or 2FA enabled.
@@ -336,10 +336,10 @@ namespace SteamPrefill.Handlers.Steam
             };
             _steamUser.SendMachineAuthResponse(authResponse);
         }
-        
-#endregion
 
-#region LoadAccountLicenses
+        #endregion
+
+        #region LoadAccountLicenses
 
         private bool _loadAccountLicensesIsRunning = true;
         /// <summary>
@@ -419,7 +419,7 @@ namespace SteamPrefill.Handlers.Steam
                         continue;
                     }
                 }
-               
+
                 foreach (KeyValue appId in package.KeyValues["appids"].Children)
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
@@ -456,7 +456,7 @@ namespace SteamPrefill.Handlers.Steam
             File.WriteAllText(_ownedDepotIdsPath, JsonSerializer.Serialize(OwnedDepotIds, SerializationContext.Default.HashSetUInt32));
             File.WriteAllText(_packageCountPath, packageRequests.Count.ToString());
         }
-#endregion
+        #endregion
 
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this app.

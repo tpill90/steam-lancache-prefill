@@ -38,7 +38,7 @@
 
         // If there is no manifest we can't download this depot, and if there is no shared depot then we can't look up a related manifest we could use
         public bool IsInvalidDepot => ManifestId == null && DepotFromApp == null;
-        
+
         public List<OperatingSystem> SupportedOperatingSystems { get; init; } = new List<OperatingSystem>();
         public Architecture Architecture { get; init; }
         public List<Language> Languages { get; init; } = new List<Language>();
@@ -71,7 +71,7 @@
                                                                        .ToList();
             }
             Architecture = rootKey["config"]["osarch"].AsEnum<Architecture>();
-            
+
             Languages = rootKey["config"]["language"].SplitCommaDelimited()
                                                     .Select(e => Language.Parse(e))
                                                     .ToList();

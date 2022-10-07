@@ -16,7 +16,7 @@
 
         private static object _lockObject = new object();
 
-        
+
         public static List<T> AllEnumValues
         {
             get

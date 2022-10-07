@@ -12,7 +12,7 @@
         /// </summary>
         [ProtoMember(1)]
         public Dictionary<string, byte[]> SentryData { get; private set; }
-        
+
         /// <summary>
         /// Upon a successful login to Steam, a "Login Key" will be returned to use on subsequent logins.
         /// This login key can be considered a "session token", and can be used on subsequent logins to avoid entering a password.
@@ -24,7 +24,7 @@
         //TODO can I restrict using this getter? since there is already a method
         [ProtoMember(3)]
         public string CurrentUsername { get; private set; }
-        
+
         private UserAccountStore()
         {
             SentryData = new Dictionary<string, byte[]>();
@@ -37,7 +37,7 @@
             {
                 return CurrentUsername;
             }
-            
+
             CurrentUsername = await PromptForUsernameAsync(ansiConsole).WaitAsync(TimeSpan.FromSeconds(30));
             return CurrentUsername;
         }

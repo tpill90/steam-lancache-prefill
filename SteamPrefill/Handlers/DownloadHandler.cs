@@ -41,7 +41,7 @@
             {
                 _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
             }
-            
+
             int retryCount = 0;
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
@@ -68,7 +68,7 @@
             _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
             return false;
         }
-        
+
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
@@ -76,7 +76,7 @@
         [SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
         private async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload)
         {
-            double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength); 
+            double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();

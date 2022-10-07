@@ -16,7 +16,7 @@
 
         public static string Green(object inputObj) => $"[green]{inputObj}[/]";
         public static string Grey(object inputObj) => $"[grey]{inputObj}[/]";
-        
+
         public static string Magenta(object inputObj) => $"[rgb(200,85,217)]{inputObj}[/]";
         public static string MediumPurple(object inputObj) => $"[{SpectreColors.MediumPurple1.ToMarkup()}]{inputObj}[/]";
 
@@ -33,7 +33,7 @@
     {
         public static Color LightGreen => new Color(99, 201, 101);
         public static Color LightRed => new Color(255, 110, 110);
-        
+
         public static Color MediumPurple1 => Color.MediumPurple1;
     }
 }

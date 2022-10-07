@@ -1,12 +1,22 @@
 name: Build-and-test
-on: [push]
+on: [push, pull_request_target]
 
 permissions:
   pull-requests: read # allows SonarCloud to decorate PRs with analysis results
   security-events: write
 
 jobs:
-  build-and-test:
+  dotnet-format:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: dotnet format check
+      run: dotnet format --exclude-diagnostics CliFx_SystemConsoleShouldBeAvoided
+  build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -18,6 +28,20 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore -c Release /p:WarningLevel=0
+    - name: Test
+      run: >
+        cd SteamPrefill.Test;
+        dotnet test --no-restore -c Release /p:WarningLevel=0
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
     - name: Test
       run: >
         cd SteamPrefill.Test;
