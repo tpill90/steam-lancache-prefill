@@ -13,7 +13,7 @@
         private readonly Dictionary<uint, HashSet<ulong>> _downloadedDepots = new Dictionary<uint, HashSet<ulong>>();
         private readonly string _downloadedDepotsPath = $"{AppConfig.CacheDir}/successfullyDownloadedDepots.json";
 
-        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler,  CdnPool cdnPool, DownloadArguments downloadArgs)
+        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler, CdnPool cdnPool, DownloadArguments downloadArgs)
         {
             _steam3Session = steam3Session;
             _appInfoHandler = appInfoHandler;

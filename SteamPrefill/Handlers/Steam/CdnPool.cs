@@ -8,7 +8,7 @@ namespace SteamPrefill.Handlers.Steam
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steamSession;
-        
+
         private List<Server> _availableServerEndpoints = new List<Server>();
         private int _minimumServerCount = 5;
         private int _maxRetries = 5;
@@ -108,7 +108,7 @@ namespace SteamPrefill.Handlers.Steam
             _availableServerEndpoints.RemoveAt(0);
             return server;
         }
-        
+
         /// <summary>
         /// Returns a connection to the pool of available connections, to be re-used later.
         /// Only valid connections should be returned to the pool.

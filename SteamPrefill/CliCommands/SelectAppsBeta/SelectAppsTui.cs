@@ -44,7 +44,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
                     appInfo.IsSelected = true;
                 }
             }
-            
+
             // Configuring status bar actions
             _statusBar.Items = new StatusItem[] {
                 new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
@@ -221,7 +221,7 @@ namespace SteamPrefill.CliCommands.SelectAppsBeta
         private string FormatItemString(AppInfo item)
         {
             var nameFormatted = item.Name.Truncate(55).PadRightUnicode(55);
-            
+
             var hoursPlayed2Weeks = item.HoursPlayed2Weeks != null ? $"{item.HoursPlayed2Weeks:N1} hours" : null;
             return string.Format("{0}{1,8}{2,17}", nameFormatted, item.ReleaseDate?.Date.ToString("yyyy"), hoursPlayed2Weeks);
         }

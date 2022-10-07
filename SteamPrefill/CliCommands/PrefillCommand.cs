@@ -34,8 +34,8 @@ namespace SteamPrefill.CliCommands
             set => _prefillPopularGames = value ?? 50;
         }
 
-        [CommandOption("force", 'f', 
-            Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.", 
+        [CommandOption("force", 'f',
+            Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.",
             Converter = typeof(NullableBoolConverter))]
         public bool? Force { get; init; }
 
@@ -45,7 +45,7 @@ namespace SteamPrefill.CliCommands
         public bool? NoLocalCache { get; init; }
 
         [CommandOption("verbose", Description = "Produces more detailed log output. Will output logs for games are already up to date.", Converter = typeof(NullableBoolConverter))]
-        public bool? Verbose 
+        public bool? Verbose
         {
             get => AppConfig.VerboseLogs;
             init => AppConfig.VerboseLogs = value ?? default(bool);
@@ -83,7 +83,7 @@ namespace SteamPrefill.CliCommands
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
             ValidateUserHasSelectedApps(steamManager);
             ValidatePopularGameCount();
-            
+
             try
             {
                 await steamManager.InitializeAsync();
@@ -96,7 +96,7 @@ namespace SteamPrefill.CliCommands
                     manualIds.AddRange(AppIds);
                 }
 #endif
-                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool), 
+                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool),
                                                              PrefillRecentGames ?? default(bool),
                                                              PrefillPopularGames,
                                                              manualIds);

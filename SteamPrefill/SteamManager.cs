@@ -128,7 +128,7 @@
         private async Task DownloadSingleAppAsync(uint appId)
         {
             AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
-            
+
             // Filter depots based on specified lang/os/architecture/etc
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
             if (!filteredDepots.Any())
@@ -182,7 +182,7 @@
             _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.ToAverageString(downloadTimer))}");
             _ansiConsole.WriteLine();
         }
-        
+
         #endregion
 
         #region Select Apps

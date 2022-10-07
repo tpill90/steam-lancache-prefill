@@ -9,13 +9,13 @@ namespace SteamPrefill.Settings
             Directory.CreateDirectory(CacheDir);
         }
 
-        #if DEBUG
+#if DEBUG
 
         public static bool EnableSteamKitDebugLogs => false;
 
         public static bool SkipDownloads { get; set; }
 
-        #endif
+#endif
 
         //TODO comment
         public static bool VerboseLogs { get; set; }

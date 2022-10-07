@@ -25,8 +25,8 @@ namespace SteamPrefill.Test
             // Setting up a "valid" app info object
             var appKeyValues = new KeyValue
             {
-                Children = 
-                { 
+                Children =
+                {
                     new KeyValue("common")
                     {
                         Children = { new KeyValue("type", "game") }
