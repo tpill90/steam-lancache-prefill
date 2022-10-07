@@ -1,3 +1,8 @@
+root = true
+
+[*]
+end_of_line = lf
+
 # .NET formatting rules.  See https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
 # Resharper Rules. See https://www.jetbrains.com/help/resharper/EditorConfig_Index.html
 [*.cs]
