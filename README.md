@@ -153,6 +153,7 @@ running `prefill` with the `--nocache` flag specified will prevent the cache fil
 - **Windows**
     - Run the `.\update.ps1` script in the executable directory
 - **Linux**
+    - **First time only** : Grant executable permissions to the update script with `chmod +x ./update.sh`
     - Run the `./update.sh` script in the executable directory
 
 ### Manually updating:
