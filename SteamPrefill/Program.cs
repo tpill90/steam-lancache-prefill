@@ -5,7 +5,8 @@ namespace SteamPrefill
      * Research - See if this endpoint can give me anything useful in some way clientconfig.akamai.steamstatic.com/appinfo/17390/sha/896ef0a3ad4c4901b78916c76e85cde05cf5f137.txt.gz
      * Logout - Should catch and handle ctrl+c keypress, to gracefully shutdown Steam before terminating
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
-     * Documentation - Add linux command examples to readme.
+     * Documentation - Add linux command examples to readme.  Ex, the difference in slashes between windows + linux.
+     * Documentation - Add to a "known issues" section that Putty is not compatible with SteamPrefill, and suffers from visual issues.
      *
      * Feature - Add request validation.  ePic might be interested in getting this implemented.  There is additionally a header in nginx that can be used to purge the cache.
      * Determine if its possible to detect ipv6, and display a message to the user that ipv6 is not supported

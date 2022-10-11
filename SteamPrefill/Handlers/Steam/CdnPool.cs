@@ -10,8 +10,9 @@ namespace SteamPrefill.Handlers.Steam
         private readonly Steam3Session _steamSession;
 
         private List<Server> _availableServerEndpoints = new List<Server>();
+
         private int _minimumServerCount = 5;
-        private int _maxRetries = 5;
+        private int _maxRetries = 3;
 
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
@@ -31,34 +32,17 @@ namespace SteamPrefill.Handlers.Steam
                 return;
             }
 
-            //TODO not a fan of how deeply nested this is
-            await _ansiConsole.StatusSpinner().StartAsync(White(" Getting available CDNs "), async task =>
+            var retryCount = 0;
+            var statusMessageBase = White(" Getting available CDN Servers... ");
+            await _ansiConsole.StatusSpinner().StartAsync(statusMessageBase, async task =>
             {
-                var retryCount = 0;
-
                 while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
                 {
-                    try
-                    {
-                        var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe()
-                                                                 .WaitAsync(timeout: TimeSpan.FromSeconds(10));
-                        _availableServerEndpoints.AddRange(returnedServers);
+                    await RequestSteamCdnServersAsync();
 
-                        // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
-                        _availableServerEndpoints = _availableServerEndpoints
-                                                    .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
-                                                    .DistinctBy(e => e.Host)
-                                                    .ToList();
-
-                        task.Status($"{White(" Getting available CDNs ")} {Green($"{_availableServerEndpoints.Count}/{_minimumServerCount}")}");
-
-                        retryCount++;
-                        await Task.Delay(retryCount * 250);
-                    }
-                    catch (TimeoutException e)
-                    {
-                        // Swallowing timeout exceptions, so that we can retry and see if the next attempt succeeds
-                    }
+                    retryCount++;
+                    task.Status($"{statusMessageBase} {LightYellow($"Retrying {retryCount}")}");
+                    await Task.Delay(retryCount * 250);
                 }
             });
 
@@ -66,6 +50,10 @@ namespace SteamPrefill.Handlers.Steam
             PrintDebugInfo();
 #endif
 
+            if (retryCount == _maxRetries && _availableServerEndpoints.Empty())
+            {
+                throw new CdnExhaustionException("Request for Steam CDN servers timed out!");
+            }
             if (_availableServerEndpoints.Empty())
             {
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
@@ -74,21 +62,27 @@ namespace SteamPrefill.Handlers.Steam
             _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
         }
 
-        private void PrintDebugInfo()
+        private async Task RequestSteamCdnServersAsync()
         {
-            // Prints out retrieved CDNs
-            var table = new Table().AddColumns("Total Results", "_availableServerEndpoints");
-            _ansiConsole.Live(table).Start(task =>
+            try
             {
-                Grid serverGrid = new Grid().AddColumn();
-                foreach (Server s in _availableServerEndpoints)
+                // GetServersForSteamPipe() sometimes hangs and never times out.  Wrapping the call in another task, so that we can timeout the entire method.
+                await Task.Run(async () =>
                 {
-                    serverGrid.AddRow($"{s.Type} {MediumPurple(s.Host)}".ToMarkup());
-                    task.Refresh();
-                }
+                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe();
+                    _availableServerEndpoints.AddRange(returnedServers);
 
-                table.AddRow(_availableServerEndpoints.Count.ToMarkup(), serverGrid);
-            });
+                    // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
+                    _availableServerEndpoints = _availableServerEndpoints
+                                                .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
+                                                .DistinctBy(e => e.Host)
+                                                .ToList();
+                }).WaitAsync(TimeSpan.FromSeconds(6));
+            }
+            catch (TimeoutException)
+            {
+                // Swallowing timeout exceptions, so that we can retry and see if the next attempt succeeds
+            }
         }
 
         /// <summary>
@@ -118,6 +112,28 @@ namespace SteamPrefill.Handlers.Steam
         {
             _availableServerEndpoints.Add(connection);
             _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
+        }
+
+        private void PrintDebugInfo()
+        {
+            if (!AppConfig.VerboseLogs)
+            {
+                return;
+            }
+
+            // Prints out retrieved CDNs
+            var table = new Table().AddColumns("Total Results", "_availableServerEndpoints");
+            _ansiConsole.Live(table).Start(task =>
+            {
+                Grid serverGrid = new Grid().AddColumn();
+                foreach (Server s in _availableServerEndpoints)
+                {
+                    serverGrid.AddRow($"{s.Type} {MediumPurple(s.Host)}".ToMarkup());
+                    task.Refresh();
+                }
+
+                table.AddRow(_availableServerEndpoints.Count.ToMarkup(), serverGrid);
+            });
         }
     }
 }
