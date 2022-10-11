@@ -7,6 +7,7 @@ namespace SteamPrefill
      * Documentation - Install instructions.  Possibly add the wget + unzip command as well for linux users?
      * Documentation - Add linux command examples to readme.  Ex, the difference in slashes between windows + linux.
      * Documentation - Add to a "known issues" section that Putty is not compatible with SteamPrefill, and suffers from visual issues.
+     * Build - Switch to building in Docker containers https://dev.to/mihinduranasinghe/using-docker-containers-in-jobs-github-actions-3eof
      *
      * Feature - Add request validation.  ePic might be interested in getting this implemented.  There is additionally a header in nginx that can be used to purge the cache.
      * Determine if its possible to detect ipv6, and display a message to the user that ipv6 is not supported

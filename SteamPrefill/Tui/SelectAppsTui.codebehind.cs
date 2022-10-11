@@ -5,6 +5,15 @@ namespace SteamPrefill.Tui
 {
     public sealed partial class SelectAppsTui : IDisposable
     {
+        // Overrides for the default color scheme
+        private readonly ColorScheme _buttonColorScheme = new ColorScheme
+        {
+            Normal = new Attribute(foreground: Color.White, background: Color.Black),
+            HotNormal = new Attribute(foreground: Color.White, background: Color.Black),
+            Focus = new Attribute(foreground: Color.BrightBlue, background: Color.Black),
+            HotFocus = new Attribute(foreground: Color.BrightBlue, background: Color.Black),
+        };
+
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private void InitLayout(List<AppInfo> appInfos)
         {
@@ -83,12 +92,12 @@ namespace SteamPrefill.Tui
             };
             window.Add(lineView);
 
-            headerLabel = new Label
+            _headerLabel = new Label
             {
                 Y = 4,
                 Width = Dim.Fill()
             };
-            window.Add(headerLabel);
+            window.Add(_headerLabel);
 
             var lineView2 = new LineView(Orientation.Horizontal)
             {
@@ -134,7 +143,7 @@ namespace SteamPrefill.Tui
         {
             _listView.Dispose();
             _searchBox.Dispose();
-            headerLabel.Dispose();
+            _headerLabel.Dispose();
             _statusBar.Dispose();
         }
     }
