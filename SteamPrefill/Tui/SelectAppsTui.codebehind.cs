@@ -1,7 +1,7 @@
 ﻿using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 
-namespace SteamPrefill.CliCommands.SelectAppsBeta
+namespace SteamPrefill.Tui
 {
     public sealed partial class SelectAppsTui : IDisposable
     {

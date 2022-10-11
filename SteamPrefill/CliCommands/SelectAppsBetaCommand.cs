@@ -1,5 +1,6 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
-namespace SteamPrefill.CliCommands.SelectAppsBeta
+
+namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
     [Command("select-apps-beta", Description = "Beta version of select-apps interface redesign")]

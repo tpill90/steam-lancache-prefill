@@ -1,9 +1,8 @@
-﻿using Wcwidth;
-using Color = Terminal.Gui.Color;
+﻿using Color = Terminal.Gui.Color;
 using Attribute = Terminal.Gui.Attribute;
 using Rune = System.Rune;
 
-namespace SteamPrefill.CliCommands.SelectAppsBeta
+namespace SteamPrefill.Tui
 {
     //TODO spend some time cleaning up this code
     //TODO selected rows need some more coloring to differentiate what is selected
