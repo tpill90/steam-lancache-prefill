@@ -4,37 +4,32 @@ using Attribute = Terminal.Gui.Attribute;
 namespace SteamPrefill.Tui
 {
     //TODO spend some time cleaning up this code
-    //TODO selected rows need some more coloring to differentiate what is selected
-    //TODO implement sorting by purchase date
     //TODO need to document in readme how you navigate the ui.  Can use keyboard alt + shift alt.  Or click with a mouse
     public partial class SelectAppsTui
     {
         private ListView _listView;
         private TextField _searchBox;
         private StatusBar _statusBar;
-        private Label headerLabel;
+        private Label _headerLabel;
+
+        //TODO comment
+        private Key _exitKeyPress = Key.Unknown;
 
         private AppInfoDataSource ListViewDataSource => (AppInfoDataSource)_listView.Source;
 
-        readonly ColorScheme _buttonColorScheme = new ColorScheme
-        {
-            Normal = new Attribute(foreground: Color.White, background: Color.Black),
-            HotNormal = new Attribute(foreground: Color.White, background: Color.Black),
-            Focus = new Attribute(foreground: Color.BrightBlue, background: Color.Black),
-            HotFocus = new Attribute(foreground: Color.BrightBlue, background: Color.Black),
-        };
+        //TODO comment
+        private List<uint> _previouslySelectedApps;
 
         public SelectAppsTui(List<AppInfo> availableGames, SteamManager steamManager)
         {
-            //TODO what is the correct encoding to use
-            Console.OutputEncoding = Encoding.Default;
-            //TODO determine the correct console
+            Console.OutputEncoding = Encoding.Unicode;
             Application.UseSystemConsole = false;
 
             InitLayout(availableGames);
 
             // Restoring previously selected items
-            foreach (var id in steamManager.LoadPreviouslySelectedApps())
+            _previouslySelectedApps = steamManager.LoadPreviouslySelectedApps();
+            foreach (var id in _previouslySelectedApps)
             {
                 var appInfo = availableGames.FirstOrDefault(e => e.AppId == id);
                 if (appInfo != null)
@@ -43,10 +38,25 @@ namespace SteamPrefill.Tui
                 }
             }
 
+
             // Configuring status bar actions
             _statusBar.Items = new StatusItem[] {
                 new StatusItem(Key.Esc, "~ESC~ to Quit", () =>
                 {
+                    if (UserHasUnsavedChanges())
+                    {
+                        var message = $"If you exit the app, any changes you have made will be lost. {Environment.NewLine}  Are you sure that you want to exit?";
+                        int userSelection = MessageBox.Query(width: 60, height: 6, "Unsaved changes!",
+                            message, defaultButton: 1, "Discard changes", "Cancel");
+
+                        // 1 refers to the second button in the MessageBox, in this case "Cancel".  Exiting the handler so we don't lose changes
+                        if (userSelection == 1)
+                        {
+                            return;
+                        }
+                    }
+
+                    _exitKeyPress = Key.Esc;
                     Application.RequestStop(Application.Top);
                     Application.Top.SetNeedsDisplay();
                 }),
@@ -64,21 +74,25 @@ namespace SteamPrefill.Tui
                 }),
                 new StatusItem (Key.Enter, "~Enter~ to Save", () =>
                 {
+                    _exitKeyPress = Key.Enter;
                     steamManager.SetAppsAsSelected(ListViewDataSource.SelectedApps);
                     Application.RequestStop(Application.Top);
                     Application.Top.SetNeedsDisplay();
                 })
             };
 
-            headerLabel.Text = ListViewDataSource.FormatHeaderString();
+            _headerLabel.Text = ListViewDataSource.FormatHeaderString();
         }
 
-        public void Run()
+        public Key Run()
         {
             _searchBox.SetFocus();
             Application.Run(Application.Top);
             Application.Shutdown();
+            return _exitKeyPress;
         }
+
+        #region Event handlers
 
         private void SearchBox_OnTextChanged(ustring obj)
         {
@@ -113,6 +127,8 @@ namespace SteamPrefill.Tui
             _listView.SetNeedsDisplay();
         }
 
+        #endregion
+
         private void ListView_RowRender(ListViewRowEventArgs obj)
         {
             if (obj.Row == _listView.SelectedItem && _listView.HasFocus)
@@ -124,6 +140,15 @@ namespace SteamPrefill.Tui
             {
                 obj.RowAttribute = new Attribute(Color.BrightYellow, Color.Black);
             }
+        }
+
+        private bool UserHasUnsavedChanges()
+        {
+            var currentlySelected = ListViewDataSource.SelectedApps.Select(e => e.AppId).ToHashSet();
+            currentlySelected.SymmetricExceptWith(_previouslySelectedApps);
+
+            // If there are any differences at all, then the user has unsaved changes
+            return currentlySelected.Any();
         }
     }
 }

@@ -194,7 +194,7 @@
                                         .ToList();
             File.WriteAllText(AppConfig.UserSelectedAppsPath, JsonSerializer.Serialize(selectedAppIds, SerializationContext.Default.ListUInt32));
 
-            _ansiConsole.MarkupLine($"Selected {Magenta(selectedAppIds.Count)} apps to prefill!  ");
+            _ansiConsole.LogMarkupLine($"Selected {Magenta(selectedAppIds.Count)} apps to prefill!  ");
         }
 
         public List<uint> LoadPreviouslySelectedApps()

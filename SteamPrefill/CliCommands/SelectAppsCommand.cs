@@ -20,8 +20,14 @@ namespace SteamPrefill.CliCommands
 
                 Application.Init();
                 using var tui2 = new SelectAppsTui(games, steamManager);
-                tui2.Run();
+                Key userKeyPress = tui2.Run();
 
+                // Will only allow for prefill if the user has saved changes.  Escape simply exists
+                if (userKeyPress != Key.Enter)
+                {
+                    return;
+                }
+                
                 // This escape sequence is required when running on linux, otherwise will not be able to use the Spectre selection prompt
                 // See : https://github.com/gui-cs/Terminal.Gui/issues/418
                 await Console.Out.WriteAsync("\x1b[?1h");
