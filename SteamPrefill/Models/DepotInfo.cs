@@ -7,10 +7,6 @@
 
         public ulong? ManifestId { get; set; }
 
-        /*
-         * TODO The _originalAppId was added in here to avoid file lock exceptions when writing shared depot manifests in parallel.
-         * This could possibly add up to a non-trivial amount of duplicated storage
-         */
         public string ManifestFileName => $"{AppConfig.CacheDir}/{_originalAppId}_{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 
         /// <summary>
