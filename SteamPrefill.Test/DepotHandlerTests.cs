@@ -18,9 +18,9 @@ namespace SteamPrefill.Test
         {
             Steam3Session steam3 = new Steam3Session(null);
             // User will always have access to every depot
-            steam3.OwnedDepotIds.Add(123);
+            steam3.LicenseManager._userLicenses.OwnedDepotIds.Add(123);
             // User will always have access to this app
-            steam3.OwnedAppIds.Add(222);
+            steam3.LicenseManager._userLicenses.OwnedAppIds.Add(222);
 
             // Setting up a "valid" app info object
             var appKeyValues = new KeyValue

@@ -66,12 +66,12 @@
             foreach (var depot in allDepots)
             {
                 // User must have access to a depot in order to download it
-                if (!_steam3Session.AccountHasDepotAccess(depot.DepotId))
+                if (!_steam3Session.LicenseManager.AccountHasDepotAccess(depot.DepotId))
                 {
                     continue;
                 }
                 // Sometimes a linked ID can be an unowned app
-                if (!_steam3Session.AccountHasAppAccess(depot.ContainingAppId))
+                if (!_steam3Session.LicenseManager.AccountHasAppAccess(depot.ContainingAppId))
                 {
                     continue;
                 }

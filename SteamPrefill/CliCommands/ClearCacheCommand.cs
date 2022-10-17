@@ -15,12 +15,14 @@ namespace SteamPrefill.CliCommands
             var ansiConsole = console.CreateAnsiConsole();
             try
             {
+                // Remove the v1/v2/v3 sub-directories
+                var rootCacheDir = new DirectoryInfo(AppConfig.CacheDir).Parent;
+
                 // Scanning the cache directory to see how much space could be saved
                 List<FileInfo> cacheFolderContents = null;
                 ansiConsole.StatusSpinner().Start($"Scanning {Cyan("Cache")} directory...", ctx =>
                 {
-                    var directoryInfo = new DirectoryInfo(AppConfig.CacheDir);
-                    cacheFolderContents = directoryInfo.EnumerateFiles("*.*", SearchOption.AllDirectories).ToList();
+                    cacheFolderContents = rootCacheDir.EnumerateFiles("*.*", SearchOption.AllDirectories).ToList();
                 });
 
                 var totalSizeOnDisk = ByteSize.FromBytes(cacheFolderContents.Sum(e => e.Length));
@@ -48,7 +50,7 @@ namespace SteamPrefill.CliCommands
 
                 ansiConsole.StatusSpinner().Start("Deleting cached files...", ctx =>
                 {
-                    Directory.Delete(AppConfig.CacheDir, true);
+                    Directory.Delete(rootCacheDir.FullName, true);
                 });
             }
             catch (Exception e)

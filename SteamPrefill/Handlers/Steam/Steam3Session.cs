@@ -2,14 +2,6 @@ namespace SteamPrefill.Handlers.Steam
 {
     public sealed class Steam3Session : IDisposable
     {
-        //TODO I wonder if I should encapsulate this metadata into it's own class
-        private readonly string _packageCountPath = $"{AppConfig.CacheDir}/packageCount.txt";
-        private readonly string _ownedAppIdsPath = $"{AppConfig.CacheDir}/OwnedAppIds.json";
-        private readonly string _ownedDepotIdsPath = $"{AppConfig.CacheDir}/OwnedDepotIds.json";
-
-        public HashSet<uint> OwnedAppIds { get; private set; } = new HashSet<uint>();
-        public HashSet<uint> OwnedDepotIds { get; private set; } = new HashSet<uint>();
-
         // Steam services
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
@@ -24,6 +16,8 @@ namespace SteamPrefill.Handlers.Steam
         private readonly IAnsiConsole _ansiConsole;
 
         private readonly UserAccountStore _userAccountStore;
+
+        public readonly LicenseManager LicenseManager;
 
         public SteamID _steamId;
 
@@ -64,6 +58,7 @@ namespace SteamPrefill.Handlers.Steam
             Client.RequestTimeout = TimeSpan.FromSeconds(5);
 
             _userAccountStore = UserAccountStore.LoadFromFile();
+            LicenseManager = new LicenseManager(SteamAppsApi, _userAccountStore);
         }
 
         public async Task LoginToSteamAsync()
@@ -362,119 +357,11 @@ namespace SteamPrefill.Handlers.Steam
                 _ansiConsole.MarkupLine(Red($"Unexpected error while retrieving license list : {licenseList.Result}"));
                 throw new SteamLoginException("Unable to retrieve user licenses!");
             }
-            LoadPackageInfo(licenseList.LicenseList);
+            LicenseManager.LoadPackageInfo(licenseList.LicenseList);
         }
 
-        //TODO should this license stuff be broken out into its own class?  And also add in the user owned games as well?
-        [SuppressMessage("Usage", "VSTHRD002:Avoid problematic synchronous waits", Justification = "Can't do async here, SteamKit2 doesn't support it.")]
-        private void LoadPackageInfo(IReadOnlyCollection<SteamApps.LicenseListCallback.License> licenseList)
-        {
-            // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
-            if (File.Exists(_packageCountPath) && File.ReadAllText(_packageCountPath) == licenseList.Count.ToString())
-            {
-                if (File.Exists(_ownedAppIdsPath) && File.Exists(_ownedDepotIdsPath))
-                {
-                    OwnedAppIds = JsonSerializer.Deserialize(File.ReadAllText(_ownedAppIdsPath), SerializationContext.Default.HashSetUInt32);
-                    OwnedDepotIds = JsonSerializer.Deserialize(File.ReadAllText(_ownedDepotIdsPath), SerializationContext.Default.HashSetUInt32);
-                    return;
-                }
-            }
-
-            Dictionary<uint, ulong> packageTokenDict = licenseList.Where(e => e.AccessToken > 0)
-                                                                  .DistinctBy(e => e.PackageID)
-                                                                  .ToDictionary(e => e.PackageID, e => e.AccessToken);
-            var packageRequests = new List<SteamApps.PICSRequest>();
-            foreach (var license in licenseList)
-            {
-                var request = new SteamApps.PICSRequest(license.PackageID);
-
-                // Some packages require a access token in order to request their apps/depot list
-                if (packageTokenDict.TryGetValue(license.PackageID, out var token))
-                {
-                    request.AccessToken = token;
-                }
-                packageRequests.Add(request);
-            }
-
-            var jobResult = SteamAppsApi.PICSGetProductInfo(new List<SteamApps.PICSRequest>(), packageRequests).ToTask().Result;
-            var packages = jobResult.Results.SelectMany(e => e.Packages)
-                                    .Select(e => e.Value)
-                                    .OrderBy(e => e.ID)
-                                    .ToList();
-
-            // Handling packages that are normally purchased or added via cd-key
-            var nonSubscription = packages.Where(e => e.KeyValues["extended"]["mastersubscriptionappid"] == KeyValue.Invalid).ToList();
-            foreach (var package in nonSubscription)
-            {
-                // Removing any free weekends that are no longer active
-                var freeWeekend = package.KeyValues["extended"]["freeweekend"];
-                if (freeWeekend != KeyValue.Invalid && freeWeekend.AsBoolean())
-                {
-                    var expiryTimeUtc = package.KeyValues["extended"]["expirytime"].AsDateTimeUtc();
-                    if (DateTime.UtcNow > expiryTimeUtc)
-                    {
-                        continue;
-                    }
-                }
-
-                foreach (KeyValue appId in package.KeyValues["appids"].Children)
-                {
-                    OwnedAppIds.Add(UInt32.Parse(appId.Value));
-                }
-                foreach (KeyValue depotId in package.KeyValues["depotids"].Children)
-                {
-                    OwnedDepotIds.Add(UInt32.Parse(depotId.Value));
-                }
-            }
-
-            // Handling subscription based packages, like EA Play for example.  The account will continue to "own" the packages, however
-            // the linked "master subscription app" will no longer be available, so these packages can't be downloaded
-            var subscriptionPackages = packages.Where(e => e.KeyValues["extended"]["mastersubscriptionappid"] != KeyValue.Invalid).ToList();
-            foreach (var package in subscriptionPackages)
-            {
-                var masterAppId = UInt32.Parse(package.KeyValues["extended"]["mastersubscriptionappid"].Value);
-                if (!OwnedAppIds.Contains(masterAppId))
-                {
-                    continue;
-                }
-
-                foreach (KeyValue appId in package.KeyValues["appids"].Children)
-                {
-                    OwnedAppIds.Add(UInt32.Parse(appId.Value));
-                }
-                foreach (KeyValue depotId in package.KeyValues["depotids"].Children)
-                {
-                    OwnedDepotIds.Add(UInt32.Parse(depotId.Value));
-                }
-            }
-
-            // Serializing this data to speedup subsequent runs
-            File.WriteAllText(_ownedAppIdsPath, JsonSerializer.Serialize(OwnedAppIds, SerializationContext.Default.HashSetUInt32));
-            File.WriteAllText(_ownedDepotIdsPath, JsonSerializer.Serialize(OwnedDepotIds, SerializationContext.Default.HashSetUInt32));
-            File.WriteAllText(_packageCountPath, packageRequests.Count.ToString());
-        }
         #endregion
-
-        /// <summary>
-        /// Checks against the list of currently owned apps to determine if the user is able to download this app.
-        /// </summary>
-        /// <param name="appid">Id of the application to check for access</param>
-        /// <returns>True if the user has access to the app</returns>
-        public bool AccountHasAppAccess(uint appid)
-        {
-            return OwnedAppIds.Contains(appid);
-        }
-
-        /// <summary>
-        /// Checks against the list of currently owned apps to determine if the user is able to download this depot.
-        /// </summary>
-        /// <param name="depotId">Id of the depot to check for access</param>
-        /// <returns>True if the user has access to the depot</returns>
-        public bool AccountHasDepotAccess(uint depotId)
-        {
-            return OwnedDepotIds.Contains(depotId);
-        }
-
+        
         public void Dispose()
         {
             CdnClient.Dispose();

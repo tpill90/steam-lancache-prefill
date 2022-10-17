@@ -103,7 +103,7 @@
                 DlcAppIds = listOfDlc.Split(",")
                                      .Select(e => uint.Parse(e))
                                      // Only including DLC that we own
-                                     .Where(e => steamSession.AccountHasAppAccess(e))
+                                     .Where(e => steamSession.LicenseManager.AccountHasAppAccess(e))
                                      .ToList();
             }
 

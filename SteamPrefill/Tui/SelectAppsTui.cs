@@ -3,8 +3,6 @@ using Attribute = Terminal.Gui.Attribute;
 
 namespace SteamPrefill.Tui
 {
-    //TODO spend some time cleaning up this code
-    //TODO need to document in readme how you navigate the ui.  Can use keyboard alt + shift alt.  Or click with a mouse
     public partial class SelectAppsTui
     {
         private ListView _listView;
