@@ -1,4 +1,4 @@
-﻿namespace SteamPrefill.Utils
+﻿namespace LancachePrefill.Common.Extensions
 {
     public static class ByteSizeExtensions
     {
@@ -7,9 +7,14 @@
             return byteSize.ToString("0.##", CultureInfo.CurrentCulture, true);
         }
 
-        public static string ToAverageString(this ref ByteSize byteSize, Stopwatch timer)
+        public static string CalculateBitrate(this ref ByteSize byteSize, Stopwatch timer)
         {
-            var averageSpeed = ByteSize.FromBytes(byteSize.Bytes / timer.Elapsed.TotalSeconds);
+            return CalculateBitrate(ref byteSize, timer.Elapsed);
+        }
+
+        public static string CalculateBitrate(this ref ByteSize byteSize, TimeSpan elapsed)
+        {
+            var averageSpeed = ByteSize.FromBytes(byteSize.Bytes / elapsed.TotalSeconds);
 
             var megabits = averageSpeed.MegaBytes * 8;
             if (megabits < 1000)

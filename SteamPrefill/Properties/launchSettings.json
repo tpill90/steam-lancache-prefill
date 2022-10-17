@@ -6,31 +6,39 @@
     },
     "Prefill All - No Cache": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --force --nocache"
+      "commandLineArgs": "prefill --all --force --nocache --no-download"
     },
-    "Prefill All - No Download": {
+    "Prefill Recent + Top 50": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --force --no-download"
-    },
-    "Prefill Selected": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --force"
-    },
-    "Prefill Recent": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --recent --force --no-download"
-    },
-    "Prefill Top 50": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --no-download --top 50"
+      "commandLineArgs": "prefill --recent --top 50 --no-download --force"
     },
     "Select Apps": {
       "commandName": "Project",
       "commandLineArgs": "select-apps"
     },
+    "Benchmark - Setup - Ids": {
+      "commandName": "Project",
+      "commandLineArgs": "benchmark setup --appid 730"
+    },
+    "Benchmark - Setup - All": {
+      "commandName": "Project",
+      "commandLineArgs": "benchmark setup --all"
+    },
+    "Benchmark - Setup - All - NoCache": {
+      "commandName": "Project",
+      "commandLineArgs": "benchmark setup --all --nocache"
+    },
+    "Benchmark - Run": {
+      "commandName": "Project",
+      "commandLineArgs": "benchmark run"
+    },
     "Game by ID": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --app 590380 --force"
+      "commandLineArgs": "prefill --app 1085660 --force"
+    },
+    "Clear cache": {
+      "commandName": "Project",
+      "commandLineArgs": "clear-cache -y"
     }
   }
 }

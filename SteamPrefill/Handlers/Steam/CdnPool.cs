@@ -9,10 +9,17 @@ namespace SteamPrefill.Handlers.Steam
         private readonly IAnsiConsole _ansiConsole;
         private readonly Steam3Session _steamSession;
 
-        private List<Server> _availableServerEndpoints = new List<Server>();
-
         private int _minimumServerCount = 5;
         private int _maxRetries = 3;
+
+        //TODO I don't think this should be public
+        public ConcurrentStack<Server> _availableServerEndpoints = new ConcurrentStack<Server>();
+        //TODO I'm not sure this should be used
+        public CdnPool(IAnsiConsole ansiConsole, ConcurrentStack<Server> availableServers)
+        {
+            _ansiConsole = ansiConsole;
+            _availableServerEndpoints = availableServers;
+        }
 
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
@@ -41,6 +48,7 @@ namespace SteamPrefill.Handlers.Steam
                     await RequestSteamCdnServersAsync();
 
                     retryCount++;
+                    //TODO might be nice to have, but flashes unnecessarily
                     task.Status($"{statusMessageBase} {LightYellow($"Retrying {retryCount}")}");
                     await Task.Delay(retryCount * 250);
                 }
@@ -59,7 +67,7 @@ namespace SteamPrefill.Handlers.Steam
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
 
-            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
+            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToConcurrentStack();
         }
 
         private async Task RequestSteamCdnServersAsync()
@@ -70,13 +78,13 @@ namespace SteamPrefill.Handlers.Steam
                 await Task.Run(async () =>
                 {
                     var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe();
-                    _availableServerEndpoints.AddRange(returnedServers);
+                    _availableServerEndpoints.PushRange(returnedServers.ToArray());
 
                     // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
                     _availableServerEndpoints = _availableServerEndpoints
                                                 .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
                                                 .DistinctBy(e => e.Host)
-                                                .ToList();
+                                                .ToConcurrentStack();
                 }).WaitAsync(TimeSpan.FromSeconds(6));
             }
             catch (TimeoutException)
@@ -98,8 +106,7 @@ namespace SteamPrefill.Handlers.Steam
                 throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
 
-            var server = _availableServerEndpoints.First();
-            _availableServerEndpoints.RemoveAt(0);
+            _availableServerEndpoints.TryPop(out var server);
             return server;
         }
 
@@ -110,8 +117,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <param name="connection">The connection that will be re-added to the pool.</param>
         public void ReturnConnection(Server connection)
         {
-            _availableServerEndpoints.Add(connection);
-            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToList();
+            _availableServerEndpoints.Push(connection);
         }
 
         private void PrintDebugInfo()

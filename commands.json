@@ -1,0 +1,9 @@
+{
+  "commands": {
+    "dotnet format": {
+      "fileName": "dotnet",
+      "workingDirectory": ".",
+      "arguments": "format"
+    }
+  }
+}

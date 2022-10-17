@@ -1,11 +1,17 @@
 ﻿namespace SteamPrefill.Models
 {
-    public class DepotInfo
+    public sealed class DepotInfo
     {
         public uint DepotId { get; init; }
         public string Name { get; }
 
         public ulong? ManifestId { get; set; }
+
+        /*
+         * TODO The _originalAppId was added in here to avoid file lock exceptions when writing shared depot manifests in parallel.
+         * This could possibly add up to a non-trivial amount of duplicated storage
+         */
+        public string ManifestFileName => $"{AppConfig.CacheDir}/{_originalAppId}_{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 
         /// <summary>
         /// Determines what app actually owns the depot, by default it is the current app.
@@ -26,7 +32,6 @@
                 return _originalAppId;
             }
         }
-
         private readonly uint _originalAppId;
 
         /// <summary>
@@ -43,8 +48,6 @@
         public Architecture Architecture { get; init; }
         public List<Language> Languages { get; init; } = new List<Language>();
         public bool? LowViolence { get; init; }
-
-        public string ManifestFileName => $"{AppConfig.CacheDir}/{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 
         [UsedImplicitly]
         public DepotInfo()

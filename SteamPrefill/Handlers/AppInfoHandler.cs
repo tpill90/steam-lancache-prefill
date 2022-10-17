@@ -1,6 +1,4 @@
-﻿using SteamKit2.Internal;
-
-namespace SteamPrefill.Handlers
+﻿namespace SteamPrefill.Handlers
 {
     /// <summary>
     /// Responsible for retrieving application metadata from Steam
@@ -77,7 +75,6 @@ namespace SteamPrefill.Handlers
         /// </summary>
         public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetUsersOwnedGamesAsync()
         {
-            //TODO Should this data be cached to disk?  Should it only be updated once per day, or only when the user has a new game? Would save 200ms
             if (_ownedGames != null)
             {
                 return _ownedGames;
@@ -114,7 +111,7 @@ namespace SteamPrefill.Handlers
         /// <param name="appIds">The list of App Ids to retrieve info for</param>
         private async Task BulkLoadAppInfosAsync(List<uint> appIds)
         {
-            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e)).ToList();
+            var appIdsToLoad = appIds.Where(e => !LoadedAppInfos.ContainsKey(e)).Distinct().ToList();
             if (!appIdsToLoad.Any())
             {
                 return;
@@ -156,6 +153,12 @@ namespace SteamPrefill.Handlers
         {
             var dlcAppIds = LoadedAppInfos.Values.SelectMany(e => e.DlcAppIds).ToList();
             await BulkLoadAppInfosAsync(dlcAppIds);
+
+            var containingAppIds = LoadedAppInfos.Values.Where(e => e.Type == AppType.Game)
+                                                        .SelectMany(e => e.Depots)
+                                                        .Select(e => e.ContainingAppId)
+                                                        .ToList();
+            await BulkLoadAppInfosAsync(containingAppIds);
 
             // Builds out the list of all depots for each game, including depots from all related DLCs
             // DLCs are stored as separate "apps", so their info comes back separately.

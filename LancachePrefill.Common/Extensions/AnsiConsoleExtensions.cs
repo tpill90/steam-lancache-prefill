@@ -22,23 +22,26 @@ namespace LancachePrefill.Common.Extensions
                               .Spinner(Spinner.Known.Dots2);
         }
 
-        public static Progress CreateSpectreProgress(this IAnsiConsole ansiConsole, TransferSpeedUnit unit)
+        public static Progress CreateSpectreProgress(this IAnsiConsole ansiConsole, TransferSpeedUnit unit, bool displayTransferRate = true)
         {
-            var displayBits = unit == Bits;
+            var displayBits = unit == TransferSpeedUnit.Bits;
+            var columns = new List<ProgressColumn>
+            {
+                new TaskDescriptionColumn(),
+                new ProgressBarColumn(),
+                new PercentageColumn(),
+                new RemainingTimeColumn()
+            };
+            if (displayTransferRate)
+            {
+                columns.Add(new DownloadedColumn());
+                columns.Add(new TransferSpeedColumn { Base = FileSizeBase.Decimal, DisplayBits = displayBits });
+            }
             var spectreProgress = ansiConsole.Progress()
                                              .HideCompleted(true)
                                              .AutoClear(true)
-                                             .Columns(
-                                                 new TaskDescriptionColumn(),
-                                                 new ProgressBarColumn(),
-                                                 new PercentageColumn(),
-                                                 new RemainingTimeColumn(),
-                                                 new DownloadedColumn(),
-                                                 new TransferSpeedColumn
-                                                 {
-                                                     Base = FileSizeBase.Decimal,
-                                                     DisplayBits = displayBits
-                                                 });
+                                             .Columns(columns.ToArray());
+
             return spectreProgress;
         }
 

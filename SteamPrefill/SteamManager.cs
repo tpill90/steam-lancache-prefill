@@ -155,10 +155,16 @@
 
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
 
+            //TODO is this needed anymore?
             await _cdnPool.PopulateAvailableServersAsync();
 
             // Get the full file list for each depot, and queue up the required chunks
-            var chunkDownloadQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
+            //TODO not a fan of having to do the status spinner here instead of inside the manifest handler
+            List<QueuedRequest> chunkDownloadQueue = null;
+            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
+            {
+                chunkDownloadQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
+            });
 
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
@@ -179,7 +185,7 @@
             downloadTimer.Stop();
 
             // Logging some metrics about the download
-            _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.ToAverageString(downloadTimer))}");
+            _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
             _ansiConsole.WriteLine();
         }
 
@@ -245,5 +251,98 @@
             _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Length)} unowned apps!  They will be excluded from this prefill run..."));
             _ansiConsole.Write(table);
         }
+
+        #region Benchmarking
+        
+        public async Task SetupBenchmarkAsync(List<uint> appIds, bool useAllOwnedGames, bool useSelectedApps)
+        {
+            _ansiConsole.WriteLine();
+            _ansiConsole.LogMarkupLine("Building benchmark workload file...");
+
+            // Building out list of apps to benchmark
+            if (useSelectedApps)
+            {
+                appIds.AddRange(LoadPreviouslySelectedApps());
+            }
+            if (useAllOwnedGames)
+            {
+                appIds.AddRange(_steam3.OwnedAppIds);
+            }
+            appIds = appIds.Distinct().ToList();
+
+            // Preloading as much metadata as possible
+            await _appInfoHandler.RetrieveAppMetadataAsync(appIds);
+            await PrintUnownedAppsAsync(appIds);
+
+            // Building out the combined workload file
+            var benchmarkWorkload = await BuildBenchmarkWorkloadAsync(appIds);
+
+            // Saving results to disk
+            benchmarkWorkload.SaveToFile(AppConfig.BenchmarkWorkloadPath);
+
+            // Writing stats
+            benchmarkWorkload.PrintSummary(_ansiConsole);
+
+            var fileSize = ByteSize.FromBytes(new FileInfo(AppConfig.BenchmarkWorkloadPath).Length);
+            _ansiConsole.Write(new Rule());
+            _ansiConsole.LogMarkupLine("Completed build of workload file...");
+            _ansiConsole.LogMarkupLine($"Resulting file size : {MediumPurple(fileSize.ToBinaryString())}");
+        }
+
+        //TODO document
+        private async Task<BenchmarkWorkload> BuildBenchmarkWorkloadAsync(List<uint> appIds)
+        {
+            await _cdnPool.PopulateAvailableServersAsync();
+
+            var benchmarkFileList = new BenchmarkWorkload();
+            await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit.Bytes, displayTransferRate: false).StartAsync(async ctx =>
+            {
+                var gamesToUse = await _appInfoHandler.GetGamesByIdAsync(appIds);
+                var overallProgressTask = ctx.AddTask("Processing games..".PadLeft(30), new ProgressTaskSettings { MaxValue = gamesToUse.Count });
+
+                //TODO add a retry loop + handle errors
+                //TODO figure out what happens if there are less than 5 cdns to use
+                await Parallel.ForEachAsync(gamesToUse, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (appInfo, _) =>
+                {
+                    var individualProgressTask = ctx.AddTask($"{Cyan(appInfo.Name.Truncate(30).PadLeft(30))}");
+                    individualProgressTask.IsIndeterminate = true;
+
+                    try
+                    {
+                        var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
+                        await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+                        if (!filteredDepots.Any())
+                        {
+                            _ansiConsole.LogMarkupLine($"{Cyan(appInfo)} - {LightYellow("No depots to download.  Current arguments filtered all depots")}");
+                            return;
+                        }
+
+                        // Get the full file list for each depot, and queue up the required chunks
+                        var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
+                        var appFileListing = new AppQueuedRequests(appInfo.Name, appInfo.AppId, allChunksForApp);
+                        benchmarkFileList.QueuedAppsList.Add(appFileListing);
+                    }
+                    catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
+                    {
+                        // Bomb out the whole process, since these are completely unrecoverable
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
+                        _ansiConsole.MarkupLine(Red($"   Unexpected error : {e.Message}"));
+                        _ansiConsole.MarkupLine("");
+                    }
+
+                    benchmarkFileList.CdnServerList = _cdnPool._availableServerEndpoints;
+
+                    overallProgressTask.Increment(1);
+                    individualProgressTask.StopTask();
+                });
+            });
+            return benchmarkFileList;
+        }
+
+        #endregion
     }
 }
