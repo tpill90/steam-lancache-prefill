@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using Color = Spectre.Console.Color;
+﻿using Color = Spectre.Console.Color;
 
 namespace SteamPrefill.CliCommands.Benchmark
 {

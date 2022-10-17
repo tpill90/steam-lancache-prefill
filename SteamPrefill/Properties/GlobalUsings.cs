@@ -1,4 +1,5 @@
-﻿global using ByteSizeLib;
+﻿global using AutoMapper;
+global using ByteSizeLib;
 global using CliFx;
 global using CliFx.Attributes;
 global using CliFx.Exceptions;
@@ -49,3 +50,4 @@ global using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConso
 global using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
 global using Architecture = SteamPrefill.Models.Enums.Architecture;
 global using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
+global using System.Security.Authentication;

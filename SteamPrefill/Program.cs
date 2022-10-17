@@ -6,11 +6,11 @@ namespace SteamPrefill
      * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
      * Documentation - Add to docs how exactly passwords/credentials are used, and stored.
      * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
-     * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large
-     * Research - See if CliFx can be swapped out for Typin https://github.com/adambajguz/Typin
+     * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large/wide.  Some images are not crisp and suffer from display scaling
      *
      * Testing - Should invest some time into adding unit tests
-     * Cleanup warnings, resharper code issues, and github code issues.  Cleanup TODOs
+     * Cleanup warnings, resharper code issues, and github code issues.
+     * Cleanup TODOs
      * Build - Fail build on both warnings + trim warnings
      * Update to dotnet 7 sdk + dotnet 7 target
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project

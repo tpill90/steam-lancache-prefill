@@ -126,7 +126,6 @@ namespace SteamPrefill.Tui
             _listView.Source = new AppInfoDataSource(appInfos);
             window.Add(_listView);
 
-            //TODO should the different actions have different colors?
             _statusBar = new StatusBar
             {
                 Visible = true,

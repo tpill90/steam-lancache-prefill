@@ -18,6 +18,7 @@
         public TransferSpeedUnit TransferSpeedUnit { get; set; } = TransferSpeedUnit.Bits;
 
         //TODO comment
+        //TODO I wonder if this large number of concurrent requests is really necessary.  Test with Dota 2 + Destiny.  Test against https://speed.cloudflare.com/ to prove numbers improve
         public int MaxConcurrentRequests { get; set; } = 50;
 
         public OperatingSystem OperatingSystem { get; set; } = OperatingSystem.Windows;

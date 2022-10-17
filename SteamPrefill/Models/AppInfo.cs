@@ -11,7 +11,10 @@
         public uint AppId { get; set; }
         public ReleaseState ReleaseState { get; set; }
 
-        //TODO comment
+        /// <summary>
+        /// Games on Steam can potentially have multiple "release dates", and are not consistently populated across all games.
+        /// Determines which date to use based on which ones are currently populated.
+        /// </summary>
         public DateTime? ReleaseDate
         {
             get
@@ -24,12 +27,14 @@
                 {
                     return SteamReleaseDate;
                 }
+                // For some reason, some games are missing both release dates, with no other alternative dates in their KeyValue pairs.
+                // These games are even missing a release date in the Steam store.
                 return null;
             }
         }
 
-        public DateTime? SteamReleaseDate { get; set; }
-        public DateTime? OriginalReleaseDate { get; set; }
+        private DateTime? SteamReleaseDate { get; set; }
+        private DateTime? OriginalReleaseDate { get; set; }
 
         public List<uint> DlcAppIds { get; } = new List<uint>();
 
@@ -75,7 +80,7 @@
             Name = rootKeyValue["common"]["name"].Value;
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
-            //TODO alot of games are missing this
+            
             SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTimeUtc();
             OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTimeUtc();
             ReleaseState = rootKeyValue["common"]["releasestate"].AsEnum<ReleaseState>(toLower: true);
