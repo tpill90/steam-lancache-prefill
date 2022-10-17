@@ -411,7 +411,7 @@ namespace SteamPrefill.Handlers.Steam
                 if (freeWeekend != KeyValue.Invalid && freeWeekend.AsBoolean())
                 {
                     var expiryTimeUtc = package.KeyValues["extended"]["expirytime"].AsDateTimeUtc();
-                    if (DateTime.Now > expiryTimeUtc)
+                    if (DateTime.UtcNow > expiryTimeUtc)
                     {
                         continue;
                     }
@@ -421,9 +421,9 @@ namespace SteamPrefill.Handlers.Steam
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
                 }
-                foreach (KeyValue appId in package.KeyValues["depotids"].Children)
+                foreach (KeyValue depotId in package.KeyValues["depotids"].Children)
                 {
-                    OwnedDepotIds.Add(UInt32.Parse(appId.Value));
+                    OwnedDepotIds.Add(UInt32.Parse(depotId.Value));
                 }
             }
 
@@ -442,9 +442,9 @@ namespace SteamPrefill.Handlers.Steam
                 {
                     OwnedAppIds.Add(UInt32.Parse(appId.Value));
                 }
-                foreach (KeyValue appId in package.KeyValues["depotids"].Children)
+                foreach (KeyValue depotId in package.KeyValues["depotids"].Children)
                 {
-                    OwnedDepotIds.Add(UInt32.Parse(appId.Value));
+                    OwnedDepotIds.Add(UInt32.Parse(depotId.Value));
                 }
             }
 
