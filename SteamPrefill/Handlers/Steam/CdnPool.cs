@@ -11,20 +11,23 @@ namespace SteamPrefill.Handlers.Steam
 
         private int _minimumServerCount = 5;
         private int _maxRetries = 3;
-
-        //TODO I don't think this should be public
-        public ConcurrentStack<Server> _availableServerEndpoints = new ConcurrentStack<Server>();
-        //TODO I'm not sure this should be used
-        public CdnPool(IAnsiConsole ansiConsole, ConcurrentStack<Server> availableServers)
-        {
-            _ansiConsole = ansiConsole;
-            _availableServerEndpoints = availableServers;
-        }
-
+        
+        public ConcurrentStack<Server> AvailableServerEndpoints = new ConcurrentStack<Server>();
+        
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
             _ansiConsole = ansiConsole;
             _steamSession = steamSession;
+        }
+
+        /// <summary>
+        /// Constructor used by the benchmark run command in order to avoid logging into Steam to get available CDN servers.
+        /// Should not be used other than with the benchmark features.
+        /// </summary>
+        public CdnPool(IAnsiConsole ansiConsole, ConcurrentStack<Server> availableServers)
+        {
+            _ansiConsole = ansiConsole;
+            AvailableServerEndpoints = availableServers;
         }
 
         /// <summary>
@@ -34,7 +37,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public async Task PopulateAvailableServersAsync()
         {
-            if (_availableServerEndpoints.Count >= _minimumServerCount)
+            if (AvailableServerEndpoints.Count >= _minimumServerCount)
             {
                 return;
             }
@@ -43,14 +46,16 @@ namespace SteamPrefill.Handlers.Steam
             var statusMessageBase = White(" Getting available CDN Servers... ");
             await _ansiConsole.StatusSpinner().StartAsync(statusMessageBase, async task =>
             {
-                while (_availableServerEndpoints.Count < _minimumServerCount && retryCount < _maxRetries)
+                while (AvailableServerEndpoints.Count < _minimumServerCount && retryCount <= _maxRetries)
                 {
                     await RequestSteamCdnServersAsync();
 
-                    retryCount++;
-                    //TODO might be nice to have, but flashes unnecessarily
-                    task.Status($"{statusMessageBase} {LightYellow($"Retrying {retryCount}")}");
+                    // Condition prevents the retry message from being displayed on the first run.
+                    var retryMessage = retryCount > 0 ? LightYellow($"Retrying {retryCount}") : "";
+                    task.Status($"{statusMessageBase} {retryMessage}");
                     await Task.Delay(retryCount * 250);
+                    
+                    retryCount++;
                 }
             });
 
@@ -58,16 +63,16 @@ namespace SteamPrefill.Handlers.Steam
             PrintDebugInfo();
 #endif
 
-            if (retryCount == _maxRetries && _availableServerEndpoints.Empty())
+            if (retryCount == _maxRetries && AvailableServerEndpoints.Empty())
             {
                 throw new CdnExhaustionException("Request for Steam CDN servers timed out!");
             }
-            if (_availableServerEndpoints.Empty())
+            if (AvailableServerEndpoints.Empty())
             {
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
 
-            _availableServerEndpoints = _availableServerEndpoints.OrderBy(e => e.WeightedLoad).ToConcurrentStack();
+            AvailableServerEndpoints = AvailableServerEndpoints.OrderBy(e => e.WeightedLoad).ToConcurrentStack();
         }
 
         private async Task RequestSteamCdnServersAsync()
@@ -78,10 +83,10 @@ namespace SteamPrefill.Handlers.Steam
                 await Task.Run(async () =>
                 {
                     var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe();
-                    _availableServerEndpoints.PushRange(returnedServers.ToArray());
+                    AvailableServerEndpoints.PushRange(returnedServers.ToArray());
 
                     // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
-                    _availableServerEndpoints = _availableServerEndpoints
+                    AvailableServerEndpoints = AvailableServerEndpoints
                                                 .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
                                                 .DistinctBy(e => e.Host)
                                                 .ToConcurrentStack();
@@ -101,12 +106,12 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public Server TakeConnection()
         {
-            if (_availableServerEndpoints.Empty())
+            if (AvailableServerEndpoints.Empty())
             {
                 throw new CdnExhaustionException("Available Steam CDN servers exhausted!  No more servers available to retry!  Try again in a few minutes");
             }
 
-            _availableServerEndpoints.TryPop(out var server);
+            AvailableServerEndpoints.TryPop(out var server);
             return server;
         }
 
@@ -117,7 +122,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <param name="connection">The connection that will be re-added to the pool.</param>
         public void ReturnConnection(Server connection)
         {
-            _availableServerEndpoints.Push(connection);
+            AvailableServerEndpoints.Push(connection);
         }
 
         private void PrintDebugInfo()
@@ -132,13 +137,13 @@ namespace SteamPrefill.Handlers.Steam
             _ansiConsole.Live(table).Start(task =>
             {
                 Grid serverGrid = new Grid().AddColumn();
-                foreach (Server s in _availableServerEndpoints)
+                foreach (Server s in AvailableServerEndpoints)
                 {
                     serverGrid.AddRow($"{s.Type} {MediumPurple(s.Host)}".ToMarkup());
                     task.Refresh();
                 }
 
-                table.AddRow(_availableServerEndpoints.Count.ToMarkup(), serverGrid);
+                table.AddRow(AvailableServerEndpoints.Count.ToMarkup(), serverGrid);
             });
         }
     }

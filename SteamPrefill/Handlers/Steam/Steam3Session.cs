@@ -1,6 +1,3 @@
-using SteamKit2.Internal;
-using System.Security.Authentication;
-
 namespace SteamPrefill.Handlers.Steam
 {
     public sealed class Steam3Session : IDisposable

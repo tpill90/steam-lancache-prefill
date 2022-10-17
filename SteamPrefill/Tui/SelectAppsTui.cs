@@ -12,13 +12,18 @@ namespace SteamPrefill.Tui
         private StatusBar _statusBar;
         private Label _headerLabel;
 
-        //TODO comment
+        /// <summary>
+        /// Used to determine which key was used to exit the TUI.  Will be either Enter/ESC.
+        /// </summary>
         private Key _exitKeyPress = Key.Unknown;
 
         private AppInfoDataSource ListViewDataSource => (AppInfoDataSource)_listView.Source;
 
-        //TODO comment
-        private List<uint> _previouslySelectedApps;
+        /// <summary>
+        /// Tracks which apps were selected when they opened up the select-apps interface.
+        /// Used to determine if the user has made any differing selections.
+        /// </summary>
+        private readonly List<uint> _previouslySelectedApps;
 
         public SelectAppsTui(List<AppInfo> availableGames, SteamManager steamManager)
         {

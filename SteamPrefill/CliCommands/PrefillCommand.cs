@@ -145,7 +145,6 @@ namespace SteamPrefill.CliCommands
             _ansiConsole.MarkupLine(Red($"Use the {Cyan("select-apps")} command to interactively choose which apps to prefill. "));
             _ansiConsole.MarkupLine("");
             _ansiConsole.Markup(Red($"Alternatively, the flag {LightYellow("--all")} can be specified to prefill all owned apps"));
-            //TODO add --top and --recent to this message
             throw new CommandException(".", 1, true);
         }
 

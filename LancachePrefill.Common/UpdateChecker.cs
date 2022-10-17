@@ -2,11 +2,11 @@
 {
     public static class UpdateChecker
     {
-        //TODO update docs
         /// <summary>
-        /// Compares the current application version against the newest version available on Github Releases.  If there is a newer version, displays a message
-        /// to the user.
+        /// Compares the current application version against the newest version available on Github Releases.
+        /// If there is a newer version, displays a message to the user.
         /// </summary>
+        /// <param name="repoName">Expected to be in the format "username/repoName"</param>
         public static async Task CheckForUpdatesAsync(Type executingAppType, string repoName, string cacheDir)
         {
             string lastUpdateCheckFile = Path.Combine(cacheDir, "lastUpdateCheck.txt");
@@ -27,7 +27,7 @@
 
                 // Query Github for a list of all available releases
                 var response = await httpClient.GetStringAsync(new Uri($"https://api.github.com/repos/{repoName}/releases"));
-                GithubRelease latestRelease = JsonSerializer.Deserialize(response, LancachePrefill.Common.SerializationContext.Default.ListGithubRelease)
+                GithubRelease latestRelease = JsonSerializer.Deserialize(response, SerializationContext.Default.ListGithubRelease)
                                                             .OrderByDescending(e => e.PublishedAt)
                                                             .First();
 

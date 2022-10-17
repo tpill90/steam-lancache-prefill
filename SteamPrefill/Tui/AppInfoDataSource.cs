@@ -39,12 +39,11 @@ namespace SteamPrefill.Tui
             }
         }
 
-        //TODO comment
         public void SetAllSelected(bool isSelected)
         {
-            for (int i = 0; i < _currAppInfo.Count; i++)
+            foreach (var app in _currAppInfo)
             {
-                _currAppInfo[i].IsSelected = isSelected;
+                app.IsSelected = isSelected;
             }
         }
 
@@ -102,12 +101,11 @@ namespace SteamPrefill.Tui
         public void Render(ListView container, ConsoleDriver driver, bool selected, int item, int col, int line, int width, int start = 0)
         {
             container.Move(col, line);
-            RenderUstr(driver, FormatItemString(_currAppInfo[item]), col, line, width, start);
+            RenderUstr(driver, FormatItemString(_currAppInfo[item]), width, start);
         }
 
         // A slightly adapted method from: https://github.com/gui-cs/Terminal.Gui/blob/fc1faba7452ccbdf49028ac49f0c9f0f42bbae91/Terminal.Gui/Views/ListView.cs#L433-L461
-        //TODO not entirely sure why this is here.  Could possibly be an extension method?
-        private void RenderUstr(ConsoleDriver driver, ustring ustr, int col, int line, int width, int start = 0)
+        private void RenderUstr(ConsoleDriver driver, ustring ustr, int width, int start = 0)
         {
             int used = 0;
             int index = start;

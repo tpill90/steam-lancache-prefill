@@ -221,6 +221,7 @@
             // Loading app metadata from steam, skipping related DLC apps
             await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
             var availableGames = await _appInfoHandler.GetGamesByIdAsync(ownedGameIds);
+
             return availableGames;
         }
 
@@ -334,7 +335,7 @@
                         _ansiConsole.MarkupLine("");
                     }
 
-                    benchmarkFileList.CdnServerList = _cdnPool._availableServerEndpoints;
+                    benchmarkFileList.CdnServerList = _cdnPool.AvailableServerEndpoints;
 
                     overallProgressTask.Increment(1);
                     individualProgressTask.StopTask();

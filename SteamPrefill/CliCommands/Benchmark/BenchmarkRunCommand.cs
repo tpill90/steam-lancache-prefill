@@ -1,12 +1,10 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands.Benchmark
 {
-    //TODO add detailed usage to readme
     [UsedImplicitly]
     [Command("benchmark run", Description = "Runs a benchmark using the previously configured workload.")]
     public class BenchmarkRunCommand : ICommand
     {
-        //TODO description
         [CommandOption("concurrency", 'c', Description = "Specifies the maximum number of concurrent requests at any one time.")]
         public uint MaxConcurrency { get; init; } = 50;
 

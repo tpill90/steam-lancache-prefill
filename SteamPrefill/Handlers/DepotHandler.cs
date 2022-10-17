@@ -122,14 +122,16 @@
             }
         }
 
-        //TODO document
+        /// <summary>
+        /// Downloads all of the required manifests for a game, and then combines all of the required chunk requests into a single queue.
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
         {
             var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
 
-            var chunkQueue = new List<QueuedRequest>();
-
             // Queueing up chunks for each depot
+            var chunkQueue = new List<QueuedRequest>();
             foreach (var depotManifest in depotManifests)
             {
                 // A depot will contain multiple files, that are broken up into 1MB chunks
