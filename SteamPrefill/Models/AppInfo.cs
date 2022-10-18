@@ -77,7 +77,7 @@
         {
             AppId = appId;
 
-            Name = rootKeyValue["common"]["name"].Value;
+            Name = rootKeyValue["common"]["name"].Value.EscapeMarkup();
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
             
