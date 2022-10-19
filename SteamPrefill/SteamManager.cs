@@ -78,7 +78,7 @@
             appIdsToDownload.AddRange(manualIds);
             if (downloadAllOwnedGames)
             {
-                appIdsToDownload.AddRange(_steam3.OwnedAppIds);
+                appIdsToDownload.AddRange(_steam3.LicenseManager.AllOwnedAppIds);
             }
             if (prefillRecentGames)
             {
@@ -154,8 +154,7 @@
             }
 
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
-
-            //TODO is this needed anymore?
+            
             await _cdnPool.PopulateAvailableServersAsync();
 
             // Get the full file list for each depot, and queue up the required chunks
@@ -216,7 +215,7 @@
 
         public async Task<List<AppInfo>> GetAllAvailableGamesAsync()
         {
-            var ownedGameIds = _steam3.OwnedAppIds.ToList();
+            var ownedGameIds = _steam3.LicenseManager.AllOwnedAppIds;
 
             // Loading app metadata from steam, skipping related DLC apps
             await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
@@ -228,7 +227,7 @@
         private async Task PrintUnownedAppsAsync(List<uint> distinctAppIds)
         {
             // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
-            AppInfo[] unownedApps = await Task.WhenAll(distinctAppIds.Where(e => !_steam3.AccountHasAppAccess(e))
+            AppInfo[] unownedApps = await Task.WhenAll(distinctAppIds.Where(e => !_steam3.LicenseManager.AccountHasAppAccess(e))
                                                                       .Select(e => _appInfoHandler.GetAppInfoAsync(e)));
             _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Length;
 
@@ -253,6 +252,7 @@
             _ansiConsole.Write(table);
         }
 
+        //TODO consider breaking this out into its own class
         #region Benchmarking
         
         public async Task SetupBenchmarkAsync(List<uint> appIds, bool useAllOwnedGames, bool useSelectedApps)
@@ -267,7 +267,7 @@
             }
             if (useAllOwnedGames)
             {
-                appIds.AddRange(_steam3.OwnedAppIds);
+                appIds.AddRange(_steam3.LicenseManager.AllOwnedAppIds);
             }
             appIds = appIds.Distinct().ToList();
 
@@ -289,8 +289,7 @@
             _ansiConsole.LogMarkupLine("Completed build of workload file...");
             _ansiConsole.LogMarkupLine($"Resulting file size : {MediumPurple(fileSize.ToBinaryString())}");
         }
-
-        //TODO document
+        
         private async Task<BenchmarkWorkload> BuildBenchmarkWorkloadAsync(List<uint> appIds)
         {
             await _cdnPool.PopulateAvailableServersAsync();

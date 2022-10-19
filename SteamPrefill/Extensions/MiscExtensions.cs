@@ -12,10 +12,14 @@
             return new ConcurrentStack<T>(list);
         }
 
-        public static ConcurrentQueue<T> ToConcurrentQueue<T>(this IOrderedEnumerable<T> list)
+        public static void AddRange<T>(this HashSet<T> hashSet, List<T> values)
         {
-            return new ConcurrentQueue<T>(list);
+            foreach (var value in values)
+            {
+                hashSet.Add(value);
+            }
         }
+
 
         [SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by Steam")]
         public static byte[] ToSha1(this byte[] input)

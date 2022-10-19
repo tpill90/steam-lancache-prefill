@@ -191,7 +191,7 @@
             var filteredGames = appInfos.Where(e => (e.Type == AppType.Game || e.Type == AppType.Beta)
                                                     && (e.ReleaseState != ReleaseState.Unavailable && e.ReleaseState != ReleaseState.Prerelease)
                                                     && e.SupportsWindows
-                                                    && _steam3Session.AccountHasAppAccess(e.AppId))
+                                                    && _steam3Session.LicenseManager.AccountHasAppAccess(e.AppId))
                                         .Where(e => !excludedAppIds.Contains(e.AppId))
                                         .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
                                         .Where(e => !e.Name.Contains("AMD Driver Updater"))

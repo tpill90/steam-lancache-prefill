@@ -1,7 +1,7 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Research - See if this endpoint can give me anything useful in some way clientconfig.akamai.steamstatic.com/appinfo/17390/sha/896ef0a3ad4c4901b78916c76e85cde05cf5f137.txt.gz
+     * Research - See if this endpoint can give me anything useful in some way.  Its also referenced in SteamKit2's PICSProductInfo class. clientconfig.akamai.steamstatic.com/appinfo/17390/sha/896ef0a3ad4c4901b78916c76e85cde05cf5f137.txt.gz
      *
      * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
      * Documentation - Add to docs how exactly passwords/credentials are used, and stored.
