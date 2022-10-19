@@ -29,8 +29,10 @@
             var timer = Stopwatch.StartNew();
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
             {
+                //TODO measure performance impact on a small library, as well as a very big one
+                var batchSize = appIds.Count / 20;
                 // Breaking the request into smaller batches that complete faster
-                var batchJobs = appIds.Chunk(50).Select(e => BulkLoadAppInfosAsync(e.ToList()));
+                var batchJobs = appIds.Chunk(batchSize).Select(e => BulkLoadAppInfosAsync(e.ToList())).ToList();
                 await Task.WhenAll(batchJobs);
 
                 if (loadDlcApps)
