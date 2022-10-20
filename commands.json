@@ -14,6 +14,11 @@
       "fileName": "explorer.exe",
       "workingDirectory": ".",
       "arguments": "C:\\Users\\Tim\\Dropbox\\Programming\\dotnet-public\\SteamPrefill\\SteamPrefill\\bin\\Release\\net6.0"
+    },
+    "Open cache folder": {
+      "fileName": "explorer.exe",
+      "workingDirectory": ".",
+      "arguments": "C:\\Users\\Tim\\AppData\\Local\\SteamPrefill\\Cache"
     }
   }
 }
