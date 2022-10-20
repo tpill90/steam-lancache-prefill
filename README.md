@@ -1,4 +1,3 @@
-
 # steam-lancache-prefill
 
 [![](https://dcbadge.vercel.app/api/server/BKnBS4u?style=flat-square)](https://discord.com/invite/BKnBS4u)
@@ -115,34 +114,8 @@ For more brand specific guides (non-exhaustive), see :
 
 # Detailed Command Usage
 
-## prefill
-
-| Option      |     | Values      |     |
-| ----------- | --- | ----------- | --- |
-| --all       |     |             | Downloads all owned apps, useful for prefilling a completely empty cache.  |
-| --recent    |     |             | Adds any games played within the last 2 weeks to the download queue.  |
-| --top       |     | 1-100       | Downloads the most popular games by player count, over the last 2 weeks.  **Default: 50**  |
-| --force     | -f  |             | By default, **SteamPrefill** will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.  <br/><br/> Running with the flag `--force` will override this behavior, and instead will always run the prefill, re-downloading all files for the specified product.  This flag may be useful for diagnostics, or benchmarking network performance.  |
-| --nocache   |     |             | **SteamPrefill** will cache copies of certain files on disk, in order to dramatically speed up future runs.  These cache files will be stored in the `/Cache` directory in the same directory as **SteamPrefill**.  However, in some scenarios this disk cache can potentially take up a non-trivial amount of storage (~1gb), which may not be ideal for all use cases. |
-| --verbose   |     |             | Produces more detailed log output.  By default, games that are already up to date will not be displayed at all.  Specifying this option will make it so that all games, even ones up to date, will be logged.  |
-| --unit      |     | bits, bytes | **(Optional)** Specifies which unit to use to display download speed. **Default : bits**  |
-| --no-ansi   |     |             | Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
-
-## clear-cache
-Deletes temporary cache files stored in the `/Cache` directory.  
-These files are cached in order to dramatically speed up future `prefill` runs (in some cases 3X faster),
-however in some cases this disk cache can potentially take up a non-trivial amount of storage (~1gb).  
-
-<img src="docs/img/Clear-Cache.png" width="630" alt="Clear cache command">
-
-These cache files will also build up over time, as newer versions of games are released, leaving unused cache data behind that will never be used again.
-
-In the case that you would like to save disk space without having to constantly clear the cache, 
-running `prefill` with the `--nocache` flag specified will prevent the cache files from being written in the first place.
-
-| Option      |     |      |
-| ----------- | --- | ---  |
-| --yes       | -y  | Skips the prompt asking to clear the cache, and immediately begins clearing the cache.     |
+> **Note**
+> Detailed command documentation has been moved to the wiki : [Detailed Command Usage](https://github.com/tpill90/steam-lancache-prefill/wiki/Detailed-Command-Usage)
 
 # Updating
 **SteamPrefill** will automatically check for updates, and notify you when an update is available :
@@ -167,7 +140,7 @@ If you are running into any issues, feel free to open up a Github issue on this 
 You can also find us at the [**LanCache.NET** Discord](https://discord.com/invite/BKnBS4u), in the `#steam-prefill` channel.
 
 # Additional Documentation
-* [Development Configuration](/docs/Development.md)
+* [Development Configuration](https://github.com/tpill90/steam-lancache-prefill/wiki/Development-Setup)
 
 # Acknowledgements
 - [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
