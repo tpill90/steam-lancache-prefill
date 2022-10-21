@@ -25,5 +25,10 @@
             IsFreeWeekend = rootKeyValue["extended"]["freeweekend"].AsBoolean();
             FreeWeekendExpiryTimeUtc = rootKeyValue["extended"]["expirytime"].AsDateTimeUtc();
         }
+
+        public override string ToString()
+        {
+            return $"Id : {Id}  MasterSubscriptionId : {MasterSubscriptionAppId}";
+        }
     }
 }

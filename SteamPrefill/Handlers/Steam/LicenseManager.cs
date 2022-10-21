@@ -1,4 +1,5 @@
-﻿using static SteamKit2.SteamApps;
+﻿using SteamKit2;
+using static SteamKit2.SteamApps;
 
 namespace SteamPrefill.Handlers.Steam
 {
@@ -41,19 +42,24 @@ namespace SteamPrefill.Handlers.Steam
         
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
+            // Filters out licenses that are subscription based, and have expired, like EA Play for example.
+            // The account will continue to "own" the packages, and will be unable to download their apps, so they must be filtered out here.
+            var nonExpiredLicenses = licenseList.Where(e => !e.LicenseFlags.HasFlag(ELicenseFlags.Expired)).ToList();
+
             // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
             if (File.Exists(LicensesPath))
             {
                 var deserialized = JsonSerializer.Deserialize(File.ReadAllText(LicensesPath), SerializationContext.Default.UserLicenses);
-                if (deserialized.LicenseCount == licenseList.Count)
+                if (deserialized.LicenseCount == nonExpiredLicenses.Count)
                 {
                     _userLicenses = deserialized;
                     return;
                 }
             }
+            _userLicenses = new UserLicenses();
 
             // Some packages require a access token in order to request their apps/depot list
-            var packageRequests = licenseList.Select(e => new PICSRequest(e.PackageID, e.AccessToken)).ToList();
+            var packageRequests = nonExpiredLicenses.Select(e => new PICSRequest(e.PackageID, e.AccessToken)).ToList();
 
             var jobResult = _steamAppsApi.PICSGetProductInfo(new List<PICSRequest>(), packageRequests).ToTask().Result;
             var packageInfos = jobResult.Results.SelectMany(e => e.Packages)
@@ -62,38 +68,22 @@ namespace SteamPrefill.Handlers.Steam
                                         .OrderBy(e => e.Id)
                                         .ToList();
 
-            _userLicenses.LicenseCount = packageInfos.Count;
+            _userLicenses.LicenseCount = nonExpiredLicenses.Count;
+            _userLicenses.OwnedPackageIds.AddRange(packageInfos.Select(e => e.Id).ToList());
 
             // Handling packages that are normally purchased or added via cd-key
-            var nonSubscription = packageInfos.Where(e => e.MasterSubscriptionAppId == null).ToList();
-            foreach (var package in nonSubscription)
+            foreach (var package in packageInfos)
             {
                 // Removing any free weekends that are no longer active
                 if (package.IsFreeWeekend && package.FreeWeekendHasExpired)
-                {
+                { 
                     continue;
                 }
-
-                _userLicenses.OwnedPackageIds.Add(package.Id);
+                
                 _userLicenses.OwnedAppIds.AddRange(package.AppIds);
                 _userLicenses.OwnedDepotIds.AddRange(package.DepotIds);
             }
 
-            // Handling subscription based packages, like EA Play for example.  The account will continue to "own" the packages, however
-            // the linked "master subscription app" will no longer be available, so these packages can't be downloaded
-            var subscriptionPackages = packageInfos.Where(e => e.MasterSubscriptionAppId != null).ToList();
-            foreach (var package in subscriptionPackages)
-            {
-                if (!_userLicenses.OwnedAppIds.Contains(package.MasterSubscriptionAppId.Value))
-                {
-                    continue;
-                }
-
-                _userLicenses.OwnedPackageIds.Add(package.Id);
-                _userLicenses.OwnedAppIds.AddRange(package.AppIds);
-                _userLicenses.OwnedDepotIds.AddRange(package.DepotIds);
-            }
-            
             // Serializing this data to speedup subsequent runs
             File.WriteAllText(LicensesPath, JsonSerializer.Serialize(_userLicenses, SerializationContext.Default.UserLicenses));
         }
