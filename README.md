@@ -7,8 +7,6 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 <img src="docs/img/Overview.png" width="730" alt="Overview">
 
-Inspired by the [lancache-autofill](https://github.com/zeropingheroes/lancache-autofill) project.
-
 # Features
 * Select apps to prefill through an interactive menu.  
 * Supports login with Steam Guard, and Steam Guard Mobile Authenticator

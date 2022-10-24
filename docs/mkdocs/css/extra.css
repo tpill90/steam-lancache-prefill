@@ -1,0 +1,18 @@
+p {
+    font-size: 18px !important;
+}
+
+/* Increases content width */
+.wy-nav-content {
+    max-width: 60% !important;
+}
+
+/* Makes long text in a table wrap around */
+.wy-table-responsive table td {
+    white-space: normal !important;
+}
+
+.rst-content table.docutils td, .rst-content table.docutils th {
+    font-size: 100% !important;
+}
+
