@@ -31,6 +31,10 @@
             {
                 //TODO measure performance impact on a small library, as well as a very big one
                 var batchSize = appIds.Count / 20;
+                if (batchSize == 0)
+                {
+                    batchSize = 1;
+                }
                 // Breaking the request into smaller batches that complete faster
                 var batchJobs = appIds.Chunk(batchSize).Select(e => BulkLoadAppInfosAsync(e.ToList())).ToList();
                 await Task.WhenAll(batchJobs);
