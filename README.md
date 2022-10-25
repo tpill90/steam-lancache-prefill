@@ -1,7 +1,9 @@
 # steam-lancache-prefill
 
-[![](https://dcbadge.vercel.app/api/server/BKnBS4u?style=flat-square)](https://discord.com/invite/BKnBS4u)
+[![](https://dcbadge.vercel.app/api/server/BKnBS4u?style=for-the-badge)](https://discord.com/invite/BKnBS4u)
+[![view - Documentation](https://img.shields.io/badge/view-Documentation-green?style=for-the-badge)](https://tpill90.github.io/steam-lancache-prefill/)
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y5DWGZN)
+
 
 Automatically fills a [Lancache](https://lancache.net/) with games from Steam, so that subsequent downloads for the same content will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
@@ -26,6 +28,10 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 - [Need Help?](#need-help)
 
 ## Initial Setup
+
+> **Note**
+> New to Linux?  See this detailed tutorial : [Install Guide For Linux Beginners](https://tpill90.github.io/steam-lancache-prefill/install-guides/Install-Guide-For-Linux-Beginners/)
+
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to a directory of your choice
 3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x ./SteamPrefill`
@@ -113,7 +119,7 @@ For more brand specific guides (non-exhaustive), see :
 # Detailed Command Usage
 
 > **Note**
-> Detailed command documentation has been moved to the wiki : [Detailed Command Usage](https://github.com/tpill90/steam-lancache-prefill/wiki/Detailed-Command-Usage)
+> Detailed command documentation has been moved to the wiki : [Detailed Command Usage](https://tpill90.github.io/steam-lancache-prefill/Detailed-Command-Usage/)
 
 # Updating
 **SteamPrefill** will automatically check for updates, and notify you when an update is available :
@@ -138,7 +144,7 @@ If you are running into any issues, feel free to open up a Github issue on this 
 You can also find us at the [**LanCache.NET** Discord](https://discord.com/invite/BKnBS4u), in the `#steam-prefill` channel.
 
 # Additional Documentation
-* [Development Configuration](https://github.com/tpill90/steam-lancache-prefill/wiki/Development-Setup)
+* [Development Configuration](https://tpill90.github.io/steam-lancache-prefill/dev-guides/Compiling-from-source/)
 
 # Acknowledgements
 - [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
