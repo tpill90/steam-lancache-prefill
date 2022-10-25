@@ -1,0 +1,17 @@
+site_name: steam-lancache-prefill wiki
+repo_url: https://github.com/tpill90/steam-lancache-prefill
+docs_dir: mkdocs
+extra_css:
+  - css/extra.css
+theme:
+  name: readthedocs
+markdown_extensions:
+  - admonition
+  - attr_list
+  - fenced_code
+  - meta
+  - nl2br
+  - sane_lists
+  - toc:
+      permalink: True
+  - tables
