@@ -12,7 +12,12 @@ p {
     white-space: normal !important;
 }
 
+/* Increases font size on tables to a readable size */
 .rst-content table.docutils td, .rst-content table.docutils th {
     font-size: 100% !important;
 }
 
+/* Code block font is too small by default */
+code {
+    font-size: 14px !important; 
+}
