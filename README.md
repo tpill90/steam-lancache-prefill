@@ -46,9 +46,12 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 ## Selecting what to prefill
 
+> **Warning**
+> This guide was written with Linux in mind.  If you are running **SteamPrefill** on Windows you will need to substitute `./SteamPrefill` with `.\SteamPrefill.exe` instead.
+
 Prior to prefilling for the first time, you will have to decide which apps should be prefilled.  This will be done using an interactive menu, for selecting what to prefill from all of your currently owned apps. To display the interactive menu, run the following command
 ```powershell
-.\SteamPrefill.exe select-apps
+./SteamPrefill select-apps
 ```
 
 Once logged into Steam, all of your currently owned apps will be displayed for selection.  Navigating using the arrow keys, select any apps that you are interested in prefilling with **space**.  Once you are satisfied with your selections, save them with **enter**.
@@ -61,7 +64,7 @@ These selections will be saved permanently, and can be freely updated at any tim
 
 Now that a prefill app list has been created, we can now move onto our initial prefill run by using 
 ```powershell
-.\SteamPrefill.exe prefill
+./SteamPrefill prefill
 ```
 
 The `prefill` command will automatically pickup the prefill app list, and begin downloading each app.  During the initial run, it is likely that the Lancache is empty, so download speeds should be expected to be around your internet line speed (in the below example, a 300mbit/s connection was used).  Once the prefill has completed, the Lancache should be fully ready to serve clients cached data.
