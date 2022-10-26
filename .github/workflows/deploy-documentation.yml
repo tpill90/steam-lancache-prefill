@@ -1,4 +1,6 @@
 name: deploy-documentation
+run-name: "Deploy Documentation"
+
 on:
   push:
     branches:

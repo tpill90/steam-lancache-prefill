@@ -39,7 +39,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 > Linux and macOS will require executable permissions to be granted with `chmod +x ./SteamPrefill` prior to running the app.
 
 > **Note**
-> Alpine Linux requires additional to be installed for the .NET runtime : [Alpine Linux Dependencies](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
+> Alpine Linux requires additional dependencies to be installed for the .NET runtime : [Alpine Linux Dependencies](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
 
 ## Optional Windows Setup
 
