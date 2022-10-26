@@ -27,20 +27,36 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 - [Updating](#updating)
 - [Need Help?](#need-help)
 
-## Initial Setup
+# Initial Setup
 
 > **Note**
 > New to Linux?  See this detailed tutorial : [Install Guide For Linux Beginners](https://tpill90.github.io/steam-lancache-prefill/install-guides/Install-Guide-For-Linux-Beginners/)
 
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to a directory of your choice
-3.  (**Linux / OSX Only**)  Give the downloaded executable permissions to be run with `chmod +x ./SteamPrefill`
-4.  (**Alpine Linux**) Install dependencies required by the .NET runtime : [(Alpine Linux dependencies)](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
-5.  (**Windows Only - Optional**)  Configure your terminal to use Unicode, for much nicer looking UI output.
-    - <img src="docs/img/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
-    - As the default console in Windows does not support UTF8, Windows Terminal should be installed from the [App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
-    - Unicode on Windows is not enabled by default, however running the following will enable it if it hasn't already been enabled.
-    - `if(!(Test-Path $profile) -or !(gc $profile).Contains("OutputEncoding")) { ac $profile "[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()";  & $profile; }`
+
+> **Warning**
+> Linux and macOS will require executable permissions to be granted with `chmod +x ./SteamPrefill` prior to running the app.
+
+> **Note**
+> Alpine Linux requires additional to be installed for the .NET runtime : [Alpine Linux Dependencies](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
+
+## Optional Windows Setup
+
+Configuring your terminal to use Unicode will result in a much nicer experience with **SteamPrefill**, for much nicer looking UI output.
+
+<img src="docs/img/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
+
+As the default console in Windows does not support UTF8, you should instead consider installing **Windows Terminal** from the [Microsoft App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
+
+Once **Windows Terminal** has been installed you will still need to enable Unicode, as it is not enabled by default. Running the following command in Powershell will enable it if it hasn't already been enabled.
+```powershell 
+if(!(Test-Path $profile) -or !(gc $profile).Contains("OutputEncoding")) 
+{ 
+    ac $profile "[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()";  
+    & $profile; 
+}
+```
 
 # Getting Started
 
