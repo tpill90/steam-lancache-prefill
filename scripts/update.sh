@@ -38,6 +38,9 @@ wget -q -nc --show-progress --progress=bar:force:noscroll $DOWNLOAD_URL
 echo -e "${Yellow} Unzipping... ${NC}"
 unzip -q -j -o SteamPrefill-${LATEST_TAG}-linux-x64.zip
 
+# Required so executable permissions don't get overwritten by unzip
+chmod +x SteamPrefill update.sh
+
 # Cleanup
 rm SteamPrefill-${LATEST_TAG}-linux-x64.zip
 
