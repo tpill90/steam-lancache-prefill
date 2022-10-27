@@ -1,7 +1,9 @@
-name: Build-and-test
+name: build-and-test
+run-name: "Build and Test"
 on: [push]
 
 permissions:
+  contents: write # Required to create a release
   pull-requests: read # allows SonarCloud to decorate PRs with analysis results
   security-events: write
 
@@ -28,10 +30,6 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore -c Release /p:WarningLevel=0
-    - name: Test
-      run: >
-        cd SteamPrefill.Test;
-        dotnet test --no-restore -c Release /p:WarningLevel=0
   test:
     runs-on: ubuntu-latest
     steps:
@@ -81,12 +79,20 @@ jobs:
       uses: actions/setup-dotnet@v2
       with:
         dotnet-version: 6.0.x
+    # Gets the executable version that will be used later in the uploaded zip file name
+    - name: Set Version
+      id: vars
+      run: >
+        version=$(grep -Po '(?<=<Version>)(.*?)(?=</Version>)' SteamPrefill/SteamPrefill.csproj);
+        echo "version=$version" >> $GITHUB_OUTPUT;
+    - run: sudo apt-get update
+    - run: sudo apt-get install zip -y
     - name: Publish
       # WarningLevel=0 so that the Annotations don't hide the Artifact list
       run: >
         dotnet publish SteamPrefill/SteamPrefill.csproj \
           --nologo \
-          -o publish \
+          -o "publish/SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}" \
           -c Release \
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
@@ -94,9 +100,19 @@ jobs:
           /p:PublishSingleFile=true \
           /p:PublishReadyToRun=true \
           /p:PublishTrimmed=true
+        cd publish;
+        zip -r SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
-        # TODO the uploaded file name needs to be improved to include branch name + date
-        name: "${{ matrix.runtime }}"
-        path: publish/
+        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }} 
+        path: publish
+        if-no-files-found: error
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        draft: true
+        name: "v${{ steps.vars.outputs.version }}"
+        files: "**/*.zip" 
+        generate_release_notes: true

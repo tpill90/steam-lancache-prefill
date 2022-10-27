@@ -1,4 +1,6 @@
 name: docker-publish
+run-name: "Publish Docker"
+
 on:
   push:
     tags:
