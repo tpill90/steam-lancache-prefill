@@ -10,62 +10,29 @@ permissions:
 jobs:
   dotnet-format:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
     - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-    - name: dotnet format check
-      run: dotnet format --exclude-diagnostics CliFx_SystemConsoleShouldBeAvoided
+    - run: dotnet format --exclude-diagnostics CliFx_SystemConsoleShouldBeAvoided
   build:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
     - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore -c Release /p:WarningLevel=0
+    - run: dotnet restore
+    - run: dotnet build --no-restore -c Release
   test:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
     - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Test
-      run: >
+    - run: dotnet restore
+    - run: >
         cd SteamPrefill.Test;
         dotnet test --no-restore -c Release /p:WarningLevel=0
-  infersharp:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
-    - name: Build
-      run: dotnet build -c Debug
-    - name: Run Infer#      
-      uses: microsoft/infersharpaction@v1.3.1
-      id: runinfersharp
-      with:
-        binary-path: SteamPrefill/bin/Debug/net6.0
-        optional-flags: --enable-null-dereference --enable-dotnet-resource-leak --enable-thread-safety-violation
-    - name: Upload SARIF output to GitHub Security Center
-      uses: github/codeql-action/upload-sarif@v1
-      with:
-        sarif_file: infer-out/report.sarif
   publish:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:6.0
     strategy:
       matrix:
         runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
@@ -73,22 +40,15 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 6.0.x
     # Gets the executable version that will be used later in the uploaded zip file name
     - name: Set Version
       id: vars
       run: >
-        version=$(grep -Po '(?<=<Version>)(.*?)(?=</Version>)' SteamPrefill/SteamPrefill.csproj);
+        version=$(grep -Po '(?<=<Version>)(.*?)(?=</Version>)' SteamPrefill/SteamPrefill.csproj); 
         echo "version=$version" >> $GITHUB_OUTPUT;
-    - run: sudo apt-get update
-    - run: sudo apt-get install zip -y
-    - name: Publish
-      # WarningLevel=0 so that the Annotations don't hide the Artifact list
+    - run: apt-get update
+    - run: apt-get install zip -y
+    - name: Publish 
       run: >
         dotnet publish SteamPrefill/SteamPrefill.csproj \
           --nologo \
@@ -96,17 +56,21 @@ jobs:
           -c Release \
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
-          /p:WarningLevel=0 \
           /p:PublishSingleFile=true \
           /p:PublishReadyToRun=true \
-          /p:PublishTrimmed=true
+          /p:PublishTrimmed=true;
+
         cd publish;
-        zip -r SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}
+        zip -r SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }};
+        cp SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip ../;
+        rm SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip;
+        cd ..;
+
     - name: Upload
       uses: actions/upload-artifact@v3
       with:
         name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }} 
-        path: publish
+        path: publish/
         if-no-files-found: error
     - name: Release
       uses: softprops/action-gh-release@v1
