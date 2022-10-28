@@ -1,5 +1,9 @@
 {
   "profiles": {
+    "Validate": {
+      "commandName": "Project",
+      "commandLineArgs": "validate --force --verbose"
+    },
     "Prefill All": {
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force --verbose"

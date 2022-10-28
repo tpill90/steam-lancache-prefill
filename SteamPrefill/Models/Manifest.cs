@@ -76,7 +76,8 @@ namespace SteamPrefill.Models
     public readonly struct ChunkData
     {
         /// <summary>
-        /// SHA-1 hash of the chunk, used as its Id.
+        /// SHA-1 hash of the chunk, used as its Id.  Always 20 bytes, but converted to a string so it can be
+        /// directly used to make a web request.
         /// </summary>
         [ProtoMember(1)]
         public readonly string ChunkId;
@@ -87,10 +88,38 @@ namespace SteamPrefill.Models
         [ProtoMember(2)]
         public readonly uint CompressedLength;
 
+        /// <summary>
+        /// Adler-32 hash
+        /// </summary>
+        [ProtoMember(3)]
+        public readonly uint Checksum;
+
+        //TODO remove?
+        [ProtoMember(4)]
+        public readonly string ChecksumString;
+
+        //TODO comment, reorder
+        [ProtoMember(5)]
+        public readonly uint UncompressedLength;
+
+        [ProtoMember(6)]
+        public readonly byte[] ChunkIDOriginal;
+
+        [ProtoMember(7)]
+        public readonly ulong Offset;
+
         public ChunkData(DepotManifest.ChunkData sourceChunk)
         {
+            Offset = sourceChunk.Offset;
+
+            ChunkIDOriginal = sourceChunk.ChunkID;
             ChunkId = HexMate.Convert.ToHexString(sourceChunk.ChunkID, HexFormattingOptions.Lowercase);
             CompressedLength = sourceChunk.CompressedLength;
+            UncompressedLength = sourceChunk.UncompressedLength;
+
+            Checksum = sourceChunk.Checksum;
+            var tempBytes = BitConverter.GetBytes(sourceChunk.Checksum);
+            ChecksumString = HexMate.Convert.ToHexString(tempBytes, HexFormattingOptions.Lowercase);
         }
 
         public override string ToString()

@@ -1,4 +1,8 @@
-﻿namespace SteamPrefill.Handlers
+﻿using Microsoft.IO;
+using System;
+using ZstdSharp.Unsafe;
+
+namespace SteamPrefill.Handlers
 {
     public sealed class DownloadHandler : IDisposable
     {
@@ -44,6 +48,7 @@
             await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
                 // Run the initial download
+                //TODO needs to switch to saying Validating instead of Downloading if validation is running
                 failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs);
 
                 // Handle any failed requests
@@ -63,18 +68,9 @@
             _ansiConsole.LogMarkupError($"Download failed! {LightYellow(failedRequests.Count)} requests failed unexpectedly, see {LightYellow("app.log")} for more details.");
             _ansiConsole.WriteLine();
 
-            // Web requests frequently fail due to transient errors, so displaying all errors to the user is unnecessary or even confusing.
-            // However, if a request fails repeatedly then there might be an underlying issue preventing success.
-            // The number of failures could approach in the thousands or even more, so rather than spam the console
-            // we will instead log them as a batch to app.log
-            foreach (var failedRequest in failedRequests)
-            {
-                FileLogger.LogExceptionNoStackTrace($"Request /depot/{failedRequest.DepotId}/chunk/{failedRequest.ChunkId} failed", failedRequest.LastFailureReason);
-            }
             return false;
         }
 
-        //TODO I don't like the number of parameters here, should maybe rethink the way this is written.
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed for any reason.
         /// </summary>
@@ -83,13 +79,15 @@
         public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload,
                                                                                 DownloadArguments downloadArgs, bool forceRecache = false)
         {
+            //requestsToDownload = requestsToDownload.Where(e => e.ChunkId == "acdbe5f233e796e9e75a4f8b052abf8054886296").ToList();
             double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
 
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             var cdnServer = _cdnPool.TakeConnection();
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, body: async (request, _) =>
+            // TODO change this back
+            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = 30 }, body: async (request, _) =>
             {
                 try
                 {
@@ -103,24 +101,22 @@
 
                     using var cts = new CancellationTokenSource();
                     using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-                    using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
+                    byte[] encryptedChunkData = await response.Content.ReadAsByteArrayAsync(cts.Token);
                     response.EnsureSuccessStatusCode();
 
-                    // Don't save the data anywhere, so we don't have to waste time writing it to disk.
-                    var buffer = new byte[4096];
-                    while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
-                    {
-                    }
+
+                    byte[] decompressed = new byte[request.chunkData.UncompressedLength];
+                    DepotChunk.Process(request.ToChunkData(), encryptedChunkData, decompressed, request.DepotKey);
+
                 }
                 catch (Exception e)
                 {
-                    request.LastFailureReason = e;
+                    _ansiConsole.LogMarkupLine(Red($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed : {e.Message}"));
                     failedRequests.Add(request);
                 }
                 progressTask.Increment(request.CompressedLength);
             });
 
-            //TODO In the scenario where a user still had all requests fail, potentially display a warning that there is an underlying issue
             // Only return the connections for reuse if there were no errors
             if (failedRequests.IsEmpty)
             {

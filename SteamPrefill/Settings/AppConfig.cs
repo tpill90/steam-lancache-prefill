@@ -1,5 +1,6 @@
 namespace SteamPrefill.Settings
 {
+    //TODO move to root folder
     public static class AppConfig
     {
         static AppConfig()
@@ -87,7 +88,7 @@ namespace SteamPrefill.Settings
 
                 // Enable verbose logs as well
                 VerboseLogs = true;
-            }
+    }
         }
 
         public static uint? CellIdOverride { get; set; }

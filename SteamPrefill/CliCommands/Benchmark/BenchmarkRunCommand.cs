@@ -87,11 +87,18 @@ namespace SteamPrefill.CliCommands.Benchmark
                 _cdnPool = new CdnPool(_ansiConsole, benchmarkWorkload.CdnServerList);
                 _totalDownloadSize = benchmarkWorkload.TotalDownloadSize;
 
-                // Randomizing request order, to simulate a more "realistic" workload similar to Lan Party traffic.
-                // We also want to avoid sequential reads, as they might be getting cached by the server's ram
-                _allRequests = benchmarkWorkload.AllQueuedRequests;
-                _allRequests.Shuffle();
+
+                // Taking a subset of the requests
+                //var subset = benchmarkWorkload.AllQueuedRequests.Take(500).ToList();
+                _allRequests = benchmarkWorkload.AllQueuedRequests.Take(25000).ToList();
+
+                //for (int i = 0; i < 10; i++)
+                //{
+                //    _allRequests.AddRange(subset);
+                //}
+                _totalDownloadSize = ByteSize.FromBytes(_allRequests.Sum(e => e.CompressedLength));
             });
+
 
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
             await _downloadHandler.InitializeAsync();

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64</RuntimeIdentifiers>
@@ -65,14 +65,22 @@
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
-    <PackageReference Include="protobuf-net" Version="3.2.30" />
+    <PackageReference Include="protobuf-net" Version="3.2.52" />
     <PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.67" />
-    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5" />
+    <PackageReference Include="SteamKit2" Version="3.3.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.34.0" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
+    <PackageReference Include="SharpCompress" Version="0.32.2" />
+    <PackageReference Include="Terminal.Gui" Version="1.7.2" />
+    <PackageReference Include="Wcwidth" Version="1.0.0" />
+    <PackageReference Include="ZString" Version="2.4.4" />
+
+    <PackageReference Include="System.IO.Hashing" Version="9.0.7" />
 
     <!-- Custom CliFx build, allows for top level exception handling in application code, instead of CliFx swallowing all exceptions -->
     <Reference Include="CliFx">
@@ -110,6 +118,9 @@
   </ItemGroup>
 
   <ItemGroup>
+
+    <!--<ProjectReference Include="..\..\ExternalLibraries\SteamKit\SteamKit2\SteamKit2\SteamKit2.csproj" />-->
+
     <ProjectReference Include="..\LancachePrefill.Common\dotnet\LancachePrefill.Common.csproj" />
   </ItemGroup>
 

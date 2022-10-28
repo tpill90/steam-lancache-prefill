@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Models
+﻿using System.ComponentModel;
+
+namespace SteamPrefill.Models
 {
     [ProtoContract(SkipConstructor = true)]
     public struct QueuedRequest
@@ -18,13 +20,37 @@
         [ProtoMember(3)]
         public readonly uint CompressedLength;
 
-        public Exception LastFailureReason { get; set; }
+        /// <summary>
+        /// Adler-32 hash, always 4 bytes
+        /// </summary>
+        [ProtoMember(4)]
+        public readonly uint ExpectedChecksum;
 
-        public QueuedRequest(Manifest depotManifest, ChunkData chunk)
+        //TODO remove?
+        [ProtoMember(5)]
+        public readonly string ExpectedChecksumString;
+
+        [ProtoMember(6)]
+        public readonly byte[] DepotKey;
+
+        public ChunkData chunkData;
+
+        public QueuedRequest(Manifest depotManifest, ChunkData chunk, byte[] depotKey)
         {
             DepotId = depotManifest.DepotId;
             ChunkId = chunk.ChunkId;
             CompressedLength = chunk.CompressedLength;
+
+            ExpectedChecksum = chunk.Checksum;
+            ExpectedChecksumString = chunk.ChecksumString;
+
+            DepotKey = depotKey;
+            chunkData = chunk;
+        }
+
+        public DepotManifest.ChunkData ToChunkData()
+        {
+            return new DepotManifest.ChunkData(chunkData.ChunkIDOriginal, ExpectedChecksum, chunkData.Offset, CompressedLength, chunkData.UncompressedLength);
         }
 
         public override string ToString()
