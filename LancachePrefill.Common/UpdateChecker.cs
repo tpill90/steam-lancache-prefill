@@ -28,7 +28,7 @@
                 // Query Github for a list of all available releases
                 var response = await httpClient.GetStringAsync(new Uri($"https://api.github.com/repos/{repoName}/releases"));
                 GithubRelease latestRelease = JsonSerializer.Deserialize(response, SerializationContext.Default.ListGithubRelease)
-                                                            .OrderByDescending(e => e.PublishedAt)
+                                                            .OrderByDescending(e => e.CreatedAt)
                                                             .First();
 
                 // Compare the available releases against our known releases
@@ -77,17 +77,26 @@
     {
     }
 
-    public class GithubRelease
+    public sealed class GithubRelease
     {
         [JsonPropertyName("tag_name")]
         public string TagName { get; set; }
 
+        [JsonPropertyName("created_at")]
+        public DateTime CreatedAt { get; set; }
+
         [JsonPropertyName("published_at")]
         public DateTime PublishedAt { get; set; }
 
+        [JsonPropertyName("draft")]
+        public bool IsDraft { get; set; }
+
+        [JsonPropertyName("prerelease")]
+        public bool IsPrerelease { get; set; }
+
         public override string ToString()
         {
-            return $"{TagName} - {PublishedAt}";
+            return $"{TagName} - Created : {CreatedAt} - Published: {PublishedAt}";
         }
     }
 }
