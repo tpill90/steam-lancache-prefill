@@ -25,9 +25,6 @@ namespace SteamPrefill.Tui
 
         public SelectAppsTui(List<AppInfo> availableGames, SteamManager steamManager)
         {
-            Console.OutputEncoding = Encoding.Unicode;
-            Application.UseSystemConsole = false;
-
             InitLayout(availableGames);
 
             // Restoring previously selected items

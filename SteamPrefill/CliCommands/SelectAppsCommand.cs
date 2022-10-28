@@ -17,6 +17,7 @@ namespace SteamPrefill.CliCommands
 
                 var games = await steamManager.GetAllAvailableGamesAsync();
 
+				Application.UseSystemConsole = true;
                 Application.Init();
                 using var tui2 = new SelectAppsTui(games, steamManager);
                 Key userKeyPress = tui2.Run();
