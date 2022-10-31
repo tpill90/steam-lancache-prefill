@@ -11,7 +11,6 @@
         /// If a manifest version is found for a specific depot, than that depot can be considered as previously downloaded.
         /// </summary>
         private readonly Dictionary<uint, HashSet<ulong>> _downloadedDepots = new Dictionary<uint, HashSet<ulong>>();
-        private readonly string _downloadedDepotsPath = $"{AppConfig.CacheDir}/successfullyDownloadedDepots.json";
 
         public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler, CdnPool cdnPool, DownloadArguments downloadArgs)
         {
@@ -19,9 +18,10 @@
             _appInfoHandler = appInfoHandler;
             _manifestHandler = new ManifestHandler(ansiConsole, cdnPool, steam3Session, downloadArgs);
 
-            if (File.Exists(_downloadedDepotsPath))
+            if (File.Exists(AppConfig.SuccessfullyDownloadedDepotsPath))
             {
-                _downloadedDepots = JsonSerializer.Deserialize(File.ReadAllText(_downloadedDepotsPath), SerializationContext.Default.DictionaryUInt32HashSetUInt64);
+                var fileContents = File.ReadAllText(AppConfig.SuccessfullyDownloadedDepotsPath);
+                _downloadedDepots = JsonSerializer.Deserialize(fileContents, SerializationContext.Default.DictionaryUInt32HashSetUInt64);
             }
         }
 
@@ -43,7 +43,7 @@
                     downloadedManifests.Add(depot.ManifestId.Value);
                 }
             }
-            File.WriteAllText(_downloadedDepotsPath, JsonSerializer.Serialize(_downloadedDepots, SerializationContext.Default.DictionaryUInt32HashSetUInt64));
+            File.WriteAllText(AppConfig.SuccessfullyDownloadedDepotsPath, JsonSerializer.Serialize(_downloadedDepots, SerializationContext.Default.DictionaryUInt32HashSetUInt64));
         }
 
         /// <summary>

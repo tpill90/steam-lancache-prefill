@@ -9,6 +9,7 @@ namespace SteamPrefill.Settings
             Directory.CreateDirectory(CacheDir);
 
             MigrateOldCacheDir();
+            MigrateSuccessfullyDownloadedDepots();
         }
 
 #if DEBUG
@@ -33,7 +34,7 @@ namespace SteamPrefill.Settings
         /// </summary>
         private const string CacheDirVersion = "v1";
 
-        //TODO remove after 11/20/2022
+        //TODO remove after 12/01/2022
         public static readonly string OldCacheDir = Path.Combine(AppContext.BaseDirectory, "Cache");
 
         /// <summary>
@@ -51,8 +52,17 @@ namespace SteamPrefill.Settings
         public static readonly string BenchmarkWorkloadPath = Path.Combine(ConfigDir, "benchmarkWorkload.bin");
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
 
+        //TODO remove after 12/01/2022
+        public static readonly string OldSuccessfullyDownloadedDepotsPath = Path.Combine(CacheDir, "successfullyDownloadedDepots.json");
+
+        /// <summary>
+        /// Keeps track of which depots have been previously downloaded.  Is used to determine whether or not a game is up to date,
+        /// based on whether all of the depots being downloaded are up to date.
+        /// </summary>
+        public static readonly string SuccessfullyDownloadedDepotsPath = Path.Combine(ConfigDir, "successfullyDownloadedDepots.json");
+
         #endregion
-        
+
         /// <summary>
         /// Gets the base directories for the cache folder, determined by which Operating System the app is currently running on.
         /// </summary>
@@ -86,7 +96,15 @@ namespace SteamPrefill.Settings
             throw new NotSupportedException($"Unknown platform {RuntimeInformation.OSDescription}");
         }
 
-        //TODO remove after 11/20/2022
+        private static void MigrateSuccessfullyDownloadedDepots()
+        {
+            // If the file exists in the old cache dir, but hasn't been migrated yet
+            if (File.Exists(OldSuccessfullyDownloadedDepotsPath) && !File.Exists(SuccessfullyDownloadedDepotsPath))
+            {
+                File.Copy(OldSuccessfullyDownloadedDepotsPath, SuccessfullyDownloadedDepotsPath);
+            }
+        }
+
         private static void MigrateOldCacheDir()
         {
             if (Directory.Exists(OldCacheDir))
