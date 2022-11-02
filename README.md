@@ -15,7 +15,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 * No installation required! A completely self-contained, portable application.
 * Multi-platform support (Windows, Linux, MacOS, Arm64)
 * High-performance!  Downloads are significantly faster than using Steam, and can easily reach 10gbit/s or more!
-* Game install writes no data to disk, so there is no need to have enough free space available.  This also means no unnecessary wear-and-tear to SSDs!
+* Game downloads write no data to disk, so there is no need to have enough free space available.  This also means no unnecessary wear-and-tear to SSDs!
 * Completely implemented from scratch, has no dependency on `SteamCMD`!
 * No Steam API key required!  
 
