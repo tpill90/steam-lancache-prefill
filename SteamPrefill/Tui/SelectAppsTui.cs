@@ -128,19 +128,7 @@ namespace SteamPrefill.Tui
         }
 
         #endregion
-
-        private void ListView_RowRender(ListViewRowEventArgs obj)
-        {
-            if (obj.Row == _listView.SelectedItem && _listView.HasFocus)
-            {
-                obj.RowAttribute = new Attribute(Color.BrightCyan, Color.Black);
-                return;
-            }
-            if (_listView.Source.IsMarked(obj.Row))
-            {
-                obj.RowAttribute = new Attribute(Color.BrightYellow, Color.Black);
-            }
-        }
+        
 
         private bool UserHasUnsavedChanges()
         {

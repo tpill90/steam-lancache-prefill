@@ -5,6 +5,8 @@ namespace SteamPrefill.Tui
 {
     public sealed partial class SelectAppsTui : IDisposable
     {
+        #region Style overrides
+
         // Overrides for the default color scheme
         private readonly ColorScheme _buttonColorScheme = new ColorScheme
         {
@@ -14,9 +16,41 @@ namespace SteamPrefill.Tui
             HotFocus = new Attribute(foreground: Color.BrightBlue, background: Color.Black),
         };
 
+        /// <summary>
+        /// Overrides the default symbol used by ListView when an item is selected
+        /// </summary>
+        private readonly char _listViewCheckedSymbol = '✓';
+
+        /// <summary>
+        /// Overrides the default symbol used by ListView when an item is not selected
+        /// </summary>
+        private readonly char _listViewUncheckedSymbol = ' ';
+
+        /// <summary>
+        /// Changes the default coloring of the "selected/focused" entry, as well as coloring previously selected apps.
+        /// </summary>
+        /// <param name="obj"></param>
+        private void ListView_RowRender(ListViewRowEventArgs obj)
+        {
+            if (obj.Row == _listView.SelectedItem && _listView.HasFocus)
+            {
+                obj.RowAttribute = new Attribute(Color.Black, Color.Gray);
+                return;
+            }
+            if (_listView.Source.IsMarked(obj.Row))
+            {
+                obj.RowAttribute = new Attribute(Color.Brown, Color.Black);
+            }
+        }
+
+#endregion
+
         [SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "<Pending>")]
         private void InitLayout(List<AppInfo> appInfos)
         {
+            View.Driver.Checked = _listViewCheckedSymbol;
+            View.Driver.UnChecked = _listViewUncheckedSymbol;
+
             var window = new Window("")
             {
                 X = 0,
@@ -115,12 +149,10 @@ namespace SteamPrefill.Tui
                 ColorScheme = new ColorScheme
                 {
                     Normal = new Attribute(foreground: Color.Gray, background: Color.Black),
-                    HotNormal = new Attribute(foreground: Color.Gray, background: Color.Black),
-                    Focus = new Attribute(foreground: Color.Cyan, background: Color.Black),
+                    HotNormal = new Attribute(foreground: Color.Gray, background: Color.Black)
                 },
                 AllowsMarking = true,
-                AllowsMultipleSelection = true,
-
+                AllowsMultipleSelection = true
             };
             _listView.RowRender += ListView_RowRender;
             _listView.Source = new AppInfoDataSource(appInfos);
