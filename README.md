@@ -32,8 +32,12 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 > **Note**
 > New to Linux?  See this detailed tutorial : [Install Guide For Linux Beginners](https://tpill90.github.io/steam-lancache-prefill/install-guides/Install-Guide-For-Linux-Beginners/)
 
-1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
-2.  Unzip to a directory of your choice
+> **Note**
+> Interested in using Docker instead?  See : [Docker Setup Guide](https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide/)
+
+1.  **SteamPrefill** can be run on both the Lancache server itself,  or on your gaming machine as an alternative Steam client.  You should decide which one works better for your use case.
+2.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
+3.  Unzip to a directory of your choice
 
 > **Warning**
 > Linux and macOS will require executable permissions to be granted with `chmod +x ./SteamPrefill` prior to running the app.
