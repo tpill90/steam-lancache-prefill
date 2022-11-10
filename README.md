@@ -150,7 +150,9 @@ After running the command, you can verify that the job was successfully created 
 
 <img src="docs/img/crontab.png" width="550" alt="Crontab jobs">
 
+## Can I fill my cache using previously installed Steam games?
 
+Unfortunately it is not possible to fill a Lancache using games that have been installed with Steam.  The installed games are in a different format than what Lancache caches, as they are decrypted and unzipped from the raw request.  The decryption/unzip process is not reversible.  Thus, the only way to get games properly cached is to redownload them using either **SteamPrefill** or **Steam**
 
 ## How can I limit download speeds?
 
