@@ -47,15 +47,15 @@ namespace SteamPrefill.Handlers.Steam
             var nonExpiredLicenses = licenseList.Where(e => !e.LicenseFlags.HasFlag(ELicenseFlags.Expired)).ToList();
 
             // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
-            //if (File.Exists(LicensesPath))
-            //{
-            //    var deserialized = JsonSerializer.Deserialize(File.ReadAllText(LicensesPath), SerializationContext.Default.UserLicenses);
-            //    if (deserialized.LicenseCount == nonExpiredLicenses.Count)
-            //    {
-            //        _userLicenses = deserialized;
-            //        return;
-            //    }
-            //}
+            if (File.Exists(LicensesPath))
+            {
+                var deserialized = JsonSerializer.Deserialize(File.ReadAllText(LicensesPath), SerializationContext.Default.UserLicenses);
+                if (deserialized.LicenseCount == nonExpiredLicenses.Count)
+                {
+                    _userLicenses = deserialized;
+                    return;
+                }
+            }
             _userLicenses = new UserLicenses();
 
             // Some packages require a access token in order to request their apps/depot list
