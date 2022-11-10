@@ -3,9 +3,9 @@
     [JsonSourceGenerationOptions(GenerationMode = JsonSourceGenerationMode.Default)]
     [JsonSerializable(typeof(List<uint>))]
     [JsonSerializable(typeof(Dictionary<uint, HashSet<ulong>>))]
-    [JsonSerializable(typeof(Dictionary<string, SteamSpyApp>))]
+    [JsonSerializable(typeof(GetMostPlayedGamesResponse))]
     [JsonSerializable(typeof(UserLicenses))]
-    internal partial class SerializationContext : JsonSerializerContext
+    internal sealed partial class SerializationContext : JsonSerializerContext
     {
     }
 }

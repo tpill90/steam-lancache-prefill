@@ -87,9 +87,9 @@
             }
             if (prefillPopularGames != null)
             {
-                var popularGames = (await SteamSpy.TopGamesLast2WeeksAsync(_ansiConsole))
+                var popularGames = (await SteamChartsService.MostPlayedByDailyPlayersAsync(_ansiConsole))
                                     .Take(prefillPopularGames.Value)
-                                    .Select(e => e.appid);
+                                    .Select(e => e.AppId);
                 appIdsToDownload.AddRange(popularGames);
             }
 
