@@ -120,6 +120,40 @@ Since there is no network transfer happening, the `prefill` should only be limit
 For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
 <img src="docs/img/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
 
+## Can SteamPrefill be ran on a schedule?
+
+Yes it can!  Scheduled jobs can be easily setup on Linux using `crontab`, and can be flexibly configured to run on any schedule that you desire.  Jobs are configured by specifying an "expression" that describes the schedule to run on. 
+Some examples of cron expressions:
+
+<table>
+<tr> <td> Schedule </td> <td> Cron Expression </td> </tr>
+<tr> <td> Every day at 2am </td> <td> 
+
+`0 2 * * * $PWD/SteamPrefill prefill`
+</td> </tr>
+<tr> <td> Every 4 hours </td> <td> 
+
+`"0 */4 * * * $PWD/SteamPrefill prefill`
+</td> </tr>
+</table>
+
+If the above examples don't cover your use case, [crontab.guru](https://crontab.guru/) is an online cron expression editor that can interactively edit cron expressions, and explain what they mean.
+
+Once you have determined a cron expression, you can then create a job using the following:
+
+> **Note**
+> This command should be run in the same directory where **SteamPrefill** is installed
+
+`job="cron expression here"; { crontab -l; echo "$job"; } | crontab -` 
+
+After running the command, you can verify that the job was successfully created with `crontab -l`.  If the output matches below, then your job is correctly configured!
+
+<img src="docs/img/crontab.png" width="550" alt="Crontab jobs">
+
+## Can I fill my cache using previously installed Steam games?
+
+Unfortunately it is not possible to fill a Lancache using games that have been installed with Steam.  The installed games are in a different format than what Lancache caches, as they are decrypted and unzipped from the raw request.  The decryption/unzip process is not reversible.  Thus, the only way to get games properly cached is to redownload them using either **SteamPrefill** or **Steam**
+
 ## How can I limit download speeds?
 
 You may want to limit the download speed of **SteamPrefill** to prevent it from potentially saturating your entire connection,  causing other devices to suffer from massive latency and poor speeds.  This issue is known as bufferbloat, and more detailed information on the issue can be found here: [What is bufferbloat?](https://www.waveform.com/tools/bufferbloat)
@@ -168,18 +202,4 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 # Acknowledgements
 - [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
 
-# External Links
-|   Link    |  Description   |  
-| ----------- | ------------ | 
-| https://steamdb.info/ | Third Party database of Steam apps.  Has extensive metadata, as well as historical data.    |
-| https://steamdb.info/faq/ | Useful info about SteamDB, as well as some technical info on how Steam works internally |
-| https://steamapi.xpaw.me/ | List of all known public Steam Web Api endpoints    |
-| https://steamdb.info/freepackages/ | A tool to automatically add free games/DLC to your account |
 
-* https://store.steampowered.com/api/appdetails?appids=10
-* https://wiki.teamfortress.com/wiki/User:RJackson/StorefrontAPI#Known_methods
-* https://steamspy.com/api.php
-* https://steamstat.us/
-* https://steam.readthedocs.io/en/latest/intro.html
-* https://partner.steamgames.com/doc/api/steam_api?language=english#enums
-* https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState

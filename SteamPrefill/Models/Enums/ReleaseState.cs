@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// Steam docs :
-    /// https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
+    /// https://partner.steamgames.com/doc/api/steam_api?#EAppReleaseState
     /// </summary>
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public sealed class ReleaseState : EnumBase<ReleaseState>
