@@ -134,6 +134,7 @@ namespace SteamPrefill.Handlers.Steam
         {
             var username = await _userAccountStore.GetUsernameAsync(_ansiConsole);
 
+            //TODO rename to session key
             string loginKey;
             _userAccountStore.LoginKeys.TryGetValue(username, out loginKey);
 
@@ -245,6 +246,7 @@ namespace SteamPrefill.Handlers.Steam
             return true;
         }
 
+        //TODO comment what exactly were waiting on here, and why.
         bool _receivedLoginKey;
         private void TryWaitForLoginKey()
         {

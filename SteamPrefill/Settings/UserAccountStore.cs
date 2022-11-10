@@ -13,6 +13,7 @@
         [ProtoMember(1)]
         public Dictionary<string, byte[]> SentryData { get; private set; }
 
+        //TODO rename to session key
         /// <summary>
         /// Upon a successful login to Steam, a "Login Key" will be returned to use on subsequent logins.
         /// This login key can be considered a "session token", and can be used on subsequent logins to avoid entering a password.
