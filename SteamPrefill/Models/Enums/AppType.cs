@@ -2,7 +2,7 @@
 {
     /// <summary>
     /// Steam docs:
-    /// https://partner.steamgames.com/doc/api/steam_api?language=english#EAppType
+    /// https://partner.steamgames.com/doc/api/steam_api?#EAppType
     /// </summary>
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     public class AppType : EnumBase<AppType>

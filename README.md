@@ -202,18 +202,4 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 # Acknowledgements
 - [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
 
-# External Links
-|   Link    |  Description   |  
-| ----------- | ------------ | 
-| https://steamdb.info/ | Third Party database of Steam apps.  Has extensive metadata, as well as historical data.    |
-| https://steamdb.info/faq/ | Useful info about SteamDB, as well as some technical info on how Steam works internally |
-| https://steamapi.xpaw.me/ | List of all known public Steam Web Api endpoints    |
-| https://steamdb.info/freepackages/ | A tool to automatically add free games/DLC to your account |
 
-* https://store.steampowered.com/api/appdetails?appids=10
-* https://wiki.teamfortress.com/wiki/User:RJackson/StorefrontAPI#Known_methods
-* https://steamspy.com/api.php
-* https://steamstat.us/
-* https://steam.readthedocs.io/en/latest/intro.html
-* https://partner.steamgames.com/doc/api/steam_api?language=english#enums
-* https://partner.steamgames.com/doc/api/steam_api?language=english#EAppReleaseState
