@@ -73,28 +73,46 @@ namespace SteamPrefill.Test
             // Depot is for macos only
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.MacOS } }
+                new DepotInfo(new KeyValue("0"), 222)
+                {
+                    DepotId = 123, 
+                    ManifestId = 5555, 
+                    SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.MacOS }
+                }
             };
 
-            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
+            var downloadArguments = new DownloadArguments { OperatingSystems = new List<OperatingSystem> { OperatingSystem.Windows } };
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(downloadArguments, depotList);
+
             // We are only interested in windows depots, so we should expect the depot to be filtered
             Assert.Empty(filteredDepots);
         }
 
-        [Fact]
-        public async Task OperatingSystemMatches_DepotIsIncluded()
+        [Theory]
+        [InlineData(      "windows", "windows")]
+        [InlineData("windows linux", "linux")]
+        [InlineData(        "linux", "windows linux")]
+        public async Task OperatingSystemMatches_DepotIsIncluded(string supportedOS, string downloadOS)
         {
-            // Depot is for windows only
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo(new KeyValue("0"), 222) { DepotId = 123, ManifestId = 5555, SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.Windows } }
+                new DepotInfo(new KeyValue("0"), 222)
+                {
+                    DepotId = 123, 
+                    ManifestId = 5555, 
+                    SupportedOperatingSystems = supportedOS.Split(" ").Select(e => OperatingSystem.Parse(e)).ToList()
+                }
             };
 
-            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments { OperatingSystem = OperatingSystem.Windows }, depotList);
-            // Since we want windows depots, the depot should be included
+            var downloadArguments = new DownloadArguments
+            {
+                OperatingSystems = downloadOS.Split(" ").Select(e => OperatingSystem.Parse(e)).ToList()
+            };
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(downloadArguments, depotList);
             Assert.Single(filteredDepots);
         }
 
+        
         [Fact]
         public async Task ArchitectureDoesntMatch_DepotIsNotIncluded()
         {

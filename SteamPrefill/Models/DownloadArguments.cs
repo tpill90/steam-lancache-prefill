@@ -20,8 +20,10 @@
         //TODO comment
         public int MaxConcurrentRequests { get; set; } = 50;
 
-        public OperatingSystem OperatingSystem { get; set; } = OperatingSystem.Windows;
-        public Architecture Architecture { get; set; } = Architecture.x64;
-        public Language Language { get; set; } = Language.English;
+        //TODO comment
+        public List<OperatingSystem> OperatingSystems { get; set; } = new List<OperatingSystem> { OperatingSystem.Windows };
+
+        public Architecture Architecture { get; init; } = Architecture.x64;
+        public Language Language { get; init; } = Language.English;
     }
 }

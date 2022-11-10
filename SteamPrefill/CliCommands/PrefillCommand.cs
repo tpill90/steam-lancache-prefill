@@ -20,6 +20,9 @@ namespace SteamPrefill.CliCommands
         }
 #endif
 
+        [CommandOption("os", Description = "Specifies which operating system(s) games should be downloaded for.  Can be windows/linux/macos", Converter = typeof(OperatingSystemConverter))]
+        public IReadOnlyList<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
+
         [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
@@ -77,7 +80,8 @@ namespace SteamPrefill.CliCommands
             {
                 Force = Force ?? default(bool),
                 NoCache = NoLocalCache ?? default(bool),
-                TransferSpeedUnit = TransferSpeedUnit
+                TransferSpeedUnit = TransferSpeedUnit,
+                OperatingSystems = OperatingSystems.ToList()
             };
 
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);

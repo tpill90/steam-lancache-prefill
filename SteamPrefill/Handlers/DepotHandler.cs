@@ -82,8 +82,9 @@
                     continue;
                 }
 
-                // Filtering to only specified operating systems
-                if (depot.SupportedOperatingSystems.Any() && !depot.SupportedOperatingSystems.Contains(downloadArgs.OperatingSystem))
+                // Checks to see if the depot supports any of the desired operating systems
+                var osIsSupported = downloadArgs.OperatingSystems.Any(e => depot.SupportedOperatingSystems.Contains(e));
+                if (depot.SupportedOperatingSystems.Any() && !osIsSupported)
                 {
                     continue;
                 }
