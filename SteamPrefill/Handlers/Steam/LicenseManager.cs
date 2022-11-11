@@ -1,7 +1,4 @@
-﻿using SteamKit2;
-using static SteamKit2.SteamApps;
-
-namespace SteamPrefill.Handlers.Steam
+﻿namespace SteamPrefill.Handlers.Steam
 {
     public sealed class LicenseManager
     {
@@ -30,14 +27,22 @@ namespace SteamPrefill.Handlers.Steam
             return _userLicenses.OwnedAppIds.Contains(appid);
         }
 
+        //TODO write test for all 3 of these conditions
         /// <summary>
-        /// Checks against the list of currently owned apps to determine if the user is able to download this depot.
+        /// Checks against the list of currently owned depots + apps to determine if the user is able to download this depot.
+        /// There are 3 cases that a depot is considered owned :
+        /// - If a user owns an App, and the Package that grants the App ownership also grants ownership to the App's depots, then the user owns the depot.
+        /// - If the user owns an App with DLC, and the App owns the depot + a Package grants ownership of the depot, then the user owns the depot.
+        /// - If the user owns an App with DLC but DLC App has no depots of its own. And instead the App owns a depot with the same Id as the DLC App,
+        ///     then the user owns the depot.
+        ///
+        /// For official documentation on how this works, see : https://partner.steamgames.com/doc/store/application/dlc
         /// </summary>
         /// <param name="depotId">Id of the depot to check for access</param>
         /// <returns>True if the user has access to the depot</returns>
         public bool AccountHasDepotAccess(uint depotId)
         {
-            return _userLicenses.OwnedDepotIds.Contains(depotId);
+            return _userLicenses.OwnedDepotIds.Contains(depotId) || _userLicenses.OwnedAppIds.Contains(depotId);
         }
         
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
@@ -75,6 +80,7 @@ namespace SteamPrefill.Handlers.Steam
             // Handling packages that are normally purchased or added via cd-key
             foreach (var package in packageInfos)
             {
+                //TODO is this necessary anymore with the new expired license check?
                 // Removing any free weekends that are no longer active
                 if (package.IsFreeWeekend && package.FreeWeekendHasExpired)
                 { 
