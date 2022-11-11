@@ -4,20 +4,15 @@ namespace SteamPrefill.CliCommands.Benchmark
 {
     //TODO comment
     [ProtoContract(SkipConstructor = true)]
-    public class BenchmarkWorkload
+    public sealed class BenchmarkWorkload
     {
         [ProtoMember(1)]
-        public ConcurrentBag<AppQueuedRequests> QueuedAppsList { get; } = new ConcurrentBag<AppQueuedRequests>();
+        public ConcurrentBag<AppQueuedRequests> QueuedAppsList { get; init; }
 
         //TODO document why this is needed
         [ProtoMember(2)]
-        public List<CdnServerShim> ServerShimList { get; set; }
-
-        public ConcurrentStack<Server> CdnServerList
-        {
-            get { return ServerShimList.Select(e => mapper.Map<CdnServerShim, Server>(e)).ToConcurrentStack(); }
-            set { ServerShimList = value.Select(e => mapper.Map<Server, CdnServerShim>(e)).ToList(); }
-        }
+        public List<CdnServerShim> ServerShimList { get; init; }
+        public ConcurrentStack<Server> CdnServerList => ServerShimList.Select(e => _mapper.Map<CdnServerShim, Server>(e)).ToConcurrentStack();
 
         public List<QueuedRequest> AllQueuedRequests => QueuedAppsList.SelectMany(e => e.QueuedRequests).ToList();
 
@@ -40,11 +35,17 @@ namespace SteamPrefill.CliCommands.Benchmark
         public ByteSize AverageChunkSize => ByteSize.FromBytes((double)TotalDownloadSize.Bytes / (double)TotalFiles);
         public string AverageChunkSizeFormatted => AverageChunkSize.ToBinaryString();
 
-        public static IMapper mapper = new MapperConfiguration(cfg =>
+        private static IMapper _mapper = new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<Server, CdnServerShim>();
             cfg.CreateMap<CdnServerShim, Server>();
         }).CreateMapper();
+
+        public BenchmarkWorkload(ConcurrentBag<AppQueuedRequests> queuedAppsList, ConcurrentStack<Server> cdnServers)
+        {
+            QueuedAppsList = queuedAppsList;
+            ServerShimList = cdnServers.Select(e => _mapper.Map<Server, CdnServerShim>(e)).ToList();
+        }
 
         #region Summary output
 

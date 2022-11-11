@@ -11,9 +11,9 @@ namespace SteamPrefill
      * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large/wide.  Some images are not crisp and suffer from display scaling
      *
      * Testing - Should invest some time into adding unit tests
-     * Cleanup warnings, resharper code issues, and github code issues.
+     * Cleanup Resharper code issues, and github code issues.
      * Cleanup TODOs
-     * Build - Fail build on both warnings + trim warnings
+     * Build - Fail build on trim warnings
      * Update to dotnet 7 sdk + dotnet 7 target
      * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
      */

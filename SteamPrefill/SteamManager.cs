@@ -294,7 +294,7 @@
         {
             await _cdnPool.PopulateAvailableServersAsync();
 
-            var benchmarkFileList = new BenchmarkWorkload();
+            var queuedApps = new ConcurrentBag<AppQueuedRequests>();
             await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit.Bytes, displayTransferRate: false).StartAsync(async ctx =>
             {
                 var gamesToUse = await _appInfoHandler.GetGamesByIdAsync(appIds);
@@ -320,7 +320,7 @@
                         // Get the full file list for each depot, and queue up the required chunks
                         var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
                         var appFileListing = new AppQueuedRequests(appInfo.Name, appInfo.AppId, allChunksForApp);
-                        benchmarkFileList.QueuedAppsList.Add(appFileListing);
+                        queuedApps.Add(appFileListing);
                     }
                     catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
                     {
@@ -334,13 +334,11 @@
                         _ansiConsole.MarkupLine("");
                     }
 
-                    benchmarkFileList.CdnServerList = _cdnPool.AvailableServerEndpoints;
-
                     overallProgressTask.Increment(1);
                     individualProgressTask.StopTask();
                 });
             });
-            return benchmarkFileList;
+            return new BenchmarkWorkload(queuedApps, _cdnPool.AvailableServerEndpoints);
         }
 
         #endregion
