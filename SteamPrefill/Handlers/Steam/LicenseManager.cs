@@ -44,7 +44,7 @@
         {
             return _userLicenses.OwnedDepotIds.Contains(depotId) || _userLicenses.OwnedAppIds.Contains(depotId);
         }
-        
+
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
             // Filters out licenses that are subscription based, and have expired, like EA Play for example.
@@ -83,10 +83,10 @@
                 //TODO is this necessary anymore with the new expired license check?
                 // Removing any free weekends that are no longer active
                 if (package.IsFreeWeekend && package.FreeWeekendHasExpired)
-                { 
+                {
                     continue;
                 }
-                
+
                 _userLicenses.OwnedAppIds.AddRange(package.AppIds);
                 _userLicenses.OwnedDepotIds.AddRange(package.DepotIds);
             }

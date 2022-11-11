@@ -68,7 +68,7 @@
                 {
                     // Regardless of which manifest failed, we're always going to retry multiple times
                     _ansiConsole.MarkupLine(Red("An unexpected error occurred while downloading manifests.  Retrying..."));
-                    
+
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
                     FileLogger.Log(e.ToString());
@@ -84,7 +84,7 @@
             {
                 throw new ManifestException("Unable to download manifests!  Skipping...");
             }
-            
+
             return depotManifests;
         }
 
@@ -97,7 +97,7 @@
 
             _cdnPool.ReturnConnection(server);
             var depotManifests = manifestTasks.Select(e => e.Result).ToList();
-            
+
             return depotManifests;
         }
 

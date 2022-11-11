@@ -128,7 +128,7 @@ namespace SteamPrefill.Tui
         }
 
         #endregion
-        
+
 
         private bool UserHasUnsavedChanges()
         {

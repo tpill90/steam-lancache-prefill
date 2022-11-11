@@ -363,7 +363,7 @@ namespace SteamPrefill.Handlers.Steam
         }
 
         #endregion
-        
+
         public void Dispose()
         {
             CdnClient.Dispose();

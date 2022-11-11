@@ -154,7 +154,7 @@
             }
 
             _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
-            
+
             await _cdnPool.PopulateAvailableServersAsync();
 
             // Get the full file list for each depot, and queue up the required chunks
@@ -254,7 +254,7 @@
 
         //TODO consider breaking this out into its own class
         #region Benchmarking
-        
+
         public async Task SetupBenchmarkAsync(List<uint> appIds, bool useAllOwnedGames, bool useSelectedApps)
         {
             _ansiConsole.WriteLine();
@@ -289,7 +289,7 @@
             _ansiConsole.LogMarkupLine("Completed build of workload file...");
             _ansiConsole.LogMarkupLine($"Resulting file size : {MediumPurple(fileSize.ToBinaryString())}");
         }
-        
+
         private async Task<BenchmarkWorkload> BuildBenchmarkWorkloadAsync(List<uint> appIds)
         {
             await _cdnPool.PopulateAvailableServersAsync();

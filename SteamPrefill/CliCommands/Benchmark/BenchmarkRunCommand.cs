@@ -22,7 +22,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         private List<QueuedRequest> _allRequests;
         private ByteSize _totalDownloadSize = ByteSize.MinValue;
         private DownloadHandler _downloadHandler;
-        
+
         public async ValueTask ExecuteAsync(IConsole console)
         {
             _ansiConsole = console.CreateAnsiConsole();
@@ -39,7 +39,7 @@ namespace SteamPrefill.CliCommands.Benchmark
             await RunWarmupAsync();
 
             var runResults = new List<Stopwatch>();
-            for(int run = 1; run <= MaxRuns; run++)
+            for (int run = 1; run <= MaxRuns; run++)
             {
                 // Force GC between runs, to minimize leftover objects from the previous run.
                 GC.Collect();
@@ -48,7 +48,7 @@ namespace SteamPrefill.CliCommands.Benchmark
                 var downloadTimer = Stopwatch.StartNew();
                 await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit).StartAsync(async ctx =>
                 {
-                    var downloadArguments = new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency }; 
+                    var downloadArguments = new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency };
                     await _downloadHandler.AttemptDownloadAsync(ctx, "Downloading", _allRequests, downloadArguments);
                 });
                 downloadTimer.Stop();
@@ -57,7 +57,7 @@ namespace SteamPrefill.CliCommands.Benchmark
                 _ansiConsole.LogMarkupLine($"Run {Cyan(run)} finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(_totalDownloadSize.CalculateBitrate(downloadTimer))}");
                 runResults.Add(downloadTimer);
             }
-            
+
             PrintSummary(runResults, _totalDownloadSize);
         }
 

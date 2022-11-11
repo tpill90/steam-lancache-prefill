@@ -17,7 +17,7 @@ namespace SteamPrefill.CliCommands
 
                 var games = await steamManager.GetAllAvailableGamesAsync();
 
-				Application.UseSystemConsole = true;
+                Application.UseSystemConsole = true;
                 Application.Init();
                 using var tui2 = new SelectAppsTui(games, steamManager);
                 Key userKeyPress = tui2.Run();
@@ -27,7 +27,7 @@ namespace SteamPrefill.CliCommands
                 {
                     return;
                 }
-                
+
                 // This escape sequence is required when running on linux, otherwise will not be able to use the Spectre selection prompt
                 // See : https://github.com/gui-cs/Terminal.Gui/issues/418
                 await console.Output.WriteAsync("\x1b[?1h");

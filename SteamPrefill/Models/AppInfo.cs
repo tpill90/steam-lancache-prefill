@@ -80,7 +80,7 @@
             Name = rootKeyValue["common"]["name"].Value.EscapeMarkup();
             Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
-            
+
             SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTimeUtc();
             OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTimeUtc();
             ReleaseState = rootKeyValue["common"]["releasestate"].AsEnum<ReleaseState>(toLower: true);

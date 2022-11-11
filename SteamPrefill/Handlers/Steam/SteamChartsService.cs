@@ -54,7 +54,7 @@
 
         [JsonPropertyName("appid")]
         public uint AppId { get; set; }
-        
+
         public override string ToString()
         {
             return $"{AppId} - {Rank}";

@@ -12,11 +12,11 @@
         public bool IsFreeWeekend;
         public DateTime? FreeWeekendExpiryTimeUtc;
         public bool FreeWeekendHasExpired => DateTime.UtcNow > FreeWeekendExpiryTimeUtc;
-        
+
         public Package(KeyValue rootKeyValue)
         {
             Id = UInt32.Parse(rootKeyValue.Name);
-            
+
             AppIds = rootKeyValue["appids"].Children.Select(e => uint.Parse(e.Value)).ToList();
             DepotIds = rootKeyValue["depotids"].Children.Select(e => uint.Parse(e.Value)).ToList();
 

@@ -13,7 +13,7 @@ jobs:
     container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
     - uses: actions/checkout@v3
-    - run: dotnet format --exclude-diagnostics CliFx_SystemConsoleShouldBeAvoided
+    - run: dotnet format --verify-no-changes
   build:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:6.0

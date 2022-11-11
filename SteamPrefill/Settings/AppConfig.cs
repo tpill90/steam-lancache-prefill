@@ -22,7 +22,7 @@ namespace SteamPrefill.Settings
         public static string SteamCdnUrl => "lancache.steamcontent.com";
 
         public static bool VerboseLogs { get; set; }
-        
+
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
@@ -79,7 +79,7 @@ namespace SteamPrefill.Settings
             if (System.OperatingSystem.IsLinux())
             {
                 // Gets base directories for the XDG Base Directory specification (Linux)
-                string pathHome = Environment.GetEnvironmentVariable("HOME") 
+                string pathHome = Environment.GetEnvironmentVariable("HOME")
                                   ?? throw new ArgumentNullException("HOME", "Could not determine HOME directory");
 
                 string pathXdgCacheHome = Environment.GetEnvironmentVariable("XDG_CACHE_HOME")

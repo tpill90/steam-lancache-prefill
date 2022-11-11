@@ -11,9 +11,9 @@ namespace SteamPrefill.Handlers.Steam
 
         private int _minimumServerCount = 5;
         private int _maxRetries = 3;
-        
+
         public ConcurrentStack<Server> AvailableServerEndpoints = new ConcurrentStack<Server>();
-        
+
         public CdnPool(IAnsiConsole ansiConsole, Steam3Session steamSession)
         {
             _ansiConsole = ansiConsole;
@@ -54,7 +54,7 @@ namespace SteamPrefill.Handlers.Steam
                     var retryMessage = retryCount > 0 ? LightYellow($"Retrying {retryCount}") : "";
                     task.Status($"{statusMessageBase} {retryMessage}");
                     await Task.Delay(retryCount * 250);
-                    
+
                     retryCount++;
                 }
             });
