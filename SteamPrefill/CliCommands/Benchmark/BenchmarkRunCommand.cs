@@ -3,6 +3,7 @@ namespace SteamPrefill.CliCommands.Benchmark
 {
     [UsedImplicitly]
     [Command("benchmark run", Description = "Runs a benchmark using the previously configured workload.")]
+    [SuppressMessage("Design", "CA1001:Type owns disposable field(s), but is not disposable", Justification = "Doesn't matter here, as this will die with the app on completion.")]
     public class BenchmarkRunCommand : ICommand
     {
         [CommandOption("concurrency", 'c', Description = "Specifies the maximum number of concurrent requests at any one time.")]

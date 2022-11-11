@@ -45,6 +45,7 @@
             return _userLicenses.OwnedDepotIds.Contains(depotId) || _userLicenses.OwnedAppIds.Contains(depotId);
         }
 
+        [SuppressMessage("Threading", "VSTHRD002:Synchronously waiting on tasks or awaiters may cause deadlocks", Justification = "Callback must be synchronous to compile")]
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
             // Filters out licenses that are subscription based, and have expired, like EA Play for example.
