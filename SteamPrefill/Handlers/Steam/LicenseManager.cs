@@ -100,9 +100,9 @@
     {
         public int LicenseCount { get; set; }
 
-        public HashSet<uint> OwnedPackageIds { get; set; } = new HashSet<uint>();
-        public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
-        public HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
+        public HashSet<uint> OwnedPackageIds { get; } = new HashSet<uint>();
+        public HashSet<uint> OwnedAppIds { get; } = new HashSet<uint>();
+        public HashSet<uint> OwnedDepotIds { get; } = new HashSet<uint>();
 
         public override string ToString()
         {

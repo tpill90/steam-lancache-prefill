@@ -30,8 +30,8 @@ namespace SteamPrefill.CliCommands
                 
                 // This escape sequence is required when running on linux, otherwise will not be able to use the Spectre selection prompt
                 // See : https://github.com/gui-cs/Terminal.Gui/issues/418
-                await Console.Out.WriteAsync("\x1b[?1h");
-                await Console.Out.FlushAsync();
+                await console.Output.WriteAsync("\x1b[?1h");
+                await console.Output.FlushAsync();
 
                 var runPrefill = ansiConsole.Prompt(new SelectionPrompt<bool>()
                                                     .Title(LightYellow("Run prefill now?"))

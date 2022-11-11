@@ -21,10 +21,9 @@
                 var responseContent = await response.Content.ReadAsStringAsync();
                 List<MostPlayedGame> topGames = JsonSerializer.Deserialize(responseContent, SerializationContext.Default.GetMostPlayedGamesResponse)
                                                               .response
-                                                              .ranks
+                                                              .Ranks
                                                               .OrderBy(e => e.Rank)
                                                               .ToList();
-
                 return topGames;
             }
             catch
@@ -44,8 +43,8 @@
 
     public sealed class Response
     {
-        public int rollup_date { get; set; }
-        public MostPlayedGame[] ranks { get; set; }
+        [JsonPropertyName("ranks")]
+        public MostPlayedGame[] Ranks { get; set; }
     }
 
     public sealed class MostPlayedGame
@@ -55,10 +54,7 @@
 
         [JsonPropertyName("appid")]
         public uint AppId { get; set; }
-
-        public int last_week_rank { get; set; }
-        public int peak_in_game { get; set; }
-
+        
         public override string ToString()
         {
             return $"{AppId} - {Rank}";
