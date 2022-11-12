@@ -4,7 +4,12 @@
     public enum ExcludedAppId
     {
         CodenameGordon = 92,
-        // Spacewar is a non-playable game, that is required for Steamworks multiplayer functionality to work
+
+        /// <summary>
+        /// SpaceWar is a non-playable game, that is required for Steamworks multiplayer functionality to work
+        ///
+        /// https://www.rockpapershotgun.com/spacewar-why-a-hidden-ancient-game-keeps-showing-in-steams-most-played-games
+        /// </summary>
         SpaceWar = 480,
         PCGamerOnline = 92500,
         RisingStormBetaDedicatedServer = 238690,

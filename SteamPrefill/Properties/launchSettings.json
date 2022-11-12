@@ -16,9 +16,9 @@
       "commandName": "Project",
       "commandLineArgs": "select-apps"
     },
-    "Benchmark - Setup - Ids": {
+    "Benchmark - Setup Ids - Best Case Workload": {
       "commandName": "Project",
-      "commandLineArgs": "benchmark setup --appid 730"
+      "commandLineArgs": "benchmark setup --appid 34234234"
     },
     "Benchmark - Setup - All": {
       "commandName": "Project",

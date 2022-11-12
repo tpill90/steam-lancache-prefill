@@ -1,21 +1,11 @@
 namespace SteamPrefill
 {
     /* TODO
-     * Research - See if this endpoint can give me anything useful in some way.  Its also referenced in SteamKit2's PICSProductInfo class. clientconfig.akamai.steamstatic.com/appinfo/17390/sha/896ef0a3ad4c4901b78916c76e85cde05cf5f137.txt.gz
-     * Determine if there is a way to selectively delete games from the cache, so that I don't have to nuke my whole cache to test something.
-     * Manifest downloads are no longer cached
-     *
-     * Documentation - Add to readme how you can login to multiple accounts.  Either two folders with two copies of the app, or setup family sharing.
-     * Documentation - Add to docs how exactly passwords/credentials are used, and stored.
-     * Documentation - Steam family sharing is supported.  You can even prefill games while on another machine.  Should probably add this to the readme
-     * Documentation - The readme could probably use a little bit of care.  Some of the images are way too large/wide.  Some images are not crisp and suffer from display scaling
-     *
+     * Research -Determine if there is a way to selectively delete games from the cache, so that I don't have to nuke my whole cache to test something.
      * Testing - Should invest some time into adding unit tests
      * Cleanup Resharper code issues, and github code issues.
      * Cleanup TODOs
      * Build - Fail build on trim warnings
-     * Update to dotnet 7 sdk + dotnet 7 target
-     * Spectre - Once pull request has been merged into Spectre, remove reference to forked copy of the project
      */
     public static class Program
     {

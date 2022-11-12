@@ -25,14 +25,22 @@ dotnet build
 
 ## Running the project
 
-Typically, for development you will want to run the project in `Debug` mode.  This mode will run dramatically slower than `Release`, however it will leave useful debugging information in the compiled assembly.  Running the following will detect and changes, and both `build` and `run` the project :
+!!! note
+    These steps assume that the working directory is `/SteamPrefill`.  All commands assume that they can find `SteamPrefill.csproj` in the working dir.
+
+Typically, for development you will want to run the project in `Debug` mode.  This mode will run dramatically slower than `Release`, however it will leave useful debugging information in the compiled assembly.  Running the following will detect and compile any changes, and then execute the project:
 ```powershell
-dotnet run --project .\SteamPrefill\SteamPrefill.csproj
+dotnet run
+```
+
+The above is analogous to running `./SteamPrefill.exe` without any parameters.  To instead supply parameters :
+```powershell
+dotnet run -- prefill --all
 ```
 
 Alternatively, to run the project at full speed with all compilation optimizations enabled, add the additional `--configuration Release` flag:
 ```powershell
-dotnet run --project .\SteamPrefill\SteamPrefill.csproj --configuration Release
+dotnet run --configuration Release
 ```
 
 ## Executing Unit Tests
