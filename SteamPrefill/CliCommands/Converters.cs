@@ -9,6 +9,26 @@
         }
     }
 
+    public sealed class OperatingSystemConverter : BindingConverter<OperatingSystem>
+    {
+        public override OperatingSystem Convert(string rawValue)
+        {
+            if (rawValue == null)
+            {
+                AnsiConsole.MarkupLine(Red($"An operating system must be specified when using {LightYellow("--os")}"));
+                AnsiConsole.Markup(Red($"Valid operating systems include : {LightYellow("windows/linux/macos")}"));
+                throw new CommandException(".", 1, true);
+            }
+            if (!OperatingSystem.IsValidEnumValue(rawValue))
+            {
+                AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid operating system!"));
+                AnsiConsole.Markup(Red($"Valid operating systems include : {LightYellow("windows/linux/macos")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return OperatingSystem.Parse(rawValue);
+        }
+    }
+
     public sealed class TransferSpeedUnitConverter : BindingConverter<TransferSpeedUnit>
     {
         public override TransferSpeedUnit Convert(string rawValue)

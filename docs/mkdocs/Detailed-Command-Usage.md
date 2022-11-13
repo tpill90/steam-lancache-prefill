@@ -9,6 +9,7 @@ Will keep track of which games have been previously downloaded, and will only do
 
 | Option      |     | Values      |     |
 | ----------- | --- | ----------- | --- |
+| --os        |     | windows, linux, macos | Specifies which operating system(s) games should be downloaded for.  Typically, almost all games support Windows, however there are increasingly more games that have Linux specific game files.  In some cases, the Linux game files may be as large as the Windows version.  **Default: Windows** |
 | --all       |     |             | Downloads all owned apps, useful for prefilling a completely empty cache.  |
 | --recent    |     |             | Adds any games played within the last 2 weeks to the download queue.  |
 | --top       |     | 1-100       | Downloads the most popular games by player count, over the last 2 weeks.  **Default: 50**  |

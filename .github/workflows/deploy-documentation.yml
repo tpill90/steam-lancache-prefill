@@ -18,4 +18,4 @@ jobs:
           cd docs;
           ls;
           pip install mkdocs-material;
-          mkdocs gh-deploy --force;
+          mkdocs gh-deploy --force --strict;
