@@ -18,10 +18,10 @@
         public TransferSpeedUnit TransferSpeedUnit { get; set; } = TransferSpeedUnit.Bits;
 
         //TODO comment
-        public int MaxConcurrentRequests { get; set; } = 50;
+        public int MaxConcurrentRequests { get; set; } = 30;
 
         //TODO comment
-        public List<OperatingSystem> OperatingSystems { get; set; } = new List<OperatingSystem> { OperatingSystem.Windows };
+        public List<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
 
         public Architecture Architecture { get; init; } = Architecture.x64;
         public Language Language { get; init; } = Language.English;
