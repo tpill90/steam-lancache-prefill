@@ -75,8 +75,8 @@ namespace SteamPrefill.Test
             {
                 new DepotInfo(new KeyValue("0"), 222)
                 {
-                    DepotId = 123, 
-                    ManifestId = 5555, 
+                    DepotId = 123,
+                    ManifestId = 5555,
                     SupportedOperatingSystems = new List<OperatingSystem> { OperatingSystem.MacOS }
                 }
             };
@@ -89,17 +89,17 @@ namespace SteamPrefill.Test
         }
 
         [Theory]
-        [InlineData(      "windows", "windows")]
+        [InlineData("windows", "windows")]
         [InlineData("windows linux", "linux")]
-        [InlineData(        "linux", "windows linux")]
+        [InlineData("linux", "windows linux")]
         public async Task OperatingSystemMatches_DepotIsIncluded(string supportedOS, string downloadOS)
         {
             var depotList = new List<DepotInfo>
             {
                 new DepotInfo(new KeyValue("0"), 222)
                 {
-                    DepotId = 123, 
-                    ManifestId = 5555, 
+                    DepotId = 123,
+                    ManifestId = 5555,
                     SupportedOperatingSystems = supportedOS.Split(" ").Select(e => OperatingSystem.Parse(e)).ToList()
                 }
             };
@@ -112,7 +112,7 @@ namespace SteamPrefill.Test
             Assert.Single(filteredDepots);
         }
 
-        
+
         [Fact]
         public async Task ArchitectureDoesntMatch_DepotIsNotIncluded()
         {
