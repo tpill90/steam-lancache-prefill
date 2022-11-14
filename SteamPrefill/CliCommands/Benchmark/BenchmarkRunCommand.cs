@@ -7,7 +7,7 @@ namespace SteamPrefill.CliCommands.Benchmark
     public class BenchmarkRunCommand : ICommand
     {
         [CommandOption("concurrency", 'c', Description = "Specifies the maximum number of concurrent requests at any one time.")]
-        public uint MaxConcurrency { get; init; } = 50;
+        public uint MaxConcurrency { get; init; } = 30;
 
         [CommandOption("iterations", 'i', Description = "Specifies how many benchmark iterations to run.")]
         public uint MaxRuns { get; init; } = 5;
