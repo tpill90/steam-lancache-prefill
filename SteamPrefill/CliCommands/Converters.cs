@@ -9,16 +9,32 @@
         }
     }
 
-    public sealed class OperatingSystemConverter : BindingConverter<OperatingSystem>
+    /// <summary>
+    /// Used to validate when an option flag has been specified, but no operating systems were specified.
+    /// Ex. --os , should throw the validation error.
+    /// </summary>
+    public sealed class OperatingSystemValidator : BindingValidator<OperatingSystem[]>
     {
-        public override OperatingSystem Convert(string rawValue)
+        public override BindingValidationError Validate(OperatingSystem[] value)
         {
-            if (rawValue == null)
+            if (value.Length == 0)
             {
                 AnsiConsole.MarkupLine(Red($"An operating system must be specified when using {LightYellow("--os")}"));
                 AnsiConsole.Markup(Red($"Valid operating systems include : {LightYellow("windows/linux/macos")}"));
                 throw new CommandException(".", 1, true);
             }
+            return Ok();
+        }
+    }
+
+    /// <summary>
+    /// Used to validate that a value passed to an option flag is indeed a valid option.
+    /// Ex. '--os android' will throw an exception since only windows/linux/macos are valid.
+    /// </summary>
+    public sealed class OperatingSystemConverter : BindingConverter<OperatingSystem>
+    {
+        public override OperatingSystem Convert(string rawValue)
+        {
             if (!OperatingSystem.IsValidEnumValue(rawValue))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid operating system!"));
@@ -33,6 +49,7 @@
     {
         public override TransferSpeedUnit Convert(string rawValue)
         {
+            // This will throw an error if a user specifies '--unit' but does not provide a value.  Does not work with List<T>
             if (rawValue == null)
             {
                 AnsiConsole.MarkupLine(Red($"A transfer speed unit must be specified when using {LightYellow("--unit")}"));

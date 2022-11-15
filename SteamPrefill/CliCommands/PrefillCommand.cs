@@ -20,9 +20,6 @@ namespace SteamPrefill.CliCommands
         }
 #endif
 
-        [CommandOption("os", Description = "Specifies which operating system(s) games should be downloaded for.  Can be windows/linux/macos", Converter = typeof(OperatingSystemConverter))]
-        public IReadOnlyList<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
-
         [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
@@ -41,6 +38,10 @@ namespace SteamPrefill.CliCommands
             Description = "Forces the prefill to always run, overrides the default behavior of only prefilling if a newer version is available.",
             Converter = typeof(NullableBoolConverter))]
         public bool? Force { get; init; }
+
+        [CommandOption("os", Description = "Specifies which operating system(s) games should be downloaded for.  Can be windows/linux/macos",
+            Converter = typeof(OperatingSystemConverter), Validators = new[] { typeof(OperatingSystemValidator) })]
+        public IReadOnlyList<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
 
         [CommandOption("nocache",
             Description = "Skips using locally cached files. Saves disk space, at the expense of slower subsequent runs.",
