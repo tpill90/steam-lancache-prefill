@@ -27,9 +27,8 @@
         public async Task RetrieveAppMetadataAsync(List<uint> appIds, bool loadDlcApps = true, bool loadRecentlyPlayed = false)
         {
             var timer = Stopwatch.StartNew();
-            await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App info...", async _ =>
+            await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App metadata...", async _ =>
             {
-                //TODO measure performance impact on a small library, as well as a very big one
                 var batchSize = appIds.Count / 20;
                 if (batchSize == 0)
                 {
@@ -181,6 +180,7 @@
             }
         }
 
+        //TODO rename to GetAvailableGamesByIdAsync
         /// <summary>
         /// Gets a list of available games, filtering out any unavailable, non-Windows games.
         /// </summary>

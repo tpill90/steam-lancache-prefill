@@ -56,6 +56,22 @@ namespace SteamPrefill.CliCommands
                 }
                 ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
             }
+            catch (TaskCanceledException e)
+            {
+                if (e.StackTrace.Contains(nameof(AppInfoHandler.RetrieveAppMetadataAsync)))
+                {
+                    ansiConsole.MarkupLine(Red("Unable to load latest App metadata! An unexpected error occurred! \n" +
+                                                "This could possibly be due to transient errors with the Steam network. \n" +
+                                                "Try again in a few minutes."));
+
+                    FileLogger.Log("Unable to load latest App metadata! An unexpected error occurred!");
+                    FileLogger.Log(e.ToString());
+                }
+                else
+                {
+                    ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                }
+            }
             catch (Exception e)
             {
                 ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
