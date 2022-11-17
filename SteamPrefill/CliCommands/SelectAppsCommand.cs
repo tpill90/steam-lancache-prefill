@@ -6,11 +6,19 @@ namespace SteamPrefill.CliCommands
                                           "As many apps as desired can be selected, which will then be used by the 'prefill' command")]
     public class SelectAppsCommand : ICommand
     {
+        [CommandOption("no-ansi",
+            Description = "Application output will be in plain text.  " +
+                          "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? NoAnsiEscapeSequences { get; init; }
+
         public async ValueTask ExecuteAsync(IConsole console)
         {
             var ansiConsole = console.CreateAnsiConsole();
-            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
+            // Property must be set to false in order to disable ansi escape sequences
+            ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
+            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
             try
             {
                 await steamManager.InitializeAsync();
