@@ -114,7 +114,7 @@
                 catch (Exception e)
                 {
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
-                    _ansiConsole.MarkupLine(Red($"   Unexpected download error : {e.Message}"));
+                    _ansiConsole.LogMarkupLine(Red($"Unexpected download error : {e.Message}  Skipping app..."));
                     _ansiConsole.MarkupLine("");
                     _prefillSummaryResult.FailedApps++;
                 }
