@@ -17,6 +17,12 @@ namespace SteamPrefill.CliCommands.Benchmark
             Converter = typeof(TransferSpeedUnitConverter))]
         public TransferSpeedUnit TransferSpeedUnit { get; init; } = TransferSpeedUnit.Bits;
 
+        [CommandOption("no-ansi",
+            Description = "Application output will be in plain text.  " +
+                          "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? NoAnsiEscapeSequences { get; init; }
+
         private IAnsiConsole _ansiConsole;
 
         private CdnPool _cdnPool;
@@ -27,6 +33,8 @@ namespace SteamPrefill.CliCommands.Benchmark
         public async ValueTask ExecuteAsync(IConsole console)
         {
             _ansiConsole = console.CreateAnsiConsole();
+            // Property must be set to false in order to disable ansi escape sequences
+            _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
             if (!File.Exists(AppConfig.BenchmarkWorkloadPath))
             {

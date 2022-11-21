@@ -1,4 +1,6 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+using Spectre.Console;
+
 namespace SteamPrefill.CliCommands.Benchmark
 {
     [UsedImplicitly]
@@ -19,11 +21,19 @@ namespace SteamPrefill.CliCommands.Benchmark
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 
+        [CommandOption("no-ansi",
+            Description = "Application output will be in plain text.  " +
+                          "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? NoAnsiEscapeSequences { get; init; }
+
         private IAnsiConsole _ansiConsole;
 
         public async ValueTask ExecuteAsync(IConsole console)
         {
             _ansiConsole = console.CreateAnsiConsole();
+            // Property must be set to false in order to disable ansi escape sequences
+            _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
             ValidateUserHasSelectedApps();
 
