@@ -34,7 +34,7 @@
         /// - If a user owns an App, and the Package that grants the App ownership also grants ownership to the App's depots, then the user owns the depot.
         /// - If the user owns an App with DLC, and the App owns the depot + a Package grants ownership of the depot, then the user owns the depot.
         /// - If the user owns an App with DLC but DLC App has no depots of its own. And instead the App owns a depot with the same Id as the DLC App,
-        ///     then the user owns the depot.
+        ///     then the user owns the depot.  Example DLC AppId : 1962660 - DepotId : 1962660
         ///
         /// For official documentation on how this works, see : https://partner.steamgames.com/doc/store/application/dlc
         /// </summary>

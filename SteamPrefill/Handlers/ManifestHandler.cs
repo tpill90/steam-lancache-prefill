@@ -42,14 +42,14 @@
                 {
                     if (e.Message.Contains("508"))
                     {
-                        _ansiConsole.MarkupLine(Red("An infinite loop was detected while download manifests.\n" +
-                                                    "This likely means that there is an issue with your network configuration.\n" +
-                                                    "Please check your configuration, and retry again.\n"));
+                        _ansiConsole.MarkupLine(Red("   An infinite loop was detected while download manifests.\n" +
+                                                    "   This likely means that there is an issue with your network configuration.\n" +
+                                                    "   Please check your configuration, and retry again.\n"));
                         throw new InfiniteLoopException("Infinite loop detected while downloading manifests");
                     }
 
                     // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("Request for manifests failed.  Retrying..."));
+                    _ansiConsole.MarkupLine(Red("   Request for manifests failed.  Retrying..."));
 
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
@@ -58,7 +58,7 @@
                 catch (TimeoutException e)
                 {
                     // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("Manifest request timed out.  Retrying..."));
+                    _ansiConsole.MarkupLine(Red("   Manifest request timed out.  Retrying..."));
 
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
@@ -67,7 +67,7 @@
                 catch (Exception e)
                 {
                     // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("An unexpected error occurred while downloading manifests.  Retrying..."));
+                    _ansiConsole.MarkupLine(Red($"   An unexpected error ({e.GetType()}) occurred while downloading manifests.  Retrying..."));
 
                     // Log extended details to disk
                     FileLogger.Log("An exception occurred while downloading manifests");
@@ -82,7 +82,7 @@
             }
             if (attempts == MaxRetries)
             {
-                throw new ManifestException("Unable to download manifests!  Skipping...");
+                throw new ManifestException("Unable to download manifests!");
             }
 
             return depotManifests;
@@ -92,12 +92,14 @@
         {
             Server server = _cdnPool.TakeConnection();
 
-            var manifestTasks = depots.Select(async e => await GetSingleManifestAsync(e, server)).ToList();
-            await Task.WhenAll(manifestTasks).WaitAsync(TimeSpan.FromSeconds(10));
+            var depotManifests = new List<Manifest>();
+            foreach (var depot in depots)
+            {
+                var manifest = await GetSingleManifestAsync(depot, server).WaitAsync(TimeSpan.FromSeconds(10));
+                depotManifests.Add(manifest);
+            }
 
             _cdnPool.ReturnConnection(server);
-            var depotManifests = manifestTasks.Select(e => e.Result).ToList();
-
             return depotManifests;
         }
 
