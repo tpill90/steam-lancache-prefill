@@ -56,7 +56,6 @@
     <PackageReference Include="SteamKit2" Version="2.4.1" />
     <PackageReference Include="Terminal.Gui" Version="1.7.2" />
     <PackageReference Include="Wcwidth" Version="1.0.0" />
-    <PackageReference Include="ZString" Version="2.4.4" />
 
     <Reference Include="Spectre.Console">
       <HintPath>..\lib\Spectre.Console.dll</HintPath>

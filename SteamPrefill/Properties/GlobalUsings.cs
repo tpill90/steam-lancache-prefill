@@ -5,7 +5,6 @@ global using CliFx.Attributes;
 global using CliFx.Exceptions;
 global using CliFx.Extensibility;
 global using CliFx.Infrastructure;
-global using Cysharp.Text;
 global using HexMate;
 global using JetBrains.Annotations;
 global using LancachePrefill.Common;
