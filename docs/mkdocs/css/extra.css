@@ -4,7 +4,7 @@ p {
 
 /* Increases content width */
 .wy-nav-content {
-    max-width: 60% !important;
+    max-width: 70% !important;
 }
 
 /* Makes long text in a table wrap around */
