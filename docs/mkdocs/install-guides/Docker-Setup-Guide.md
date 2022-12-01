@@ -79,7 +79,8 @@ Adding the following command will configure the scheduled job to run the `prefil
 
 ```bash
 #!/bin/bash
-docker run --rm \
+docker rm -f SteamPrefill &>/dev/null && echo 'Removed old container from previous run';
+docker run --rm --name SteamPrefill \
   --net=br0 \
   --add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX  \
   --volume ~/.config/SteamPrefill:/Config \
