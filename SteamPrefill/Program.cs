@@ -6,6 +6,7 @@ namespace SteamPrefill
      * Cleanup TODOs
      * Build - Fail build on trim warnings
      * Research - Determine if Polly could be used in this project
+     * Docs - Make sure all terminal photos are the same width + height.  Retake if necessary
      */
     public static class Program
     {

@@ -1,19 +1,17 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
-using Spectre.Console;
-
 namespace SteamPrefill.CliCommands.Benchmark
 {
     [UsedImplicitly]
     [Command("benchmark setup", Description = "Configures a benchmark workload from multiple apps.  Benchmark workload is static, and portable between machines.")]
     public class BenchmarkSetupCommand : ICommand
     {
-        [CommandOption("appid", Description = "The id of one or more games to include in benchmark workload file.  AppIds can be found using https://steamdb.info/")]
+        [CommandOption("appid", Description = "The id of one or more apps to include in benchmark workload file.  AppIds can be found using https://steamdb.info/")]
         public List<uint> AppIds { get; init; } = new List<uint>();
 
-        [CommandOption("all", Description = "Includes all currently owned games in benchmark workload file", Converter = typeof(NullableBoolConverter))]
-        public bool? BenchmarkAllOwnedGames { get; init; }
+        [CommandOption("all", Description = "Includes all currently owned apps in benchmark workload file", Converter = typeof(NullableBoolConverter))]
+        public bool? BenchmarkAllOwnedApps { get; init; }
 
-        [CommandOption("use-selected", Description = "Includes games selected using 'select-apps' in the benchmark workload file", Converter = typeof(NullableBoolConverter))]
+        [CommandOption("use-selected", Description = "Includes apps selected using 'select-apps' in the benchmark workload file", Converter = typeof(NullableBoolConverter))]
         public bool? UseSelectedApps { get; init; }
 
         [CommandOption("nocache",
@@ -46,7 +44,7 @@ namespace SteamPrefill.CliCommands.Benchmark
             try
             {
                 await steamManager.InitializeAsync();
-                await steamManager.SetupBenchmarkAsync(AppIds.ToList(), BenchmarkAllOwnedGames ?? default(bool), UseSelectedApps ?? default(bool));
+                await steamManager.SetupBenchmarkAsync(AppIds.ToList(), BenchmarkAllOwnedApps ?? default(bool), UseSelectedApps ?? default(bool));
             }
             finally
             {
@@ -61,7 +59,7 @@ namespace SteamPrefill.CliCommands.Benchmark
             {
                 return;
             }
-            if (BenchmarkAllOwnedGames ?? default(bool))
+            if (BenchmarkAllOwnedApps ?? default(bool))
             {
                 return;
             }

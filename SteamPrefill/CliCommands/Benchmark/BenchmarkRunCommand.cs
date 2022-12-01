@@ -6,7 +6,7 @@ namespace SteamPrefill.CliCommands.Benchmark
     [SuppressMessage("Design", "CA1001:Type owns disposable field(s), but is not disposable", Justification = "Doesn't matter here, as this will die with the app on completion.")]
     public class BenchmarkRunCommand : ICommand
     {
-        [CommandOption("concurrency", 'c', Description = "Specifies the maximum number of concurrent requests at any one time.")]
+        [CommandOption("concurrency", 'c', Description = "Specifies the maximum number of concurrent requests at any one time.", Validators = new[] { typeof(ConcurrencyValidator) })]
         public uint MaxConcurrency { get; init; } = 30;
 
         [CommandOption("iterations", 'i', Description = "Specifies how many benchmark iterations to run.")]
@@ -58,13 +58,20 @@ namespace SteamPrefill.CliCommands.Benchmark
                 await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit).StartAsync(async ctx =>
                 {
                     var downloadArguments = new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency };
-                    await _downloadHandler.AttemptDownloadAsync(ctx, "Downloading", _allRequests, downloadArguments);
+                    var failedRequests = await _downloadHandler.AttemptDownloadAsync(ctx, $"Run {Cyan(run)}", _allRequests, downloadArguments);
+
+                    // Any failed requests means that the run is invalidated
+                    if (failedRequests.Any())
+                    {
+                        _ansiConsole.LogMarkupLine(Red($"Run failed!  Invalidating run result due to {LightYellow(failedRequests.Count)} unexpected requests failing!"));
+                        return;
+                    }
+
+                    // Logging some metrics about the download
+                    _ansiConsole.LogMarkupLine($"Run {Cyan(run)} finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(_totalDownloadSize.CalculateBitrate(downloadTimer))}");
+                    runResults.Add(downloadTimer);
                 });
                 downloadTimer.Stop();
-
-                // Logging some metrics about the download
-                _ansiConsole.LogMarkupLine($"Run {Cyan(run)} finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(_totalDownloadSize.CalculateBitrate(downloadTimer))}");
-                runResults.Add(downloadTimer);
             }
 
             PrintSummary(runResults, _totalDownloadSize);
@@ -101,7 +108,13 @@ namespace SteamPrefill.CliCommands.Benchmark
             await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit).StartAsync(async ctx =>
             {
                 var downloadArguments = new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency };
-                await _downloadHandler.AttemptDownloadAsync(ctx, LightYellow("Running warmup"), _allRequests, downloadArguments);
+                var failedRequests = await _downloadHandler.AttemptDownloadAsync(ctx, LightYellow("Running warmup"), _allRequests, downloadArguments);
+
+                // Fail early if there are any failed requests, benchmark is likely to not be valid at all.
+                if (failedRequests.Any())
+                {
+                    throw new BenchmarkException($"Benchmark warmup failed.  {failedRequests.Count} requests failed unexpectedly");
+                }
             });
         }
 
