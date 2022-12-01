@@ -15,3 +15,14 @@ markdown_extensions:
   - toc:
       permalink: True
   - tables
+plugins:
+  - awesome-pages:
+      strict: true
+nav:
+  - Welcome: index.md
+  - Install Guides: 
+    - ... | flat | install-guides/*.md
+  - Dev Guides: 
+    - ... | flat | dev-guides/*.md
+  - Miscellaneous: 
+    - ... | flat | miscellaneous/*.md

@@ -2,9 +2,11 @@
 
 [![](https://dcbadge.vercel.app/api/server/BKnBS4u?style=for-the-badge)](https://discord.com/invite/BKnBS4u)
 [![view - Documentation](https://img.shields.io/badge/view-Documentation-green?style=for-the-badge)](https://tpill90.github.io/steam-lancache-prefill/)
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y5DWGZN)
-[![dockerhub](https://img.shields.io/docker/pulls/tpill90/steam-lancache-prefill?color=9af&style=for-the-badge)](https://hub.docker.com/r/tpill90/steam-lancache-prefill)
 
+[![dockerhub](https://img.shields.io/docker/pulls/tpill90/steam-lancache-prefill?color=9af&style=for-the-badge)](https://hub.docker.com/r/tpill90/steam-lancache-prefill)
+![GitHub all releases](https://img.shields.io/github/downloads/tpill90/steam-lancache-prefill/total?color=red&style=for-the-badge)
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Y8Y5DWGZN)
 
 Automatically fills a [Lancache](https://lancache.net/) with games from Steam, so that subsequent downloads for the same content will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
@@ -125,7 +127,7 @@ Since there is no network transfer happening, the `prefill` should only be limit
 For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
 <img src="docs/img/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
 
-## Can SteamPrefill be ran on a schedule?
+## Can SteamPrefill be run on a schedule?
 
 Yes it can!  Scheduled jobs can be easily setup on Linux using `crontab`, and can be flexibly configured to run on any schedule that you desire.  Jobs are configured by specifying an "expression" that describes the schedule to run on. 
 Some examples of cron expressions:
@@ -138,7 +140,7 @@ Some examples of cron expressions:
 </td> </tr>
 <tr> <td> Every 4 hours </td> <td> 
 
-`"0 */4 * * * $PWD/SteamPrefill prefill`
+`0 */4 * * * $PWD/SteamPrefill prefill`
 </td> </tr>
 </table>
 
