@@ -16,6 +16,5 @@ jobs:
           python-version: 3.x
       - run: >
           cd docs;
-          ls;
-          pip install mkdocs-material;
+          pip install mkdocs-awesome-pages-plugin;
           mkdocs gh-deploy --force --strict;

@@ -20,7 +20,7 @@ apt-get install curl jq unzip -y
 ```
 
 !!! Warning
-    You may run into a "Could not open lock file" error when running `apt-get install`, and will need to prefix the command with `sudo`.
+    You may run into a "Could not open lock file" error when running `apt-get install`, and will need to prefix the command with `sudo`
 
 Once the install command has finished successfully, we can move on to installing **SteamPrefill**.
 
