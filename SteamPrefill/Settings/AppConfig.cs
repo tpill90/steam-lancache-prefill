@@ -12,16 +12,19 @@ namespace SteamPrefill.Settings
             MigrateSuccessfullyDownloadedDepots();
         }
 
-#if DEBUG
-
-        public static bool EnableSteamKitDebugLogs => false;
-        public static bool SkipDownloads { get; set; }
-
-#endif
-
         public static string SteamCdnUrl => "lancache.steamcontent.com";
 
-        public static bool VerboseLogs { get; set; }
+        //TODO comment
+        private static bool _verboseLogs;
+        public static bool VerboseLogs
+        {
+            get => _verboseLogs;
+            set
+            {
+                _verboseLogs = value;
+                AnsiConsoleExtensions.WriteVerboseLogs = value;
+            }
+        }
 
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
@@ -41,6 +44,13 @@ namespace SteamPrefill.Settings
         /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
         /// </summary>
         public static readonly string ConfigDir = Path.Combine(AppContext.BaseDirectory, "Config");
+
+        #region Timeouts
+
+        //TODO comment
+        public static TimeSpan SteamKitRequestTimeout => TimeSpan.FromSeconds(60);
+
+        #endregion
 
         #region Serialization file paths
 
@@ -62,6 +72,13 @@ namespace SteamPrefill.Settings
         public static readonly string SuccessfullyDownloadedDepotsPath = Path.Combine(ConfigDir, "successfullyDownloadedDepots.json");
 
         #endregion
+
+#if DEBUG
+
+        public static bool EnableSteamKitDebugLogs => false;
+        public static bool SkipDownloads { get; set; }
+
+#endif
 
         /// <summary>
         /// Gets the base directories for the cache folder, determined by which Operating System the app is currently running on.

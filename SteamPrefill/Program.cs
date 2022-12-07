@@ -1,6 +1,8 @@
 namespace SteamPrefill
 {
     /* TODO
+     * Testing - See how chunk downloads react to throttled internet bandwidth ~1mb/s.  Does it throw a lot of TimeoutException/TaskCancelledExceptions? 
+     *
      * Research -Determine if there is a way to selectively delete games from the cache, so that I don't have to nuke my whole cache to test something.
      * Testing - Should invest some time into adding unit tests
      * Cleanup Resharper code issues, and github code issues.

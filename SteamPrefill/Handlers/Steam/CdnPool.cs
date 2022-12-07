@@ -87,7 +87,8 @@ namespace SteamPrefill.Handlers.Steam
 
                     // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
                     AvailableServerEndpoints = AvailableServerEndpoints
-                                                .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
+                                                .Where(e => e.Protocol == Server.ConnectionProtocol.HTTP && e.AllowedAppIds.Length == 0
+                                                                                                         && (e.Type == "SteamCache" || e.Type == "CDN"))
                                                 .DistinctBy(e => e.Host)
                                                 .ToConcurrentStack();
                 }).WaitAsync(TimeSpan.FromSeconds(6));
