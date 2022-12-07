@@ -13,6 +13,9 @@ namespace SteamPrefill
         {
             try
             {
+                var assembly = Assembly.GetExecutingAssembly();
+                var informationVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
                 var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
                                   "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
                                   "\n" +
@@ -22,6 +25,7 @@ namespace SteamPrefill
                              .SetTitle("SteamPrefill")
                              .SetExecutableName($"SteamPrefill{(OperatingSystem.IsWindows() ? ".exe" : "")}")
                              .SetDescription(description)
+                             .SetVersion($"v{informationVersion}")
                              .Build()
                              .RunAsync();
             }

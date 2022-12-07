@@ -6,7 +6,7 @@
 
     <AssemblyName>SteamPrefill</AssemblyName>
     <RootNamespace>SteamPrefill</RootNamespace>
-    <Version>1.8.1</Version>
+    <VersionPrefix>1.8.1</VersionPrefix>
     <Authors>tpill90</Authors>
 
     <!-- Code analysis settings -->
