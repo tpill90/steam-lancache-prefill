@@ -14,6 +14,8 @@
         public static string LightRed(object inputObj) => $"[{SpectreColors.LightRed.ToMarkup()}]{inputObj}[/]";
         public static string LightYellow(object inputObj) => $"[rgb(249,241,165)]{inputObj}[/]";
 
+        public static string ForestGreen(object inputObj) => $"[rgb(121,158,105)]{inputObj}[/]";
+
         public static string Green(object inputObj) => $"[green]{inputObj}[/]";
         public static string Grey(object inputObj) => $"[grey]{inputObj}[/]";
 

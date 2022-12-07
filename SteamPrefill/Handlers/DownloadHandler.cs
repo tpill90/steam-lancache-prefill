@@ -18,7 +18,7 @@
 
             _client = new HttpClient
             {
-                Timeout = TimeSpan.FromSeconds(15)
+                Timeout = AppConfig.SteamKitRequestTimeout
             };
             _client.DefaultRequestHeaders.Add("User-Agent", "Valve/Steam HTTP Client 1.0");
         }
