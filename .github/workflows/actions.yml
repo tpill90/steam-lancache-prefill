@@ -4,79 +4,65 @@ on: [push]
 
 permissions:
   contents: write # Required to create a release
-  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
-  security-events: write
 
 jobs:
   dotnet-format:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted 
     container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
     - uses: actions/checkout@v3
     - run: dotnet format --verify-no-changes
-  build:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
+  build-test:
+    runs-on: self-hosted 
+    container: mcr.microsoft.com/dotnet/sdk:6.0 
     steps:
     - uses: actions/checkout@v3
     - run: dotnet restore
     - run: dotnet build --no-restore -c Release /p:TreatWarningsAsErrors=true
-  test:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
-    steps:
-    - uses: actions/checkout@v3
-    - run: dotnet restore
     - run: >
         cd SteamPrefill.Test;
         dotnet test --no-restore -c Release /p:WarningLevel=0
   publish:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container: mcr.microsoft.com/dotnet/sdk:6.0
     strategy:
       matrix:
-        runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
-      fail-fast: false
+        runtime: ['win-x64', 'linux-x64']
+      fail-fast: true
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
     # Gets the executable version that will be used later in the uploaded zip file name
     - name: Set Version
       id: vars
-      run: >
-        version=$(grep -Po '(?<=<Version>)(.*?)(?=</Version>)' SteamPrefill/SteamPrefill.csproj); 
+      run: |
+        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' SteamPrefill/SteamPrefill.csproj); 
         echo "version=$version" >> $GITHUB_OUTPUT;
+        suffix=$(date +"%m%d%H%M");
+        echo "suffix=$suffix" >> $GITHUB_OUTPUT
     - run: apt-get update
     - run: apt-get install zip -y
     - name: Publish 
       run: >
+        version=${{ steps.vars.outputs.version }}
+        suffix=${{ steps.vars.outputs.suffix }}
+
         dotnet publish SteamPrefill/SteamPrefill.csproj \
           --nologo \
-          -o "publish/SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}" \
+          --version-suffix $suffix \
+          -o "publish/SteamPrefill-$version-$suffix-${{ matrix.runtime }}" \
           -c Release \
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
-          /p:PublishSingleFile=true \
-          /p:PublishReadyToRun=true \
-          /p:PublishTrimmed=true;
+          /p:PublishSingleFile=true; 
 
         cd publish;
-        zip -r SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }};
-        cp SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip ../;
-        rm SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }}.zip;
+        zip -r SteamPrefill-$version-$suffix-${{ matrix.runtime }}.zip SteamPrefill-$version-$suffix-${{ matrix.runtime }};
+        cp SteamPrefill-$version-$suffix-${{ matrix.runtime }}.zip ../;
+        rm SteamPrefill-$version-$suffix-${{ matrix.runtime }}.zip;
         cd ..;
-
-    - name: Upload
+    - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }} 
+        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.suffix }}-${{ matrix.runtime }} 
         path: publish/
-        if-no-files-found: error
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        draft: true
-        name: "v${{ steps.vars.outputs.version }}"
-        files: "**/*.zip" 
-        generate_release_notes: true
+        if-no-files-found: error 
