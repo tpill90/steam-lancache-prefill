@@ -7,9 +7,6 @@ namespace SteamPrefill.Settings
             // Create required folders
             Directory.CreateDirectory(ConfigDir);
             Directory.CreateDirectory(CacheDir);
-
-            MigrateOldCacheDir();
-            MigrateSuccessfullyDownloadedDepots();
         }
 
         public static string SteamCdnUrl => "lancache.steamcontent.com";
@@ -37,9 +34,6 @@ namespace SteamPrefill.Settings
         /// </summary>
         private const string CacheDirVersion = "v1";
 
-        //TODO remove after 12/01/2022
-        public static readonly string OldCacheDir = Path.Combine(AppContext.BaseDirectory, "Cache");
-
         /// <summary>
         /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
         /// </summary>
@@ -61,9 +55,6 @@ namespace SteamPrefill.Settings
         /// </summary>
         public static readonly string BenchmarkWorkloadPath = Path.Combine(ConfigDir, "benchmarkWorkload.bin");
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
-
-        //TODO remove after 12/01/2022
-        public static readonly string OldSuccessfullyDownloadedDepotsPath = Path.Combine(CacheDir, "successfullyDownloadedDepots.json");
 
         /// <summary>
         /// Keeps track of which depots have been previously downloaded.  Is used to determine whether or not a game is up to date,
@@ -111,23 +102,6 @@ namespace SteamPrefill.Settings
             }
 
             throw new NotSupportedException($"Unknown platform {RuntimeInformation.OSDescription}");
-        }
-
-        private static void MigrateSuccessfullyDownloadedDepots()
-        {
-            // If the file exists in the old cache dir, but hasn't been migrated yet
-            if (File.Exists(OldSuccessfullyDownloadedDepotsPath) && !File.Exists(SuccessfullyDownloadedDepotsPath))
-            {
-                File.Copy(OldSuccessfullyDownloadedDepotsPath, SuccessfullyDownloadedDepotsPath);
-            }
-        }
-
-        private static void MigrateOldCacheDir()
-        {
-            if (Directory.Exists(OldCacheDir))
-            {
-                Directory.Delete(OldCacheDir, true);
-            }
         }
     }
 }
