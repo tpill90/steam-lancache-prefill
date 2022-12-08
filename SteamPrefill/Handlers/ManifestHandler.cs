@@ -25,81 +25,64 @@
         }
 
         /// <summary>
-        /// Downloads all of the manifests for a list of specified depots.  Will retry up to 3 times, in the case of errors.
+        /// Downloads all of the manifests for a list of specified depots.
+        /// Will retry up to 3 times, in the case of transient errors.
+        /// If the download for a manifest has failed 3 times, it will skip downloading the current app.
         /// </summary>
         /// <exception cref="ManifestException"></exception>
         public async Task<List<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
         {
-            int attempts = 0;
-            var depotManifests = new List<Manifest>();
-            while (depotManifests.Count != depots.Count && attempts < MaxRetries)
-            {
-                try
-                {
-                    depotManifests = await AttemptManifestDownloadAsync(depots);
-                }
-                catch (SteamKitWebRequestException e)
-                {
-                    if (e.Message.Contains("508"))
-                    {
-                        _ansiConsole.MarkupLine(Red("   An infinite loop was detected while download manifests.\n" +
-                                                    "   This likely means that there is an issue with your network configuration.\n" +
-                                                    "   Please check your configuration, and retry again.\n"));
-                        throw new InfiniteLoopException("Infinite loop detected while downloading manifests");
-                    }
-
-                    // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("   Request for manifests failed.  Retrying..."));
-
-                    // Log extended details to disk
-                    FileLogger.Log("An exception occurred while downloading manifests");
-                    FileLogger.Log(e.ToString());
-                }
-                catch (TimeoutException e)
-                {
-                    // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red("   Manifest request timed out.  Retrying..."));
-
-                    // Log extended details to disk
-                    FileLogger.Log("An exception occurred while downloading manifests");
-                    FileLogger.Log(e.ToString());
-                }
-                catch (Exception e)
-                {
-                    // Regardless of which manifest failed, we're always going to retry multiple times
-                    _ansiConsole.MarkupLine(Red($"   An unexpected error ({e.GetType()}) occurred while downloading manifests.  Retrying..."));
-
-                    // Log extended details to disk
-                    FileLogger.Log("An exception occurred while downloading manifests");
-                    FileLogger.Log(e.ToString());
-                }
-                finally
-                {
-                    // Pausing a short time, in case the error was transient
-                    await Task.Delay(500 * attempts);
-                }
-                attempts++;
-            }
-            if (attempts == MaxRetries)
-            {
-                throw new ManifestException("Unable to download manifests!");
-            }
-
-            return depotManifests;
-        }
-
-        private async Task<List<Manifest>> AttemptManifestDownloadAsync(List<DepotInfo> depots)
-        {
-            Server server = _cdnPool.TakeConnection();
+            _ansiConsole.LogMarkupVerbose($"Downloading manifests for {Magenta(depots.Count)} depots");
 
             var depotManifests = new List<Manifest>();
             foreach (var depot in depots)
             {
-                var manifest = await GetSingleManifestAsync(depot, server).WaitAsync(TimeSpan.FromSeconds(10));
-                depotManifests.Add(manifest);
-            }
+                int attempts = 0;
+                Manifest manifest = null;
+                while (manifest == null && attempts < MaxRetries)
+                {
+                    try
+                    {
+                        _ansiConsole.LogMarkupVerbose($"Downloading manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)}");
 
-            _cdnPool.ReturnConnection(server);
+                        Server server = _cdnPool.TakeConnection();
+
+                        manifest = await GetSingleManifestAsync(depot, server).WaitAsync(AppConfig.SteamKitRequestTimeout);
+                        depotManifests.Add(manifest);
+
+                        _cdnPool.ReturnConnection(server);
+                    }
+                    catch (Exception e)
+                    {
+                        if (e is TaskCanceledException || e is TimeoutException)
+                        {
+                            _ansiConsole.LogMarkupError($"Manifest request timed out for depot {Cyan(depot.Name)} - {LightYellow(depot.DepotId)}.  Retrying...");
+                        }
+                        else if (e is SteamKitWebRequestException && e.Message.Contains("508"))
+                        {
+                            _ansiConsole.LogMarkupError("   An infinite loop was detected while downloading manifests.\n" +
+                                                            "   This likely means that there is an issue with your network configuration.\n" +
+                                                            "   Please check your configuration, and retry again.\n");
+                            throw new InfiniteLoopException("Infinite loop detected while downloading manifests");
+                        }
+                        else
+                        {
+                            // Default catch all message
+                            _ansiConsole.LogMarkupError($"   An unexpected error ({e.GetType()}) occurred while downloading manifests.  Retrying...");
+                        }
+                        FileLogger.LogException("An exception occurred while downloading manifests", e);
+                    }
+
+                    // Pausing a short time, in case the error was transient
+                    attempts++;
+                    await Task.Delay(500 * attempts);
+
+                    if (attempts == MaxRetries)
+                    {
+                        throw new ManifestException("Unable to download manifests!");
+                    }
+                }
+            }
             return depotManifests;
         }
 

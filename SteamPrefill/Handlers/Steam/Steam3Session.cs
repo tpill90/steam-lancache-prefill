@@ -53,9 +53,9 @@ namespace SteamPrefill.Handlers.Steam
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
 
             CdnClient = new Client(_steamClient);
-            // Configuring SteamKit's HttpClient to timeout in a more reasonable time frame.
-            Client.ResponseBodyTimeout = TimeSpan.FromSeconds(5);
-            Client.RequestTimeout = TimeSpan.FromSeconds(5);
+            // Configuring SteamKit's HttpClient to timeout in a more reasonable time frame.  This is only used when downloading manifests
+            Client.ResponseBodyTimeout = AppConfig.SteamKitRequestTimeout;
+            Client.RequestTimeout = AppConfig.SteamKitRequestTimeout;
 
             _userAccountStore = UserAccountStore.LoadFromFile();
             LicenseManager = new LicenseManager(SteamAppsApi, _userAccountStore);
