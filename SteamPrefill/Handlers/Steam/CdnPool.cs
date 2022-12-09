@@ -91,7 +91,7 @@ namespace SteamPrefill.Handlers.Steam
                                                                                                          && (e.Type == "SteamCache" || e.Type == "CDN"))
                                                 .DistinctBy(e => e.Host)
                                                 .ToConcurrentStack();
-                }).WaitAsync(TimeSpan.FromSeconds(6));
+                }).WaitAsync(TimeSpan.FromSeconds(15));
             }
             catch (TimeoutException)
             {

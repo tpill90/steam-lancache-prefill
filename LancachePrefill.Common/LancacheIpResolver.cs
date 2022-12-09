@@ -40,7 +40,7 @@ namespace LancachePrefill.Common
 
         private static async Task<DetectedServer> DetectLancacheServerAsync(string cdnUrl)
         {
-            using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+            using var httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
 
             // Tries to resolve poisoned DNS record, then localhost, then Docker's host
             var possibleLancacheUrls = new List<string> { cdnUrl, "localhost", "172.17.0.1" };

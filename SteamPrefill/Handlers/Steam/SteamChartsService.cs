@@ -11,7 +11,7 @@
             {
                 using var httpClient = new HttpClient
                 {
-                    Timeout = TimeSpan.FromSeconds(5)
+                    Timeout = TimeSpan.FromSeconds(15)
                 };
 
                 using var request = new HttpRequestMessage(HttpMethod.Get, new Uri("https://api.steampowered.com/ISteamChartsService/GetMostPlayedGames/v1/"));
