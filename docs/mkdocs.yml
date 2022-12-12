@@ -25,5 +25,7 @@ nav:
     - ... | flat | install-guides/*.md
   - Dev Guides: 
     - ... | flat | dev-guides/*.md
+  - Steam Documentation: 
+    - ... | flat | steam-docs/*.md
   - Miscellaneous: 
     - ... | flat | miscellaneous/*.md
