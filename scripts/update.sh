@@ -17,6 +17,10 @@ if ! [ -x "$(command -v unzip)" ]; then
   echo -e "${RED}Required software unzip is not installed.${NC}" >&2
   exit 1
 fi
+if ! [ -x "$(command -v wget)" ]; then
+  echo -e "${RED}Required software unzip is not installed.${NC}" >&2
+  exit 1
+fi
 
 # Getting latest version tag
 echo -e "${Yellow} Checking for latest version ${NC}"

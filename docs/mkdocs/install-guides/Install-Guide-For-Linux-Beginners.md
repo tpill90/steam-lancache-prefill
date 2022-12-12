@@ -16,7 +16,7 @@ To run the following commands, open up a new **terminal** session, and enter the
 apt-get update
 
 # Installs the required software
-apt-get install curl jq unzip -y
+apt-get install curl jq unzip wget -y
 ```
 
 !!! Warning

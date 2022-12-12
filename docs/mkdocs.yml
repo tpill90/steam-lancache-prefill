@@ -20,6 +20,7 @@ plugins:
       strict: true
 nav:
   - Welcome: index.md
+  - Detailed Command Usage: Detailed-Command-Usage.md 
   - Install Guides: 
     - ... | flat | install-guides/*.md
   - Dev Guides: 
