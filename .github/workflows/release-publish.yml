@@ -16,7 +16,7 @@ jobs:
     strategy:
       matrix:
         runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
-      fail-fast: true
+      fail-fast: false
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -28,19 +28,16 @@ jobs:
         echo "version=$version" >> $GITHUB_OUTPUT;
     - run: apt-get update
     - run: apt-get install zip -y
-    - run: dotnet restore --runtime "${{ matrix.runtime }}"
     - name: Publish 
       run: >
         version=${{ steps.vars.outputs.version }}
 
         dotnet publish SteamPrefill/SteamPrefill.csproj \
           --nologo \
-          --no-restore \
           -o "publish/SteamPrefill-$version-${{ matrix.runtime }}" \
           -c Release \
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
-          --version-suffix $suffix \
           /p:PublishSingleFile=true \
           /p:PublishReadyToRun=true \
           /p:PublishTrimmed=true;
