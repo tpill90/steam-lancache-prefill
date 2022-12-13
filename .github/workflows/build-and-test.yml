@@ -2,40 +2,41 @@ name: build-and-test
 run-name: "Build and Test"
 on: [push]
 
-permissions:
-  contents: write # Required to create a release
+env:
+  # Used to parameterize these build scripts between LancachePrefill projects
+  PROJECT_NAME: SteamPrefill
 
 jobs:
   dotnet-format:
-    runs-on: self-hosted 
+    runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
     - uses: actions/checkout@v3
     - run: dotnet format --verify-no-changes
   build-test:
-    runs-on: self-hosted 
+    runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:6.0 
     steps:
     - uses: actions/checkout@v3
     - run: dotnet restore
     - run: dotnet build --no-restore -c Release /p:TreatWarningsAsErrors=true
     - run: >
-        cd SteamPrefill.Test;
+        cd $PROJECT_NAME.Test;
         dotnet test --no-restore -c Release /p:WarningLevel=0
   publish:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:6.0
     strategy:
       matrix:
         runtime: ['win-x64', 'linux-x64']
-      fail-fast: true
+      fail-fast: false
     steps:
     - uses: actions/checkout@v3
     # Gets the executable version that will be used later in the uploaded zip file name
     - name: Set Version
       id: vars
       run: |
-        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' SteamPrefill/SteamPrefill.csproj); 
+        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' $PROJECT_NAME/$PROJECT_NAME.csproj); 
         echo "version=$version" >> $GITHUB_OUTPUT;
         suffix=$(date +"%m%d%H%M");
         echo "suffix=$suffix" >> $GITHUB_OUTPUT
@@ -46,23 +47,23 @@ jobs:
         version=${{ steps.vars.outputs.version }}
         suffix=${{ steps.vars.outputs.suffix }}
 
-        dotnet publish SteamPrefill/SteamPrefill.csproj \
+        dotnet publish $PROJECT_NAME/$PROJECT_NAME.csproj \
           --nologo \
           --version-suffix $suffix \
-          -o "publish/SteamPrefill-$version-$suffix-${{ matrix.runtime }}" \
+          -o "publish/$PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}" \
           -c Release \
           --runtime "${{ matrix.runtime }}" \
           --self-contained true \
           /p:PublishSingleFile=true; 
 
         cd publish;
-        zip -r SteamPrefill-$version-$suffix-${{ matrix.runtime }}.zip SteamPrefill-$version-$suffix-${{ matrix.runtime }};
-        cp SteamPrefill-$version-$suffix-${{ matrix.runtime }}.zip ../;
-        rm SteamPrefill-$version-$suffix-${{ matrix.runtime }}.zip;
+        zip -r $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}.zip $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }};
+        cp $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}.zip ../;
+        rm $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}.zip;
         cd ..;
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.suffix }}-${{ matrix.runtime }} 
+        name: $PROJECT_NAME-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.suffix }}-${{ matrix.runtime }} 
         path: publish/
         if-no-files-found: error 
