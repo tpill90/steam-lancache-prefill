@@ -7,17 +7,18 @@
         //TODO comment
         public static bool WriteVerboseLogs = false;
 
-        //TODO break these timer methods out into their own extension class
-        //TODO comment
-        private static string FormattedTime => $"[[{DateTime.Now.ToString("h:mm:ss")} {DateTime.Now.ToString("tt")}]]";
+        private static string FormattedTime => $"[[{DateTime.Now.ToString("h:mm:ss tt")}]]";
 
-        //TODO comment
+        /// <summary>
+        /// Writes formatted markup text to the console, without a newline.
+        /// </summary>
+        /// <param name="console"></param>
+        /// <param name="message"></param>
         public static void LogMarkup(this IAnsiConsole console, string message)
         {
             console.Markup($"{FormattedTime} {message}");
         }
 
-        //TODO comment
         public static void LogMarkupLine(this IAnsiConsole console, string message)
         {
             console.MarkupLine($"{FormattedTime} {message}");
@@ -36,8 +37,10 @@
             FileLogger.Log($"{message} {formattedElapsedTime}");
         }
 
-        //TODO comment
         //TODO Replace LogMarkupLine() instances in the codebase that could use this instead.
+        /// <summary>
+        /// Will log error messages to the console, only when <see cref="WriteVerboseLogs"/> has been set to true.
+        /// </summary>
         public static void LogMarkupVerbose(this IAnsiConsole console, string message)
         {
             // Always write to the logfile
@@ -51,7 +54,9 @@
             console.MarkupLine($"{FormattedTime} {message}");
         }
 
-        //TODO comment
+        /// <summary>
+        /// Logs an error message to the console, as well as to the log file.
+        /// </summary>
         public static void LogMarkupError(this IAnsiConsole console, string message)
         {
             console.MarkupLine($"{FormattedTime} {Red(message)}");

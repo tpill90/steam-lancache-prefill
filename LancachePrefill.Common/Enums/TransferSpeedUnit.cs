@@ -1,4 +1,4 @@
-﻿namespace LancachePrefill.Common.Extensions
+﻿namespace LancachePrefill.Common.Enums
 {
     public sealed class TransferSpeedUnit : EnumBase<TransferSpeedUnit>
     {

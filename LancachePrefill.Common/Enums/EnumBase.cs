@@ -1,4 +1,4 @@
-﻿namespace LancachePrefill.Common
+﻿namespace LancachePrefill.Common.Enums
 {
     /// <summary>
     /// This class is intended to be used to create "strongly typed enums", as an alternative to regular "int" enums in C#.

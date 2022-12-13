@@ -8,6 +8,7 @@ global using CliFx.Infrastructure;
 global using HexMate;
 global using JetBrains.Annotations;
 global using LancachePrefill.Common;
+global using LancachePrefill.Common.Enums;
 global using LancachePrefill.Common.Exceptions;
 global using LancachePrefill.Common.Extensions;
 global using NStack;

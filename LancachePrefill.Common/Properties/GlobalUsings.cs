@@ -1,5 +1,6 @@
 ﻿global using ByteSizeLib;
 global using CliFx.Infrastructure;
+global using LancachePrefill.Common.Enums;
 global using LancachePrefill.Common.Exceptions;
 global using LancachePrefill.Common.Extensions;
 global using Spectre.Console;
