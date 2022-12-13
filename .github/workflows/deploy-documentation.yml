@@ -16,5 +16,5 @@ jobs:
           python-version: 3.x
       - run: >
           cd docs;
-          pip install mkdocs-awesome-pages-plugin;
+          pip install mkdocs mkdocs-awesome-pages-plugin;
           mkdocs gh-deploy --force --strict;
