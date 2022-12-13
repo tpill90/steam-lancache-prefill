@@ -13,24 +13,28 @@ namespace LancachePrefill.Common
     public static class LancacheIpResolver
     {
         private static IAnsiConsole _ansiConsole;
+        private static DetectedServer _detectedServer;
 
         public static async Task<string> ResolveLancacheIpAsync(IAnsiConsole ansiConsole, string cdnUrl)
         {
+            if (_detectedServer != null)
+            {
+                return _detectedServer.IpAddress.ToString();
+            }
             if (_ansiConsole == null)
             {
                 _ansiConsole = ansiConsole;
             }
 
-            DetectedServer detectedServer = null;
             await _ansiConsole.StatusSpinner().StartAsync("Detecting Lancache server...", async _ =>
             {
-                detectedServer = await DetectLancacheServerAsync(cdnUrl);
+                _detectedServer = await DetectLancacheServerAsync(cdnUrl);
             });
 
-            if (detectedServer != null)
+            if (_detectedServer != null)
             {
-                _ansiConsole.LogMarkupLine($"Detected Lancache server at {Cyan(detectedServer.Url)} [[{MediumPurple(detectedServer.IpAddress)}]]");
-                return detectedServer.IpAddress.ToString();
+                _ansiConsole.LogMarkupLine($"Detected Lancache server at {Cyan(_detectedServer.Url)} [[{MediumPurple(_detectedServer.IpAddress)}]]");
+                return _detectedServer.IpAddress.ToString();
             }
 
             // If no server was detected, checks for common configuration issues
