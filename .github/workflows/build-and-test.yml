@@ -64,6 +64,6 @@ jobs:
     - name: Upload Artifact
       uses: actions/upload-artifact@v3
       with:
-        name: $PROJECT_NAME-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.suffix }}-${{ matrix.runtime }} 
+        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.suffix }}-${{ matrix.runtime }} 
         path: publish/
         if-no-files-found: error 
