@@ -85,7 +85,8 @@ namespace SteamPrefill.Handlers.Steam
                     var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe();
                     AvailableServerEndpoints.PushRange(returnedServers.ToArray());
 
-                    // Filtering out non-cacheable HTTPs CDNs.  SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
+                    // Filtering out non-cacheable CDNs.  HTTPS servers are included, as they appear to be able to be manually overridden to HTTP.
+                    // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
                     AvailableServerEndpoints = AvailableServerEndpoints
                                                 .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
                                                 .DistinctBy(e => e.Host)
