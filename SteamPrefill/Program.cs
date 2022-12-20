@@ -18,6 +18,7 @@ namespace SteamPrefill
                 var assembly = Assembly.GetExecutingAssembly();
                 var informationVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
+                var cliArgs = ParseHiddenFlags();
                 var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
                                   "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
                                   "\n" +
@@ -29,7 +30,7 @@ namespace SteamPrefill
                              .SetDescription(description)
                              .SetVersion($"v{informationVersion}")
                              .Build()
-                             .RunAsync();
+                             .RunAsync(cliArgs);
             }
             //TODO dedupe this throughout the codebase
             catch (TimeoutException e)
@@ -67,6 +68,24 @@ namespace SteamPrefill
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// Adds hidden flags that may be useful for debugging/development, but shouldn't be displayed to users in the help text
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> ParseHiddenFlags()
+        {
+            // Have to skip the first argument, since its the path to the executable
+            var args = Environment.GetCommandLineArgs().Skip(1).ToList();
+
+            if (args.Any(e => e.Contains("--debug")))
+            {
+                AppConfig.EnableSteamKitDebugLogs = true;
+                args.Remove("--debug");
+            }
+
+            return args;
         }
 
         public static class OperatingSystem
