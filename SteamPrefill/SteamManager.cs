@@ -19,13 +19,11 @@
             _ansiConsole = ansiConsole;
             _downloadArgs = downloadArgs;
 
-#if DEBUG
             if (AppConfig.EnableSteamKitDebugLogs)
             {
                 DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
                 DebugLog.Enabled = true;
             }
-#endif
 
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);

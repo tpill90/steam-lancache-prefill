@@ -23,6 +23,18 @@ namespace SteamPrefill.Settings
             }
         }
 
+        //TODO comment
+        private static bool _enableSteamKitDebugLogs;
+        public static bool EnableSteamKitDebugLogs
+        {
+            get => _enableSteamKitDebugLogs;
+            set
+            {
+                VerboseLogs = true;
+                _enableSteamKitDebugLogs = value;
+            }
+        }
+
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
@@ -66,7 +78,6 @@ namespace SteamPrefill.Settings
 
 #if DEBUG
 
-        public static bool EnableSteamKitDebugLogs => false;
         public static bool SkipDownloads { get; set; }
 
 #endif

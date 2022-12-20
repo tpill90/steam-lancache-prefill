@@ -113,6 +113,7 @@ namespace SteamPrefill.Handlers.Steam
             }
 
             AvailableServerEndpoints.TryPop(out var server);
+            _ansiConsole.LogMarkupVerbose($"Using CDN {Cyan(server.Host)}");
             return server;
         }
 
