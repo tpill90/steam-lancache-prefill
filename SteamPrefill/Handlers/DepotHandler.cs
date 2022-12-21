@@ -65,6 +65,11 @@
 
             foreach (var depot in allDepots)
             {
+                if (ExcludedDepots.Ids.Contains(depot.DepotId))
+                {
+                    continue;
+                }
+
                 // User must have access to a depot in order to download it
                 if (!_steam3Session.LicenseManager.AccountHasDepotAccess(depot.DepotId))
                 {
