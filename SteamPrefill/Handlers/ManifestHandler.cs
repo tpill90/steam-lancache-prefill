@@ -35,7 +35,16 @@
             _ansiConsole.LogMarkupVerbose($"Downloading manifests for {Magenta(depots.Count)} depots");
 
             var depotManifests = new List<Manifest>();
-            foreach (var depot in depots)
+
+            // Loading manifests already on disk in parallel
+            var cachedManifestTasks = depots.Where(e => ManifestIsCached(e))
+                                                        .Select(e => GetSingleManifestAsync(e))
+                                                        .ToList();
+            var resultManifests = await Task.WhenAll(cachedManifestTasks);
+            depotManifests.AddRange(resultManifests);
+
+            // Downloading un-cached depots from the internet
+            foreach (var depot in depots.Where(e => !ManifestIsCached(e)))
             {
                 int attempts = 0;
                 Manifest manifest = null;
@@ -45,12 +54,8 @@
                     {
                         _ansiConsole.LogMarkupVerbose($"Downloading manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)}");
 
-                        Server server = _cdnPool.TakeConnection();
-
-                        manifest = await GetSingleManifestAsync(depot, server).WaitAsync(AppConfig.SteamKitRequestTimeout);
+                        manifest = await GetSingleManifestAsync(depot).WaitAsync(AppConfig.SteamKitRequestTimeout);
                         depotManifests.Add(manifest);
-
-                        _cdnPool.ReturnConnection(server);
                     }
                     catch (Exception e)
                     {
@@ -93,19 +98,22 @@
         /// <param name="depot">The depot to download a manifest for</param>
         /// <returns>A manifest file</returns>
         /// <exception cref="ManifestException">Throws if no manifest was returned by Steam</exception>
-        private async Task<Manifest> GetSingleManifestAsync(DepotInfo depot, Server server)
+        private async Task<Manifest> GetSingleManifestAsync(DepotInfo depot)
         {
-            if (!_downloadArguments.NoCache && File.Exists(depot.ManifestFileName))
+            if (ManifestIsCached(depot))
             {
                 return Manifest.LoadFromFile(depot.ManifestFileName);
             }
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
+
+            Server server = _cdnPool.TakeConnection();
             DepotManifest manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
             if (manifest == null)
             {
                 throw new ManifestException($"Unable to download manifest for depot {depot.Name} - {depot.DepotId}.  Manifest request received no response.");
             }
+            _cdnPool.ReturnConnection(server);
 
             var protoManifest = new Manifest(manifest, depot);
             if (_downloadArguments.NoCache)
@@ -144,6 +152,11 @@
                 Code = manifestRequestCode,
                 RetrievedAt = DateTime.Now
             };
+        }
+
+        private bool ManifestIsCached(DepotInfo depot)
+        {
+            return !_downloadArguments.NoCache && File.Exists(depot.ManifestFileName);
         }
     }
 }
