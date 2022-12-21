@@ -144,7 +144,8 @@ namespace SteamPrefill.Handlers.Steam
                 Password = loginKey == null ? _ansiConsole.ReadPassword() : null,
                 ShouldRememberPassword = true,
                 LoginKey = loginKey,
-                LoginID = 5995
+                //TODO randomize and save this loginId per instance.  Should prevent multiple instances of SteamPrefill from being logged out
+                LoginID = 5395
             };
             // Sentry file is required when using Steam Guard w\ email
             if (_userAccountStore.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
