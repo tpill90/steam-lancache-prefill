@@ -18,7 +18,8 @@ ENV \
         LC_ALL=en_US.UTF-8 \
         TERM=xterm-256color
 
-COPY  /publish/SteamPrefill /usr/bin
-RUN chmod +x /usr/bin/SteamPrefill
+WORKDIR /usr/bin
+COPY  /publish/SteamPrefill /
+RUN chmod +x /SteamPrefill
 
-ENTRYPOINT [ "/usr/bin/SteamPrefill" ]
+ENTRYPOINT [ "/SteamPrefill" ]
