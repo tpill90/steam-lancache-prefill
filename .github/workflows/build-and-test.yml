@@ -7,63 +7,7 @@ env:
   PROJECT_NAME: SteamPrefill
 
 jobs:
-  dotnet-format:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
-    steps:
-    - uses: actions/checkout@v3
-    - run: dotnet format --verify-no-changes
   build-test:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0 
-    steps:
-    - uses: actions/checkout@v3
-    - run: dotnet restore
-    - run: dotnet build --no-restore -c Release /p:TreatWarningsAsErrors=true
-    - run: >
-        cd $PROJECT_NAME.Test;
-        dotnet test --no-restore -c Release /p:WarningLevel=0
-  publish:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
-    strategy:
-      matrix:
-        runtime: ['win-x64', 'linux-x64']
-      fail-fast: false
-    steps:
-    - uses: actions/checkout@v3
-    # Gets the executable version that will be used later in the uploaded zip file name
-    - name: Set Version
-      id: vars
-      run: |
-        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' $PROJECT_NAME/$PROJECT_NAME.csproj); 
-        echo "version=$version" >> $GITHUB_OUTPUT;
-        suffix=$(date +"%m%d%H%M");
-        echo "suffix=$suffix" >> $GITHUB_OUTPUT
-    - run: apt-get update
-    - run: apt-get install zip -y
-    - name: Publish 
-      run: >
-        version=${{ steps.vars.outputs.version }}
-        suffix=${{ steps.vars.outputs.suffix }}
-
-        dotnet publish $PROJECT_NAME/$PROJECT_NAME.csproj \
-          --nologo \
-          --version-suffix $suffix \
-          -o "publish/$PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}" \
-          -c Release \
-          --runtime "${{ matrix.runtime }}" \
-          --self-contained true \
-          /p:PublishSingleFile=true; 
-
-        cd publish;
-        zip -r $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}.zip $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }};
-        cp $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}.zip ../;
-        rm $PROJECT_NAME-$version-$suffix-${{ matrix.runtime }}.zip;
-        cd ..;
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ steps.vars.outputs.suffix }}-${{ matrix.runtime }} 
-        path: publish/
-        if-no-files-found: error 
+    uses: tpill90/lancache-prefill-common/.github/workflows/build-and-test.yml@main
+    with:
+      PROJECT_NAME: SteamPrefill
