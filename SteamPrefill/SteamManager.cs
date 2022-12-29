@@ -147,6 +147,7 @@
                     return;
                 }
 
+                //TODO remove this
                 _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {Green("  Up to date!")}");
                 return;
             }

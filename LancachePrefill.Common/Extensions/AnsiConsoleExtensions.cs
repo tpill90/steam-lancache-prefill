@@ -1,19 +1,16 @@
 ﻿namespace LancachePrefill.Common.Extensions
 {
-    //TODO comment
     public static class AnsiConsoleExtensions
     {
-        //TODO I don't particularly like this.  Refactor into something more sane
-        //TODO comment
-        public static bool WriteVerboseLogs = false;
-
-        private static string FormattedTime => $"[[{DateTime.Now.ToString("h:mm:ss tt")}]]";
+        /// <summary>
+        /// When enabled, log messages written using <see cref="LogMarkupVerbose"/> will be printed to the console,
+        /// in addition to being logged to the log file.
+        /// </summary>
+        public static bool WriteVerboseLogs { get; set; }
 
         /// <summary>
-        /// Writes formatted markup text to the console, without a newline.
+        /// Writes text formatted with ANSI escape sequences console, without a newline.
         /// </summary>
-        /// <param name="console"></param>
-        /// <param name="message"></param>
         public static void LogMarkup(this IAnsiConsole console, string message)
         {
             console.Markup($"{FormattedTime} {message}");
@@ -25,6 +22,10 @@
             FileLogger.Log(message);
         }
 
+        /// <summary>
+        /// Writes text formatted with ANSI escape sequences console, with the elapsed time appended.
+        /// </summary>
+        /// <param name="message">Message text formatted with ANSI escape sequences</param>
         public static void LogMarkupLine(this IAnsiConsole console, string message, Stopwatch stopwatch)
         {
             var messageWithTime = $"{FormattedTime} {message}";
@@ -37,7 +38,6 @@
             FileLogger.Log($"{message} {formattedElapsedTime}");
         }
 
-        //TODO Replace LogMarkupLine() instances in the codebase that could use this instead.
         /// <summary>
         /// Will log error messages to the console, only when <see cref="WriteVerboseLogs"/> has been set to true.
         /// </summary>
@@ -62,5 +62,7 @@
             console.MarkupLine($"{FormattedTime} {Red(message)}");
             FileLogger.Log(message);
         }
+
+        private static string FormattedTime => $"[[{DateTime.Now.ToString("h:mm:ss tt")}]]";
     }
 }

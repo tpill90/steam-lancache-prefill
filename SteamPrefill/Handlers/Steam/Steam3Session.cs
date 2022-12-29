@@ -177,6 +177,8 @@ namespace SteamPrefill.Handlers.Steam
         }
 
         private int _failedLogonAttempts;
+
+        [SuppressMessage("", "VSTHRD002:Synchronously waiting on tasks may cause deadlocks.", Justification = "Its not possible for this callback method to be async, must block synchronously")]
         private bool HandleLogonResult(SteamUser.LoggedOnCallback logonResult)
         {
             _steamId = logonResult.ClientSteamID;
