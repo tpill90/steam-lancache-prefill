@@ -80,7 +80,6 @@ namespace LancachePrefill.Common
                 }
                 catch (Exception e) when (e is HttpRequestException | e is TaskCanceledException)
                 {
-                    //TODO should probably log an error message here
                     // Catching target machine refused connection + timeout exceptions, so we can try the next address
                 }
             }

@@ -1,18 +1,21 @@
 ﻿namespace LancachePrefill.Common
 {
+    /// <summary>
+    /// A simple file logger, written with the intention of avoiding the complexity of adding Microsoft.Logging to this project,
+    /// as well as avoiding the complexity of setting up Dependency Injection when it isn't needed in this project.
+    /// </summary>
     public static class FileLogger
     {
-        private static string _logFilePath = "app.log";
-        private static object _lockObject = new object();
+        private const string LogFilePath = "app.log";
+        private static readonly object LockObject = new object();
 
-        //TODO need to move this over to using a logging library, rather than doing this manually
         public static void Log(string message)
         {
-            //TODO this isn't ideal, but this lock is here to avoid writing to the same file concurrently.  Should likely switch over to an actual logging library
-            lock (_lockObject)
+            // Avoids writing to the same file concurrently.
+            lock (LockObject)
             {
                 var messageNoAnsi = message.RemoveMarkup();
-                File.AppendAllText(_logFilePath, $"[{DateTime.Now.ToString("h:mm:ss tt")}] {messageNoAnsi}\n");
+                File.AppendAllText(LogFilePath, $"[{DateTime.Now.ToString("h:mm:ss tt")}] {messageNoAnsi}\n");
             }
         }
 
