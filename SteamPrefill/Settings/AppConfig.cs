@@ -82,6 +82,7 @@ namespace SteamPrefill.Settings
 
 #endif
 
+        //TODO move to lancacheprefill.common
         /// <summary>
         /// Gets the base directories for the cache folder, determined by which Operating System the app is currently running on.
         /// </summary>

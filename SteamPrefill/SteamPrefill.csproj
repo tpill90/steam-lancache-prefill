@@ -22,12 +22,9 @@
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
-
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
   <!-- Includes Linux update script in publish package -->
@@ -47,7 +44,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- External -->
+    <!-- External Packages -->
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="ByteSize" Version="2.1.1" />
     <PackageReference Include="CliFx" Version="2.3.0" />
@@ -57,11 +54,9 @@
     <PackageReference Include="Terminal.Gui" Version="1.7.2" />
     <PackageReference Include="Wcwidth" Version="1.0.0" />
 
+    <!-- Custom Spectre.Console build -->
     <Reference Include="Spectre.Console">
       <HintPath>..\lib\Spectre.Console.dll</HintPath>
-    </Reference>
-    <Reference Include="Spectre.Console.Cli">
-      <HintPath>..\lib\Spectre.Console.Cli.dll</HintPath>
     </Reference>
 
     <!-- Debugging Packages -->
