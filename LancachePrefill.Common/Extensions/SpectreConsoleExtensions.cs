@@ -2,6 +2,11 @@
 {
     public static class SpectreConsoleExtensions
     {
+        /// <summary>
+        /// Creates an instance of <see cref="IAnsiConsole"/> that is integrated with CliFX
+        /// </summary>
+        /// <param name="console">IConsole instance provided by CliFX</param>
+        /// <returns></returns>
         public static IAnsiConsole CreateAnsiConsole(this IConsole console)
         {
             return AnsiConsole.Create(new AnsiConsoleSettings
@@ -43,7 +48,7 @@
             return spectreProgress;
         }
 
-        public static string ReadPassword(this IAnsiConsole console, string promptText = null)
+        public static async Task<string> ReadPasswordAsync(this IAnsiConsole console, string promptText = null)
         {
             var promptTask = Task.Run(() =>
             {
@@ -52,7 +57,7 @@
                                       .PromptStyle("white")
                                       .Secret());
             });
-            return promptTask.WaitAsync(TimeSpan.FromSeconds(30)).GetAwaiter().GetResult();
+            return await promptTask.WaitAsync(TimeSpan.FromSeconds(30));
         }
 
         public static Markup ToMarkup(this Object obj)

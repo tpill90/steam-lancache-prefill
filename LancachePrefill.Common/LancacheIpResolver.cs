@@ -15,17 +15,17 @@ namespace LancachePrefill.Common
         private static IAnsiConsole _ansiConsole;
         private static DetectedServer _detectedServer;
 
+        [SuppressMessage("Maintainability", "CA1508:Avoid dead conditional code", Justification = "Analyzer is incorrectly detecting dead code due to Spectre.Console block")]
         public static async Task<string> ResolveLancacheIpAsync(IAnsiConsole ansiConsole, string cdnUrl)
         {
+            _ansiConsole ??= ansiConsole;
+
+            // Returned cached server if previously detected
             if (_detectedServer != null)
             {
                 return _detectedServer.IpAddress.ToString();
             }
-            if (_ansiConsole == null)
-            {
-                _ansiConsole = ansiConsole;
-            }
-
+            
             await _ansiConsole.StatusSpinner().StartAsync("Detecting Lancache server...", async _ =>
             {
                 _detectedServer = await DetectLancacheServerAsync(cdnUrl);
@@ -80,6 +80,7 @@ namespace LancachePrefill.Common
                 }
                 catch (Exception e) when (e is HttpRequestException | e is TaskCanceledException)
                 {
+                    //TODO should probably log an error message here
                     // Catching target machine refused connection + timeout exceptions, so we can try the next address
                 }
             }

@@ -58,7 +58,7 @@ namespace SteamPrefill.CliCommands
                 {
                     ansiConsole.MarkupLine(Red("Timed out while waiting for username entry"));
                 }
-                if (e.StackTrace.Contains(nameof(SpectreConsoleExtensions.ReadPassword)))
+                if (e.StackTrace.Contains(nameof(SpectreConsoleExtensions.ReadPasswordAsync)))
                 {
                     ansiConsole.MarkupLine(Red("Timed out while waiting for password entry"));
                 }

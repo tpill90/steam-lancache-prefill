@@ -141,7 +141,7 @@ namespace SteamPrefill.Handlers.Steam
             _logonDetails = new SteamUser.LogOnDetails
             {
                 Username = username,
-                Password = loginKey == null ? _ansiConsole.ReadPassword() : null,
+                Password = loginKey == null ? await _ansiConsole.ReadPasswordAsync() : null,
                 ShouldRememberPassword = true,
                 LoginKey = loginKey,
                 //TODO randomize and save this loginId per instance.  Should prevent multiple instances of SteamPrefill from being logged out
@@ -202,7 +202,7 @@ namespace SteamPrefill.Handlers.Steam
             {
                 _userAccountStore.LoginKeys.Remove(_logonDetails.Username);
                 _logonDetails.LoginKey = null;
-                _logonDetails.Password = _ansiConsole.ReadPassword("Steam session expired!  Password re-entry required!");
+                _logonDetails.Password = _ansiConsole.ReadPasswordAsync("Steam session expired!  Password re-entry required!").GetAwaiter().GetResult();
                 return false;
             }
 
@@ -215,7 +215,7 @@ namespace SteamPrefill.Handlers.Steam
                     throw new AuthenticationException("Invalid username/password");
                 }
 
-                _logonDetails.Password = _ansiConsole.ReadPassword($"{Red("Invalid password!  Please re-enter your password!")}");
+                _logonDetails.Password = _ansiConsole.ReadPasswordAsync($"{Red("Invalid password!  Please re-enter your password!")}").GetAwaiter().GetResult();
                 return false;
             }
 
