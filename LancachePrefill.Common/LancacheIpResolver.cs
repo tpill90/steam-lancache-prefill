@@ -25,7 +25,7 @@ namespace LancachePrefill.Common
             {
                 return _detectedServer.IpAddress.ToString();
             }
-            
+
             await _ansiConsole.StatusSpinner().StartAsync("Detecting Lancache server...", async _ =>
             {
                 _detectedServer = await DetectLancacheServerAsync(cdnUrl);
