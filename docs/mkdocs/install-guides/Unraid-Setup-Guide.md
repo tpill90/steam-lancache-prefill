@@ -20,7 +20,7 @@ Next you will run the following command to setup the container, and start config
 docker run -it --rm \
   --net=br0 \
   --add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX  \
-  --volume ~/.config/SteamPrefill:/Config \
+  --volume /mnt/user/appdata/SteamPrefill:/Config \
   tpill90/steam-lancache-prefill:latest \
   select-apps
 ```
@@ -48,7 +48,7 @@ docker rm -f SteamPrefill &>/dev/null && echo 'Removed old container from previo
 docker run --rm --name SteamPrefill \
   --net=br0 \
   --add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX  \
-  --volume ~/.config/SteamPrefill:/Config \
+  --volume /mnt/user/appdata/SteamPrefill:/Config \
   tpill90/steam-lancache-prefill:latest \
   prefill
 ```
