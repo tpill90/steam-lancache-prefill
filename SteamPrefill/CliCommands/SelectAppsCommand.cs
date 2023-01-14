@@ -22,12 +22,11 @@ namespace SteamPrefill.CliCommands
             try
             {
                 await steamManager.InitializeAsync();
-
-                var games = await steamManager.GetAllAvailableGamesAsync();
+                var tuiAppModels = await BuildTuiAppModelsAsync(steamManager);
 
                 Application.UseSystemConsole = true;
                 Application.Init();
-                using var tui2 = new SelectAppsTui(games, steamManager);
+                using var tui2 = new SelectAppsTui(tuiAppModels);
                 Key userKeyPress = tui2.Run();
 
                 // Will only allow for prefill if the user has saved changes.  Escape simply exists
@@ -35,6 +34,7 @@ namespace SteamPrefill.CliCommands
                 {
                     return;
                 }
+                steamManager.SetAppsAsSelected(tuiAppModels);
 
                 // This escape sequence is required when running on linux, otherwise will not be able to use the Spectre selection prompt
                 // See : https://github.com/gui-cs/Terminal.Gui/issues/418
@@ -88,6 +88,29 @@ namespace SteamPrefill.CliCommands
             {
                 steamManager.Shutdown();
             }
+        }
+
+        private static async Task<List<TuiAppInfo>> BuildTuiAppModelsAsync(SteamManager steamManager)
+        {
+            // Listing user's owned apps, and selected apps
+            var ownedApps = await steamManager.GetAllAvailableAppsAsync();
+            var previouslySelectedApps = steamManager.LoadPreviouslySelectedApps();
+
+            // Building out Tui models
+            var tuiAppModels = ownedApps.Select(e => 
+                                        new TuiAppInfo(e.AppId.ToString(), e.Name)
+                                        {
+                                            MinutesPlayed = e.MinutesPlayed2Weeks,
+                                            ReleaseDate = e.ReleaseDate
+                                        }).ToList();
+
+            // Flagging previously selected apps as selected
+            foreach (var appInfo in tuiAppModels)
+            {
+                appInfo.IsSelected = previouslySelectedApps.Contains(UInt32.Parse(appInfo.AppId));
+            }
+
+            return tuiAppModels;
         }
     }
 }

@@ -120,7 +120,7 @@
             await PrintUnownedAppsAsync(distinctAppIds);
 
             _ansiConsole.LogMarkupLine("Prefill complete!");
-            _prefillSummaryResult.RenderSummaryTable(_ansiConsole, availableGames.Count);
+            _prefillSummaryResult.RenderSummaryTable(_ansiConsole);
         }
 
         private async Task DownloadSingleAppAsync(uint appId)
@@ -191,11 +191,11 @@
 
         #region Select Apps
 
-        public void SetAppsAsSelected(List<AppInfo> userSelected)
+        public void SetAppsAsSelected(List<TuiAppInfo> tuiAppModels)
         {
-            List<uint> selectedAppIds = userSelected
-                                        .Select(e => e.AppId)
-                                        .ToList();
+            List<uint> selectedAppIds = tuiAppModels.Where(e => e.IsSelected)
+                                                    .Select(e => UInt32.Parse(e.AppId))
+                                                    .ToList();
             File.WriteAllText(AppConfig.UserSelectedAppsPath, JsonSerializer.Serialize(selectedAppIds, SerializationContext.Default.ListUInt32));
 
             _ansiConsole.LogMarkupLine($"Selected {Magenta(selectedAppIds.Count)} apps to prefill!  ");
@@ -212,7 +212,7 @@
 
         #endregion
 
-        public async Task<List<AppInfo>> GetAllAvailableGamesAsync()
+        public async Task<List<AppInfo>> GetAllAvailableAppsAsync()
         {
             var ownedGameIds = _steam3.LicenseManager.AllOwnedAppIds;
 
