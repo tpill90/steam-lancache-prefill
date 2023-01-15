@@ -22,8 +22,9 @@ jobs:
         runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
       fail-fast: false
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
     # Gets the executable version that will be used later in the uploaded zip file name
     - name: Set Version
       id: vars
@@ -70,6 +71,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+      with:
+        submodules: true
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
