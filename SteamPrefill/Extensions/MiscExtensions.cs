@@ -19,7 +19,7 @@
                 hashSet.Add(value);
             }
         }
-        
+
         [SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by Steam")]
         public static byte[] ToSha1(this byte[] input)
         {

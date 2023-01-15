@@ -97,7 +97,7 @@ namespace SteamPrefill.CliCommands
             var previouslySelectedApps = steamManager.LoadPreviouslySelectedApps();
 
             // Building out Tui models
-            var tuiAppModels = ownedApps.Select(e => 
+            var tuiAppModels = ownedApps.Select(e =>
                                         new TuiAppInfo(e.AppId.ToString(), e.Name)
                                         {
                                             MinutesPlayed = e.MinutesPlayed2Weeks,
