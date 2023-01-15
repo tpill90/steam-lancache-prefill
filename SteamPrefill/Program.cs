@@ -13,6 +13,9 @@ namespace SteamPrefill
         {
             try
             {
+                // Checking to see if the user double clicked the exe in Windows, and display a message on how to use the app
+                OperatingSystemUtils.DetectDoubleClickOnWindows("SteamPrefill");
+
                 var assembly = Assembly.GetExecutingAssembly();
                 var informationVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
