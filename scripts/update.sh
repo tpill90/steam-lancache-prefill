@@ -18,7 +18,7 @@ if ! [ -x "$(command -v unzip)" ]; then
   exit 1
 fi
 if ! [ -x "$(command -v wget)" ]; then
-  echo -e "${RED}Required software unzip is not installed.${NC}" >&2
+  echo -e "${RED}Required software wget is not installed.${NC}" >&2
   exit 1
 fi
 
