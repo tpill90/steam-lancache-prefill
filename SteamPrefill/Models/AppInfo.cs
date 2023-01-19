@@ -5,9 +5,6 @@
     /// </summary>
     public sealed class AppInfo
     {
-        //TODO remove
-        public bool IsSelected { get; set; }
-
         public uint AppId { get; set; }
         public ReleaseState ReleaseState { get; set; }
 

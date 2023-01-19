@@ -17,10 +17,18 @@
         /// </summary>
         public TransferSpeedUnit TransferSpeedUnit { get; set; } = TransferSpeedUnit.Bits;
 
-        //TODO comment
+        /// <summary>
+        /// Limits the maximum number of requests that can be in flight at any one time.  Does not guarantee there will always be 30,
+        /// it is just an upper limit.
+        ///
+        /// The default of 30 was found to be a good middle ground for maximum throughput. It also minimizes the potential for SteamPrefill to
+        /// choke out any other downloads on the network, without having to require users setup QoS themselves.
+        /// </summary>
         public int MaxConcurrentRequests { get; set; } = 30;
 
-        //TODO comment
+        /// <summary>
+        /// Determines which Operating System specific depots should be included in the download.
+        /// </summary>
         public List<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
 
         public Architecture Architecture { get; init; } = Architecture.x64;
