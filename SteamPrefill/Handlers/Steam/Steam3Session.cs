@@ -249,8 +249,16 @@ namespace SteamPrefill.Handlers.Steam
             return true;
         }
 
-        //TODO comment what exactly were waiting on here, and why.
-        bool _receivedLoginKey;
+        private bool _receivedLoginKey;
+
+        /// <summary>
+        /// After a successful login, Steam will return a "Login Key", which is essentially a session token.
+        /// This "Login Key" will be used in subsequent logins, which will allow the user to login again without providing a password.
+        ///
+        /// Steam appears to have some sort of geo-location that detects if you are logging into your account
+        /// from a region that isn't your usual region (Ex. Logging onto a machine in Sydney, when you are from US East Coast).
+        /// If Steam detects this scenario, it will never issue a login key, presumable to minimize stolen passwords/accounts.
+        /// </summary>
         private void TryWaitForLoginKey()
         {
             if (_logonDetails.LoginKey != null)

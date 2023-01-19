@@ -1,7 +1,6 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands
 {
-    //TODO need to rethink the verbiage between 'app' and 'game' on the user facing docs
     [UsedImplicitly]
     [Command("prefill", Description = "Downloads the latest version of one or more specified app(s)." +
                                            "  Automatically includes apps selected using the 'select-apps' command")]

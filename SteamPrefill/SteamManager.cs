@@ -97,7 +97,7 @@
             // Whitespace divider
             _ansiConsole.WriteLine();
 
-            var availableGames = await _appInfoHandler.GetGamesByIdAsync(distinctAppIds);
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
             foreach (var app in availableGames)
             {
                 try
@@ -142,13 +142,6 @@
             if (_downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
             {
                 _prefillSummaryResult.AlreadyUpToDate++;
-                if (!AppConfig.VerboseLogs)
-                {
-                    return;
-                }
-
-                //TODO remove this
-                _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {Green("  Up to date!")}");
                 return;
             }
 
@@ -218,7 +211,7 @@
 
             // Loading app metadata from steam, skipping related DLC apps
             await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
-            var availableGames = await _appInfoHandler.GetGamesByIdAsync(ownedGameIds);
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(ownedGameIds);
 
             return availableGames;
         }
@@ -296,7 +289,7 @@
             var queuedApps = new ConcurrentBag<AppQueuedRequests>();
             await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit.Bytes, displayTransferRate: false).StartAsync(async ctx =>
             {
-                var gamesToUse = await _appInfoHandler.GetGamesByIdAsync(appIds);
+                var gamesToUse = await _appInfoHandler.GetAvailableGamesByIdAsync(appIds);
                 var overallProgressTask = ctx.AddTask("Processing games..".PadLeft(30), new ProgressTaskSettings { MaxValue = gamesToUse.Count });
 
                 //TODO add a retry loop + handle errors
