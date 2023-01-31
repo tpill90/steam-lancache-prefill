@@ -202,7 +202,7 @@ For more brand specific guides (non-exhaustive), see :
 3.  Thats it!  You're all up to date!
 
 ### Docker update:
-sudo docker pull tpill90/steam-lancache-prefill:latest
+- sudo docker pull tpill90/steam-lancache-prefill:latest
 
 # Need Help?
 If you are running into any issues, feel free to open up a Github issue on this repository.
