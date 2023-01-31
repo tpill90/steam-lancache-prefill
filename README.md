@@ -201,6 +201,9 @@ For more brand specific guides (non-exhaustive), see :
 2.  Unzip to the directory where **SteamPrefill** is currently installed, overwriting the previous executable.
 3.  Thats it!  You're all up to date!
 
+### Docker update:
+sudo docker pull tpill90/steam-lancache-prefill:latest
+
 # Need Help?
 If you are running into any issues, feel free to open up a Github issue on this repository.
 
