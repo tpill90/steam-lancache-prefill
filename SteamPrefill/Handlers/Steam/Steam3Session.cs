@@ -134,18 +134,16 @@ namespace SteamPrefill.Handlers.Steam
         {
             var username = await _userAccountStore.GetUsernameAsync(_ansiConsole);
 
-            //TODO rename to session key
-            string loginKey;
-            _userAccountStore.LoginKeys.TryGetValue(username, out loginKey);
+            string sessionToken;
+            _userAccountStore.SessionTokens.TryGetValue(username, out sessionToken);
 
             _logonDetails = new SteamUser.LogOnDetails
             {
                 Username = username,
-                Password = loginKey == null ? await _ansiConsole.ReadPasswordAsync() : null,
+                Password = sessionToken == null ? await _ansiConsole.ReadPasswordAsync() : null,
                 ShouldRememberPassword = true,
-                LoginKey = loginKey,
-                //TODO randomize and save this loginId per instance.  Should prevent multiple instances of SteamPrefill from being logged out
-                LoginID = 5395
+                LoginKey = sessionToken,
+                LoginID = _userAccountStore.SessionId
             };
             // Sentry file is required when using Steam Guard w\ email
             if (_userAccountStore.SentryData.TryGetValue(_logonDetails.Username, out var bytes))
@@ -202,7 +200,7 @@ namespace SteamPrefill.Handlers.Steam
             var loginKeyExpired = _logonDetails.LoginKey != null && loggedOn.Result == EResult.InvalidPassword;
             if (loginKeyExpired)
             {
-                _userAccountStore.LoginKeys.Remove(_logonDetails.Username);
+                _userAccountStore.SessionTokens.Remove(_logonDetails.Username);
                 _logonDetails.LoginKey = null;
                 _logonDetails.Password = _ansiConsole.ReadPasswordAsync("Steam session expired!  Password re-entry required!").GetAwaiter().GetResult();
                 return false;
@@ -280,7 +278,7 @@ namespace SteamPrefill.Handlers.Steam
 
         private void LoginKeyCallback(SteamUser.LoginKeyCallback loginKey)
         {
-            _userAccountStore.LoginKeys[_logonDetails.Username] = loginKey.LoginKey;
+            _userAccountStore.SessionTokens[_logonDetails.Username] = loginKey.LoginKey;
             _userAccountStore.Save();
 
             _steamUser.AcceptNewLoginKey(loginKey);
