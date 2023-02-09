@@ -65,4 +65,19 @@
             return TransferSpeedUnit.Parse(rawValue);
         }
     }
+
+
+    public sealed class ConcurrencyValidator : BindingValidator<uint>
+    {
+        public override BindingValidationError Validate(uint value)
+        {
+            if (value == 0)
+            {
+                AnsiConsole.MarkupLine(Red($"{White(0)} is not a valid value for {LightYellow("--concurrency")}"));
+                AnsiConsole.Markup(Red($"Please select a value between {LightYellow("1-100")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return Ok();
+        }
+    }
 }
