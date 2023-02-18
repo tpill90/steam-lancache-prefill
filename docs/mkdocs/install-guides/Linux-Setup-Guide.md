@@ -1,4 +1,4 @@
-# Install Guide For Linux Beginners
+# Linux Setup Guide
 
 This guide is written to help Linux beginners successfully download **SteamPrefill** on their Lancache caching server. 
 

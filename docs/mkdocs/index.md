@@ -6,7 +6,7 @@ title: Welcome
 
 **Getting started?**
 
-Check out the install guides for various platforms: [Install Guide For Linux Beginners](install-guides/Install-Guide-For-Linux-Beginners.md),  [Docker Setup Guide](install-guides/Docker-Setup-Guide.md), and [Unraid Setup Guide](install-guides/Unraid-Setup-Guide.md).
+Check out the install guides for various platforms: [Linux Setup Guide](install-guides/Linux-Setup-Guide), [Windows Setup Guide](install-guides/Windows-Setup-Guide.md),   [Docker Setup Guide](install-guides/Docker-Setup-Guide.md), and [Unraid Setup Guide](install-guides/Unraid-Setup-Guide.md).
 
 **Interesting in Contributing?**
 
