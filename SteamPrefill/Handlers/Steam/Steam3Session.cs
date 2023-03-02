@@ -202,7 +202,7 @@ namespace SteamPrefill.Handlers.Steam
             {
                 _userAccountStore.SessionTokens.Remove(_logonDetails.Username);
                 _logonDetails.LoginKey = null;
-                _logonDetails.Password = _ansiConsole.ReadPasswordAsync("Steam session expired!  Password re-entry required!").GetAwaiter().GetResult();
+                _logonDetails.Password = _ansiConsole.ReadPasswordAsync("Steam session expired!  Password re-entry required! --> :").GetAwaiter().GetResult();
                 return false;
             }
 
