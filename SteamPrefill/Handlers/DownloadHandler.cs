@@ -36,7 +36,7 @@
         /// In the case of any failed downloads, the failed downloads will be retried up to 3 times.  If the downloads fail 3 times, then
         /// false will be returned
         /// </summary>
-        /// <returns>True if all downloads succeeded.  False if downloads failed 3 times.</returns>
+        /// <returns>True if all downloads succeeded.  False if any downloads failed 3 times in a row.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
         {
 #if DEBUG
