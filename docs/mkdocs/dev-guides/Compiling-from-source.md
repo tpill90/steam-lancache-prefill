@@ -59,3 +59,7 @@ To compile and run all tests in the entire repo, run the following command:
 ```powershell
 dotnet test
 ```
+
+## Where should I get started?
+
+A good place to start poking around the project would be the [CliCommands folder](https://github.com/tpill90/steam-lancache-prefill/tree/master/SteamPrefill/CliCommands).  This folder contains the implementations for each of the individual commands that can be run, such as `prefill` or `benchmark`.  
