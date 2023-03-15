@@ -14,9 +14,31 @@ permissions:
   contents: write # Required to create a release
 
 jobs:
+  # Needed in order to prevent softprops/action-gh-release from creating duplicate releases for each publish target.
+  # The duplicate releases happen because of a race condition, where each parallel publish job thinks the release has not yet been created.
+  create-placeholder-release:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/dotnet/sdk:6.0
+    steps:
+    # Gets the executable version that will be used later in the uploaded zip file name
+    - name: Set Version
+      id: vars
+      run: |
+        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' $PROJECT_NAME/$PROJECT_NAME.csproj); 
+        echo "version=$version" >> $GITHUB_OUTPUT;
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        draft: true
+        name: "v${{ steps.vars.outputs.version }}"
+        files: "**/*.zip" 
+        generate_release_notes: true
+
   dotnet-publish:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:6.0
+    needs: create-placeholder-release
     strategy:
       matrix:
         runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
