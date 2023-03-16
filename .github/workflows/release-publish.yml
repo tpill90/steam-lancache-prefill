@@ -20,6 +20,9 @@ jobs:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/dotnet/sdk:6.0
     steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
     # Gets the executable version that will be used later in the uploaded zip file name
     - name: Set Version
       id: vars
