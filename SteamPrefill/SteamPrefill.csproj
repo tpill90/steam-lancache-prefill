@@ -49,8 +49,15 @@
     <PackageReference Include="ByteSize" Version="2.1.1" />
     <PackageReference Include="CliFx" Version="2.3.0" />
     <PackageReference Include="HexMate" Version="0.0.3" />
-    <PackageReference Include="protobuf-net" Version="3.1.17" />
-    <PackageReference Include="SteamKit2" Version="2.4.1" />
+    <PackageReference Include="protobuf-net" Version="3.2.16" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />
+
+    <!-- TODO remove this custom built SteamKit2 dll once the SteamKit team has published the auth changes -->
+    <!--<PackageReference Include="SteamKit2" Version="2.4.1" />-->
+    <Reference Include="SteamKit2">
+      <HintPath>..\lib\SteamKit2.dll</HintPath>
+    </Reference>
+
     <PackageReference Include="Terminal.Gui" Version="1.7.2" />
     <PackageReference Include="Wcwidth" Version="1.0.0" />
 

@@ -1,23 +1,18 @@
-﻿namespace SteamPrefill.Settings
+﻿using System.IdentityModel.Tokens.Jwt;
+
+namespace SteamPrefill.Settings
 {
     /// <summary>
-    /// Keeps track of the session tokens returned by Steam, that allow for subsequent logins without passwords.
+    /// Keeps track of the auth tokens (JWT) returned by Steam, that allow for subsequent logins without passwords.
     /// </summary>
     [ProtoContract(SkipConstructor = true)]
     public sealed class UserAccountStore
     {
-        /// <summary>
-        /// SentryData is returned by Steam when logging in with Steam Guard w\ email.
-        /// This data is required to be passed along in every subsequent login, in order to re-use an existing session.
-        /// </summary>
+        //TODO deprecated, remove in the future, say 2023/07/01
         [ProtoMember(1)]
         public Dictionary<string, byte[]> SentryData { get; private set; }
 
-        /// <summary>
-        /// Upon a successful login to Steam, a "Login Key" will be returned to use on subsequent logins.
-        /// This login key can be considered a "session token", and can be used on subsequent logins to avoid entering a password.
-        /// These keys will be unique to each user.
-        /// </summary>
+        //TODO deprecated, remove in the future, say 2023/07/01
         [ProtoMember(2)]
         public Dictionary<string, string> SessionTokens { get; private set; }
 
@@ -32,6 +27,12 @@
         [ProtoMember(4)]
         public uint? SessionId { get; private set; }
 
+        /// <summary>
+        /// Steam has switched over to using JWT tokens for authorization.
+        /// </summary>
+        [ProtoMember(5)]
+        public string AccessToken { get; set; }
+
         [SuppressMessage("Security", "CA5394:Random is an insecure RNG", Justification = "Security doesn't matter here, as all that is needed is a unique id.")]
         private UserAccountStore()
         {
@@ -42,6 +43,12 @@
             SessionId = (uint)random.Next(0, 16384);
         }
 
+        /// <summary>
+        /// Gets the current user's username, if they have already entered it before.
+        /// If they have not yet entered it, they will be prompted to do so.
+        ///
+        /// Will timeout after 30 seconds of no user activity.
+        /// </summary>
         public async Task<string> GetUsernameAsync(IAnsiConsole ansiConsole)
         {
             if (!String.IsNullOrEmpty(CurrentUsername))
@@ -51,6 +58,20 @@
 
             CurrentUsername = await PromptForUsernameAsync(ansiConsole).WaitAsync(TimeSpan.FromSeconds(30));
             return CurrentUsername;
+        }
+
+        public bool AccessTokenIsValid()
+        {
+            if (String.IsNullOrEmpty(AccessToken))
+            {
+                return false;
+            }
+
+            var parsedToken = new JwtSecurityToken(AccessToken);
+
+            // Tokens seem to be valid for ~6 months.  We're going to add a bit of "buffer" (1 day) to make sure that new tokens are request prior to expiration
+            var tokenHasExpired = DateTimeOffset.Now.DateTime.AddDays(1) < parsedToken.ValidTo;
+            return tokenHasExpired;
         }
 
         private async Task<string> PromptForUsernameAsync(IAnsiConsole ansiConsole)
@@ -67,6 +88,8 @@
             });
         }
 
+        #region Serialization
+
         public static UserAccountStore LoadFromFile()
         {
             if (!File.Exists(AppConfig.AccountSettingsStorePath))
@@ -75,14 +98,16 @@
             }
 
             using var fileStream = File.Open(AppConfig.AccountSettingsStorePath, FileMode.Open, FileAccess.Read);
-            var userAccountStore = Serializer.Deserialize<UserAccountStore>(fileStream);
+            var userAccountStore = ProtoBuf.Serializer.Deserialize<UserAccountStore>(fileStream);
             return userAccountStore;
         }
 
         public void Save()
         {
             using var fs = File.Open(AppConfig.AccountSettingsStorePath, FileMode.Create, FileAccess.Write);
-            Serializer.Serialize(fs, this);
+            ProtoBuf.Serializer.Serialize(fs, this);
         }
+
+        #endregion
     }
 }

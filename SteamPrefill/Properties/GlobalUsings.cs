@@ -36,7 +36,6 @@ global using System.Net.Http;
 global using System.Reflection;
 global using System.Runtime.InteropServices;
 global using System.Runtime.Serialization;
-global using System.Security.Authentication;
 global using System.Security.Cryptography;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
@@ -48,3 +47,5 @@ global using AnsiConsoleExtensions = LancachePrefill.Common.Extensions.AnsiConso
 global using PicsProductInfo = SteamKit2.SteamApps.PICSProductInfoCallback.PICSProductInfo;
 global using Architecture = SteamPrefill.Models.Enums.Architecture;
 global using OperatingSystem = SteamPrefill.Models.Enums.OperatingSystem;
+global using SteamKit2.Authentication;
+global using AuthenticationException = System.Security.Authentication.AuthenticationException;
