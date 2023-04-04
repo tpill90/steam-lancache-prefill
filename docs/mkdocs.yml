@@ -5,6 +5,11 @@ extra_css:
   - css/extra.css
 theme:
   name: readthedocs
+  highlightjs: true
+  hljs_languages:
+    - bash
+    - csharp
+    - powershell
 markdown_extensions:
   - admonition
   - attr_list

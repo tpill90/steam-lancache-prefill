@@ -32,46 +32,25 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 # Initial Setup
 
-> **Note**
-> New to Linux?  See this detailed tutorial : [Install Guide For Linux Beginners](https://tpill90.github.io/steam-lancache-prefill/install-guides/Install-Guide-For-Linux-Beginners/)
+**SteamPrefill** is flexible and portable, and supports multiple platforms and configurations.  It can be run on directly on the Lancache server itself,  or on your gaming machine as an alternative Steam client.  You should decide which one works better for your use case.
 
-> **Note**
-> Interested in using Docker instead?  See : [Docker Setup Guide](https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide/)
+Detailed setup guides are available for the following platforms:
 
-> **Note**
-> Using Unraid?  See : [Unraid Setup Guide](https://tpill90.github.io/steam-lancache-prefill/install-guides/Unraid-Setup-Guide/)
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Install-Guide-For-Linux-Beginners/">
+    <img src="docs/img/platforms/linux.png" height="80px" title="Linux" alt="Linux" />
+</a> &nbsp; &nbsp; &nbsp;
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide/">
+    <img src="docs/img/platforms/docker.webp" height="80px" title="Docker" alt="Docker" />
+</a> &nbsp; &nbsp; &nbsp;
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Unraid-Setup-Guide/">
+    <img src="docs/img/platforms/unraid.png" height="80px" title="unRAID" alt="unRAID" />
+</a> &nbsp; &nbsp; &nbsp;
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Windows-Setup-Guide/">
+    <img src="docs/img/platforms/windows.png" height="60px" title="Windows" alt="Windows" />
+</a>
 
-1.  **SteamPrefill** can be run on both the Lancache server itself,  or on your gaming machine as an alternative Steam client.  You should decide which one works better for your use case.
-2.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
-3.  Unzip to a directory of your choice
-
-> **Warning**
-> Linux and macOS will require executable permissions to be granted with `chmod +x ./SteamPrefill` prior to running the app.
-
-> **Note**
-> Alpine Linux requires additional dependencies to be installed for the .NET runtime : [Alpine Linux Dependencies](https://docs.microsoft.com/en-us/dotnet/core/install/linux-alpine#dependencies)
-
-## Optional Windows Setup
-
-Configuring your terminal to use Unicode will result in a much nicer experience with **SteamPrefill**, for much nicer looking UI output.
-
-<img src="docs/img/ConsoleWithUtf8.png" width="730" alt="Initial Prefill">
-
-As the default console in Windows does not support UTF8, you should instead consider installing **Windows Terminal** from the [Microsoft App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
-
-Once **Windows Terminal** has been installed you will still need to enable Unicode, as it is not enabled by default. Running the following command in Powershell will enable it if it hasn't already been enabled.
-```powershell
-if(!(Test-Path $profile))
-{
-    New-Item -Path $profile -Type File -Force
-}
-if(!(gc $profile).Contains("OutputEncoding")) 
-{ 
-    ac $profile "[console]::InputEncoding = [console]::OutputEncoding = [System.Text.UTF8Encoding]::new()";
-    & $profile; 
-}
-```
-
+</br>
+     
 # Getting Started
 
 ## Selecting what to prefill
@@ -193,20 +172,22 @@ For more brand specific guides (non-exhaustive), see :
 
 <img src="docs/img/UpdateAvailable.png" width="675" alt="Update available message">
 
+
+
 ### Automatically updating
+
 - **Windows**
     - Run the `.\update.ps1` script in the executable directory
 - **Linux**
     - **First time only** : Grant executable permissions to the update script with `chmod +x ./update.sh`
     - Run the `./update.sh` script in the executable directory
+- **Docker**
+    - `docker pull tpill90/steam-lancache-prefill:latest`
 
 ### Manually updating:
 1.  Download the latest version for your OS from the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page.
 2.  Unzip to the directory where **SteamPrefill** is currently installed, overwriting the previous executable.
 3.  Thats it!  You're all up to date!
-
-### Docker update:
-- sudo docker pull tpill90/steam-lancache-prefill:latest
 
 # Need Help?
 If you are running into any issues, feel free to open up a Github issue on this repository.
@@ -214,7 +195,7 @@ If you are running into any issues, feel free to open up a Github issue on this 
 You can also find us at the [**LanCache.NET** Discord](https://discord.com/invite/BKnBS4u), in the `#steam-prefill` channel.
 
 # Additional Documentation
-* [Development Configuration](https://tpill90.github.io/steam-lancache-prefill/dev-guides/Compiling-from-source/)
+*  Interested in compiling the project from source?  See [Development Setup Guide](https://tpill90.github.io/steam-lancache-prefill/dev-guides/Compiling-from-source/)
 
 # Acknowledgements
 - [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
