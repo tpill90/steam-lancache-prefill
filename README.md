@@ -36,7 +36,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 Detailed setup guides are available for the following platforms:
 
-<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Install-Guide-For-Linux-Beginners/">
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Linux-Setup-Guide/">
     <img src="docs/img/platforms/linux.png" height="80px" title="Linux" alt="Linux" />
 </a> &nbsp; &nbsp; &nbsp;
 <a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide/">
