@@ -17,7 +17,20 @@ docker run -it --rm --net=host \
 
 This command is the same as running **SteamPrefill** from the command line with no options, and if successful should produce the following output:
 
-![docker no command](../images/install-guides/docker-no-command.png)
+<div id="player"></div>
+<br>
+
+<script src="../../assets/asciinema-player.min.js"></script>
+<script>
+AsciinemaPlayer.create('../casts/docker-pull.cast', document.getElementById('player'), {
+    autoPlay: true,
+    terminalFontSize: "14px",
+    fit: 'none',
+    terminalFontFamily: "'Cascadia Mono', monospace",
+    rows: 14
+});
+</script>
+
 
 At this point, you will be able to run any of the `COMMANDS` listed in the output by appending the desired command at the end, for example with `select-apps`:
 
@@ -28,10 +41,10 @@ docker run -it --rm --net=host  \
   select-apps
 ```
 
-### Next Steps
+## Next Steps
 
 If you are new to **SteamPrefill** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide. 
 
 Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/steam-lancache-prefill#frequently-asked-questions).  
 
-Alternatively, to see all of the features that **SteamPrefill** offers, take a look at [Detailed command usage](https://github.com/tpill90/steam-lancache-prefill/wiki/Detailed-Command-Usage)
+Alternatively, to see all of the features that **SteamPrefill** offers, take a look at [Detailed command usage](../../Detailed-Command-Usage)

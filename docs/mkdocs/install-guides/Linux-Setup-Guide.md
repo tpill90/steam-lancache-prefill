@@ -67,4 +67,4 @@ If you are new to **SteamPrefill** and would like an introductory tutorial, see 
 
 Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/steam-lancache-prefill#frequently-asked-questions).  
 
-Alternatively, to see all of the features that **SteamPrefill** offers, take a look at [Detailed command usage](https://github.com/tpill90/steam-lancache-prefill/wiki/Detailed-Command-Usage)
+Alternatively, to see all of the features that **SteamPrefill** offers, take a look at [Detailed command usage](../../Detailed-Command-Usage)
