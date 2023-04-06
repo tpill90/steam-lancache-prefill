@@ -2,7 +2,8 @@ site_name: steam-lancache-prefill wiki
 repo_url: https://github.com/tpill90/steam-lancache-prefill
 docs_dir: mkdocs
 extra_css:
-  - css/extra.css
+  - assets/asciinema-player.css
+  - assets/extra.css
 theme:
   name: readthedocs
   highlightjs: true
