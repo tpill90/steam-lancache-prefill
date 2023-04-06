@@ -8,8 +8,6 @@ theme:
   name: readthedocs
   highlightjs: true
   hljs_languages:
-    - bash
-    - csharp
     - powershell
 markdown_extensions:
   - admonition
