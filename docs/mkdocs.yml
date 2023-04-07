@@ -1,14 +1,20 @@
 site_name: steam-lancache-prefill wiki
 repo_url: https://github.com/tpill90/steam-lancache-prefill
 docs_dir: mkdocs
+
 extra_css:
-  - assets/asciinema-player.css
+  - assets/external/asciinema-player.css
   - assets/extra.css
+extra_javascript:
+  - assets/external/asciinema-player.min.js
+  - assets/extra.js
+
 theme:
   name: readthedocs
   highlightjs: true
   hljs_languages:
     - powershell
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -19,17 +25,23 @@ markdown_extensions:
   - toc:
       permalink: True
   - tables
+
+# https://github.com/mkdocs/mkdocs/wiki/MkDocs-Plugins
 plugins:
+  # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
   - awesome-pages:
       strict: true
+  # https://github.com/oprypin/mkdocs-section-index
+  #TODO look into this in the future - section-index
+
 nav:
   - Welcome: index.md
-  - Detailed Command Usage: Detailed-Command-Usage.md 
   - Install Guides: 
     - ... | flat | install-guides/*.md
+  - Detailed Command Usage: 
+    - ... | flat | detailed-command-usage/*.md
   - Dev Guides: 
     - ... | flat | dev-guides/*.md
   - Steam Documentation: 
     - ... | flat | steam-docs/*.md
-  - Miscellaneous: 
-    - ... | flat | miscellaneous/*.md
+  

@@ -17,20 +17,8 @@ docker run -it --rm --net=host \
 
 This command is the same as running **SteamPrefill** from the command line with no options, and if successful should produce the following output:
 
-<div id="player"></div>
+<div data-cli-player="../casts/docker-pull.cast"></div>
 <br>
-
-<script src="../../assets/asciinema-player.min.js"></script>
-<script>
-AsciinemaPlayer.create('../casts/docker-pull.cast', document.getElementById('player'), {
-    autoPlay: true,
-    terminalFontSize: "14px",
-    fit: 'none',
-    terminalFontFamily: "'Cascadia Mono', monospace",
-    rows: 14
-});
-</script>
-
 
 At this point, you will be able to run any of the `COMMANDS` listed in the output by appending the desired command at the end, for example with `select-apps`:
 

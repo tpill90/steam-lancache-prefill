@@ -1,0 +1,2 @@
+{"version":2,"width":120,"height":30,"timestamp":1680903145,"theme":{},"env":{"SHELL":"/bin/bash","TERM":"xterm-256color"}}
+[0.068,"o","\u001b[?25l \u001b[4;38;5;15mBenchmark summary\u001b[0m                              \r\n                                                \r\n       \u001b[38;5;80mMin\u001b[0m      │   \u001b[38;5;229mAverage\u001b[0m    │     \u001b[38;5;141mMax\u001b[0m        \r\n  ━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━┿━━━━━━━━━━━━━━  \r\n   20.76 Gbit/s │ 21.21 Gbit/s │ 21.61 Gbit/s"]
