@@ -9,6 +9,11 @@ end_of_line = lf
 indent_style = space
 indent_size = 4
 
+[*.js]
+indent_style = tab
+tab_size = 4
+curly_bracket_next_line = true
+
 # -----  Resharper Rules ----- 
 # https://www.jetbrains.com/help/resharper/EditorConfig_CSHARP_CSharpIndentStylePageSchema.html#resharper_csharp_align_linq_query
 align_linq_query = true

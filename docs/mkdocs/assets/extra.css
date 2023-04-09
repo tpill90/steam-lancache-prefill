@@ -1,20 +1,4 @@
-
-@font-face {
-    font-family: "Cascadia Mono";
-    src:    local(CascadiaMono),
-            url("CascadiaMono.ttf") format("truetype");
-    font-stretch: normal;
-    font-style: normal;
-    font-weight: 700;
-}
-
-@font-face {
-    font-family: "Cascadia Mono";
-    src:    local(CascadiaMono),
-            url("CascadiaMono.ttf") format("truetype");
-    font-stretch: normal;
-}
-
+/* Increases default font size */
 p {
     font-size: 18px !important;
 }
@@ -38,3 +22,29 @@ p {
 code {
     font-size: 14px !important; 
 }
+
+/* #region Asciinema Overrides */
+
+/* Custom font to match Windows Terminal's default */
+@font-face {
+    font-family: "Cascadia Mono";
+    src:    local(CascadiaMono),
+            url("external/CascadiaMono.ttf") format("truetype");
+    font-stretch: normal;
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "Cascadia Mono";
+    src:    local(CascadiaMono),
+            url("external/CascadiaMono.ttf") format("truetype");
+    font-stretch: normal;
+}
+
+/* Makes the color for Spectre.Console's progress bar more closely match the other yellows */
+.fg-11 {
+    color: rgb(249,241,165) !important;
+}
+
+/* #endregion */
