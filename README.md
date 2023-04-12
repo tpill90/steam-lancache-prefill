@@ -121,33 +121,8 @@ For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force
 
 ## Can SteamPrefill be run on a schedule?
 
-Yes it can!  Scheduled jobs can be easily setup on Linux using `crontab`, and can be flexibly configured to run on any schedule that you desire.  Jobs are configured by specifying an "expression" that describes the schedule to run on. 
-Some examples of cron expressions:
-
-<table>
-<tr> <td> Schedule </td> <td> Cron Expression </td> </tr>
-<tr> <td> Every day at 2am </td> <td> 
-
-`0 2 * * * $PWD/SteamPrefill prefill`
-</td> </tr>
-<tr> <td> Every 4 hours </td> <td> 
-
-`0 */4 * * * $PWD/SteamPrefill prefill`
-</td> </tr>
-</table>
-
-If the above examples don't cover your use case, [crontab.guru](https://crontab.guru/) is an online cron expression editor that can interactively edit cron expressions, and explain what they mean.
-
-Once you have determined a cron expression, you can then create a job using the following:
-
-> **Note**
-> This command should be run in the same directory where **SteamPrefill** is installed
-
-`job="cron expression here"; { crontab -l; echo "$job"; } | crontab -` 
-
-After running the command, you can verify that the job was successfully created with `crontab -l`.  If the output matches below, then your job is correctly configured!
-
-<img src="docs/img/crontab.png" width="550" alt="Crontab jobs">
+Yes it can!  Scheduled jobs can be easily setup on Linux using `systemd` services, and can be flexibly configured to run on any schedule that you desire.  
+See [Configuring a Nightly Job](https://tpill90.github.io/steam-lancache-prefill/install-guides/Scheduled-Job/) for a guide on how to get setup with a schedule.
 
 ## Can I fill my cache using previously installed Steam games?
 
