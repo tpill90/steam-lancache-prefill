@@ -78,6 +78,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <!-- Required definitions in order for Microsoft.CodeAnalysis.BannedApiAnalyzers to work -->
+    <AdditionalFiles Include="BannedSymbols.txt" Link="Properties\BannedSymbols.txt" />
+
     <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="16.9.60">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>

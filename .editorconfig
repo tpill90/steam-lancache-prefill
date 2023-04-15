@@ -9,11 +9,6 @@ end_of_line = lf
 indent_style = space
 indent_size = 4
 
-[*.js]
-indent_style = tab
-tab_size = 4
-curly_bracket_next_line = true
-
 # -----  Resharper Rules ----- 
 # https://www.jetbrains.com/help/resharper/EditorConfig_CSHARP_CSharpIndentStylePageSchema.html#resharper_csharp_align_linq_query
 align_linq_query = true
@@ -66,5 +61,13 @@ dotnet_diagnostic.cs4014.severity = error
 # IDE0090 : 'new' expression can be simplified
 csharp_style_implicit_object_creation_when_type_is_apparent = false
 
+# Banned APIs will be bumped up to an error instead of warning
+dotnet_diagnostic.rs0030.severity = error
+
 # The method does not need to use async/await - Introduces annoying 'return' statements for async methods, that hurt code readability.
 dotnet_diagnostic.AsyncFixer01.severity = none
+
+[*.js]
+indent_style = tab
+tab_size = 4
+curly_bracket_next_line = true

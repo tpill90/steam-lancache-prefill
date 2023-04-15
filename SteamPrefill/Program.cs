@@ -1,13 +1,5 @@
 namespace SteamPrefill
 {
-    /* TODO
-     * Testing - Should invest some time into adding unit tests
-     * Cleanup Resharper code issues, and github code issues.
-     * Cleanup TODOs
-     * Build - Fail build on trim warnings
-     * Research - Determine if Polly could be used in this project
-     * Docs - Make sure all terminal photos are the same width + height.  Retake if necessary
-     */
     public static class Program
     {
         public static async Task<int> Main()
@@ -46,7 +38,7 @@ namespace SteamPrefill
                 {
                     AnsiConsole.Console.MarkupLine(Red("Timed out while waiting for password entry"));
                 }
-                AnsiConsole.Console.WriteException(e, ExceptionFormats.ShortenPaths);
+                AnsiConsole.Console.LogException(e);
             }
             catch (TaskCanceledException e)
             {
@@ -61,12 +53,12 @@ namespace SteamPrefill
                 }
                 else
                 {
-                    AnsiConsole.Console.WriteException(e, ExceptionFormats.ShortenPaths);
+                    AnsiConsole.Console.LogException(e);
                 }
             }
             catch (Exception e)
             {
-                AnsiConsole.Console.WriteException(e, ExceptionFormats.ShortenPaths);
+                AnsiConsole.Console.LogException(e);
             }
 
             return 0;
@@ -75,21 +67,31 @@ namespace SteamPrefill
         /// <summary>
         /// Adds hidden flags that may be useful for debugging/development, but shouldn't be displayed to users in the help text
         /// </summary>
-        /// <returns></returns>
-        public static List<string> ParseHiddenFlags()
+        private static List<string> ParseHiddenFlags()
         {
             // Have to skip the first argument, since its the path to the executable
             var args = Environment.GetCommandLineArgs().Skip(1).ToList();
 
+            // Enables SteamKit2 debugging as well as SteamPrefill verbose logs
             if (args.Any(e => e.Contains("--debug")))
             {
+                AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--debug")} flag.  Displaying debug only logging...");
                 AppConfig.EnableSteamKitDebugLogs = true;
                 args.Remove("--debug");
+            }
+
+            // Will skip over downloading logic.  Will only download manifests
+            if (args.Any(e => e.Contains("--no-download")))
+            {
+                AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--no-download")} flag.  Will skip downloading chunks...");
+                AppConfig.SkipDownloads = true;
+                args.Remove("--no-download");
             }
 
             return args;
         }
 
+        //TODO move to lancacheprefill.common
         public static class OperatingSystem
         {
             public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);

@@ -70,10 +70,14 @@
 
         #region Prefill
 
-        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames, List<uint> manualIds)
+        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames, List<uint> manualIds = null)
         {
             var appIdsToDownload = LoadPreviouslySelectedApps();
-            appIdsToDownload.AddRange(manualIds);
+
+            if (manualIds != null)
+            {
+                appIdsToDownload.AddRange(manualIds);
+            }
             if (downloadAllOwnedGames)
             {
                 appIdsToDownload.AddRange(_steam3.LicenseManager.AllOwnedAppIds);
@@ -166,6 +170,12 @@
             _ansiConsole.Markup($" from {LightYellow(chunkDownloadQueue.Count)} chunks");
 #endif
             _ansiConsole.MarkupLine("");
+
+            if (AppConfig.SkipDownloads)
+            {
+                _ansiConsole.MarkupLine("");
+                return;
+            }
 
             var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue, _downloadArgs);
             if (downloadSuccessful)

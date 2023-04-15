@@ -27,7 +27,7 @@
         {
             if (_lancacheAddress == null)
             {
-                _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamCdnUrl);
+                _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamTriggerDomain);
             }
         }
 
@@ -39,12 +39,6 @@
         /// <returns>True if all downloads succeeded.  False if any downloads failed 3 times in a row.</returns>
         public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
         {
-#if DEBUG
-            if (AppConfig.SkipDownloads)
-            {
-                return true;
-            }
-#endif
             await InitializeAsync();
 
             int retryCount = 0;
