@@ -44,7 +44,7 @@
             depotManifests.AddRange(resultManifests);
 
             // Downloading un-cached depots from the internet
-            foreach (var depot in depots.Where(e => !ManifestIsCached(e)))
+            foreach (var depot in depots.Where(e => !ManifestIsCached(e)).ToList())
             {
                 int attempts = 0;
                 Manifest manifest = null;
@@ -54,7 +54,7 @@
                     {
                         _ansiConsole.LogMarkupVerbose($"Downloading manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)}");
 
-                        manifest = await GetSingleManifestAsync(depot).WaitAsync(AppConfig.SteamKitRequestTimeout);
+                        manifest = await GetSingleManifestAsync(depot);
                         depotManifests.Add(manifest);
                     }
                     catch (Exception e)
