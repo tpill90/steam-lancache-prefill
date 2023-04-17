@@ -33,6 +33,16 @@ if [ -z "${LATEST_TAG}" ]; then
 fi
 echo -e " Found latest version : ${Cyan} ${LATEST_TAG} ${NC}"
 
+# Checking to see if SteamPrefill is already up to date
+if [ ! -f /SteamPrefill ]; then
+    CURRENT_VERSION=$(./SteamPrefill --version)
+
+    if [ "${CURRENT_VERSION}" == "v${LATEST_TAG}" ]; then
+        echo -e "${Yellow} Already up to date !${NC}"
+        exit
+    fi
+fi
+
 # Downloading latest version
 echo -e "${Yellow} Downloading... ${NC}"
 DOWNLOAD_URL="https://github.com/tpill90/steam-lancache-prefill/releases/download/v${LATEST_TAG}/SteamPrefill-${LATEST_TAG}-linux-x64.zip"
