@@ -6,19 +6,6 @@ namespace SteamPrefill.CliCommands
                                            "  Automatically includes apps selected using the 'select-apps' command")]
     public class PrefillCommand : ICommand
     {
-
-#if DEBUG // Experimental, debugging only
-        [CommandOption("app", Description = "Debugging only.")]
-        public IReadOnlyList<uint> AppIds { get; init; }
-
-        [CommandOption("no-download", Description = "Debugging only.", Converter = typeof(NullableBoolConverter))]
-        public bool? NoDownload
-        {
-            get => AppConfig.SkipDownloads;
-            init => AppConfig.SkipDownloads = value ?? default(bool);
-        }
-#endif
-
         [CommandOption("all", Description = "Prefills all currently owned games", Converter = typeof(NullableBoolConverter))]
         public bool? DownloadAllOwnedGames { get; init; }
 
@@ -92,18 +79,9 @@ namespace SteamPrefill.CliCommands
             {
                 await steamManager.InitializeAsync();
 
-                var manualIds = new List<uint>();
-#if DEBUG 
-                // Experimental, debugging only
-                if (AppIds != null)
-                {
-                    manualIds.AddRange(AppIds);
-                }
-#endif
                 await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool),
                                                              PrefillRecentGames ?? default(bool),
-                                                             PrefillPopularGames,
-                                                             manualIds);
+                                                             PrefillPopularGames);
             }
             catch (TimeoutException e)
             {
@@ -116,7 +94,7 @@ namespace SteamPrefill.CliCommands
                 {
                     _ansiConsole.MarkupLine(Red("Timed out while waiting for password entry"));
                 }
-                _ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                _ansiConsole.LogException(e);
             }
             catch (TaskCanceledException e)
             {
@@ -126,17 +104,16 @@ namespace SteamPrefill.CliCommands
                                                 "This could possibly be due to transient errors with the Steam network. \n" +
                                                 "Try again in a few minutes."));
 
-                    FileLogger.Log("Unable to load latest App metadata! An unexpected error occurred!");
-                    FileLogger.Log(e.ToString());
+                    FileLogger.LogException("Unable to load latest App metadata! An unexpected error occurred!", e);
                 }
                 else
                 {
-                    _ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                    _ansiConsole.LogException(e);
                 }
             }
             catch (Exception e)
             {
-                _ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                _ansiConsole.LogException(e);
             }
             finally
             {
@@ -148,13 +125,6 @@ namespace SteamPrefill.CliCommands
         private void ValidateUserHasSelectedApps(SteamManager steamManager)
         {
             var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
-
-#if DEBUG
-            if (AppIds != null && AppIds.Any())
-            {
-                return;
-            }
-#endif
 
             if ((DownloadAllOwnedGames ?? default(bool)) || (PrefillRecentGames ?? default(bool)) || PrefillPopularGames != null || userSelectedApps.Any())
             {

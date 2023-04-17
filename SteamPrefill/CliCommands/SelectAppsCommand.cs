@@ -62,7 +62,7 @@ namespace SteamPrefill.CliCommands
                 {
                     ansiConsole.MarkupLine(Red("Timed out while waiting for password entry"));
                 }
-                ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                ansiConsole.LogException(e);
             }
             catch (TaskCanceledException e)
             {
@@ -77,12 +77,12 @@ namespace SteamPrefill.CliCommands
                 }
                 else
                 {
-                    ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                    ansiConsole.LogException(e);
                 }
             }
             catch (Exception e)
             {
-                ansiConsole.WriteException(e, ExceptionFormats.ShortenPaths);
+                ansiConsole.LogException(e);
             }
             finally
             {

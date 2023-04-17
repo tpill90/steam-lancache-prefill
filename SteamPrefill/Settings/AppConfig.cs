@@ -9,7 +9,10 @@ namespace SteamPrefill.Settings
             Directory.CreateDirectory(CacheDir);
         }
 
-        public static string SteamCdnUrl => "lancache.steamcontent.com";
+        /// <summary>
+        /// TODO document that this is actually the "trigger" domain.  Explain what it is used for, and why it is needed.
+        /// </summary>
+        public static string SteamTriggerDomain => "lancache.steamcontent.com";
 
         //TODO comment
         private static bool _verboseLogs;
@@ -30,10 +33,19 @@ namespace SteamPrefill.Settings
             get => _enableSteamKitDebugLogs;
             set
             {
-                VerboseLogs = true;
                 _enableSteamKitDebugLogs = value;
+
+                // Enable verbose logs as well
+                VerboseLogs = true;
+                AnsiConsoleExtensions.WriteVerboseLogs = value;
             }
         }
+
+        //TODO comment
+        public static bool SkipDownloads { get; set; }
+
+        //TODO comment
+        public static TimeSpan SteamKitRequestTimeout => TimeSpan.FromSeconds(60);
 
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
@@ -50,13 +62,6 @@ namespace SteamPrefill.Settings
         /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
         /// </summary>
         public static readonly string ConfigDir = Path.Combine(AppContext.BaseDirectory, "Config");
-
-        #region Timeouts
-
-        //TODO comment
-        public static TimeSpan SteamKitRequestTimeout => TimeSpan.FromSeconds(60);
-
-        #endregion
 
         #region Serialization file paths
 
@@ -75,12 +80,6 @@ namespace SteamPrefill.Settings
         public static readonly string SuccessfullyDownloadedDepotsPath = Path.Combine(ConfigDir, "successfullyDownloadedDepots.json");
 
         #endregion
-
-#if DEBUG
-
-        public static bool SkipDownloads { get; set; }
-
-#endif
 
         //TODO move to lancacheprefill.common
         /// <summary>
