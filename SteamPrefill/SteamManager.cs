@@ -278,10 +278,17 @@
             await PrintUnownedAppsAsync(appIds);
 
             // Building out the combined workload file
-            var benchmarkWorkload = await BuildBenchmarkWorkloadAsync(appIds);
+            BenchmarkWorkload benchmarkWorkload = await BuildBenchmarkWorkloadAsync(appIds);
 
             // Saving results to disk
             benchmarkWorkload.SaveToFile(AppConfig.BenchmarkWorkloadPath);
+
+            // No need to display the summary table if the benchmark wasn't built.  This can happen if the user passed in an unowned appid with no other appids
+            if (benchmarkWorkload.AllQueuedRequests.Empty())
+            {
+                _ansiConsole.LogMarkupError("Benchmark file not built!  All apps were unowned and could not be included!");
+                return;
+            }
 
             // Writing stats
             benchmarkWorkload.PrintSummary(_ansiConsole);

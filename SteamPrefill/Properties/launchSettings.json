@@ -32,10 +32,6 @@
       "commandName": "Project",
       "commandLineArgs": "benchmark run"
     },
-    "Game by ID": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --app 1085660 --force"
-    },
     "Clear cache": {
       "commandName": "Project",
       "commandLineArgs": "clear-cache"
