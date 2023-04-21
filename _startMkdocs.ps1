@@ -5,7 +5,6 @@
 
 pip install mkdocs
 pip install mkdocs-awesome-pages-plugin
-pip install mkdocs-section-index
 pip install mkdocs-static-i18n
 
 cd docs
