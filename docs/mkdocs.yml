@@ -4,6 +4,7 @@ docs_dir: mkdocs
 
 extra_css:
   - assets/external/asciinema-player.css
+  - assets/language-picker.css
   - assets/extra.css
 extra_javascript:
   - assets/external/asciinema-player.min.js
@@ -11,6 +12,8 @@ extra_javascript:
 
 theme:
   name: readthedocs
+  # For defaults see : https://github.com/mkdocs/mkdocs/tree/master/mkdocs/themes/readthedocs
+  custom_dir: custom_theme/
   highlightjs: true
   hljs_languages:
     - powershell
@@ -31,6 +34,19 @@ plugins:
   # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
   - awesome-pages:
       strict: true
+      
+  # https://github.com/ultrabug/mkdocs-static-i18n
+  # Icons taken from - https://github.com/lipis/flag-icons
+  - i18n:
+      default_language: en
+      docs_structure: suffix
+      languages:
+        en:
+          name: English
+          build: true
+        gr:
+          name: Ελληνικά
+          build: true
   # https://github.com/oprypin/mkdocs-section-index
   #TODO look into this in the future - section-index
 
