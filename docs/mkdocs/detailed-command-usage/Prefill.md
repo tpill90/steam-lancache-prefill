@@ -1,15 +1,54 @@
 # prefill
 
-<div data-cli-player="../casts/prefill.cast" data-rows=14></div>
+<div data-cli-player="../casts/prefill.cast" data-rows=13></div>
 <br>
 
 ## Overview
 
 Automatically fills a Lancache with games from Steam so that subsequent downloads will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
-Will keep track of which games have been previously downloaded, and will only download games that have updates.
+Keeps track of which games have been previously downloaded, and will only download games that have updates.  
 
-<!-- TODO add an "examples" section that shows what you can do with some of the options -->
+-----
+
+## Example usage
+
+!!! Note
+    This command will automatically include any apps that have been selected using `select-apps`, regardless of any additional optional flags specified.
+
+Initiating a `prefill` run is as simple as running the following from the terminal:
+```powershell
+./SteamPrefill prefill
+```
+
+At the beginning of a `prefill` run, **SteamPrefill** will check to see which apps have new updates since the last `prefill` run, as well as checking to see if any apps have never been successfully prefilled.  If `prefill` detects that there are any apps that need to be downloaded, it will begin doing so.  If there are no apps that need to be downloaded, then the `prefill` run will simply finish immediately.  
+
+
+### Prefilling your entire Steam library
+
+Depending on the size of your library, and which apps you want to prefill, it may be easier to simply prefill the entire library instead.  This will also automatically include any new games you may have purchased, without having to use `select-apps` to select the newly purchased game.
+
+```powershell
+./SteamPrefill prefill --all
+```
+
+### Ensuring your cache is fully primed
+
+Suppose that you have an event coming up, and you want to be 100% certain that your Lancache is prefilled.  Normally running `prefill` will ensure that you have the latest update data primed, however you may want to have complete certainty that it is.  Adding the `--force` flag will make **SteamPrefill** re-download every app, ignoring the fact that they may have already been up to date from a previous run.  Because **SteamPrefill** will be re-downloading every app again from start to finish, any data that may be missing will be filled in again.
+
+```powershell
+./SteamPrefill prefill --force
+```
+
+### Combining multiple flags
+
+It is possible to combine multiple flags together in a single command, rather than having to use them separately one at a time.  For example, the following command will prefill the most popular games on Steam, only download the Linux version, and display more detailed log output:
+
+```powershell
+./SteamPrefill prefill --top --os linux --verbose
+```
+
+-----
 
 ## Options
 

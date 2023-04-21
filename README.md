@@ -16,7 +16,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 * Select apps to prefill through an interactive menu.  
 * Supports login with Steam Guard, and Steam Guard Mobile Authenticator
 * No installation required! A completely self-contained, portable application.
-* Multi-platform support (Windows, Linux, MacOS, Arm64)
+* Multi-platform support (Windows, Linux, MacOS, Arm64, Docker, Unraid)
 * High-performance!  Downloads are significantly faster than using Steam, and can easily reach 10gbit/s or more!
 * Game downloads write no data to disk, so there is no need to have enough free space available.  This also means no unnecessary wear-and-tear to SSDs!
 * Completely implemented from scratch, has no dependency on `SteamCMD`!
@@ -96,6 +96,12 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 
 # Frequently Asked Questions
 
+## I have to login with my password?  How do I know this is safe?
+
+**SteamPrefill**, like Steam, will never save your password.  Your password will only be temporarily used once during the initial login, and won't be save to disk anywhere.  Upon login **SteamPrefill** will receive an "access token" that will be used on future logins, no password required.  Since **SteamPrefill** is open source, you can validate that this is indeed how your password is being used in the [source code](https://github.com/tpill90/steam-lancache-prefill/blob/919ee58ead1458778b121933bbde02cc16d03837/SteamPrefill/Handlers/Steam/Steam3Session.cs#L106).
+
+For extra account security, it is good practice to enable 2 Factor Authentication (2FA) for your account using **Steam Guard Mobile Authenticator**.  The authenticator generates a code that you need to enter every time that you log on to your Steam account. The code changes every 30 seconds, can be used only once, and is unguessable.  To get setup, see the guide [How to set up a Steam Guard Mobile Authenticator](https://help.steampowered.com/en/faqs/view/6891-E071-C9D9-0134)
+
 ## Can I run SteamPrefill on the Lancache server?
 
 You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you reguarly would!
@@ -161,6 +167,13 @@ For more brand specific guides (non-exhaustive), see :
 - [Linksys](https://www.linksys.com/support-article?articleNum=137079)
 - [TP-Link](https://www.tp-link.com/us/support/faq/557/)
 
+## How do I pause my running downloads?
+
+You can pause your downloads at any time by simply pressing `CTRL + C`, which will immediately terminate the application.  This won't hurt anything at all, and **SteamPrefill** will pickup where it left off during the next `prefill` run.
+
+## Is it possible to prefill apps I don't own?
+
+While it would certainly be helpful (and cheaper!) to prefill apps that you don't own, it is unfortunately not possible.  In order to download from the Steam network, Steam requires you to authenticate with your username and password.  Steam keeps track of which apps you own, which is how **SteamPrefill** displays the list of available apps in `select-apps`.  When **SteamPrefill** attempts to download any app (owned or unowned) the Steam network will validate that you do indeed own that app.  If you do not own it, then the Steam network will simply refuse to let you download it.
 
 # Detailed Command Usage
 
@@ -171,7 +184,6 @@ For more brand specific guides (non-exhaustive), see :
 **SteamPrefill** will automatically check for updates, and notify you when an update is available :
 
 <img src="docs/img/UpdateAvailable.png" width="675" alt="Update available message">
-
 
 
 ### Automatically updating

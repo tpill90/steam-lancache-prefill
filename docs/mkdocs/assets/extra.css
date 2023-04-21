@@ -1,3 +1,8 @@
+/* Increase H1 size */
+h1 {
+    font-size: 36px;
+}
+
 /* Increases default font size */
 p {
     font-size: 18px !important;

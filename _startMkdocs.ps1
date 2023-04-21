@@ -1,9 +1,12 @@
 # Check dead links
-# npm install -g markdown-link-check@3.10.3
-# get-childitem *.md -Recurse | ForEach-Object { markdown-link-check --quiet $_.FullName }
+# muffett http://localhost:8000
 
+
+
+pip install mkdocs
 pip install mkdocs-awesome-pages-plugin
 pip install mkdocs-section-index
+pip install mkdocs-static-i18n
 
 cd docs
 start http://127.0.0.1:8000

@@ -9,7 +9,7 @@ This project is using [mkdocs](https://www.mkdocs.org) to generate the static do
 choco install python
 
 # Installs required mkdocs package
-pip install mkdocs
+pip install mkdocs mkdocs-awesome-pages-plugin mkdocs-section-index mkdocs-static-i18n
 ```
 
 ## Project Layout
