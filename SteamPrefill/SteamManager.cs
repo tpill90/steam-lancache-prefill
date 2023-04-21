@@ -70,14 +70,9 @@
 
         #region Prefill
 
-        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames, List<uint> manualIds = null)
+        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames)
         {
             var appIdsToDownload = LoadPreviouslySelectedApps();
-
-            if (manualIds != null)
-            {
-                appIdsToDownload.AddRange(manualIds);
-            }
             if (downloadAllOwnedGames)
             {
                 appIdsToDownload.AddRange(_steam3.LicenseManager.AllOwnedAppIds);

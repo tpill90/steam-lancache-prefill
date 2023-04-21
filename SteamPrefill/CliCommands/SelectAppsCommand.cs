@@ -48,7 +48,7 @@ namespace SteamPrefill.CliCommands
 
                 if (runPrefill)
                 {
-                    await steamManager.DownloadMultipleAppsAsync(false, false, null, new List<uint>());
+                    await steamManager.DownloadMultipleAppsAsync(false, false, null);
                 }
             }
             catch (TimeoutException e)
