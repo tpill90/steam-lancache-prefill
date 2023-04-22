@@ -26,11 +26,9 @@
                 <!-- Dropdown entries that are hidden by default -->
                 <div class="dropdown-content">
                     {% for lang, display in config.plugins.i18n.config.languages.items() -%}
-                        <!-- page.url -->
-                        <a href="/{{ lang }}/">
-                            <img src="/assets/flags/{{lang}}.svg" class="flagIcon"> {{ display.name }}
+                        <a href="{{ lang | url }}">
+                            <img src="{{ base_url }}/assets/flags/{{ lang }}.svg" class="flagIcon"> {{ display.name }}
                         </a>
-                   
                     {% endfor %}
                 </div>
             </div>
