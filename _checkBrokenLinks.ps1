@@ -1,2 +1,2 @@
 # Check dead links
-muffet /buffer-size:8096 http://localhost:8000
+muffet /buffer-size:8096 /exclude:https://steamdb.info http://localhost:8000

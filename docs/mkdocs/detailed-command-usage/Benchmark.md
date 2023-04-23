@@ -9,7 +9,7 @@ Intended for use in identifying potential bottlenecks both server side (usually 
 <!-- TODO touch this up -->
 - Portable, no need to login to Steam in order to start download.
 - Able to be used across multiple machines at the same time, without logging in
-- Continous sustained download, combines multiple apps into a single download
+- Continuous sustained download, combines multiple apps into a single download
 - Repeatable, will perform the same download every time
 - Randomized, requests will be completed in a random order
 
@@ -18,9 +18,7 @@ Intended for use in identifying potential bottlenecks both server side (usually 
 <div data-cli-player="../casts/benchmark-setup.cast" data-rows=22></div>
 <br>
 
-Creates a benchmark "workload" comprised of multiple apps, that will then be benchmarked using the `run` sub-command.
-
-<!-- TODO Add sample  -->
+Creates a benchmark "workload" comprised of multiple apps, that will then be benchmarked using the `run` sub-command.  Generally, the ideal benchmark will be the one that most closely matches the apps that you will usually be downloaded.  This can be setup for example with `./SteamPrefill benchmark setup --use-selected`
 
 <!-- Markdown columns determine width based on the the longest cell.  &nbsp; forces the length to be longer, so --use-selected doesn't get broken into two lines  -->
 | Option   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |     |
@@ -33,8 +31,6 @@ Creates a benchmark "workload" comprised of multiple apps, that will then be ben
 
 ## run
 
-<!-- TODO Add sample  -->
-
 Runs multiple iterations of the benchmark workload created with `benchmark setup`.  Useful for measuring the throughput for the Lancache server, and diagnosing any potential performance issues.
 
 <u>** Warmup **</u>
@@ -42,7 +38,7 @@ Runs multiple iterations of the benchmark workload created with `benchmark setup
 <div data-cli-player="../casts/benchmark-warmup.cast" data-rows=5></div>
 <br>
 
-The first part of the benchmark run will be the intialization + warmup of the workload.  The workload file previously created with `benchmark setup` will be loaded from disk, and the ordering of the requests to be made will be randomized.  
+The first part of the benchmark run will be the initialization + warmup of the workload.  The workload file previously created with `benchmark setup` will be loaded from disk, and the ordering of the requests to be made will be randomized.  
 
 Next, the warmup run will download all of the workload's requests, which is necessary for a few reasons:
 

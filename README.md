@@ -153,7 +153,7 @@ While it would certainly be helpful (and cheaper!) to prefill apps that you don'
 # Detailed Command Usage
 
 > **Note**
-> Detailed command documentation has been moved to the wiki : [Detailed Command Usage](https://tpill90.github.io/steam-lancache-prefill/Detailed-Command-Usage/)
+> Detailed command documentation has been moved to the wiki : [Detailed Command Usage](https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Prefill/)
 
 # Updating
 **SteamPrefill** will automatically check for updates, and notify you when an update is available :

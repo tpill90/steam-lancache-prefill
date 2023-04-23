@@ -57,7 +57,9 @@ chmod +x ./SteamPrefill
 
 If everything worked as expected, you should see output similar to below
 
-![linux install](../images/install-guides/Successful-Linux-Install.png){: style="width:850px"}
+<div data-cli-player="../casts/successful-linux-install.cast" data-rows=7></div>
+<br>
+
 
 **SteamPrefill** is now installed on your machine!  You can now run it with `./SteamPrefill`
 
@@ -66,5 +68,3 @@ If everything worked as expected, you should see output similar to below
 If you are new to **SteamPrefill** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide. 
 
 Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/steam-lancache-prefill#frequently-asked-questions).  
-
-Alternatively, to see all of the features that **SteamPrefill** offers, take a look at [Detailed command usage](../../Detailed-Command-Usage)
