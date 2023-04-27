@@ -71,7 +71,11 @@ namespace SteamPrefill.Handlers.Steam
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
 
-            AvailableServerEndpoints = AvailableServerEndpoints.OrderBy(e => e.WeightedLoad).ToConcurrentStack();
+            AvailableServerEndpoints = AvailableServerEndpoints
+                                       // "CDN" type servers always have a load of 0, seem to be the fastest
+                                       .OrderByDescending(e => e.Load)
+                                       .ToConcurrentStack();
+
         }
 
         private async Task RequestSteamCdnServersAsync()

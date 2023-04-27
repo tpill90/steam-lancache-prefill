@@ -15,7 +15,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         public bool? UseSelectedApps { get; init; }
 
         [CommandOption("nocache",
-            Description = "Skips using locally cached files.  Saves disk space, at the expense of slower subsequent runs.",
+            Description = "Skips using locally cached manifests.  Saves disk space, at the expense of slower subsequent runs.",
             Converter = typeof(NullableBoolConverter))]
         public bool? NoLocalCache { get; init; }
 

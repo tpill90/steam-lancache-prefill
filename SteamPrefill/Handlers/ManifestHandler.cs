@@ -52,7 +52,6 @@
                 {
                     try
                     {
-                        _ansiConsole.LogMarkupVerbose($"Downloading manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)}");
 
                         manifest = await GetSingleManifestAsync(depot);
                         depotManifests.Add(manifest);
@@ -104,6 +103,8 @@
             {
                 return Manifest.LoadFromFile(depot.ManifestFileName);
             }
+
+            _ansiConsole.LogMarkupVerbose($"Downloading manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)}");
 
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
 

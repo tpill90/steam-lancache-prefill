@@ -26,7 +26,7 @@ Creates a benchmark "workload" comprised of multiple apps, that will then be ben
 | --use-selected | Creates a workload file using apps previously specified with `select-apps`.  Ideal for most use cases, since it likely aligns with games that will be downloaded by real event clients. |
 | --all          | Benchmark workload will be created using all currently owned apps.  |
 | --appid        | The id of one or more apps to include in benchmark workload file.  Useful for testing a specific app, without having to modify previously selected apps.  AppIds can be found using [SteamDB](https://steamdb.info/)  |
-| --nocache      | Skips using locally cached files.  No recommended for use with `setup`, as it can dramatically increase the amount of time to build the workload file. |
+| --nocache      | Skips using locally cached manifests.  No recommended for use with `setup`, as it can dramatically increase the amount of time to build the workload file. |
 | --no-ansi      |      Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
 
 ## run

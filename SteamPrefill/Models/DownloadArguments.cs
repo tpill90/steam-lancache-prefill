@@ -8,7 +8,7 @@
         public bool Force { get; init; }
 
         /// <summary>
-        /// When set to true, will avoid saving as much data to disk as possible
+        /// When set to true, will avoid saving as much data to disk as possible.  Currently only saves manifests to disk.
         /// </summary>
         public bool NoCache { get; set; }
 
