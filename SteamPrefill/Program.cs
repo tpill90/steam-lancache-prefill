@@ -8,10 +8,7 @@ namespace SteamPrefill
             {
                 // Checking to see if the user double clicked the exe in Windows, and display a message on how to use the app
                 OperatingSystemUtils.DetectDoubleClickOnWindows("SteamPrefill");
-
-                var assembly = Assembly.GetExecutingAssembly();
-                var informationVersion = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-
+                
                 var cliArgs = ParseHiddenFlags();
                 var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
                                   "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
@@ -22,7 +19,7 @@ namespace SteamPrefill
                              .SetTitle("SteamPrefill")
                              .SetExecutableName($"SteamPrefill{(OperatingSystem.IsWindows() ? ".exe" : "")}")
                              .SetDescription(description)
-                             .SetVersion($"v{informationVersion}")
+                             .SetVersion($"v{ThisAssembly.Info.InformationalVersion}")
                              .Build()
                              .RunAsync(cliArgs);
             }
