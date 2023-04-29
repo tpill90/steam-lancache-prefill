@@ -15,9 +15,10 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+  </PropertyGroup>
 
+  <PropertyGroup Label="Trim Settings">
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
   </PropertyGroup>
@@ -51,13 +52,10 @@
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="protobuf-net" Version="3.2.16" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />
-
     <!-- TODO remove this custom built SteamKit2 dll once the SteamKit team has published the auth changes -->
-    <!--<PackageReference Include="SteamKit2" Version="2.4.1" />-->
     <Reference Include="SteamKit2">
       <HintPath>..\lib\SteamKit2.dll</HintPath>
     </Reference>
-
     <PackageReference Include="Terminal.Gui" Version="1.7.2" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
@@ -67,7 +65,7 @@
 
     <!-- Custom Spectre.Console build -->
     <Reference Include="Spectre.Console">
-      <HintPath>..\lib\Spectre.Console.dll</HintPath>
+      <HintPath>..\LancachePrefill.Common\lib\Spectre.Console.dll</HintPath>
     </Reference>
 
     <!-- Debugging Packages -->
