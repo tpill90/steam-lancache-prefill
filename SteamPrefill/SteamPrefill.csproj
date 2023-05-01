@@ -47,8 +47,6 @@
   <ItemGroup>
     <!-- External Packages -->
     <PackageReference Include="AutoMapper" Version="11.0.1" />
-    <PackageReference Include="ByteSize" Version="2.1.1" />
-    <PackageReference Include="CliFx" Version="2.3.0" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="protobuf-net" Version="3.2.16" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />
@@ -56,12 +54,10 @@
     <Reference Include="SteamKit2">
       <HintPath>..\lib\SteamKit2.dll</HintPath>
     </Reference>
-    <PackageReference Include="Terminal.Gui" Version="1.7.2" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Wcwidth" Version="1.0.0" />
 
     <!-- Custom Spectre.Console build -->
     <Reference Include="Spectre.Console">
