@@ -8,3 +8,5 @@
 | [https://steamstat.us/)](https://steamstat.us/) | Steam network status |
 | [https://partner.steamgames.com/doc/api](https://partner.steamgames.com/doc/api) | Steamworks API reference |
 | [https://partner.steamgames.com/doc/api/steam_api?#enums](https://partner.steamgames.com/doc/api/steam_api?#enums) | Steam API enums |
+| [https://github.com/Revadike/InternalSteamWebAPI/wiki](https://github.com/Revadike/InternalSteamWebAPI/wiki) | Undocumented Steam API used internally |
+| [https://github.com/SteamDatabase/SteamTracking/tree/master/API](https://github.com/SteamDatabase/SteamTracking/tree/master/API) | More undocumented Steam APIs |

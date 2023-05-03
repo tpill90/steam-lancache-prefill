@@ -10,6 +10,7 @@ Please note that this list is non-exhaustive, and likely inaccurate, as Valve ma
 
 | Cell Id | Short | City              |
 |---------|-------|-------------------|
+| 0       |       | **Use Geolocation**           |
 | 1       | ord   | Chicago           |
 | 4       | lhr   | London            |
 | 5       | fra   | Frankfurt         |

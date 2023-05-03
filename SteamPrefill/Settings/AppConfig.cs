@@ -61,7 +61,7 @@ namespace SteamPrefill.Settings
         /// <summary>
         /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
         /// </summary>
-        public static readonly string ConfigDir = Path.Combine(AppContext.BaseDirectory, "Config");
+        private static readonly string ConfigDir = Path.Combine(AppContext.BaseDirectory, "Config");
 
         #region Serialization file paths
 
@@ -78,6 +78,9 @@ namespace SteamPrefill.Settings
         /// based on whether all of the depots being downloaded are up to date.
         /// </summary>
         public static readonly string SuccessfullyDownloadedDepotsPath = Path.Combine(ConfigDir, "successfullyDownloadedDepots.json");
+
+        //TODO comment
+        public static readonly string CachedCellIdPath = Path.Combine(CacheDir, "cellId.txt");
 
         #endregion
     }

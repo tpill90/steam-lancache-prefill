@@ -12,14 +12,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solutio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteamPrefill.Test", "SteamPrefill.Test\SteamPrefill.Test.csproj", "{E0EB88EE-A218-4062-8611-06652352F375}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LancachePrefill.Common", "LancachePrefill.Common\LancachePrefill.Common.csproj", "{D983EC87-5052-4E88-8891-23EE47A5FF9A}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{964C7C38-DF8F-4D47-AFD0-30B670EFA4AB}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-and-test.yml = .github\workflows\build-and-test.yml
 		.github\workflows\deploy-documentation.yml = .github\workflows\deploy-documentation.yml
 		.github\workflows\release-publish.yml = .github\workflows\release-publish.yml
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LancachePrefill.Common", "..\lancache-prefill-common\LancachePrefill.Common.csproj", "{79A8FB85-F2CE-4548-8CF4-0805314AF6E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +35,10 @@ Global
 		{E0EB88EE-A218-4062-8611-06652352F375}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0EB88EE-A218-4062-8611-06652352F375}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0EB88EE-A218-4062-8611-06652352F375}.Release|Any CPU.Build.0 = Release|Any CPU
-		{79A8FB85-F2CE-4548-8CF4-0805314AF6E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{79A8FB85-F2CE-4548-8CF4-0805314AF6E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{79A8FB85-F2CE-4548-8CF4-0805314AF6E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{79A8FB85-F2CE-4548-8CF4-0805314AF6E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D983EC87-5052-4E88-8891-23EE47A5FF9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D983EC87-5052-4E88-8891-23EE47A5FF9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D983EC87-5052-4E88-8891-23EE47A5FF9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D983EC87-5052-4E88-8891-23EE47A5FF9A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

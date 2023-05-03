@@ -2,7 +2,7 @@
   "profiles": {
     "Prefill All": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --verbose"
+      "commandLineArgs": "prefill --all --force --verbose"
     },
     "Prefill All - No Download": {
       "commandName": "Project",
@@ -12,17 +12,13 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force --nocache --no-download --verbose"
     },
-    "Prefill Selected": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --force --no-download --verbose"
-    },
-    "Prefill Recent + Top 50": {
-      "commandName": "Project",
-      "commandLineArgs": "prefill --recent --top 50 --no-download --force --verbose"
-    },
     "Select Apps": {
       "commandName": "Project",
       "commandLineArgs": "select-apps"
+    },
+    "Prefill Selected": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --force --no-download --verbose"
     },
     "Benchmark - Setup Ids - Best Case Workload": {
       "commandName": "Project",

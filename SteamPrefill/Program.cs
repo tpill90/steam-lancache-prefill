@@ -79,6 +79,13 @@ namespace SteamPrefill
                 args.Remove("--no-download");
             }
 
+            // Adding some formatting to logging to make it more readable + clear that these flags are enabled
+            if (AppConfig.EnableSteamKitDebugLogs || AppConfig.SkipDownloads)
+            {
+                AnsiConsole.Console.WriteLine();
+                AnsiConsole.Console.Write(new Rule());
+            }
+
             return args;
         }
     }
