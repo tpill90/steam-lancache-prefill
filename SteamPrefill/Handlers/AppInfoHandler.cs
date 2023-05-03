@@ -54,9 +54,8 @@
                     }
                 }
             });
-#if DEBUG
-            _ansiConsole.LogMarkupLine($"Loaded metadata for {Magenta(appIds.Count)} apps ", timer);
-#endif
+
+            _ansiConsole.LogMarkupVerbose($"Loaded metadata for {Magenta(appIds.Count)} apps ", timer);
         }
 
         /// <summary>

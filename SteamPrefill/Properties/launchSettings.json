@@ -2,15 +2,15 @@
   "profiles": {
     "Prefill All": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --force"
+      "commandLineArgs": "prefill --all --verbose"
     },
     "Prefill All - No Cache": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --force --nocache --no-download"
+      "commandLineArgs": "prefill --all --force --nocache --no-download --verbose"
     },
     "Prefill Recent + Top 50": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --recent --top 50 --no-download --force"
+      "commandLineArgs": "prefill --recent --top 50 --no-download --force --verbose"
     },
     "Select Apps": {
       "commandName": "Project",

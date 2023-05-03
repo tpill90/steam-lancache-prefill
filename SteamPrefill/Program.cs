@@ -23,17 +23,15 @@ namespace SteamPrefill
                              .Build()
                              .RunAsync(cliArgs);
             }
-            //TODO dedupe this throughout the codebase
             catch (TimeoutException e)
             {
-                AnsiConsole.Console.MarkupLine("\n");
                 if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsernameAsync)))
                 {
-                    AnsiConsole.Console.MarkupLine(Red("Timed out while waiting for username entry"));
+                    AnsiConsole.Console.LogMarkupError("Timed out while waiting for username entry");
                 }
                 if (e.StackTrace.Contains(nameof(SpectreConsoleExtensions.ReadPasswordAsync)))
                 {
-                    AnsiConsole.Console.MarkupLine(Red("Timed out while waiting for password entry"));
+                    AnsiConsole.Console.LogMarkupError("Timed out while waiting for password entry");
                 }
                 AnsiConsole.Console.LogException(e);
             }
@@ -41,24 +39,19 @@ namespace SteamPrefill
             {
                 if (e.StackTrace.Contains(nameof(AppInfoHandler.RetrieveAppMetadataAsync)))
                 {
-                    AnsiConsole.Console.MarkupLine(Red("Unable to load latest App metadata! An unexpected error occurred! \n" +
+                    AnsiConsole.Console.LogMarkupError("Unable to load latest App metadata! An unexpected error occurred! \n" +
                                                        "This could possibly be due to transient errors with the Steam network. \n" +
-                                                       "Try again in a few minutes."));
-
-                    FileLogger.Log("Unable to load latest App metadata! An unexpected error occurred!");
-                    FileLogger.Log(e.ToString());
+                                                       "Try again in a few minutes.");
                 }
-                else
-                {
-                    AnsiConsole.Console.LogException(e);
-                }
+                AnsiConsole.Console.LogException(e);
             }
             catch (Exception e)
             {
                 AnsiConsole.Console.LogException(e);
             }
 
-            return 0;
+            // Return failed status code, since you can only get to this line if an exception was handled
+            return 1;
         }
 
         /// <summary>

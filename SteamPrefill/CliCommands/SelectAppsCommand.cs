@@ -51,39 +51,6 @@ namespace SteamPrefill.CliCommands
                     await steamManager.DownloadMultipleAppsAsync(false, false, null);
                 }
             }
-            catch (TimeoutException e)
-            {
-                ansiConsole.MarkupLine("\n");
-                if (e.StackTrace.Contains(nameof(UserAccountStore.GetUsernameAsync)))
-                {
-                    ansiConsole.MarkupLine(Red("Timed out while waiting for username entry"));
-                }
-                if (e.StackTrace.Contains(nameof(SpectreConsoleExtensions.ReadPasswordAsync)))
-                {
-                    ansiConsole.MarkupLine(Red("Timed out while waiting for password entry"));
-                }
-                ansiConsole.LogException(e);
-            }
-            catch (TaskCanceledException e)
-            {
-                if (e.StackTrace.Contains(nameof(AppInfoHandler.RetrieveAppMetadataAsync)))
-                {
-                    ansiConsole.MarkupLine(Red("Unable to load latest App metadata! An unexpected error occurred! \n" +
-                                                "This could possibly be due to transient errors with the Steam network. \n" +
-                                                "Try again in a few minutes."));
-
-                    FileLogger.Log("Unable to load latest App metadata! An unexpected error occurred!");
-                    FileLogger.Log(e.ToString());
-                }
-                else
-                {
-                    ansiConsole.LogException(e);
-                }
-            }
-            catch (Exception e)
-            {
-                ansiConsole.LogException(e);
-            }
             finally
             {
                 steamManager.Shutdown();
