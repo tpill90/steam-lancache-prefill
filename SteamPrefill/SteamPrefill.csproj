@@ -49,17 +49,19 @@
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="protobuf-net" Version="3.2.16" />
+    <PackageReference Include="SteamKit2" Version="2.5.0-Beta.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />
-    <!-- TODO remove this custom built SteamKit2 dll once the SteamKit team has published the auth changes -->
-    <Reference Include="SteamKit2">
-      <HintPath>..\lib\SteamKit2.dll</HintPath>
-    </Reference>
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <!-- Custom Spectre.Console build -->
+    <!-- Custom CliFx build, allows for top level exception handling in application code, instead of CliFx swallowing all exceptions -->
+    <Reference Include="CliFx">
+      <HintPath>..\LancachePrefill.Common\lib\CliFx.dll</HintPath>
+    </Reference>
+
+    <!-- Custom Spectre.Console build, includes changes to display transfer speed in bits -->
     <Reference Include="Spectre.Console">
       <HintPath>..\LancachePrefill.Common\lib\Spectre.Console.dll</HintPath>
     </Reference>

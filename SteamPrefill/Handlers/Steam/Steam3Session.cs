@@ -260,6 +260,8 @@ namespace SteamPrefill.Handlers.Steam
         {
             if (_disconnected)
             {
+                // Needed so message doesn't display on the same line as the prompt
+                _ansiConsole.WriteLine("");
                 _ansiConsole.LogMarkupLine("Already disconnected from Steam");
                 return;
             }
