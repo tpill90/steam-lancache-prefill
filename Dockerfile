@@ -3,10 +3,11 @@ LABEL maintainers="tpilius@gmail.com;kirbo@kirbo-designs.com"
 
 RUN \
         apt update \
-        && apt install -y --no-install-recommends \
+        && DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends \
                 ca-certificates \
                 libncursesw5 \
                 locales \
+                tzdata \
         && sed -i '/en_US.UTF-8/s/^# //' /etc/locale.gen \
         && dpkg-reconfigure --frontend=noninteractive locales \
         && update-locale LANG=en_US.UTF-8 \
