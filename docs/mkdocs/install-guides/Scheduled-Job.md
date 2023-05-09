@@ -47,7 +47,7 @@ Type=oneshot
 Nice=19
 User=# Replace with your username
 WorkingDirectory=# Set this to the directory where SteamPrefill is installed.  E.g /home/tim/Prefills
-ExecStart=# Set this to match your working directory from the line above.  E.g. /home/tim/Prefills SteamPrefill --no-ansi
+ExecStart=# Set this to match your working directory from the line above.  E.g. /home/tim/Prefills/SteamPrefill prefill --no-ansi
 
 [Install]
 WantedBy=multi-user.target
