@@ -60,15 +60,8 @@
         public bool IsFreeGame { get; set; }
 
         public int? MinutesPlayed2Weeks { get; set; }
-        public decimal? HoursPlayed2Weeks => MinutesPlayed2Weeks == null ? null : (decimal)MinutesPlayed2Weeks / 60;
 
         public List<Category> Categories { get; init; }
-
-        [UsedImplicitly]
-        public AppInfo()
-        {
-            // Parameter-less constructor for deserialization
-        }
 
         public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue)
         {
@@ -84,12 +77,12 @@
 
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {
-                // Depots should always have a ID for their name.
-                // For whatever reason Steam also includes branches + other metadata that we don't care about in here as well.
-                Depots = rootKeyValue["depots"].Children.Where(e => uint.TryParse(e.Name, out _))
-                                               .Select(e => new DepotInfo(e, appId))
-                                               .Where(e => !e.IsInvalidDepot)
-                                               .ToList();
+                // Depots should always have a numerical ID for their name. For whatever reason Steam also includes branches + other metadata
+                // that we don't care about in here, which will be filtered out as they don't have a numerical ID
+                var depotInfos = rootKeyValue["depots"].Children.Where(e => uint.TryParse(e.Name, out _))
+                                                       .Select(e => new DepotInfo(e, appId))
+                                                       .Where(e => !e.IsInvalidDepot)
+                                                       .ToList();
             }
 
             // Extended Section

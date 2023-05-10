@@ -4,9 +4,17 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --all --verbose"
     },
+    "Prefill All - No Download": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --all --force --no-download --verbose"
+    },
     "Prefill All - No Cache": {
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force --nocache --no-download --verbose"
+    },
+    "Prefill Selected": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --force --no-download --verbose"
     },
     "Prefill Recent + Top 50": {
       "commandName": "Project",
