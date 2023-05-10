@@ -45,7 +45,7 @@ namespace SteamPrefill.Test
         {
             var depotList = new List<DepotInfo>
             {
-                new DepotInfo { DepotId = 777, ManifestId = 55 }
+                new DepotInfo(new KeyValue("0"), 222) { DepotId = 777, ManifestId = 55 }
             };
 
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(new DownloadArguments(), depotList);

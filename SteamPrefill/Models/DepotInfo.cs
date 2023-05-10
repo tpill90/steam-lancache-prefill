@@ -42,14 +42,8 @@
 
         public List<OperatingSystem> SupportedOperatingSystems { get; init; } = new List<OperatingSystem>();
         public Architecture Architecture { get; init; }
-        public List<Language> Languages { get; init; } = new List<Language>();
+        public List<Language> Languages { get; init; }
         public bool? LowViolence { get; init; }
-
-        [UsedImplicitly]
-        public DepotInfo()
-        {
-            // Parameter-less constructor for deserialization
-        }
 
         public DepotInfo(KeyValue rootKey, uint appId)
         {
@@ -57,7 +51,13 @@
             Name = rootKey["name"].Value;
             _originalAppId = appId;
 
-            ManifestId = rootKey["manifests"]["public"].AsUnsignedLongNullable();
+            ManifestId = rootKey["manifests"]["public"]["gid"].AsUnsignedLongNullable();
+            // Legacy key where the manifest id was previously stored.  Not all depots have migrated to the new "gid" key, so this is still necessary.
+            if (ManifestId == null)
+            {
+                ManifestId = rootKey["manifests"]["public"].AsUnsignedLongNullable();
+            }
+
             DepotFromApp = rootKey["depotfromapp"].AsUnsignedIntNullable();
             DlcAppId = rootKey["dlcappid"].AsUnsignedIntNullable();
 
