@@ -79,7 +79,7 @@
             {
                 // Depots should always have a numerical ID for their name. For whatever reason Steam also includes branches + other metadata
                 // that we don't care about in here, which will be filtered out as they don't have a numerical ID
-                var depotInfos = rootKeyValue["depots"].Children.Where(e => uint.TryParse(e.Name, out _))
+                Depots = rootKeyValue["depots"].Children.Where(e => uint.TryParse(e.Name, out _))
                                                        .Select(e => new DepotInfo(e, appId))
                                                        .Where(e => !e.IsInvalidDepot)
                                                        .ToList();
