@@ -41,5 +41,17 @@
                 list[n] = value;
             }
         }
+
+        public static async Task<string> ReadPasswordAsync(this IAnsiConsole console, string promptText = null)
+        {
+            var promptTask = Task.Run(() =>
+            {
+                var defaultPrompt = $"Please enter your {Cyan("Steam password")}. {LightYellow("(Password won't be saved)")} : ";
+                return console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
+                                      .PromptStyle("white")
+                                      .Secret());
+            });
+            return await promptTask.WaitAsync(TimeSpan.FromSeconds(30));
+        }
     }
 }

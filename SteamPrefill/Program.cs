@@ -2,6 +2,11 @@ namespace SteamPrefill
 {
     public static class Program
     {
+        private const string Description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
+                                           "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
+                                           "\n" +
+                                           "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
+
         public static async Task<int> Main()
         {
             try
@@ -10,15 +15,11 @@ namespace SteamPrefill
                 OperatingSystemUtils.DetectDoubleClickOnWindows("SteamPrefill");
 
                 var cliArgs = ParseHiddenFlags();
-                var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
-                                  "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
-                                  "\n" +
-                                  "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
                 return await new CliApplicationBuilder()
                              .AddCommandsFromThisAssembly()
                              .SetTitle("SteamPrefill")
-                             .SetExecutableName($"SteamPrefill{(OperatingSystem.IsWindows() ? ".exe" : "")}")
-                             .SetDescription(description)
+                             .SetExecutableNamePlatformAware("SteamPrefill")
+                             .SetDescription(Description)
                              .SetVersion($"v{ThisAssembly.Info.InformationalVersion}")
                              .Build()
                              .RunAsync(cliArgs);
@@ -29,7 +30,7 @@ namespace SteamPrefill
                 {
                     AnsiConsole.Console.LogMarkupError("Timed out while waiting for username entry");
                 }
-                if (e.StackTrace.Contains(nameof(SpectreConsoleExtensions.ReadPasswordAsync)))
+                if (e.StackTrace.Contains(nameof(MiscExtensions.ReadPasswordAsync)))
                 {
                     AnsiConsole.Console.LogMarkupError("Timed out while waiting for password entry");
                 }
@@ -79,12 +80,6 @@ namespace SteamPrefill
             }
 
             return args;
-        }
-
-        //TODO move to lancacheprefill.common
-        public static class OperatingSystem
-        {
-            public static bool IsWindows() => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         }
     }
 }
