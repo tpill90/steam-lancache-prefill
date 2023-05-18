@@ -33,7 +33,7 @@ namespace SteamPrefill.Test
                     }
                 }
             };
-            var appInfoHandlerMock = new Mock<AppInfoHandler>(null, null);
+            var appInfoHandlerMock = new Mock<AppInfoHandler>(null, null, null);
             appInfoHandlerMock.Setup(e => e.GetAppInfoAsync(It.IsAny<uint>()))
                           .Returns(Task.FromResult(new AppInfo(steam3, 222, appKeyValues)));
 

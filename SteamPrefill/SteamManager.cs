@@ -12,7 +12,7 @@
         private readonly DepotHandler _depotHandler;
         private readonly AppInfoHandler _appInfoHandler;
 
-        private PrefillSummaryResult _prefillSummaryResult = new PrefillSummaryResult();
+        private readonly PrefillSummaryResult _prefillSummaryResult = new PrefillSummaryResult();
 
         public SteamManager(IAnsiConsole ansiConsole, DownloadArguments downloadArgs)
         {
@@ -27,7 +27,7 @@
 
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
-            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3);
+            _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
             _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool, downloadArgs);
         }
@@ -47,11 +47,10 @@
             await _steam3.LoginToSteamAsync();
             _steam3.WaitForLicenseCallback();
 
-#if DEBUG
             _ansiConsole.LogMarkupLine("Steam session initialization complete!", timer);
-#else
-            _ansiConsole.LogMarkupLine("Steam session initialization complete!");
-#endif
+            // White spacing + a horizontal rule to delineate that initialization has completed
+            _ansiConsole.WriteLine();
+            _ansiConsole.Write(new Rule());
 
         }
 

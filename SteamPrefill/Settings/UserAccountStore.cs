@@ -90,6 +90,7 @@ namespace SteamPrefill.Settings
 
         #region Serialization
 
+        //TODO this adds about 100ms to each run
         public static UserAccountStore LoadFromFile()
         {
             if (!File.Exists(AppConfig.AccountSettingsStorePath))

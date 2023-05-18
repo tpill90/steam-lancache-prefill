@@ -1,7 +1,33 @@
+using SteamPrefill.Extensions;
+
 namespace SteamPrefill.Handlers.Steam
 {
     public sealed class Steam3Session : IDisposable
     {
+        /// <summary>
+        /// CellId represents the region that the user is geographically located in, and determines which Connection Managers and CDNs
+        /// will be used by SteamPrefill.
+        /// 
+        /// Typically, Steam will automatically select the correct CellId using geolocation.
+        /// However, the api endpoint used (ISteamDirectory/GetCMList) will unpredictably return non-local servers due to an issue with Valve's
+        /// api not handling trailing slashes correctly.
+        ///
+        /// For example calling ISteamDirectory/GetCMList/v1?cellid=0 will always return the correct regional servers, however adding a trailing slash
+        /// to the end of the url (ex. /v1/?) will cause Steam to return non-local servers.
+        ///
+        /// Upon login to the Steam network certain metadata about the session will be received, this includes the correct CellId which we will save
+        /// and use for future logins.  Using the correct CellId will guarantee significantly faster login and app metadata retrieval times.
+        ///
+        /// See https://tpill90.github.io/steam-lancache-prefill/steam-docs/CDN-Regions/ for a list of known CDNs
+        /// </summary>
+        private uint CellId
+        {
+            get => File.Exists(AppConfig.CachedCellIdPath) ? uint.Parse(File.ReadAllText(AppConfig.CachedCellIdPath)) : 0;
+            set => File.WriteAllText(AppConfig.CachedCellIdPath, value.ToString());
+        }
+
+        #region Member fields
+
         // Steam services
         private readonly SteamClient _steamClient;
         private readonly SteamUser _steamUser;
@@ -19,11 +45,14 @@ namespace SteamPrefill.Handlers.Steam
 
         public SteamID _steamId;
 
+        #endregion
+
         public Steam3Session(IAnsiConsole ansiConsole)
         {
             _ansiConsole = ansiConsole;
 
-            _steamClient = new SteamClient();
+            _steamClient = new SteamClient(SteamConfiguration.Create(e => e.WithCellID(CellId)
+                                                                                                 .WithConnectionTimeout(AppConfig.SteamKitRequestTimeout)));
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             SteamContent = _steamClient.GetHandler<SteamContent>();
@@ -45,7 +74,11 @@ namespace SteamPrefill.Handlers.Steam
                 _disconnected = true;
             });
 
-            _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn => _loggedOnCallbackResult = loggedOn);
+            _callbackManager.Subscribe<SteamUser.LoggedOnCallback>(loggedOn =>
+            {
+                _loggedOnCallbackResult = loggedOn;
+                CellId = loggedOn.CellID;
+            });
             _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
 
             CdnClient = new Client(_steamClient);
@@ -88,6 +121,8 @@ namespace SteamPrefill.Handlers.Steam
                     throw new SteamLoginException("Unable to login to Steam!  Try again in a few moments...");
                 }
             }
+
+            await _steamClient.CurrentEndPoint.PrintGeolocationInfoAsync();
         }
 
         private async Task GetAccessTokenAsync()
@@ -143,6 +178,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="SteamConnectionException">Throws if unable to connect to Steam</exception>
         private void ConnectToSteam()
         {
+            _ansiConsole.LogMarkupVerbose($"Connecting with CellId: {LightYellow(CellId)}");
             var timeoutAfter = DateTime.Now.AddSeconds(30);
 
             // Busy waiting until the client has a successful connection established
