@@ -4,13 +4,20 @@
     {
         public static async Task PrintGeolocationInfoAsync(this EndPoint endpoint)
         {
-            var ipAddress = ((IPEndPoint)endpoint).Address;
+            try
+            {
+                var ipAddress = ((IPEndPoint)endpoint).Address;
 
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetStringAsync(new Uri($"http://ip-api.com/json/{ipAddress}"));
-            var geolocationInfo = JsonSerializer.Deserialize(response, SerializationContext.Default.GeolocationDetails);
+                using var httpClient = new HttpClient();
+                var response = await httpClient.GetStringAsync(new Uri($"http://ip-api.com/json/{ipAddress}"));
+                var geolocationInfo = JsonSerializer.Deserialize(response, SerializationContext.Default.GeolocationDetails);
 
-            AnsiConsole.Console.LogMarkupVerbose($"Using CM {LightYellow(ipAddress)} - {geolocationInfo.Country} - {geolocationInfo.City}");
+                AnsiConsole.Console.LogMarkupVerbose($"Using CM {LightYellow(ipAddress)} - {geolocationInfo.Country} - {geolocationInfo.City}");
+            }
+            catch
+            {
+                AnsiConsole.Console.LogMarkupError("Unable to determine CM geolocation info");
+            }
         }
     }
 
