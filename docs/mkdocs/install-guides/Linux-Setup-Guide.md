@@ -28,7 +28,7 @@ Once the install command has finished successfully, we can move on to installing
 
 We will be using a script to assist with installing **SteamPrefill** for the first time.  This will be helpful as it will save us from running several manual steps.
 
-To begin, open up a new terminal session.  We will want to create a new directory to install **SteamPrefill** into.  For example, to create the directory and to move into it, run"
+To begin, open up a new terminal session.  We will want to create a new directory to install **SteamPrefill** into.  For example, to create the directory and to move into it, run
 
 ``` bash
 mkdir SteamPrefill
@@ -37,7 +37,8 @@ cd SteamPrefill/
 
 After running the above commands successfully, you should see similar output in your terminal :
 
-![create](../images/install-guides/Create-SteamPrefill-Directory.png){: style="width:430px"}
+<div data-cli-player="../casts/make-new-directory.cast" data-rows=4></div>
+<br>
 
 We can now move on to downloading the [install script](https://github.com/tpill90/steam-lancache-prefill/blob/master/scripts/update.sh) from the repo, and running it to install **SteamPrefill** 
 
