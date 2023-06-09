@@ -34,7 +34,7 @@ fi
 echo -e " Found latest version : ${Cyan} ${LATEST_TAG} ${NC}"
 
 # Checking to see if SteamPrefill is already up to date
-if [ -f /SteamPrefill ]; then
+if [ -f ./SteamPrefill ]; then
     CURRENT_VERSION=$(./SteamPrefill --version)
 
     if [ "${CURRENT_VERSION}" == "v${LATEST_TAG}" ]; then
