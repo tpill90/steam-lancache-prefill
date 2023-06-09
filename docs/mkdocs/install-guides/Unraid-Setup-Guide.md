@@ -1,18 +1,18 @@
 # Unraid Setup Guide
 
-Prior to installing SteamPrefill via docker you should ensure you have a working Lancache caching and Lancache DNS server installed on your system.
+Prior to installing {{prefillName}} via docker you should ensure you have a working Lancache caching and Lancache DNS server installed on your system.
 
 !!! note
     These steps assume that you are running Lancache caching server as a docker container on a custom network configured for your own subnet.
     
 ![Unraid Lancache Setup](../images/install-guides/unraid-docker-typical-setup.png){: style="width:530px"}
 
-## Installing SteamPrefill Docker Image
+## Installing {{prefillName}} Docker Image
 
-Again from your Unraid terminal you will download and run the **SteamPrefill** Docker image.
+Again from your Unraid terminal you will download and run the **{{prefillName}}** Docker image.
 
 !!! note
-    ```--add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX``` is required in order to tell the container the IP Address of your Lancache server running on your custom network.  If not specified, **SteamPrefill** will be unable to locate the Lancache server, and will be unable to prefill.
+    ```--add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX``` is required in order to tell the container the IP Address of your Lancache server running on your custom network.  If not specified, **{{prefillName}}** will be unable to locate the Lancache server, and will be unable to prefill.
     
 Next you will run the following command to setup the container, and start configuring which apps to prefill.
 
@@ -20,12 +20,12 @@ Next you will run the following command to setup the container, and start config
 docker run -it --rm \
   --net=br0 \
   --add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX  \
-  --volume /mnt/user/appdata/SteamPrefill:/Config \
+  --volume /mnt/user/appdata/{{prefillName}}:/Config \
   tpill90/steam-lancache-prefill:latest \
   select-apps
 ```
 
-To get familiarized with how to use **SteamPrefill**, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide.
+To get familiarized with how to use **{{prefillName}}**, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide.
 
 ## Setting up a schedule
 
@@ -44,11 +44,11 @@ Adding the following command will configure the scheduled job to run the `prefil
 
 ```bash
 #!/bin/bash
-docker rm -f SteamPrefill &>/dev/null && echo 'Removed old container from previous run';
-docker run --rm --name SteamPrefill \
+docker rm -f {{prefillName}} &>/dev/null && echo 'Removed old container from previous run';
+docker run --rm --name {{prefillName}} \
   --net=br0 \
   --add-host=lancache.steamcontent.com:XXX.XXX.XXX.XXX  \
-  --volume /mnt/user/appdata/SteamPrefill:/Config \
+  --volume /mnt/user/appdata/{{prefillName}}:/Config \
   tpill90/steam-lancache-prefill:latest \
   prefill
 ```
@@ -64,10 +64,10 @@ Some examples of cron expressions:
 
 If the above examples don't cover your use case, [crontab.guru](https://crontab.guru/) is an online cron expression editor that can interactively edit cron expressions, and explain what they mean.
 
-Finally after entering a cron expression, click *APPLY* to save your cron expression.  You should now be all set to have **SteamPrefill** run on a schedule!
+Finally after entering a cron expression, click *APPLY* to save your cron expression.  You should now be all set to have **{{prefillName}}** run on a schedule!
 
 ## Next Steps
 
-If you are new to **SteamPrefill** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide. 
+If you are new to **{{prefillName}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide. 
 
 Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/steam-lancache-prefill#frequently-asked-questions).  

@@ -10,6 +10,10 @@ extra_css:
 extra_javascript:
   - assets/external/asciinema-player.min.js
   - assets/extra.js
+# Defines global variables that can be used by templates
+extra:
+  prefillName: SteamPrefill
+  gamingServiceName: Steam
 
 theme:
   name: readthedocs
@@ -48,6 +52,9 @@ plugins:
         gr:
           name: Ελληνικά
           build: true
+  # Allows global variables 
+  - macros
+  
   # https://github.com/oprypin/mkdocs-section-index
   #TODO look into this in the future - section-index
 
