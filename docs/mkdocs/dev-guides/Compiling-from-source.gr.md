@@ -23,7 +23,7 @@ Remove-Item "C:\Users\$Env:USERNAME\AppData\Roaming\NuGet\nuget.config"
 ## Κλωνοποίηση του repo και των submodules
 
 ```powershell
-git clone --recurse-submodules -j8 https://github.com/tpill90/steam-lancache-prefill.git
+git clone --recurse-submodules -j8 https://github.com/tpill90/{{repo_name}}.git
 ```
 Αν είναι ήδη κλωνοποιημένο το repository αλλά χωρίς τα submodules, τρέξε αυτήν την εντολή για να προσθέσεις τα submodules:
 ```
@@ -41,14 +41,14 @@ dotnet build
 ## Τρέχοντας το έργο
 
 !!! σημείωση
-    Σε όλα τα βήματα υποθέτω ότι είσαι στον φάκελο `/{{prefillName}}`.  Όλες οι εντολές υποθέτουν ότι θα βρουν το `SteamPrefill.csproj` στον φάκελο που τρέχουμε τις εντολές.
+    Σε όλα τα βήματα υποθέτω ότι είσαι στον φάκελο `/{{prefillName}}`.  Όλες οι εντολές υποθέτουν ότι θα βρουν το `{{prefillName}}.csproj` στον φάκελο που τρέχουμε τις εντολές.
 
 Τυπικά, για την ανάπτυξη τρέχουμε το έργο σε περιβάλλον `Debug` .  Σε αυτό το περιβάλλον, θα τρέξουν όλα αρκετά πιο αργά από ότι το τελικό `Release`, όμως θα μας δόσει πολύτιμες πληροφορίες για το πως έγινε το compile.  Τρέχοντας λοιπόν την παρακάτω εντολή θα εντοπιστούν και θα γίνουν compile οι όποιες αλλαγές, μετά τρέχουμε το έργο:
 ```powershell
 dotnet run
 ```
 
-Είναι ανάλογο με το από πάνω αλλά χωρίς παραμέτρους `./SteamPrefill.exe`. Οπότε τρέχουμε αυτό αν θέλουμε να βάλουμε παραμέτρους:
+Είναι ανάλογο με το από πάνω αλλά χωρίς παραμέτρους `./{{prefillName}}.exe`. Οπότε τρέχουμε αυτό αν θέλουμε να βάλουμε παραμέτρους:
 ```powershell
 dotnet run -- prefill --all
 ```
@@ -67,4 +67,4 @@ dotnet test
 
 ## Από που αρχίζω;
 
-Ένα καλό μέρος για να αρχίσουμε το έργο είναι το [CliCommands folder](https://github.com/tpill90/steam-lancache-prefill/tree/master/SteamPrefill/CliCommands).  Αυτός ο φάκελος περιέχει όλες τις εντολές που μπορούμε να τρέξουμε, όπως `prefill` ή `benchmark`.  
+Ένα καλό μέρος για να αρχίσουμε το έργο είναι το [CliCommands folder](https://github.com/tpill90/{{repo_name}}/tree/master/{{prefillName}}/CliCommands).  Αυτός ο φάκελος περιέχει όλες τις εντολές που μπορούμε να τρέξουμε, όπως `prefill` ή `select-apps`.  

@@ -5,7 +5,7 @@
 
 ## Overview
 
-Automatically fills a Lancache with games from {{ gamingServiceName }} so that subsequent downloads will be served from the Lancache, improving speeds and reducing load on your internet connection.
+Automatically fills a Lancache with games from {{ gaming_service_name }} so that subsequent downloads will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
 Keeps track of which games have been previously downloaded, and will only download games that have updates.  
 

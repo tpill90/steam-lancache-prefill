@@ -40,11 +40,11 @@ After running the above commands successfully, you should see similar output in 
 <div data-cli-player="../casts/make-new-directory.cast" data-rows=4></div>
 <br>
 
-We can now move on to downloading the [install script](https://github.com/tpill90/steam-lancache-prefill/blob/master/scripts/update.sh) from the repo, and running it to install **{{prefillName}}** 
+We can now move on to downloading the [install script](https://github.com/tpill90/{{repo_name}}/blob/master/scripts/update.sh) from the repo, and running it to install **{{prefillName}}** 
 
 ```bash
 # Downloads the install script
-curl -o update.sh --location "https://raw.githubusercontent.com/tpill90/steam-lancache-prefill/master/scripts/update.sh"
+curl -o update.sh --location "https://raw.githubusercontent.com/tpill90/{{repo_name}}/master/scripts/update.sh"
 
 # Allows the install script to be executed
 chmod +x update.sh
@@ -66,6 +66,6 @@ If everything worked as expected, you should see output similar to below
 
 ## Next Steps
 
-If you are new to **{{prefillName}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide. 
+If you are new to **{{prefillName}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide. 
 
-Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/steam-lancache-prefill#frequently-asked-questions).  
+Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/{{repo_name}}#frequently-asked-questions).  

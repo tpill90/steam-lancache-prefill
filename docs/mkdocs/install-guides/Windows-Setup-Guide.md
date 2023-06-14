@@ -2,7 +2,7 @@
 
 ## Installing {{prefillName}}
 
-1.  Navigate to the [Releases](https://github.com/tpill90/steam-lancache-prefill/releases) page on Github.
+1.  Navigate to the [Releases](https://github.com/tpill90/{{repo_name}}/releases) page on Github.
 2.  Download the latest version for Windows.  The filename should look like `{{prefillName}}-X.Y.Z-win-x64.zip`.
 3.  Unzip to a directory of your choice.  This can be anywhere on your system.
 
@@ -30,6 +30,6 @@ if(!(gc $profile).Contains("OutputEncoding"))
 
 ## Next Steps
 
-If you are new to **{{prefillName}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/steam-lancache-prefill#getting-started) guide. 
+If you are new to **{{prefillName}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide. 
 
-Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/steam-lancache-prefill#frequently-asked-questions).  
+Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/{{repo_name}}#frequently-asked-questions).  

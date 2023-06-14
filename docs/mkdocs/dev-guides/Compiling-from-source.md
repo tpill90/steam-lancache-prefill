@@ -23,7 +23,7 @@ Remove-Item "C:\Users\$Env:USERNAME\AppData\Roaming\NuGet\nuget.config"
 ## Cloning the repo and submodules
 
 ```powershell
-git clone --recurse-submodules -j8 https://github.com/tpill90/steam-lancache-prefill.git
+git clone --recurse-submodules -j8 https://github.com/tpill90/{{repo_name}}.git
 ```
 If you've already cloned the repository without the submodules, use this command to include the submodules:
 ```
@@ -67,4 +67,4 @@ dotnet test
 
 ## Where should I get started?
 
-A good place to start poking around the project would be the [CliCommands folder](https://github.com/tpill90/steam-lancache-prefill/tree/master/SteamPrefill/CliCommands).  This folder contains the implementations for each of the individual commands that can be run, such as `prefill` or `benchmark`.  
+A good place to start poking around the project would be the [CliCommands folder](https://github.com/tpill90/{{repo_name}}/tree/master/{{prefillName}}/CliCommands).  This folder contains the implementations for each of the individual commands that can be run, such as `prefill` or `select-apps`.  

@@ -2,7 +2,7 @@
 title: Welcome
 ---
 
-**{{ prefillName }}** is a tool used to automate filling a Lancache with games from {{gamingServiceName}}, so that subsequent downloads for the same content will be served from the Lancache, improving speeds and reducing load on your internet connection.
+**{{ prefillName }}** is a tool used to automate filling a Lancache with games from {{gaming_service_name}}, so that subsequent downloads for the same content will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
 **Getting started?**
 
