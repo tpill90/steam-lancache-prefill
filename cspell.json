@@ -3,7 +3,10 @@
     "language": "en",
     "words": [
         "Asus",
+        "Cascadia",
         "codehilite",
+        "endregion",
+        "Fira",
         "lancache",
         "Linksys",
         "mkdocs",
@@ -11,7 +14,8 @@
         "nocache",
         "redownload",
         "steamprefill",
-        "tpill"
+        "tpill",
+        "viewbox"
     ],
     "flagWords": [
         "hte"
