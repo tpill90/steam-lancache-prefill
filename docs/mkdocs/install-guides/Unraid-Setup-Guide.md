@@ -5,7 +5,7 @@ Prior to installing {{prefillName}} via docker you should ensure you have a work
 !!! note
     These steps assume that you are running Lancache caching server as a docker container on a custom network configured for your own subnet.
     
-![Unraid Lancache Setup](../images/unraid-docker-typical-setup.png){: style="width:530px"}
+![Unraid Lancache Setup](images/unraid-docker-typical-setup.png){: style="width:530px"}
 
 ## Installing {{prefillName}} Docker Image
 
@@ -31,10 +31,10 @@ To get familiarized with how to use **{{prefillName}}**, see the [Getting Starte
 
 The [User Scripts Community App](https://forums.unraid.net/topic/48286-plugin-ca-user-scripts/) can be used to create and configure custom scheduled jobs on Unraid.  To begin, ensure that the app is installed from Unraid's *App* tab, if it isn't already installed.
 
-![Unraid Community Apps](../images/unraid-userscript-community-app.png){: style="height:300px"}
+![Unraid Community Apps](images/unraid-userscript-community-app.png){: style="height:300px"}
 
 After installing **User Scripts**, click Unraid's *Plugins* tab, then the **User Scripts** icon to open up the settings for scheduled jobs.
-![User Scripts Settings button](../images/unraid-userscripts-button.png){: style="width:830px"}
+![User Scripts Settings button](images/unraid-userscripts-button.png){: style="width:830px"}
 
 Next, add a new script by clicking *ADD NEW SCRIPT*, and give it the name `{{prefillName}}`.  After it has been created, click the orange gear next to `{{prefillName}}`, and select *EDIT SCRIPT*.
 Adding the following command will configure the scheduled job to run the `prefill` command every time it is configured.  Be sure sure to change `XXX.XXX.XXX.XXX` to your Lancache server IP.
