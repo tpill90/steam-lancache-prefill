@@ -9,6 +9,9 @@ extra_css:
   - assets/extra.css
 extra_javascript:
   - assets/external/asciinema-player.min.js
+  - assets/external/clipboard.min.js
+  - assets/external/popper.min.js
+  - assets/external/tippy-bundle.umd.min.js
   - assets/extra.js
 # Defines global variables that can be used by templates
 # TODO finish doing the variable substituion for the remainder of the docs.  Still have some steam specific things left in shared docs
