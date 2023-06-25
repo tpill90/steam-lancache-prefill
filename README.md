@@ -10,7 +10,7 @@
 
 Automatically fills a [Lancache](https://lancache.net/) with games from Steam, so that subsequent downloads for the same content will be served from the Lancache, improving speeds and reducing load on your internet connection.
 
-<img src="docs/img/Overview.png" width="730" alt="Overview">
+<img src="docs/img/svg/overview.svg" alt="Overview">
 
 # Features
 * Select apps to prefill through an interactive menu.  
@@ -65,7 +65,7 @@ Prior to prefilling for the first time, you will have to decide which apps shoul
 
 Once logged into Steam, all of your currently owned apps will be displayed for selection.  Navigating using the arrow keys, select any apps that you are interested in prefilling with **space**.  Once you are satisfied with your selections, save them with **enter**.
 
-<img src="docs/img/Interactive-App-Selection.png" height="350" alt="Interactive app selection">
+<img src="docs/img/svg/Interactive-App-Selection.svg" alt="Interactive app selection">
 
 These selections will be saved permanently, and can be freely updated at any time by simply rerunning `select-apps` again at any time.
 
@@ -78,21 +78,21 @@ Now that a prefill app list has been created, we can now move onto our initial p
 
 The `prefill` command will automatically pickup the prefill app list, and begin downloading each app.  During the initial run, it is likely that the Lancache is empty, so download speeds should be expected to be around your internet line speed (in the below example, a 300mbit/s connection was used).  Once the prefill has completed, the Lancache should be fully ready to serve clients cached data.
 
-<img src="docs/img/Initial-Prefill.png" width="720" alt="Initial Prefill">
+<img src="docs/img/svg/Initial-Prefill.svg" alt="Initial Prefill">
 
 ## Updating previously prefilled apps
 
 Updating any previously prefilled apps can be done by simply re-running the `prefill` command, which will use same prefill app list as before.
 
-**SteamPrefill** keeps track of which version of each app was previously prefilled, and will only re-download if there is a newer version of the app available.  Any apps that are currently up to date, will simply be skipped.
+**SteamPrefill** keeps track of which version of each app was previously prefilled, and will only re-download if there is a newer version of the app available.  Any apps that are currently up to date, will simply be skipped.  The number of apps already up to date will be displayed in the end of run summary table:
 
-<img src="docs/img/Prefill-Up-To-Date.png" width="720" alt="Prefilled app up to date">
+<img src="docs/img/svg/Prefill-Up-To-Date.svg" alt="Prefilled app up to date">
 
 
 However, if there is a newer version of an app that is available, then **SteamPrefill** will re-download the app.  Due to how Lancache works, this subsequent run should complete much faster than the initial prefill (example below used a 10gbit connection).
-Any data that was previously downloaded, will be retrieved from the Lancache, while any new data from the update will be retrieved from the internet.
+ Any data that was previously downloaded, will be retrieved from the Lancache, while any new data from the update will be retrieved from the internet.  Any apps that have been updated will be counted towards the "Updated" column in the end of run summary.
 
-<img src="docs/img/Prefill-New-Version-Available.png" width="720" alt="Prefill run when app has an update">
+<img src="docs/img/svg/Prefill-New-Version-Available.svg" alt="Prefill run when app has an update">
 
 # Frequently Asked Questions
 
@@ -108,16 +108,16 @@ You certainly can!  All you need to do is download **SteamPrefill** onto the ser
 
 If everything works as expected, you should see a message saying it found the server at `127.0.0.1`
 
-<img src="docs/img/AutoDns-Server.png" width="580" alt="Prefill running on Lancache Server">
+<img src="docs/img/svg/AutoDns-Server.svg" alt="Prefill running on Lancache Server">
 
 Running from a Docker container on the Lancache server is also supported!  You should instead see a message saying the server was found at `172.17.0.1`
 
-<img src="docs/img/AutoDns-Docker.png" width="580" alt="Prefill running on Lancache Server in Docker">
+<img src="docs/img/svg/AutoDns-Docker.svg" alt="Prefill running on Lancache Server in Docker">
 
 Running on the Lancache server itself can give you some advantages over running **SteamPrefill** on a client machine, primarily the speed at which you can prefill apps.  
 Since there is no network transfer happening, the `prefill` should only be limited by disk I/O and CPU throughput.  
 For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force` on previously cached game yields the following performance 
-<img src="docs/img/AutoDns-ServerPerf.png" width="830" alt="Prefill running on Lancache Server in Docker">
+<img src="docs/img/svg/AutoDns-ServerPerf.svg" alt="Prefill running on Lancache Server in Docker">
 
 ## Can SteamPrefill be run on a schedule?
 
@@ -158,7 +158,7 @@ While it would certainly be helpful (and cheaper!) to prefill apps that you don'
 # Updating
 **SteamPrefill** will automatically check for updates, and notify you when an update is available :
 
-<img src="docs/img/UpdateAvailable.png" width="675" alt="Update available message">
+<img src="docs/img/svg/app-update-available.svg" alt="Update available message">
 
 
 ### Automatically updating
@@ -186,5 +186,3 @@ You can also find us at the [**LanCache.NET** Discord](https://discord.com/invit
 
 # Acknowledgements
 - [@dlrudie](https://github.com/dlrudie) for all your help with debugging and testing!
-
-

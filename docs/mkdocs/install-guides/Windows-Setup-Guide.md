@@ -10,7 +10,7 @@
 
 Configuring your terminal to use Unicode will result in a much nicer experience with **{{prefillName}}**, for much nicer looking UI output.
 
-![UTF8 Comparison](../images/install-guides/ConsoleWithUtf8.png){: style="width:730px"}
+![UTF8 Comparison](../images/ConsoleWithUtf8.png){: style="width:730px"}
 
 As the default console in Windows does not support UTF8, you should instead consider installing **Windows Terminal** from the [Microsoft App Store](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701), or [Chocolatey](https://community.chocolatey.org/packages/microsoft-windows-terminal).
 
