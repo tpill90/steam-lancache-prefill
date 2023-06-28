@@ -18,13 +18,19 @@ namespace SteamPrefill.CliCommands
             // Property must be set to false in order to disable ansi escape sequences
             ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
-            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
+            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments() { Force = true });
             try
             {
                 await steamManager.InitializeAsync();
                 var tuiAppModels = await BuildTuiAppModelsAsync(steamManager);
 
-                Application.UseSystemConsole = true;
+                // Using System.Console is required when the shell is running in "xterm" mode, otherwise colors won't display correctly.
+                // Only want to enable it for "xterm" as it can prevent being able to ctrl+c the app on Linux
+                // See : https://github.com/tpill90/steam-lancache-prefill/issues/176
+                if (Environment.GetEnvironmentVariable("ENV") == "xterm")
+                {
+                    Application.UseSystemConsole = true;
+                }
                 Application.Init();
                 using var tui2 = new SelectAppsTui(tuiAppModels);
                 Key userKeyPress = tui2.Run();
