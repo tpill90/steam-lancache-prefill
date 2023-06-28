@@ -18,7 +18,7 @@
     },
     "Prefill Selected": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --force --no-download --verbose"
+      "commandLineArgs": "prefill --force --verbose"
     },
     "Benchmark - Setup Ids - Best Case Workload": {
       "commandName": "Project",
