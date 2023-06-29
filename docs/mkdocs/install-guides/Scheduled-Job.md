@@ -13,7 +13,7 @@ You should create a new file named `/etc/systemd/system/{{prefillName.lower()}}.
 ```ini
 [Unit]
 Description={{prefillName}} run daily
-Requires={{prefillName}}.service
+Requires={{prefillName.lower()}}.service
 
 [Timer]
 # Runs every day at 4am (local time)
