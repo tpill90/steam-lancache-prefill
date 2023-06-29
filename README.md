@@ -13,11 +13,11 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 <img src="docs/img/svg/overview.svg" alt="Overview">
 
 # Features
-* Select apps to prefill through an interactive menu.  
+* Selecting which apps to prefill can be done through an interactive menu.  
 * Supports login with Steam Guard, and Steam Guard Mobile Authenticator
 * No installation required! A completely self-contained, portable application.
 * Multi-platform support (Windows, Linux, MacOS, Arm64, Docker, Unraid)
-* High-performance!  Downloads are significantly faster than using Steam, and can easily reach 10gbit/s or more!
+* High-performance! Downloads are significantly faster than using Steam.  Downloads can scale all the way up to 100gbit/s!
 * Game downloads write no data to disk, so there is no need to have enough free space available.  This also means no unnecessary wear-and-tear to SSDs!
 * Completely implemented from scratch, has no dependency on `SteamCMD`!
 * No Steam API key required!  
@@ -30,24 +30,18 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 - [Updating](#updating)
 - [Need Help?](#need-help)
 
+</br>
+
 # Initial Setup
 
 **SteamPrefill** is flexible and portable, and supports multiple platforms and configurations.  It can be run on directly on the Lancache server itself,  or on your gaming machine as an alternative Steam client.  You should decide which one works better for your use case.
 
 Detailed setup guides are available for the following platforms:
 
-<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Linux-Setup-Guide/">
-    <img src="docs/img/platforms/linux.png" height="80px" title="Linux" alt="Linux" />
-</a> &nbsp; &nbsp; &nbsp;
-<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide/">
-    <img src="docs/img/platforms/docker.webp" height="80px" title="Docker" alt="Docker" />
-</a> &nbsp; &nbsp; &nbsp;
-<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Unraid-Setup-Guide/">
-    <img src="docs/img/platforms/unraid.png" height="80px" title="unRAID" alt="unRAID" />
-</a> &nbsp; &nbsp; &nbsp;
-<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Windows-Setup-Guide/">
-    <img src="docs/img/platforms/windows.png" height="60px" title="Windows" alt="Windows" />
-</a>
+[![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black&label=)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Linux-Setup-Guide)&nbsp;&nbsp;
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide)&nbsp;&nbsp;
+[![Unraid](https://img.shields.io/badge/unraid-%23F15A2C.svg?style=for-the-badge&logo=unraid&logoColor=white)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Unraid-Setup-Guide)&nbsp;&nbsp;
+[![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Windows-Setup-Guide)
 
 </br>
      
