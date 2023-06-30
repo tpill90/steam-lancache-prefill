@@ -37,11 +37,21 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 Detailed setup guides are available for the following platforms:
 
-[![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black&label=)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Linux-Setup-Guide)&nbsp;&nbsp;
-[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide)&nbsp;&nbsp;
-[![Unraid](https://img.shields.io/badge/unraid-%23F15A2C.svg?style=for-the-badge&logo=unraid&logoColor=white)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Unraid-Setup-Guide)&nbsp;&nbsp;
-[![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://tpill90.github.io/steam-lancache-prefill/install-guides/Windows-Setup-Guide)
-     
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Linux-Setup-Guide">
+    <img src="/docs/img/badges/linux-setup-badge.svg" height="32px" title="Linux" alt="Linux" />
+</a> &nbsp; 
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Docker-Setup-Guide">
+    <img src="/docs/img/badges/docker-setup-badge.svg" height="32px" title="Docker" alt="Docker" />
+</a> &nbsp; 
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Unraid-Setup-Guide">
+    <img src="/docs/img/badges/unraid-setup-badge.svg" height="32px" title="unRAID" alt="unRAID" />
+</a> &nbsp; 
+<a target="_blank" href="https://tpill90.github.io/steam-lancache-prefill/install-guides/Windows-Setup-Guide">
+    <img src="/docs/img/badges/windows-setup-badge.svg" height="32px" title="Windows" alt="Windows" />
+</a>
+
+<br/>
+
 # Getting Started
 
 ## Selecting what to prefill
