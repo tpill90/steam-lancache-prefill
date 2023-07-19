@@ -4,7 +4,7 @@
 Intended for use in identifying potential bottlenecks both server side (usually disk IO), as well as client side.
 
 <!-- TODO don't like this line -->
-`Benchmark` uses the same download logic as `prefill`, however it offers the following instead:
+`benchmark` uses the same download logic as `prefill`, however it offers the following instead:
 
 <!-- TODO touch this up -->
 - Portable, no need to login to Steam in order to start download.

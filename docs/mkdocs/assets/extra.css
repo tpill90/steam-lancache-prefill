@@ -56,7 +56,7 @@ code {
 
 /* #region Copy to clipboard */
 
-.clipboard {
+.clipboardContainer {
     position: relative;
     display: block;
     float: right;

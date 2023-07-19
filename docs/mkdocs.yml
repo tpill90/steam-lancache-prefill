@@ -13,6 +13,7 @@ extra_javascript:
   - assets/external/popper.min.js
   - assets/external/tippy-bundle.umd.min.js
   - assets/extra.js
+  
 # Defines global variables that can be used by templates
 # TODO finish doing the variable substituion for the remainder of the docs.  Still have some steam specific things left in shared docs
 extra:
@@ -46,7 +47,6 @@ plugins:
   # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
   - awesome-pages:
       strict: true
-      
   # https://github.com/ultrabug/mkdocs-static-i18n
   # Icons taken from - https://github.com/lipis/flag-icons
   - i18n:
@@ -61,9 +61,6 @@ plugins:
           build: true
   # Allows global variables 
   - macros
-  
-  # https://github.com/oprypin/mkdocs-section-index
-  #TODO look into this in the future - section-index
 
 nav:
   - Welcome: index.md
