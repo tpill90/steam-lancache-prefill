@@ -8,6 +8,6 @@ env:
 
 jobs:
   build-test:
-    uses: tpill90/lancache-prefill-common/.github/workflows/build-and-test.yml@main
+    uses: tpill90/lancache-prefill-common/.github/workflows/build-and-test-template.yml@main
     with:
       PROJECT_NAME: SteamPrefill

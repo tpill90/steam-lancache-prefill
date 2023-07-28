@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solutio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteamPrefill.Test", "SteamPrefill.Test\SteamPrefill.Test.csproj", "{E0EB88EE-A218-4062-8611-06652352F375}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LancachePrefill.Common", "LancachePrefill.Common\LancachePrefill.Common.csproj", "{D983EC87-5052-4E88-8891-23EE47A5FF9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LancachePrefill.Common", "LancachePrefill.Common\dotnet\LancachePrefill.Common.csproj", "{D983EC87-5052-4E88-8891-23EE47A5FF9A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{964C7C38-DF8F-4D47-AFD0-30B670EFA4AB}"
 	ProjectSection(SolutionItems) = preProject
