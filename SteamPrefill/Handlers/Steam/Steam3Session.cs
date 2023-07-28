@@ -1,5 +1,3 @@
-using SteamPrefill.Extensions;
-
 namespace SteamPrefill.Handlers.Steam
 {
     public sealed class Steam3Session : IDisposable
