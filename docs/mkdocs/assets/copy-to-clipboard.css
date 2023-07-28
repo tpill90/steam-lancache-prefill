@@ -1,0 +1,19 @@
+.hljs {
+    min-height: 3em;
+    position: relative;
+}
+
+/* TODO figure out why actual wiki code highlighting colors have changed */
+
+.clipboardContainer {
+    position: absolute;
+    top: .5em;
+    right: .5em;
+    z-index: 1;
+    display: inline-block;
+}
+
+.btn-clipboard, .btn-clipboard:active {
+    display: block;
+    padding: .25rem .5rem;
+}

@@ -1,16 +1,21 @@
 # Compiling From Source
 
+<!-- TODO go through each page and add ----- to sections to make it easier to read -->
+
 ## Installing Prerequisites
 
+<!-- TODO add git here -->
 Only the .NET 6 SDK is required to compile the project.  This can be installed through one of the following methods
 
+
 ### Using Chocolatey
+<!-- TODO explain what choco is and link to the install guide -->
+
 ```powershell
 choco install dotnet-6.0-sdk
 ```
 
-### Manually
-The latest .NET 6.0 SDK can be found here  [.NET 6.0 SDK - Windows x64 Installer](https://download.visualstudio.microsoft.com/download/pr/deb4711b-7bbc-4afa-8884-9f2b964797f2/fb603c451b2a6e0a2cb5372d33ed68b9/dotnet-sdk-6.0.300-win-x64.exe)
+-----
 
 ## Fixing Nuget's Default Config 
 

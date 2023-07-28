@@ -53,23 +53,3 @@ code {
 }
 
 /* #endregion */
-
-/* #region Copy to clipboard */
-
-.clipboardContainer {
-    position: relative;
-    display: block;
-    float: right;
-}
-
-.btn-clipboard {
-    position: relative;
-    top: -.5rem;
-    right: .25rem;
-    z-index: 10;
-    display: block;
-    padding: .25rem .5rem;
-    cursor: pointer;
-}
-
-/* #endregion */

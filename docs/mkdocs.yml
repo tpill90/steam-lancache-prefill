@@ -6,12 +6,14 @@ site_url: https://tpill90.github.io/steam-lancache-prefill
 extra_css:
   - assets/external/asciinema-player.css
   - assets/language-picker.css
+  - assets/copy-to-clipboard.css
   - assets/extra.css
 extra_javascript:
   - assets/external/asciinema-player.min.js
   - assets/external/clipboard.min.js
   - assets/external/popper.min.js
   - assets/external/tippy-bundle.umd.min.js
+  - assets/copy-to-clipboard.js
   - assets/extra.js
   
 # Defines global variables that can be used by templates
