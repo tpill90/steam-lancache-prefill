@@ -8,3 +8,4 @@ lockfile
 /SteamPrefill.sln.DotSettings.user
 /docs/site
 /docs/__pycache__
+/docs/RenderAnsiToSvg/__pycache__

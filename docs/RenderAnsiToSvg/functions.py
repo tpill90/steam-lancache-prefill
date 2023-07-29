@@ -1,3 +1,5 @@
+#TODO document
+
 #region imports
 
 import re
@@ -9,19 +11,54 @@ from rich.console import Console
 from rich.terminal_theme import TerminalTheme
 from yaml import safe_load
 from bs4 import BeautifulSoup
+import os
 import sys
+from rich import print
 
 #endregion
 
 #TODO refactor
+# TODO this is adding something to the path, figure out why this is trying to do that
 THISDIR = str(Path(__file__).resolve().parent)
 sys.path.insert(0, str(Path(THISDIR).parent))
+# TODO move this elsewhere
+fontFilePath = f"{THISDIR}/assets/CascadiaMono-Regular.woff2"
 
-def ansiToSVG(
-	ansiText: str,
-	fileName: str,
-	theme: str | None = None
-):
+
+def renderAnsiToSVG(inputDirectory: str):
+	# Making sure the targeted folder has any .ansi files we can process
+	ansiFilesToProcess = find_files_with_extension(inputDirectory, ".ansi")
+	if not ansiFilesToProcess:
+		raise Exception(f"No .ansi files were found in the input directory.")
+
+	for inputFile in ansiFilesToProcess:
+		
+		print(f"Processing [magenta]{inputFile}[/magenta]")
+		fullFilePath = os.path.join(inputDirectory, inputFile)
+
+		inputText = ''
+		f = open(fullFilePath, "r", encoding='utf-8')
+		for line in f:
+			# need to manually remove newlines
+			temp = line.replace(r'\r\n', "")
+			
+			# handle escaping unicode characters
+			temp = temp.replace(r'\u001b', "\u001b".encode().decode('unicode-escape'))
+			inputText += temp
+
+		f.close()
+		
+		svgOutputPath = f"{inputDirectory}/svg/{os.path.splitext(inputFile)[0]}.svg"
+		renderSingleSVG(inputText, svgOutputPath)
+		
+		# Font will be embedded directly into the SVG.  This is necessary since Github doesn't allow loading fonts from different domains
+		fontBase64String = encode_file_to_base64(fontFilePath)
+		replace_file_content(svgOutputPath, 'Fira Code', 'Cascadia Mono')
+		replace_file_content(svgOutputPath, 'local("FiraCode-Regular")', f"url(\"data:application/font-woff;charset=utf-8;base64,{fontBase64String}\") format(\"woff2\")")
+
+		remove_title_bar(svgOutputPath)
+
+def renderSingleSVG(ansiText: str, fileName: str, theme: str | None = None):
 	console = _doRichRender(ansiText)
 	console.save_svg(fileName, theme=_doRichTerminalTheme(theme), title="")
 
@@ -35,8 +72,12 @@ def _doRichRender(ansiText: str) -> Console:
 	console.height = len(richText.wrap(console, width=CONSOLE_WIDTH))
 	return console
 
+def find_files_with_extension(directory_path: str, extension: str):
+    file_list = [file for file in os.listdir(directory_path) if file.endswith(extension)]
+    return file_list
+
 def _doRichTerminalTheme(theme: str | None) -> TerminalTheme:
-	base24 = safe_load(Path(theme or f"{THISDIR}/img/assets/onedark.yml").read_text(encoding="utf-8"))
+	base24 = safe_load(Path(theme or f"{THISDIR}/assets/onedark.yml").read_text(encoding="utf-8"))
 
 	return TerminalTheme(
 		background=_hexToRGB(base24["base00"]),

@@ -1,4 +1,3 @@
-# svg script
 bs4
 rich
 lxml

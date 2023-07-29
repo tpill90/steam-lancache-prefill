@@ -8,6 +8,10 @@ indent_style = tab
 tab_size = 4
 curly_bracket_next_line = true
 
+[*.py]
+indent_style = tab
+tab_size = 4
+
 # .NET formatting rules.  See https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
 # Resharper Rules. See https://www.jetbrains.com/help/resharper/EditorConfig_Index.html
 [*.cs]
@@ -72,7 +76,3 @@ dotnet_diagnostic.rs0030.severity = error
 # The method does not need to use async/await - Introduces annoying 'return' statements for async methods, that hurt code readability.
 dotnet_diagnostic.AsyncFixer01.severity = none
 
-[*.js]
-indent_style = tab
-tab_size = 4
-curly_bracket_next_line = true
