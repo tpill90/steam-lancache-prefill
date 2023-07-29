@@ -7,6 +7,8 @@ Prior to installing {{prefillName}} via docker you should ensure you have a work
     
 ![Unraid Lancache Setup](images/unraid-docker-typical-setup.png){: style="width:530px"}
 
+-----
+
 ## Installing {{prefillName}} Docker Image
 
 Again from your Unraid terminal you will download and run the **{{prefillName}}** Docker image.
@@ -26,6 +28,8 @@ docker run -it --rm \
 ```
 
 To get familiarized with how to use **{{prefillName}}**, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide.
+
+-----
 
 ## Setting up a schedule
 
@@ -65,6 +69,8 @@ Some examples of cron expressions:
 If the above examples don't cover your use case, [crontab.guru](https://crontab.guru/) is an online cron expression editor that can interactively edit cron expressions, and explain what they mean.
 
 Finally after entering a cron expression, click *APPLY* to save your cron expression.  You should now be all set to have **{{prefillName}}** run on a schedule!
+
+-----
 
 ## Next Steps
 

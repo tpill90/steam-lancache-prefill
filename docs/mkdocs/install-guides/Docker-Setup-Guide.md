@@ -5,6 +5,8 @@ This guide is intended for getting started with the **{{prefillName}}** Docker i
 !!! Note
     Docker is not strictly required to run **{{prefillName}}**,  as it is a completely self-contained portable app.
 
+-----
+
 ## Basic Usage Via Command Line
 
 To download and run the latest version of the container, open up a terminal and run the following command:
@@ -28,6 +30,8 @@ docker run -it --rm --net=host  \
   tpill90/{{repo_name}}:latest \
   select-apps
 ```
+
+-----
 
 ## Next Steps
 

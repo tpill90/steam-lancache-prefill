@@ -2,6 +2,8 @@
 
 This guide is written to help Linux beginners successfully download **{{prefillName}}** on their Lancache caching server. 
 
+-----
+
 ## Installing Prerequisites
 
 Prior to installing **{{prefillName}}** we will need to make sure that `curl`, `jq`, and `unzip` are already installed on our system.  Depending on your machine's configuration, this software may or may not already be installed.  Regardless, the following steps will ensure that everything needed is successfully installed.  
@@ -23,6 +25,8 @@ apt-get install curl jq unzip wget -y
     You may run into a "Could not open lock file" error when running `apt-get install`, and will need to prefix the command with `sudo`
 
 Once the install command has finished successfully, we can move on to installing **{{prefillName}}**.
+
+-----
 
 ## Installing {{prefillName}}
 
@@ -63,6 +67,8 @@ If everything worked as expected, you should see output similar to below
 
 
 **{{prefillName}}** is now installed on your machine!  You can now run it with `./{{prefillName}}`
+
+-----
 
 ## Next Steps
 

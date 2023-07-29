@@ -1,8 +1,10 @@
 # benchmark
-<!-- TODO give this whole file another run through --!>
+
+## Overview
 
 Intended for use in identifying potential bottlenecks both server side (usually disk IO), as well as client side.
 
+<!-- TODO give this whole file another run through.  Maybe write a more in depth workflow explanation.  --!>
 <!-- TODO don't like this line -->
 `benchmark` uses the same download logic as `prefill`, however it offers the following instead:
 
@@ -12,6 +14,8 @@ Intended for use in identifying potential bottlenecks both server side (usually 
 - Continuous sustained download, combines multiple apps into a single download
 - Repeatable, will perform the same download every time
 - Randomized, requests will be completed in a random order
+
+-----
 
 ## setup
 
@@ -28,6 +32,8 @@ Creates a benchmark "workload" comprised of multiple apps, that will then be ben
 | --appid        | The id of one or more apps to include in benchmark workload file.  Useful for testing a specific app, without having to modify previously selected apps.  AppIds can be found using [SteamDB](https://steamdb.info/)  |
 | --nocache      | Skips using locally cached manifests.  No recommended for use with `setup`, as it can dramatically increase the amount of time to build the workload file. |
 | --no-ansi      |      Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
+
+-----
 
 ## run
 

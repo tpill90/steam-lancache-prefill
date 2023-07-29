@@ -6,6 +6,8 @@
 2.  Download the latest version for Windows.  The filename should look like `{{prefillName}}-X.Y.Z-win-x64.zip`.
 3.  Unzip to a directory of your choice.  This can be anywhere on your system.
 
+-----
+
 ## Optional Windows Setup
 
 Configuring your terminal to use Unicode will result in a much nicer experience with **{{prefillName}}**, for much nicer looking UI output.
@@ -27,6 +29,8 @@ if(!(gc $profile).Contains("OutputEncoding"))
     & $profile; 
 }
 ```
+
+-----
 
 ## Next Steps
 

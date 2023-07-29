@@ -5,35 +5,41 @@
 ## Installing Prerequisites
 
 <!-- TODO add git here -->
-Only the .NET 6 SDK is required to compile the project.  This can be installed through one of the following methods
+Only the .NET 6 SDK is required to compile the project.  The following instructions will be using Chocolatey as a package manager for Windows, which makes installing software much easier as it can be done by a single command.  Chocolatey can be installed using the [Chocolatey install guide](https://chocolatey.org/install#individual) if it isn't already installed.
 
-
-### Using Chocolatey
-<!-- TODO explain what choco is and link to the install guide -->
+### dotnet SDK
 
 ```powershell
 choco install dotnet-6.0-sdk
+# Needs to be removed in order to resolve issue with Nuget's being misconfigured by default after install.  
+Remove-Item "C:\Users\$Env:USERNAME\AppData\Roaming\NuGet\nuget.config"
+```
+
+### Git
+
+Additionally, if Git has not already been installed it can be installed using the following:
+
+```powershell
+choco install git.install
 ```
 
 -----
 
-## Fixing Nuget's Default Config 
+## Cloning the repository
 
-```powershell
-# Needs to be removed, in order to resolve issue with Nuget being preconfigured wrong.  
-# Will auto-regenerate on first run.
-Remove-Item "C:\Users\$Env:USERNAME\AppData\Roaming\NuGet\nuget.config"
-```
-
-## Cloning the repo and submodules
+Prior to doing any work on the project a copy of the code must first be cloned from Github.  The following will clone the repo as well as all of the required submodules:
 
 ```powershell
 git clone --recurse-submodules -j8 https://github.com/tpill90/{{repo_name}}.git
 ```
-If you've already cloned the repository without the submodules, use this command to include the submodules:
+
+
+Alternatively if you've already cloned the repository without the submodules, use this command to include the submodules:
 ```
 git submodule update --init --recursive
 ```
+
+-----
 
 ## Compiling
 
@@ -42,6 +48,8 @@ The project can be compiled by running the following in the repository root (the
 ```powershell
 dotnet build
 ```
+
+-----
 
 ## Running the project
 
@@ -63,13 +71,17 @@ Alternatively, to run the project at full speed with all compilation optimizatio
 dotnet run --configuration Release
 ```
 
-## Executing Unit Tests
+-----
+
+## Running Unit Tests
 
 To compile and run all tests in the entire repo, run the following command:
 ```powershell
 dotnet test
 ```
 
-## Where should I get started?
+-----
+
+## Where should I get started in the codebase?
 
 A good place to start poking around the project would be the [CliCommands folder](https://github.com/tpill90/{{repo_name}}/tree/master/{{prefillName}}/CliCommands).  This folder contains the implementations for each of the individual commands that can be run, such as `prefill` or `select-apps`.  

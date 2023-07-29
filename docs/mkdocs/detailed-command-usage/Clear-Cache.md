@@ -13,6 +13,8 @@ These cached manifests will also build up over time, as newer versions of games 
 In the case that you would like to save disk space without having to constantly clear the manifest cache, 
 running `prefill` with the `--nocache` flag specified will prevent the cached manifests from being written in the first place.
 
+-----
+
 ## Options
 
 | Option      |     |      |

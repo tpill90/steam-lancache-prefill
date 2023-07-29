@@ -12,6 +12,8 @@ choco install python
 pip install -r requirements.txt
 ```
 
+-----
+
 ## Project Layout
 
     mkdocs.yml    # Mkdocs root configuration file.
@@ -19,11 +21,15 @@ pip install -r requirements.txt
         index.md  # The documentation homepage.
         ...       # Other markdown pages, images and other files.
 
+-----
+
 ## Making Changes
 
 **mkdocs** has a built in server that will watch for changes being made, and immediately display those changes.  
 
 You can launch the the live server using `mkdocs serve`, and open `http://127.0.0.1:8000/` in your browser.  You can now make edits and have the page automatically refresh and display those changes!
+
+-----
 
 ## Helpful links
 
