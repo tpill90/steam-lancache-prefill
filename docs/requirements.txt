@@ -1,4 +1,5 @@
-# svg script
-bs4
-rich
-lxml
+mkdocs == 1.4.2
+mkdocs-awesome-pages-plugin 
+mkdocs-static-i18n 
+mkdocs-macros-plugin
+mkdocs-htmlproofer-plugin

@@ -49,6 +49,12 @@ markdown_extensions:
 
 # https://github.com/mkdocs/catalog
 plugins:
+  # Fails the build if any of the external or internal links 404
+  # See for more info : https://github.com/manuzhang/mkdocs-htmlproofer-plugin
+  - htmlproofer:
+      enabled: !ENV [ENABLED_HTMLPROOFER, False]
+      validate_external_urls: True
+      raise_error: True
   # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
   - awesome-pages:
       strict: true

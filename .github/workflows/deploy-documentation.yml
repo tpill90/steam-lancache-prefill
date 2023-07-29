@@ -16,5 +16,6 @@ jobs:
           python-version: 3.x
       - run: >
           cd docs;
-          pip install mkdocs mkdocs-awesome-pages-plugin mkdocs-static-i18n mkdocs-macros-plugin;
+          pip install -r requirements.txt;
+          export ENABLED_HTMLPROOFER=true;
           mkdocs gh-deploy --force --strict;
