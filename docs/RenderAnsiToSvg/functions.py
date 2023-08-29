@@ -1,5 +1,7 @@
 #TODO document
 
+# This is rendering an SVG (Scalable Vector Graphic - https://en.wikipedia.org/wiki/SVG)
+
 #region imports
 
 import re

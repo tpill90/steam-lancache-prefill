@@ -33,18 +33,18 @@ namespace SteamPrefill.CliCommands.Benchmark
             // Property must be set to false in order to disable ansi escape sequences
             _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
-            ValidateUserHasSelectedApps();
-
             var downloadArgs = new DownloadArguments
             {
-                NoCache = NoLocalCache ?? default(bool)
+                NoCache = NoLocalCache ?? false
             };
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
+
+            ValidateUserHasSelectedApps(steamManager);
 
             try
             {
                 await steamManager.InitializeAsync();
-                await steamManager.SetupBenchmarkAsync(AppIds.ToList(), BenchmarkAllOwnedApps ?? default(bool), UseSelectedApps ?? default(bool));
+                await steamManager.SetupBenchmarkAsync(AppIds.ToList(), BenchmarkAllOwnedApps ?? false, UseSelectedApps ?? false);
             }
             finally
             {
@@ -53,22 +53,33 @@ namespace SteamPrefill.CliCommands.Benchmark
         }
 
         // Validates that the user has selected at least 1 app
-        private void ValidateUserHasSelectedApps()
+        private void ValidateUserHasSelectedApps(SteamManager steamManager)
         {
+            var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
+
             if (AppIds != null && AppIds.Any())
             {
                 return;
             }
-            if (BenchmarkAllOwnedApps ?? default(bool))
+            if (BenchmarkAllOwnedApps ?? false)
             {
                 return;
             }
-            if (UseSelectedApps ?? default(bool))
+            if (UseSelectedApps != null && UseSelectedApps.Value)
             {
-                return;
+                if (userSelectedApps.Any())
+                {
+                    return;
+                }
+
+                // User hasn't selected any apps yet, despite them specifying the --use-selected flag
+                _ansiConsole.MarkupLine(Red($"Flag {LightYellow("--use-selected")} was specified, however no apps have been previously selected with {Cyan("select-apps")}."));
+                _ansiConsole.Markup(Red("Please choose some apps and try again"));
+
+                throw new CommandException(".", 1, true);
             }
 
-            _ansiConsole.MarkupLine(Red("No apps have been selected for prefill! At least 1 app is required!"));
+            _ansiConsole.MarkupLine(Red("No apps have been selected for benchmark! At least 1 app is required!"));
             _ansiConsole.Markup(Red($"See flags {LightYellow("--appid")}, {LightYellow("--all")} and {LightYellow("--use-selected")} to interactively choose which apps to prefill"));
 
             throw new CommandException(".", 1, true);
