@@ -71,6 +71,7 @@
 
         public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames)
         {
+            // Building out full list of AppIds to use.
             var appIdsToDownload = LoadPreviouslySelectedApps();
             if (downloadAllOwnedGames)
             {
@@ -89,6 +90,7 @@
                 appIdsToDownload.AddRange(popularGames);
             }
 
+            // AppIds can potentially be added twice when building out the full list of ids
             var distinctAppIds = appIdsToDownload.Distinct().ToList();
             await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
 
@@ -158,7 +160,9 @@
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
+            _prefillSummaryResult.TotalBytesTransferred += totalBytes;
 
+            //TODO make this look nicer
             _ansiConsole.LogMarkup($"Downloading {Magenta(totalBytes.ToDecimalString())}");
 #if DEBUG
             _ansiConsole.Markup($" from {LightYellow(chunkDownloadQueue.Count)} chunks");
