@@ -18,7 +18,7 @@ namespace SteamPrefill.CliCommands
             // Property must be set to false in order to disable ansi escape sequences
             ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
-            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments() { Force = true });
+            using var steamManager = new SteamManager(ansiConsole, new DownloadArguments());
             try
             {
                 await steamManager.InitializeAsync();
