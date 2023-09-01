@@ -24,13 +24,8 @@ namespace SteamPrefill.CliCommands
                 await steamManager.InitializeAsync();
                 var tuiAppModels = await BuildTuiAppModelsAsync(steamManager);
 
-                // Using System.Console is required when the shell is running in "xterm" mode, otherwise colors won't display correctly.
-                // Only want to enable it for "xterm" as it can prevent being able to ctrl+c the app on Linux
-                // See : https://github.com/tpill90/steam-lancache-prefill/issues/176
-                if (Environment.GetEnvironmentVariable("ENV") == "xterm")
-                {
-                    Application.UseSystemConsole = true;
-                }
+                // This is required to be enabled otherwise some Linux distros/shells won't display color correctly.
+                Application.UseSystemConsole = true;
                 Application.Init();
                 using var tui2 = new SelectAppsTui(tuiAppModels);
                 Key userKeyPress = tui2.Run();
