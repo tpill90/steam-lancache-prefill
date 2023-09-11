@@ -1,7 +1,7 @@
 ﻿#Requires -RunAsAdministrator
 
 $targetInterfaceDesc = "Mellanox"
-$lancacheIp = "192.168.1.222"
+$lancacheIp = "192.168.1.223"
 
 
 $ErrorActionPreference = "Stop"
@@ -31,3 +31,5 @@ Resolve-DnsName "lancache.steamcontent.com" | Format-Table -Property Name,IP4Add
 
 Clear-DnsClientCache
 ipconfig /flushdns
+
+Start-Sleep -Seconds 5
