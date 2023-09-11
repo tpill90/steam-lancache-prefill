@@ -30,6 +30,11 @@ namespace SteamPrefill.CliCommands
                 using var tui2 = new SelectAppsTui(tuiAppModels);
                 Key userKeyPress = tui2.Run();
 
+                // There is an issue with Terminal.Gui where this property is set to 'true' when the TUI is initialized, but forgets to reset it back to 'false' when the TUI closes.
+                // This causes an issue where the prefill run is not able to be cancelled with ctrl+c, but only on Linux systems.
+                Console.TreatControlCAsInput = false;
+
+
                 // Will only allow for prefill if the user has saved changes.  Escape simply exists
                 if (userKeyPress != Key.Enter)
                 {
