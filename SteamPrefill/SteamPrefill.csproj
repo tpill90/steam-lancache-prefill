@@ -17,7 +17,8 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
   </PropertyGroup>
 
-  <PropertyGroup Label="Trim Settings">
+  <!-- Trim Settings -->
+  <PropertyGroup>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>

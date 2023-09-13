@@ -127,7 +127,7 @@
         {
             AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
 
-            // Filter depots based on specified lang/os/architecture/etc
+            // Filter depots based on specified language/OS/cpu architecture/etc
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
             if (!filteredDepots.Any())
             {

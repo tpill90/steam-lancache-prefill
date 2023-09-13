@@ -2,11 +2,7 @@ namespace SteamPrefill
 {
     public static class Program
     {
-        private const string Description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
-                                           "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
-                                           "\n" +
-                                           "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
-
+        //TODO - Loading app metadata when specifying --all used to be faster.  I think it used to skip over downloading DLC depots.  Something must have changed, look into it.
         public static async Task<int> Main()
         {
             try
@@ -15,11 +11,16 @@ namespace SteamPrefill
                 OperatingSystemUtils.DetectDoubleClickOnWindows("SteamPrefill");
 
                 var cliArgs = ParseHiddenFlags();
+                var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
+                                  "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
+                                  "\n" +
+                                  "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
+
                 return await new CliApplicationBuilder()
                              .AddCommandsFromThisAssembly()
                              .SetTitle("SteamPrefill")
                              .SetExecutableNamePlatformAware("SteamPrefill")
-                             .SetDescription(Description)
+                             .SetDescription(description)
                              .SetVersion($"v{ThisAssembly.Info.InformationalVersion}")
                              .Build()
                              .RunAsync(cliArgs);
