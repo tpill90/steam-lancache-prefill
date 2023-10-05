@@ -19,6 +19,7 @@
 
   <!-- Trim Settings -->
   <PropertyGroup>
+    <PublishTrimmed>true</PublishTrimmed>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
@@ -27,6 +28,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DebugType>none</DebugType>
     <DebugSymbols>false</DebugSymbols>
+  </PropertyGroup>
+
+  <!--TODO add this to the other projects-->
+  <PropertyGroup>
+    <!-- Removes the full file system path from exception stack traces, only shows the file names now -->
+    <PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
   </PropertyGroup>
 
   <!-- Includes Linux update script in publish package -->

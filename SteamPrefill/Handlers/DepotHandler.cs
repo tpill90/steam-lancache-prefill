@@ -38,10 +38,7 @@
                 }
 
                 var downloadedManifests = _downloadedDepots[depotId];
-                if (!downloadedManifests.Contains(depot.ManifestId.Value))
-                {
-                    downloadedManifests.Add(depot.ManifestId.Value);
-                }
+                downloadedManifests.Add(depot.ManifestId.Value);
             }
             File.WriteAllText(AppConfig.SuccessfullyDownloadedDepotsPath, JsonSerializer.Serialize(_downloadedDepots, SerializationContext.Default.DictionaryUInt32HashSetUInt64));
         }
