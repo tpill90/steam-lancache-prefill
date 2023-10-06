@@ -77,7 +77,7 @@ namespace SteamPrefill.Handlers.Steam
                 _loggedOnCallbackResult = loggedOn;
                 CellId = loggedOn.CellID;
             });
-            _callbackManager.Subscribe<SteamApps.LicenseListCallback>(LicenseListCallback);
+            _callbackManager.Subscribe<LicenseListCallback>(LicenseListCallback);
 
             CdnClient = new Client(_steamClient);
             // Configuring SteamKit's HttpClient to timeout in a more reasonable time frame.  This is only used when downloading manifests
@@ -85,7 +85,7 @@ namespace SteamPrefill.Handlers.Steam
             Client.RequestTimeout = AppConfig.SteamKitRequestTimeout;
 
             _userAccountStore = UserAccountStore.LoadFromFile();
-            LicenseManager = new LicenseManager(SteamAppsApi, _userAccountStore);
+            LicenseManager = new LicenseManager(SteamAppsApi);
         }
 
         public async Task LoginToSteamAsync()
@@ -335,6 +335,8 @@ namespace SteamPrefill.Handlers.Steam
 
         private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)
         {
+            var timer = Stopwatch.StartNew();
+
             _loadAccountLicensesIsRunning = false;
             if (licenseList.Result != EResult.OK)
             {
@@ -342,6 +344,8 @@ namespace SteamPrefill.Handlers.Steam
                 throw new SteamLoginException("Unable to retrieve user licenses!");
             }
             LicenseManager.LoadPackageInfo(licenseList.LicenseList);
+
+            _ansiConsole.LogMarkupLine("Loaded account licenses", timer);
         }
 
         #endregion

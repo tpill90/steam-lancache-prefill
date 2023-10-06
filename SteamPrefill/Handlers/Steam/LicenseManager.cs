@@ -3,18 +3,14 @@
     public sealed class LicenseManager
     {
         private readonly SteamApps _steamAppsApi;
-        private readonly UserAccountStore _userAccountStore;
-
-        private string LicensesPath => Path.Combine(AppConfig.CacheDir, $"userLicenses_{_userAccountStore.CurrentUsername}.json");
 
         internal UserLicenses _userLicenses = new UserLicenses();
 
         public List<uint> AllOwnedAppIds => _userLicenses.OwnedAppIds.ToList();
 
-        public LicenseManager(SteamApps steamAppsApi, UserAccountStore userAccountStore)
+        public LicenseManager(SteamApps steamAppsApi)
         {
             _steamAppsApi = steamAppsApi;
-            _userAccountStore = userAccountStore;
         }
 
         /// <summary>
@@ -48,21 +44,11 @@
         [SuppressMessage("Threading", "VSTHRD002:Synchronously waiting on tasks or awaiters may cause deadlocks", Justification = "Callback must be synchronous to compile")]
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
+            _userLicenses = new UserLicenses();
+
             // Filters out licenses that are subscription based, and have expired, like EA Play for example.
             // The account will continue to "own" the packages, and will be unable to download their apps, so they must be filtered out here.
             var nonExpiredLicenses = licenseList.Where(e => !e.LicenseFlags.HasFlag(ELicenseFlags.Expired)).ToList();
-
-            // If we haven't bought any new games (or free-to-play) since the last run, we can reload our owned Apps/Depots
-            if (File.Exists(LicensesPath))
-            {
-                var deserialized = JsonSerializer.Deserialize(File.ReadAllText(LicensesPath), SerializationContext.Default.UserLicenses);
-                if (deserialized.LicenseCount == nonExpiredLicenses.Count)
-                {
-                    _userLicenses = deserialized;
-                    return;
-                }
-            }
-            _userLicenses = new UserLicenses();
 
             // Some packages require a access token in order to request their apps/depot list
             var packageRequests = nonExpiredLicenses.Select(e => new PICSRequest(e.PackageID, e.AccessToken)).ToList();
@@ -91,9 +77,6 @@
                 _userLicenses.OwnedAppIds.AddRange(package.AppIds);
                 _userLicenses.OwnedDepotIds.AddRange(package.DepotIds);
             }
-
-            // Serializing this data to speedup subsequent runs
-            File.WriteAllText(LicensesPath, JsonSerializer.Serialize(_userLicenses, SerializationContext.Default.UserLicenses));
         }
     }
 
