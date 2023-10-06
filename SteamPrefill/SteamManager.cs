@@ -114,6 +114,8 @@
                     // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
                     _ansiConsole.LogMarkupLine(Red($"Unexpected download error : {e.Message}  Skipping app..."));
                     _ansiConsole.MarkupLine("");
+                    FileLogger.LogException(e);
+
                     _prefillSummaryResult.FailedApps++;
                 }
             }
@@ -180,6 +182,10 @@
             {
                 _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
                 _prefillSummaryResult.Updated++;
+            }
+            else
+            {
+                _prefillSummaryResult.FailedApps++;
             }
             downloadTimer.Stop();
 

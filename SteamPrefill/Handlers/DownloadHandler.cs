@@ -100,9 +100,10 @@
                     {
                     }
                 }
-                catch
+                catch (Exception e)
                 {
                     failedRequests.Add(request);
+                    FileLogger.LogException($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed", e);
                 }
                 progressTask.Increment(request.CompressedLength);
             });
