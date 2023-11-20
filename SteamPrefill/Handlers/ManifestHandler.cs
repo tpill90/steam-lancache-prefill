@@ -140,7 +140,10 @@
         /// <exception cref="ManifestException">Throws if no valid manifest code was found</exception>
         private async Task<ManifestRequestCode> GetManifestRequestCodeAsync(DepotInfo depot)
         {
-            ulong manifestRequestCode = await _steam3Session.SteamContent.GetManifestRequestCode(depot.DepotId, depot.ContainingAppId, depot.ManifestId.Value, "public");
+            ulong manifestRequestCode = await _steam3Session.SteamContent.GetManifestRequestCode(depot.DepotId, depot.ContainingAppId, depot.ManifestId.Value, "public")
+                                                                         // Adding an additional timeout to this SteamKit method.  I have a feeling that this is not properly timing out 
+                                                                         // for some users.
+                                                                         .WaitAsync(TimeSpan.FromSeconds(90));
 
             // If we could not get the manifest code, this is a fatal error, as it we can't download the manifest without it.
             if (manifestRequestCode == 0)

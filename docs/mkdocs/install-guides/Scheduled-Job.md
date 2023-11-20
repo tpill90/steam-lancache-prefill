@@ -56,6 +56,7 @@ WantedBy=multi-user.target
 Once these two files are setup, you can enable the scheduled job with:
 ```
 sudo systemctl daemon-reload
+sudo systemctl enable {{prefillName.lower()}}.timer
 sudo systemctl start {{prefillName.lower()}}.timer
 sudo systemctl enable {{prefillName.lower()}}
 ```
