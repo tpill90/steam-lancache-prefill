@@ -2,23 +2,13 @@
 
 ## Απαιρέτητα πακετά για την εγκατάσταση
 
-Χρειαζόμαστε μόνο το .NET 6 SDK για να κάνουμε compile αυτό το έργο.  Αυτό μπορεί να γίνει με τις παρακάτω μεθόδους
+Χρειαζόμαστε μόνο το .NET 8 SDK για να κάνουμε compile αυτό το έργο.  Αυτό μπορεί να γίνει με τις παρακάτω μεθόδους
 
 ### Με το Chocolatey
 ```powershell
-choco install dotnet-6.0-sdk
+choco install dotnet-sdk --version=8.0.100
 ```
 
-### Χειροκίνητα
-Με το τελευταίο .NET 6.0 SDK που μπορούμε να βρούμε εδώ  [.NET 6.0 SDK - Windows x64 Installer](https://download.visualstudio.microsoft.com/download/pr/deb4711b-7bbc-4afa-8884-9f2b964797f2/fb603c451b2a6e0a2cb5372d33ed68b9/dotnet-sdk-6.0.300-win-x64.exe)
-
-## Διορθώνοντας το αρχικό config του Nuget 
-
-```powershell
-# Πρέπει να σβηστεί, για να λύσουμε το θέμα με την λάθος προρύθμιση του Buget.  
-# Θα αυτόδημιουργηθεί με την πρώτη εκτέλεση.
-Remove-Item "C:\Users\$Env:USERNAME\AppData\Roaming\NuGet\nuget.config"
-```
 
 ## Κλωνοποίηση του repo και των submodules
 

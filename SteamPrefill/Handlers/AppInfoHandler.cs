@@ -83,7 +83,7 @@
         /// <param name="appIdsToLoad">The list of App Ids to retrieve info for</param>
         private async Task AppInfoRequestAsync(List<uint> appIdsToLoad)
         {
-            if (!appIdsToLoad.Any())
+            if (appIdsToLoad.Empty())
             {
                 return;
             }

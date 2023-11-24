@@ -1,12 +1,7 @@
 ﻿namespace SteamPrefill.Models.Exceptions
 {
-    public class CdnExhaustionException : Exception
+    public sealed class CdnExhaustionException : Exception
     {
-        private CdnExhaustionException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-
-        }
-
         public CdnExhaustionException()
         {
 

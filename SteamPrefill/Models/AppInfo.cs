@@ -48,7 +48,7 @@
         public List<string> OSList { get; }
 
         // Some games simply don't have any OSList at all, so this means that they should always be considered as supported.
-        public bool SupportsWindows => !OSList.Any() || OSList.Contains("windows");
+        public bool SupportsWindows => OSList.Empty() || OSList.Contains("windows");
 
         /// <summary>
         /// Specifies the type of app, can be "config", "tool", "game".  This seems to be up to the developer, and isn't 100% consistent.

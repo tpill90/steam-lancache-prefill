@@ -1,18 +1,13 @@
 # Compiling From Source
 
-<!-- TODO go through each page and add ----- to sections to make it easier to read -->
-
 ## Installing Prerequisites
 
-<!-- TODO add git here -->
-Only the .NET 6 SDK is required to compile the project.  The following instructions will be using Chocolatey as a package manager for Windows, which makes installing software much easier as it can be done by a single command.  Chocolatey can be installed using the [Chocolatey install guide](https://chocolatey.org/install#individual) if it isn't already installed.
+Only the .NET 8 SDK is required to compile the project.  The following instructions will be using Chocolatey as a package manager for Windows, which makes installing software much easier as it can be done by a single command.  Chocolatey can be installed using the [Chocolatey install guide](https://chocolatey.org/install#individual) if it isn't already installed.
 
 ### dotnet SDK
 
 ```powershell
-choco install dotnet-6.0-sdk
-# Needs to be removed in order to resolve issue with Nuget's being misconfigured by default after install.  
-Remove-Item "C:\Users\$Env:USERNAME\AppData\Roaming\NuGet\nuget.config"
+choco install dotnet-sdk --version=8.0.100
 ```
 
 ### Git
