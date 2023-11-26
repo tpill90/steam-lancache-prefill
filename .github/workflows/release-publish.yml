@@ -67,10 +67,7 @@ jobs:
           -o "publish/$PROJECT_NAME-$version-${{ matrix.runtime }}" \
           -c Release \
           --runtime "${{ matrix.runtime }}" \
-          --self-contained true \
-          /p:PublishSingleFile=true \
-          /p:PublishReadyToRun=true \
-          /p:PublishTrimmed=true;
+          --self-contained true;
 
         cd publish;
 
