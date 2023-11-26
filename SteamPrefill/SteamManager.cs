@@ -104,7 +104,7 @@
                 {
                     await DownloadSingleAppAsync(app.AppId);
                 }
-                catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
+                catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
                 {
                     // We'll want to bomb out the entire process for these exceptions, as they mean we can't prefill any apps at all
                     throw;
@@ -131,7 +131,7 @@
 
             // Filter depots based on specified language/OS/cpu architecture/etc
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
-            if (!filteredDepots.Any())
+            if (filteredDepots.Empty())
             {
                 //TODO add to summary output?
                 _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {LightYellow("No depots to download.  Current arguments filtered all depots")}");
@@ -164,12 +164,7 @@
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
             _prefillSummaryResult.TotalBytesTransferred += totalBytes;
 
-            //TODO make this look nicer
-            _ansiConsole.LogMarkup($"Downloading {Magenta(totalBytes.ToDecimalString())}");
-#if DEBUG
-            _ansiConsole.Markup($" from {LightYellow(chunkDownloadQueue.Count)} chunks");
-#endif
-            _ansiConsole.MarkupLine("");
+            _ansiConsole.LogMarkupVerbose($"Downloading {Magenta(totalBytes.ToDecimalString())} from {LightYellow(chunkDownloadQueue.Count)} chunks");
 
             if (AppConfig.SkipDownloads)
             {
@@ -238,7 +233,7 @@
             _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Length;
 
 
-            if (!unownedApps.Any())
+            if (unownedApps.Empty())
             {
                 return;
             }
@@ -324,7 +319,7 @@
                     {
                         var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
                         await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
-                        if (!filteredDepots.Any())
+                        if (filteredDepots.Empty())
                         {
                             _ansiConsole.LogMarkupLine($"{Cyan(appInfo)} - {LightYellow("No depots to download.  Current arguments filtered all depots")}");
                             return;
@@ -335,7 +330,7 @@
                         var appFileListing = new AppQueuedRequests(appInfo.Name, appInfo.AppId, allChunksForApp);
                         queuedApps.Add(appFileListing);
                     }
-                    catch (Exception e) when (e is LancacheNotFoundException || e is UserCancelledException || e is InfiniteLoopException)
+                    catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
                     {
                         // Bomb out the whole process, since these are completely unrecoverable
                         throw;

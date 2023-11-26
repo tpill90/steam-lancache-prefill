@@ -18,7 +18,7 @@ jobs:
   # The duplicate releases happen because of a race condition, where each parallel publish job thinks the release has not yet been created.
   create-placeholder-release:
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
+    container: mcr.microsoft.com/dotnet/sdk:8.0
     steps:
     - uses: actions/checkout@v3
       with:
@@ -40,7 +40,7 @@ jobs:
 
   dotnet-publish:
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
+    container: mcr.microsoft.com/dotnet/sdk:8.0
     needs: create-placeholder-release
     strategy:
       matrix:
@@ -67,10 +67,7 @@ jobs:
           -o "publish/$PROJECT_NAME-$version-${{ matrix.runtime }}" \
           -c Release \
           --runtime "${{ matrix.runtime }}" \
-          --self-contained true \
-          /p:PublishSingleFile=true \
-          /p:PublishReadyToRun=true \
-          /p:PublishTrimmed=true;
+          --self-contained true;
 
         cd publish;
 
@@ -101,7 +98,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v2
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Publish
       run: >
         dotnet publish $PROJECT_NAME/$PROJECT_NAME.csproj \

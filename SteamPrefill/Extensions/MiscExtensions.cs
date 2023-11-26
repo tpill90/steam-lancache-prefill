@@ -2,6 +2,7 @@
 {
     public static class MiscExtensions
     {
+        //TODO rename to IsEmpty
         public static bool Empty<T>(this IEnumerable<T> enumerable)
         {
             return !enumerable.Any();
@@ -18,13 +19,6 @@
             {
                 hashSet.Add(value);
             }
-        }
-
-        [SuppressMessage("Microsoft.Security", "CA5350", Justification = "SHA1 is required by Steam")]
-        public static byte[] ToSha1(this byte[] input)
-        {
-            using var sha = SHA1.Create();
-            return sha.ComputeHash(input);
         }
 
         [SuppressMessage("Security", "CA5394:Random is an insecure RNG", Justification = "Security doesn't matter here, just need to shuffle requests.")]

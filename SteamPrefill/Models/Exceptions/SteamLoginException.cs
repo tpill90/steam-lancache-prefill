@@ -1,12 +1,7 @@
 ﻿namespace SteamPrefill.Models.Exceptions
 {
-    public class SteamLoginException : Exception
+    public sealed class SteamLoginException : Exception
     {
-        protected SteamLoginException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-
-        }
-
         public SteamLoginException()
         {
 

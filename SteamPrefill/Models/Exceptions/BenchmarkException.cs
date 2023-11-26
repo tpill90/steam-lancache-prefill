@@ -1,12 +1,7 @@
 ﻿namespace SteamPrefill.Models.Exceptions
 {
-    public class BenchmarkException : Exception
+    public sealed class BenchmarkException : Exception
     {
-        protected BenchmarkException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-
-        }
-
         public BenchmarkException()
         {
 

@@ -58,7 +58,7 @@
             });
 
             // Handling final failed requests
-            if (!failedRequests.Any())
+            if (failedRequests.IsEmpty)
             {
                 return true;
             }
@@ -103,7 +103,7 @@
                 catch (Exception e)
                 {
                     failedRequests.Add(request);
-                    FileLogger.LogException($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed", e);
+                    FileLogger.LogExceptionNoStackTrace($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed", e);
                 }
                 progressTask.Increment(request.CompressedLength);
             });
