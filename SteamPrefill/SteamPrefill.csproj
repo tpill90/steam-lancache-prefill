@@ -20,15 +20,19 @@
   <!-- Publish Settings -->
   <PropertyGroup>
     <PublishTrimmed>true</PublishTrimmed>
+    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <!-- Reverts back to the default trim mode used by dotnet 6, otherwise CliFx breaks without reflection -->
     <TrimMode>partial</TrimMode>
+    
     <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
 
-    <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- Removes the git commit hash being appended to the version number when publishing..  Ex: v2.3.0+5afde434cfe8472ba36138c4912e7aa08a7a22d0 -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
