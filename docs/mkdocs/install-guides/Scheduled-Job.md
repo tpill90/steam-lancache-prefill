@@ -6,7 +6,7 @@
 
 ## Configuring The Schedule
 
-We will first need to configure a `timer` which will configure the schedule that **{{prefillName}}** will run on.  In this example, we will setup a schedule that will run nightly at 4am local time.  This schedule was chosen
+We will first need to configure a `timer` which will configure the schedule that **{{prefillName}}** will run on.  In this example, we will setup a schedule that will run nightly at 4am local time.
 
 You should create a new file named `/etc/systemd/system/{{prefillName.lower()}}.timer`, and save the following configuration into that file.
 

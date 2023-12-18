@@ -1,6 +1,7 @@
 name: release-publish
 run-name: "Publish Release"
 
+#TODO parameterize this and move this into lancache prefill common so I don't have to keep updating it in each project.
 on:
   push:
     tags:
@@ -106,10 +107,7 @@ jobs:
           -o publish \
           -c Release \
           --runtime "linux-x64" \
-          --self-contained true \
-          /p:PublishSingleFile=true \
-          /p:PublishReadyToRun=true \
-          /p:PublishTrimmed=true
+          --self-contained true;
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
