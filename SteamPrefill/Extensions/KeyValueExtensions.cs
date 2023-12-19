@@ -48,11 +48,7 @@
             return DateTimeOffset.FromUnixTimeSeconds(seconds).DateTime;
         }
 
-        /// <summary>
-        /// Attempts to convert and return the value of this instance as an enum.
-        /// If the conversion is invalid, null is returned.
-        /// </summary>
-        public static T AsEnum<T>(this KeyValue keyValue, bool toLower = false) where T : EnumBase<T>
+        public static string ToLowerCaseString(this KeyValue keyValue)
         {
             if (keyValue == KeyValue.Invalid)
             {
@@ -62,11 +58,7 @@
             {
                 return null;
             }
-            if (toLower)
-            {
-                return EnumBase<T>.Parse(keyValue.Value.ToLower());
-            }
-            return EnumBase<T>.Parse(keyValue.Value);
+            return keyValue.Value.ToLower();
         }
 
         public static List<string> SplitCommaDelimited(this KeyValue keyValue)

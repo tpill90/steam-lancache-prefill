@@ -1,14 +1,11 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
-    public class Architecture : EnumBase<Architecture>
+    [Intellenum(typeof(string))]
+    public sealed partial class Architecture
     {
-        public static readonly Architecture unknown = new Architecture("unknown");
-        public static readonly Architecture x86 = new Architecture("32");
-        public static readonly Architecture x64 = new Architecture("64");
-
-        private Architecture(string name) : base(name)
-        {
-        }
+        public static readonly Architecture unknown = new("unknown");
+        public static readonly Architecture x86 = new("32");
+        public static readonly Architecture x64 = new("64");
     }
 }

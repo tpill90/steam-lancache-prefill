@@ -66,6 +66,7 @@
     <!-- External Packages -->
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="HexMate" Version="0.0.3" />
+    <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
     <PackageReference Include="protobuf-net" Version="3.2.16" />
     <PackageReference Include="SteamKit2" Version="2.5.0-Beta.1" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />

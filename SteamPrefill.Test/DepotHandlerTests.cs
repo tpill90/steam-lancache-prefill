@@ -100,13 +100,13 @@ namespace SteamPrefill.Test
                 {
                     DepotId = 123,
                     ManifestId = 5555,
-                    SupportedOperatingSystems = supportedOS.Split(" ").Select(e => OperatingSystem.Parse(e)).ToList()
+                    SupportedOperatingSystems = supportedOS.Split(" ").Select(e => OperatingSystem.FromValue(e)).ToList()
                 }
             };
 
             var downloadArguments = new DownloadArguments
             {
-                OperatingSystems = downloadOS.Split(" ").Select(e => OperatingSystem.Parse(e)).ToList()
+                OperatingSystems = downloadOS.Split(" ").Select(e => OperatingSystem.FromValue(e)).ToList()
             };
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(downloadArguments, depotList);
             Assert.Single(filteredDepots);

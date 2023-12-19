@@ -26,13 +26,13 @@
     {
         public override OperatingSystem Convert(string rawValue)
         {
-            if (!OperatingSystem.IsValidEnumValue(rawValue))
+            if (!OperatingSystem.TryFromValue(rawValue, out var _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid operating system!"));
                 AnsiConsole.Markup(Red($"Valid operating systems include : {LightYellow("windows/linux/macos")}"));
                 throw new CommandException(".", 1, true);
             }
-            return OperatingSystem.Parse(rawValue);
+            return OperatingSystem.FromValue(rawValue);
         }
     }
 
