@@ -1,13 +1,10 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
-    public class OperatingSystem : EnumBase<OperatingSystem>
+    [Intellenum(typeof(string))]
+    public sealed partial class OperatingSystem
     {
-        public static readonly OperatingSystem Windows = new OperatingSystem("windows");
-        public static readonly OperatingSystem MacOS = new OperatingSystem("macos");
-        public static readonly OperatingSystem Linux = new OperatingSystem("linux");
-
-        private OperatingSystem(string name) : base(name)
-        {
-        }
+        public static readonly OperatingSystem Windows = new("windows");
+        public static readonly OperatingSystem MacOS = new("macos");
+        public static readonly OperatingSystem Linux = new("linux");
     }
 }

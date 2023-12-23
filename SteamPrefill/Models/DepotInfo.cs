@@ -66,13 +66,15 @@
             {
                 SupportedOperatingSystems = rootKey["config"]["oslist"].Value
                                                                        .Split(',')
-                                                                       .Select(e => OperatingSystem.Parse(e))
+                                                                       .Select(e => OperatingSystem.FromValue(e))
                                                                        .ToList();
             }
-            Architecture = rootKey["config"]["osarch"].AsEnum<Architecture>();
+
+            Architecture.TryFromValue(rootKey["config"]["osarch"].ToLowerCaseString(), out var appType);
+            Architecture = appType;
 
             Languages = rootKey["config"]["language"].SplitCommaDelimited()
-                                                    .Select(e => Language.Parse(e))
+                                                    .Select(e => Language.FromValue(e))
                                                     .ToList();
 
             if (rootKey["config"]["lowviolence"].Value is "1")

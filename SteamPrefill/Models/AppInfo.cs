@@ -66,14 +66,19 @@
         public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue)
         {
             AppId = appId;
-
             Name = rootKeyValue["common"]["name"].Value.EscapeMarkup();
-            Type = rootKeyValue["common"]["type"].AsEnum<AppType>(toLower: true);
+
+
+            AppType.TryFromValue(rootKeyValue["common"]["type"].ToLowerCaseString(), out var appType);
+            Type = appType;
+
             OSList = rootKeyValue["common"]["oslist"].SplitCommaDelimited();
 
             SteamReleaseDate = rootKeyValue["common"]["steam_release_date"].AsDateTimeUtc();
             OriginalReleaseDate = rootKeyValue["common"]["original_release_date"].AsDateTimeUtc();
-            ReleaseState = rootKeyValue["common"]["releasestate"].AsEnum<ReleaseState>(toLower: true);
+
+            ReleaseState.TryFromValue(rootKeyValue["common"]["releasestate"].ToLowerCaseString(), out var releaseState);
+            ReleaseState = releaseState;
 
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {

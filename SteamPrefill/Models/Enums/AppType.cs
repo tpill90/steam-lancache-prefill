@@ -5,7 +5,8 @@
     /// https://partner.steamgames.com/doc/api/steam_api?#EAppType
     /// </summary>
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
-    public class AppType : EnumBase<AppType>
+    [Intellenum(typeof(string))]
+    public sealed partial class AppType
     {
         public static readonly AppType Application = new AppType("application");
         public static readonly AppType Beta = new AppType("beta");
@@ -20,9 +21,5 @@
         public static readonly AppType Series = new AppType("series");
         public static readonly AppType Tool = new AppType("tool");
         public static readonly AppType Video = new AppType("video");
-
-        private AppType(string name) : base(name)
-        {
-        }
     }
 }

@@ -12,6 +12,7 @@ global using LancachePrefill.Common.Enums;
 global using LancachePrefill.Common.Exceptions;
 global using LancachePrefill.Common.Extensions;
 global using LancachePrefill.Common.SelectAppsTui;
+global using Intellenum;
 global using ProtoBuf;
 global using Spectre.Console;
 global using SteamKit2;
