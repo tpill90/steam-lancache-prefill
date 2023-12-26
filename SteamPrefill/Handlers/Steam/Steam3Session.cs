@@ -260,7 +260,14 @@ namespace SteamPrefill.Handlers.Steam
                 _logonDetails.Password = _ansiConsole.ReadPasswordAsync($"{Red("Invalid password!  Please re-enter your password!")}").GetAwaiter().GetResult();
                 return false;
             }
-
+            // User previously authenticated, but changed their password such that the previous access token is no longer valid.
+            if (loggedOn.Result == EResult.AccessDenied)
+            {
+                _ansiConsole.LogMarkupLine(Red("Steam password was changed!  Current login token is no longer valid.  Re-authentication is required..."));
+                _logonDetails.Password = _ansiConsole.ReadPasswordAsync($"{Red("Please enter your password!")}").GetAwaiter().GetResult();
+                _userAccountStore.AccessToken = null;
+                return false;
+            }
             // SteamGuard code required
             if (loggedOn.Result == EResult.AccountLogonDenied)
             {
@@ -277,7 +284,7 @@ namespace SteamPrefill.Handlers.Steam
                 throw new SteamLoginException($"Unable to login to Steam.  An unknown error occurred : {loggedOn.Result}");
             }
 
-            _ansiConsole.LogMarkupLine($"Logged into Steam");
+            _ansiConsole.LogMarkupLine("Logged into Steam");
 
             // Forcing a garbage collect to remove stored password from memory
             if (_logonDetails.Password != null)
