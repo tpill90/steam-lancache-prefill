@@ -131,7 +131,6 @@ Depending on the terminal that you are using, and what colors your system suppor
 ```
 [6:20:46 PM] Starting [38;5;80mCounter-Strike: Global Offensive[0m
 [6:20:46 PM] Downloading [38;5;170m12.91 GiB[0m
-Downloading.. [38;5;11m━━━━━━━━━[0m[38;5;8m━━━━━━━━━━━━━━━━━[0m  13% [38;5;12m00:05:13[0m 1.8[38;5;8m/[0m12.9 [38;5;8mGiB[0m 305.8 Mbit/s
 ```
 
 One of the reasons you may be seeing this is that your terminal is misreporting what capabilities it supports, thus receiving output that it can't handle.  
