@@ -105,7 +105,7 @@ For extra account security, it is good practice to enable 2 Factor Authenticatio
 
 ## Can I run SteamPrefill on the Lancache server?
 
-You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you reguarly would!
+You certainly can!  All you need to do is download **SteamPrefill** onto the server, and run it as you regularly would!
 
 If everything works as expected, you should see a message saying it found the server at `127.0.0.1`
 
@@ -124,6 +124,18 @@ For example, using a **SK hynix Gold P31 2TB NVME** and running `prefill --force
 
 Yes it can!  Scheduled jobs can be easily setup on Linux using `systemd` services, and can be flexibly configured to run on any schedule that you desire.  
 See [Configuring a Nightly Job](https://tpill90.github.io/steam-lancache-prefill/install-guides/Scheduled-Job/) for a guide on how to get setup with a schedule.
+
+## My logs have weird characters that make it hard to read.  Is there any way to remove them?
+
+Depending on the terminal that you are using, and what colors your system supports, you may see output similar to the following:
+```
+[6:20:46 PM] Starting [38;5;80mCounter-Strike: Global Offensive[0m
+[6:20:46 PM] Downloading [38;5;170m12.91 GiB[0m
+Downloading.. [38;5;11m━━━━━━━━━[0m[38;5;8m━━━━━━━━━━━━━━━━━[0m  13% [38;5;12m00:05:13[0m 1.8[38;5;8m/[0m12.9 [38;5;8mGiB[0m 305.8 Mbit/s
+```
+
+One of the reasons you may be seeing this is that your terminal is misreporting what capabilities it supports, thus receiving output that it can't handle.  
+To remove these characters from the log, simply use the flag `--no-ansi` which will remove all unsupported characters from the application's output.
 
 ## Can I fill my cache using previously installed Steam games?
 
