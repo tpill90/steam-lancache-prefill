@@ -47,5 +47,21 @@
             });
             return await promptTask.WaitAsync(TimeSpan.FromSeconds(30));
         }
+
+        //TODO comment
+        public static void WriteDebugFiles(this KeyValue rootKeyValue, string path)
+        {
+            if (!AppConfig.EnableSteamKitDebugLogs)
+            {
+                return;
+            }
+
+            if (File.Exists(path))
+            {
+                return;
+            }
+
+            rootKeyValue.SaveToFile(path, false);
+        }
     }
 }

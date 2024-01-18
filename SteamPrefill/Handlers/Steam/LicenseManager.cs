@@ -41,6 +41,7 @@
             return _userLicenses.OwnedDepotIds.Contains(depotId) || _userLicenses.OwnedAppIds.Contains(depotId);
         }
 
+        //TODO serialize the data in this method in a file in the \Debugging folder so that its easier to debug by being able to see all ids
         [SuppressMessage("Threading", "VSTHRD002:Synchronously waiting on tasks or awaiters may cause deadlocks", Justification = "Callback must be synchronous to compile")]
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {

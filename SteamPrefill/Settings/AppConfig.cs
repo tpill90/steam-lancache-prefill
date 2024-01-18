@@ -27,6 +27,7 @@ namespace SteamPrefill.Settings
         }
 
         //TODO comment
+        //TODO maybe rename to debug?
         private static bool _enableSteamKitDebugLogs;
         public static bool EnableSteamKitDebugLogs
         {
@@ -38,6 +39,9 @@ namespace SteamPrefill.Settings
                 // Enable verbose logs as well
                 VerboseLogs = true;
                 AnsiConsoleExtensions.WriteVerboseLogs = value;
+
+                // Used for debugging, when --debug is used Steam metadata will be dumped to these folders
+                Directory.CreateDirectory($@"{DebugOutputDir}\AppInfo");
             }
         }
 
@@ -81,6 +85,12 @@ namespace SteamPrefill.Settings
 
         //TODO comment
         public static readonly string CachedCellIdPath = Path.Combine(CacheDir, "cellId.txt");
+
+        #endregion
+
+        #region Debugging File Paths
+
+        public static readonly string DebugOutputDir = Path.Combine(CacheDir, "Debugging");
 
         #endregion
     }

@@ -111,6 +111,8 @@
             foreach (var app in appInfos)
             {
                 LoadedAppInfos.TryAdd(app.ID, new AppInfo(_steam3Session, app.ID, app.KeyValues));
+
+                app.KeyValues.WriteDebugFiles($@"{AppConfig.DebugOutputDir}\AppInfo\AppInfo_{app.ID}.txt");
             }
         }
 
