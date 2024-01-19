@@ -232,4 +232,13 @@ namespace SteamPrefill.CliCommands.Benchmark
             return Host;
         }
     }
+
+    //TODO document
+    [UsedImplicitly(ImplicitUseTargetFlags.Members)]
+    [Intellenum(typeof(string))]
+    public sealed partial class PresetWorkload
+    {
+        public static readonly PresetWorkload Destiny2 = new PresetWorkload("1085660");
+        public static readonly PresetWorkload Dota2 = new PresetWorkload("570");
+    }
 }

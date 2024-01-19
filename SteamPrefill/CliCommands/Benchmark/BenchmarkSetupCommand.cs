@@ -1,8 +1,6 @@
 ﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
 namespace SteamPrefill.CliCommands.Benchmark
 {
-    //TODO add preset for destiny and dota
-
     [UsedImplicitly]
     [Command("benchmark setup", Description = "Configures a benchmark workload from multiple apps.  Benchmark workload is static, and portable between machines.")]
     public class BenchmarkSetupCommand : ICommand
@@ -16,16 +14,19 @@ namespace SteamPrefill.CliCommands.Benchmark
         [CommandOption("use-selected", Description = "Includes apps selected using 'select-apps' in the benchmark workload file", Converter = typeof(NullableBoolConverter))]
         public bool? UseSelectedApps { get; init; }
 
-        [CommandOption("nocache",
-            Description = "Skips using locally cached manifests.  Saves disk space, at the expense of slower subsequent runs.",
-            Converter = typeof(NullableBoolConverter))]
-        public bool? NoLocalCache { get; init; }
-
         [CommandOption("no-ansi",
             Description = "Application output will be in plain text.  " +
                           "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
             Converter = typeof(NullableBoolConverter))]
         public bool? NoAnsiEscapeSequences { get; init; }
+
+        [CommandOption("preset",
+            Description = "Sets up a benchmark with one or more preset workloads, with differing performance characteristics. Can be Destiny2/Dota2",
+            Converter = typeof(PresetWorkloadConverter),
+            Validators = new[] { typeof(PresetWorkloadValidator) })]
+        public IReadOnlyList<PresetWorkload> Presets { get; init; } = new List<PresetWorkload> { };
+
+        private List<uint> PresetAppIds => Presets.Select(e => UInt32.Parse(e)).ToList();
 
         private IAnsiConsole _ansiConsole;
 
@@ -37,16 +38,16 @@ namespace SteamPrefill.CliCommands.Benchmark
 
             var downloadArgs = new DownloadArguments
             {
-                NoCache = NoLocalCache ?? false
+                NoCache = AppConfig.NoLocalCache
             };
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
-
             ValidateUserHasSelectedApps(steamManager);
 
             try
             {
+                var combinedAppIds = PresetAppIds.Union(AppIds).ToList();
                 await steamManager.InitializeAsync();
-                await steamManager.SetupBenchmarkAsync(AppIds.ToList(), BenchmarkAllOwnedApps ?? false, UseSelectedApps ?? false);
+                await steamManager.SetupBenchmarkAsync(combinedAppIds, BenchmarkAllOwnedApps ?? false, UseSelectedApps ?? false);
             }
             finally
             {
@@ -60,6 +61,10 @@ namespace SteamPrefill.CliCommands.Benchmark
             var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
 
             if (AppIds != null && AppIds.Any())
+            {
+                return;
+            }
+            if (Presets.Any())
             {
                 return;
             }

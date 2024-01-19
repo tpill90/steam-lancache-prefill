@@ -49,4 +49,35 @@
             return Ok();
         }
     }
+
+    //TODO this pattern of these two is burdensome and difficult to understand.  Can this be abstracted at all?
+    //TODO comment
+    public sealed class PresetWorkloadValidator : BindingValidator<PresetWorkload[]>
+    {
+        public override BindingValidationError Validate(PresetWorkload[] value)
+        {
+            if (value.Length == 0)
+            {
+                AnsiConsole.MarkupLine(Red($"A preset must be specified when using {LightYellow("--preset")}"));
+                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("Destiny2/Dota2")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return Ok();
+        }
+    }
+
+    //TODO document
+    public sealed class PresetWorkloadConverter : BindingConverter<PresetWorkload>
+    {
+        public override PresetWorkload Convert(string rawValue)
+        {
+            if (!PresetWorkload.TryFromName(rawValue, out var _))
+            {
+                AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid preset"));
+                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("Destiny2/Dota2")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return PresetWorkload.FromName(rawValue);
+        }
+    }
 }
