@@ -93,5 +93,10 @@ namespace SteamPrefill.Settings
         public static readonly string DebugOutputDir = Path.Combine(CacheDir, "Debugging");
 
         #endregion
+
+        /// <summary>
+        /// Skips using locally cached manifests. Saves disk space, at the expense of slower subsequent runs.  Intended for debugging.
+        /// </summary>
+        public static bool NoLocalCache { get; set; }
     }
 }

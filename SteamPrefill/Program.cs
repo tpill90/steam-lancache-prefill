@@ -81,6 +81,15 @@ namespace SteamPrefill
                 args.Remove("--no-download");
             }
 
+            // Skips using locally cached manifests. Saves disk space, at the expense of slower subsequent runs.
+            // Useful for debugging since the manifests will always be re-downloaded.
+            if (args.Any(e => e.Contains("--nocache")))
+            {
+                AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--nocache")} flag.  Will always re-download manifests...");
+                AppConfig.SkipDownloads = true;
+                args.Remove("--nocache");
+            }
+
             // Adding some formatting to logging to make it more readable + clear that these flags are enabled
             if (AppConfig.EnableSteamKitDebugLogs || AppConfig.SkipDownloads)
             {
