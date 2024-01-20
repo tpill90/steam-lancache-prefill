@@ -29,11 +29,6 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(OperatingSystemConverter), Validators = new[] { typeof(OperatingSystemValidator) })]
         public IReadOnlyList<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
 
-        [CommandOption("nocache",
-            Description = "Skips using locally cached manifests. Saves disk space, at the expense of slower subsequent runs.",
-            Converter = typeof(NullableBoolConverter))]
-        public bool? NoLocalCache { get; init; }
-
         [CommandOption("verbose", Description = "Produces more detailed log output. Will output logs for games are already up to date.", Converter = typeof(NullableBoolConverter))]
         public bool? Verbose
         {
@@ -66,7 +61,7 @@ namespace SteamPrefill.CliCommands
             var downloadArgs = new DownloadArguments
             {
                 Force = Force ?? default(bool),
-                NoCache = NoLocalCache ?? default(bool),
+                NoCache = AppConfig.NoLocalCache,
                 TransferSpeedUnit = TransferSpeedUnit,
                 OperatingSystems = OperatingSystems.ToList()
             };
