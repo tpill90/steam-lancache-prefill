@@ -42,12 +42,16 @@ After=remote-fs.target
 Wants=remote-fs.target
 
 [Service]
-Type=oneshot
-# Sets the job to the lowest priority
-Nice=19
 User=# Replace with your username
-WorkingDirectory=# Set this to the directory where {{prefillName}} is installed.  E.g /home/tim/Prefills
-ExecStart=# Set this to match your working directory from the line above.  E.g. /home/tim/Prefills/{{prefillName}} prefill --no-ansi
+
+# Set this to the directory where {{prefillName}} is installed. 
+WorkingDirectory=# Example : /home/tim/{{prefillName}}
+
+# This should be the full path to SteamPrefill, as well as any additional option flags
+ExecStart= # Example: /home/tim/{{prefillName}}/{{prefillName}} prefill --no-ansi
+
+Type=oneshot
+Nice=19
 
 [Install]
 WantedBy=multi-user.target
@@ -56,8 +60,7 @@ WantedBy=multi-user.target
 Once these two files are setup, you can enable the scheduled job with:
 ```
 sudo systemctl daemon-reload
-sudo systemctl enable {{prefillName.lower()}}.timer
-sudo systemctl start {{prefillName.lower()}}.timer
+sudo systemctl enable --now {{prefillName.lower()}}.timer
 sudo systemctl enable {{prefillName.lower()}}
 ```
 
