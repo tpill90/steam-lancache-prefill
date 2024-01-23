@@ -16,10 +16,7 @@
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
 
-            _client = new HttpClient
-            {
-                Timeout = AppConfig.SteamKitRequestTimeout
-            };
+            _client = new HttpClient();
             _client.DefaultRequestHeaders.Add("User-Agent", "Valve/Steam HTTP Client 1.0");
         }
 
@@ -67,12 +64,10 @@
             return false;
         }
 
-
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
         /// </summary>
         /// <returns>A list of failed requests</returns>
-        [SuppressMessage("Reliability", "CA2016:Forward the 'CancellationToken' parameter to methods", Justification = "Don't have a need to cancel")]
         public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload, DownloadArguments downloadArgs)
         {
             double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
@@ -81,29 +76,29 @@
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             var cdnServer = _cdnPool.TakeConnection();
-            //TODO consider wrapping each parallel task in another timeout to see if it fixes peoples hanging issues
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, async (request, _) =>
+            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, body: async (request, _) =>
             {
-                var buffer = new byte[4096];
                 try
                 {
                     var url = $"http://{_lancacheAddress}/depot/{request.DepotId}/chunk/{request.ChunkId}";
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                     requestMessage.Headers.Host = cdnServer.Host;
 
-                    var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead);
-                    using Stream responseStream = await response.Content.ReadAsStreamAsync();
+                    using var cts = new CancellationTokenSource();
+                    using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                    using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
                     response.EnsureSuccessStatusCode();
 
                     // Don't save the data anywhere, so we don't have to waste time writing it to disk.
-                    while (await responseStream.ReadAsync(buffer, 0, buffer.Length, _) != 0)
+                    var buffer = new byte[4096];
+                    while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
                     {
                     }
                 }
                 catch (Exception e)
                 {
+                    _ansiConsole.LogMarkupLine($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed : {e.GetType().ToString()}");
                     failedRequests.Add(request);
-                    FileLogger.LogExceptionNoStackTrace($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed", e);
                 }
                 progressTask.Increment(request.CompressedLength);
             });

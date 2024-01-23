@@ -32,7 +32,8 @@ space_between_attribute_sections = false
 
 # CA1002: Do not expose generic lists
 dotnet_diagnostic.CA1002.severity = none
-# CA1008: Enums should have zero value - The enums in this case are modeling Steam enums.
+# CA1008: Enums should have zero value
+# - The enums in this case are modeling Steam enums, so I have to match them exactly.
 dotnet_diagnostic.CA1008.severity = none
 # CA1014: Mark assemblies with CLSCompliant
 dotnet_diagnostic.CA1014.severity = none
@@ -40,6 +41,7 @@ dotnet_diagnostic.CA1014.severity = none
 dotnet_diagnostic.CA1031.severity = none
 # CA1034: Nested types should not be visible
 dotnet_diagnostic.CA1034.severity = none
+
 # CA1051: Do not declare visible instance fields
 dotnet_diagnostic.CA1051.severity = none
 # CA1054: URI parameters should not be strings
@@ -57,7 +59,6 @@ dotnet_diagnostic.CA1310.severity = none
 dotnet_diagnostic.CA1815.severity = none
 # CA1822: Member does not access instance data and can be marked as static
 dotnet_diagnostic.CA1822.severity = none
-dotnet_diagnostic.CA1835.severity = none
 
 # CA1854: Prefer the IDictionary.TryGetValue(TKey, out TValue) method
 # - I'm not worried about performance in this application where ContainsKey() is being used, and I like the current syntax as far as readability
