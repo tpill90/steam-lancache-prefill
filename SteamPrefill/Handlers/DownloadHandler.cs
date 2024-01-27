@@ -46,11 +46,11 @@
                 failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs);
 
                 // Handle any failed requests
-                while (failedRequests.Any() && retryCount < 3)
+                while (failedRequests.Any() && retryCount < 2)
                 {
                     retryCount++;
                     await Task.Delay(2000 * retryCount);
-                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList(), downloadArgs);
+                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList(), downloadArgs, forceRecache: true);
                 }
             });
 
@@ -64,11 +64,14 @@
             return false;
         }
 
+        //TODO I don't like the number of parameters here, should maybe rethink the way this is written.
         /// <summary>
-        /// Attempts to download the specified requests.  Returns a list of any requests that have failed.
+        /// Attempts to download the specified requests.  Returns a list of any requests that have failed for any reason.
         /// </summary>
+        /// <param name="forceRecache">When specified, will cause the cache to delete the existing cached data for a request, and redownload it again.</param>
         /// <returns>A list of failed requests</returns>
-        public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload, DownloadArguments downloadArgs)
+        public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload,
+                                                                                DownloadArguments downloadArgs, bool forceRecache = false)
         {
             double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
@@ -81,6 +84,10 @@
                 try
                 {
                     var url = $"http://{_lancacheAddress}/depot/{request.DepotId}/chunk/{request.ChunkId}";
+                    if (forceRecache)
+                    {
+                        url += "?nocache=1";
+                    }
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                     requestMessage.Headers.Host = cdnServer.Host;
 
@@ -97,12 +104,14 @@
                 }
                 catch (Exception e)
                 {
-                    _ansiConsole.LogMarkupLine($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed : {e.GetType().ToString()}");
                     failedRequests.Add(request);
+                    _ansiConsole.LogMarkupLine(Red($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed : {e.GetType()}"));
+                    FileLogger.LogExceptionNoStackTrace($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed", e);
                 }
                 progressTask.Increment(request.CompressedLength);
             });
 
+            //TODO In the scenario where a user still had all requests fail, potentially display a warning that there is an underlying issue
             // Only return the connections for reuse if there were no errors
             if (failedRequests.IsEmpty)
             {
