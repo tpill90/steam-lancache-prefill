@@ -50,7 +50,7 @@ namespace SteamPrefill.Handlers.Steam
             _ansiConsole = ansiConsole;
 
             _steamClient = new SteamClient(SteamConfiguration.Create(e => e.WithCellID(CellId)
-                                                                                                 .WithConnectionTimeout(AppConfig.SteamKitRequestTimeout)));
+                                                                                                 .WithConnectionTimeout(TimeSpan.FromSeconds(60))));
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             SteamContent = _steamClient.GetHandler<SteamContent>();
@@ -81,8 +81,7 @@ namespace SteamPrefill.Handlers.Steam
 
             CdnClient = new Client(_steamClient);
             // Configuring SteamKit's HttpClient to timeout in a more reasonable time frame.  This is only used when downloading manifests
-            Client.ResponseBodyTimeout = AppConfig.SteamKitRequestTimeout;
-            Client.RequestTimeout = AppConfig.SteamKitRequestTimeout;
+            Client.RequestTimeout = TimeSpan.FromSeconds(60);
 
             _userAccountStore = UserAccountStore.LoadFromFile();
             LicenseManager = new LicenseManager(SteamAppsApi);
