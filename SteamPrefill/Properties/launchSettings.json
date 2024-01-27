@@ -20,9 +20,9 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --force --verbose"
     },
-    "Benchmark - Setup Ids - Best Case Workload": {
+    "Benchmark - Setup - Preset": {
       "commandName": "Project",
-      "commandLineArgs": "benchmark setup --appid 1085660"
+      "commandLineArgs": "benchmark setup --preset Destiny2"
     },
     "Benchmark - Setup - All": {
       "commandName": "Project",

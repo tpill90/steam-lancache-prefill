@@ -25,12 +25,13 @@ Intended for use in identifying potential bottlenecks both server side (usually 
 Creates a benchmark "workload" comprised of multiple apps, that will then be benchmarked using the `run` sub-command.  Generally, the ideal benchmark will be the one that most closely matches the apps that you will usually be downloaded.  This can be setup for example with `./SteamPrefill benchmark setup --use-selected`
 
 <!-- Markdown columns determine width based on the the longest cell.  &nbsp; forces the length to be longer, so --use-selected doesn't get broken into two lines  -->
-| Option   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  |     |
-| ---------------- | --- |
-| --use-selected | Creates a workload file using apps previously specified with `select-apps`.  Ideal for most use cases, since it likely aligns with games that will be downloaded by real event clients. |
-| --all          | Benchmark workload will be created using all currently owned apps.  |
-| --appid        | The id of one or more apps to include in benchmark workload file.  Useful for testing a specific app, without having to modify previously selected apps.  AppIds can be found using [SteamDB](https://steamdb.info/)  |
-| --no-ansi      |      Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
+| Option   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | Values |     |
+| ---------------- | --- | --- |
+| --use-selected |  | Creates a workload file using apps previously specified with `select-apps`.  Ideal for most use cases, since it likely aligns with games that will be downloaded by real event clients. |
+| --all          |  | Benchmark workload will be created using all currently owned apps.  |
+| --appid        |  | The id of one or more apps to include in benchmark workload file.  Useful for testing a specific app, without having to modify previously selected apps.  AppIds can be found using [SteamDB](https://steamdb.info/)  |
+| --no-ansi      |  |     Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
+| --preset    | Dota2, Destiny2 |  Can be used to quickly setup a benchmark with a predefined workload of differing characteristics.  Destiny2 represents a best case scenario where chunk sizes are close to 1Mib, whereas Dota2 is a worst case scenario of small files. |
 
 -----
 
