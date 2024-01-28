@@ -8,14 +8,6 @@ namespace SteamPrefill.Settings
     [ProtoContract(SkipConstructor = true)]
     public sealed class UserAccountStore
     {
-        //TODO deprecated, remove in the future, say 2023/07/01
-        [ProtoMember(1)]
-        public Dictionary<string, byte[]> SentryData { get; private set; }
-
-        //TODO deprecated, remove in the future, say 2023/07/01
-        [ProtoMember(2)]
-        public Dictionary<string, string> SessionTokens { get; private set; }
-
         //TODO can I restrict using this getter? since there is already a method
         [ProtoMember(3)]
         public string CurrentUsername { get; private set; }
@@ -36,9 +28,6 @@ namespace SteamPrefill.Settings
         [SuppressMessage("Security", "CA5394:Random is an insecure RNG", Justification = "Security doesn't matter here, as all that is needed is a unique id.")]
         private UserAccountStore()
         {
-            SentryData = new Dictionary<string, byte[]>();
-            SessionTokens = new Dictionary<string, string>();
-
             var random = new Random();
             SessionId = (uint)random.Next(0, 16384);
         }
@@ -90,7 +79,6 @@ namespace SteamPrefill.Settings
 
         #region Serialization
 
-        //TODO this adds about 100ms to each run
         public static UserAccountStore LoadFromFile()
         {
             if (!File.Exists(AppConfig.AccountSettingsStorePath))
