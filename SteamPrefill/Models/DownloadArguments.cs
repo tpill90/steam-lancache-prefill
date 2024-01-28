@@ -7,6 +7,7 @@
         /// </summary>
         public bool Force { get; init; }
 
+        //TODO this should probably just use the global static one from AppConfig
         /// <summary>
         /// When set to true, will avoid saving as much data to disk as possible.  Currently only saves manifests to disk.
         /// </summary>
