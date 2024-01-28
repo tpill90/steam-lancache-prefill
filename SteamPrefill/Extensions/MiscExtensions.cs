@@ -1,8 +1,7 @@
-﻿namespace SteamPrefill.Utils
+﻿namespace SteamPrefill.Extensions
 {
     public static class MiscExtensions
     {
-        //TODO rename to IsEmpty
         public static bool Empty<T>(this IEnumerable<T> enumerable)
         {
             return !enumerable.Any();

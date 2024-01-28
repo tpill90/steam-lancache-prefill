@@ -23,7 +23,6 @@
             return _userLicenses.OwnedAppIds.Contains(appid);
         }
 
-        //TODO write test for all 3 of these conditions
         /// <summary>
         /// Checks against the list of currently owned depots + apps to determine if the user is able to download this depot.
         /// There are 3 cases that a depot is considered owned :

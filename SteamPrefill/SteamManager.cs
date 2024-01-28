@@ -133,7 +133,6 @@
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
             if (filteredDepots.Empty())
             {
-                //TODO add to summary output?
                 _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {LightYellow("No depots to download.  Current arguments filtered all depots")}");
                 return;
             }
@@ -152,7 +151,6 @@
             await _cdnPool.PopulateAvailableServersAsync();
 
             // Get the full file list for each depot, and queue up the required chunks
-            //TODO not a fan of having to do the status spinner here instead of inside the manifest handler
             List<QueuedRequest> chunkDownloadQueue = null;
             await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
             {
@@ -308,8 +306,6 @@
                 var gamesToUse = await _appInfoHandler.GetAvailableGamesByIdAsync(appIds);
                 var overallProgressTask = ctx.AddTask("Processing games..".PadLeft(30), new ProgressTaskSettings { MaxValue = gamesToUse.Count });
 
-                //TODO add a retry loop + handle errors
-                //TODO figure out what happens if there are less than 5 cdns to use
                 await Parallel.ForEachAsync(gamesToUse, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (appInfo, _) =>
                 {
                     var individualProgressTask = ctx.AddTask($"{Cyan(appInfo.Name.Truncate(30).PadLeft(30))}");
