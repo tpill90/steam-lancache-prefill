@@ -25,6 +25,7 @@
 
         public static readonly Language Hungarian = new("hungarian");
         public static readonly Language Italian = new("italian");
+        public static readonly Language Indonesian = new("indonesian");
         public static readonly Language Japanese = new("japanese");
         public static readonly Language Korean = new("koreana");
         public static readonly Language Latam = new("latam");
