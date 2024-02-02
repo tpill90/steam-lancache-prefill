@@ -9,7 +9,7 @@
     ///
     /// https://steamdb.info/blog/manifest-request-codes/ 
     /// </summary>
-    public class ManifestRequestCode
+    public sealed class ManifestRequestCode
     {
         public ulong Code { get; set; }
         public DateTime RetrievedAt { get; set; }

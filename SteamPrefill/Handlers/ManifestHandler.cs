@@ -117,7 +117,7 @@
             _cdnPool.ReturnConnection(server);
 
             var protoManifest = new Manifest(manifest, depot);
-            if (_downloadArguments.NoCache)
+            if (AppConfig.NoLocalCache)
             {
                 return protoManifest;
             }
@@ -160,7 +160,7 @@
 
         private bool ManifestIsCached(DepotInfo depot)
         {
-            return !_downloadArguments.NoCache && File.Exists(depot.ManifestFileName);
+            return !AppConfig.NoLocalCache && File.Exists(depot.ManifestFileName);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace SteamPrefill.Models
+﻿using Serializer = ProtoBuf.Serializer;
+
+namespace SteamPrefill.Models
 {
     [ProtoContract]
     public sealed class Manifest

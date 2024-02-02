@@ -68,7 +68,7 @@
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed for any reason.
         /// </summary>
-        /// <param name="forceRecache">When specified, will cause the cache to delete the existing cached data for a request, and redownload it again.</param>
+        /// <param name="forceRecache">When specified, will cause the cache to delete the existing cached data for a request, and re-download it again.</param>
         /// <returns>A list of failed requests</returns>
         public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload,
                                                                                 DownloadArguments downloadArgs, bool forceRecache = false)

@@ -8,9 +8,8 @@ namespace SteamPrefill.Settings
     [ProtoContract(SkipConstructor = true)]
     public sealed class UserAccountStore
     {
-        //TODO can I restrict using this getter? since there is already a method
         [ProtoMember(3)]
-        public string CurrentUsername { get; private set; }
+        private string CurrentUsername { get; set; }
 
         /// <summary>
         /// Used to identify separate instances of Steam/SteamPrefill on the Steam network.
@@ -40,7 +39,7 @@ namespace SteamPrefill.Settings
         /// </summary>
         public async Task<string> GetUsernameAsync(IAnsiConsole ansiConsole)
         {
-            if (!String.IsNullOrEmpty(CurrentUsername))
+            if (!string.IsNullOrEmpty(CurrentUsername))
             {
                 return CurrentUsername;
             }
@@ -51,7 +50,7 @@ namespace SteamPrefill.Settings
 
         public bool AccessTokenIsValid()
         {
-            if (String.IsNullOrEmpty(AccessToken))
+            if (string.IsNullOrEmpty(AccessToken))
             {
                 return false;
             }

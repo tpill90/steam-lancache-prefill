@@ -2,7 +2,6 @@
 
 namespace SteamPrefill.CliCommands.Benchmark
 {
-    //TODO comment
     [ProtoContract(SkipConstructor = true)]
     public sealed class BenchmarkWorkload
     {
@@ -138,7 +137,6 @@ namespace SteamPrefill.CliCommands.Benchmark
 
         #endregion
 
-        //TODO this could actually likely be generic
         #region Serialization
 
         public static BenchmarkWorkload LoadFromFile(string filename)
@@ -233,7 +231,12 @@ namespace SteamPrefill.CliCommands.Benchmark
         }
     }
 
-    //TODO document
+    /// <summary>
+    /// Defines available preset workloads, which consist of a single app.  These apps were chosen since they are free and are available by every account.
+    /// Each app has differing performance characteristics:
+    /// Destiny 2 is as close to an ideal workload as possible, as nearly all of its chunks are 1mb or larger.
+    /// Dota 2 is a worst case workload, as the chunks are very small
+    /// </summary>
     [UsedImplicitly(ImplicitUseTargetFlags.Members)]
     [Intellenum(typeof(string))]
     public sealed partial class PresetWorkload

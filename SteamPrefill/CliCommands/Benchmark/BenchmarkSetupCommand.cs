@@ -36,11 +36,7 @@ namespace SteamPrefill.CliCommands.Benchmark
             // Property must be set to false in order to disable ansi escape sequences
             _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
-            var downloadArgs = new DownloadArguments
-            {
-                NoCache = AppConfig.NoLocalCache
-            };
-            using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
+            using var steamManager = new SteamManager(_ansiConsole, new DownloadArguments());
             ValidateUserHasSelectedApps(steamManager);
 
             try

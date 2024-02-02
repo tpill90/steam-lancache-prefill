@@ -47,20 +47,28 @@
             return await promptTask.WaitAsync(TimeSpan.FromSeconds(30));
         }
 
-        //TODO comment
-        public static void WriteDebugFiles(this KeyValue rootKeyValue, string path)
+        /// <summary>
+        /// Steam returns a large amount of metadata, which can be difficult to sift through using the debugger.  This metadata will be
+        /// dumped to disk, so that it can be viewed in a text editor easily.
+        /// </summary>
+        public static void WriteSteamMetadataToDisk(this KeyValue rootKeyValue, string filePath)
         {
-            if (!AppConfig.EnableSteamKitDebugLogs)
+            if (!AppConfig.DebugLogs)
+            {
+                return;
+            }
+            if (File.Exists(filePath))
             {
                 return;
             }
 
-            if (File.Exists(path))
+            var rootDir = Path.GetDirectoryName(filePath);
+            if (!Directory.Exists(rootDir))
             {
-                return;
+                Directory.CreateDirectory(rootDir);
             }
 
-            rootKeyValue.SaveToFile(path, false);
+            rootKeyValue.SaveToFile(filePath, false);
         }
     }
 }

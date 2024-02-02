@@ -276,7 +276,7 @@ namespace SteamPrefill.Handlers.Steam
             }
             if (loggedOn.Result == EResult.ServiceUnavailable)
             {
-                throw new SteamLoginException($"Unable to login to Steam : Service is unavailable");
+                throw new SteamLoginException("Unable to login to Steam : Service is unavailable");
             }
             if (loggedOn.Result != EResult.OK)
             {
@@ -339,7 +339,7 @@ namespace SteamPrefill.Handlers.Steam
             });
         }
 
-        private void LicenseListCallback(SteamApps.LicenseListCallback licenseList)
+        private void LicenseListCallback(LicenseListCallback licenseList)
         {
             var timer = Stopwatch.StartNew();
 

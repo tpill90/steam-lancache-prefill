@@ -113,7 +113,7 @@
             return filteredDepots;
         }
 
-        //TODO comment
+        //TODO document how this works, and why its needed
         public async Task BuildLinkedDepotInfoAsync(List<DepotInfo> depots)
         {
             foreach (var depotInfo in depots.Where(e => e.ManifestId == null))

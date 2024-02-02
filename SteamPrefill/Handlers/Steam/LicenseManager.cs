@@ -40,7 +40,6 @@
             return _userLicenses.OwnedDepotIds.Contains(depotId) || _userLicenses.OwnedAppIds.Contains(depotId);
         }
 
-        //TODO serialize the data in this method in a file in the \Debugging folder so that its easier to debug by being able to see all ids
         [SuppressMessage("Threading", "VSTHRD002:Synchronously waiting on tasks or awaiters may cause deadlocks", Justification = "Callback must be synchronous to compile")]
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
@@ -60,14 +59,11 @@
                                         .OrderBy(e => e.Id)
                                         .ToList();
 
-            // TODO why am I using this field, vs just calling OwnedPackageIds.Length?
-            _userLicenses.LicenseCount = nonExpiredLicenses.Count;
             _userLicenses.OwnedPackageIds.AddRange(packageInfos.Select(e => e.Id).ToList());
 
             // Handling packages that are normally purchased or added via cd-key
             foreach (var package in packageInfos)
             {
-                //TODO is this necessary anymore with the new expired license check?
                 // Removing any free weekends that are no longer active
                 if (package.IsFreeWeekend && package.FreeWeekendHasExpired)
                 {
@@ -79,15 +75,14 @@
             }
         }
     }
-
-    [SuppressMessage("Usage", "CA2227:Change to be read-only by removing property setter", Justification = "Properties must have setters for source generator deserializer to work")]
+    
     public sealed class UserLicenses
     {
-        public int LicenseCount { get; set; }
+        public int LicenseCount => OwnedPackageIds.Count;
 
-        public HashSet<uint> OwnedPackageIds { get; set; } = new HashSet<uint>();
-        public HashSet<uint> OwnedAppIds { get; set; } = new HashSet<uint>();
-        public HashSet<uint> OwnedDepotIds { get; set; } = new HashSet<uint>();
+        public HashSet<uint> OwnedPackageIds { get; } = new HashSet<uint>();
+        public HashSet<uint> OwnedAppIds { get; } = new HashSet<uint>();
+        public HashSet<uint> OwnedDepotIds { get; } = new HashSet<uint>();
 
         public override string ToString()
         {
