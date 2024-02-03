@@ -22,7 +22,7 @@
     },
     "Benchmark - Setup - Preset": {
       "commandName": "Project",
-      "commandLineArgs": "benchmark setup --preset Destiny2"
+      "commandLineArgs": "benchmark setup -h"
     },
     "Benchmark - Setup - All": {
       "commandName": "Project",

@@ -234,7 +234,7 @@ namespace SteamPrefill.CliCommands.Benchmark
     [Intellenum(typeof(string))]
     public sealed partial class PresetWorkload
     {
-        public static readonly PresetWorkload Destiny2 = new PresetWorkload("1085660");
-        public static readonly PresetWorkload Dota2 = new PresetWorkload("570");
+        public static readonly PresetWorkload BigChunks = new PresetWorkload("1085660");
+        public static readonly PresetWorkload SmallChunks = new PresetWorkload("570");
     }
 }

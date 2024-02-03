@@ -21,7 +21,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         public bool? NoAnsiEscapeSequences { get; init; }
 
         [CommandOption("preset",
-            Description = "Sets up a benchmark with one or more preset workloads, with differing performance characteristics. Can be Destiny2/Dota2",
+            Description = "Sets up a benchmark with one or more preset workloads, with differing performance characteristics. Can be SmallChunks/BigChunks",
             Converter = typeof(PresetWorkloadConverter),
             Validators = new[] { typeof(PresetWorkloadValidator) })]
         public IReadOnlyList<PresetWorkload> Presets { get; init; } = new List<PresetWorkload> { };
