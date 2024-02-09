@@ -346,5 +346,83 @@
         }
 
         #endregion
+
+        #region Status
+
+        public async Task CurrentlyDownloadedAsync(SortOrder sortOrder, string sortColumn)
+        {
+            await _cdnPool.PopulateAvailableServersAsync();
+
+            // Pre-Load all selected apps and their manifests
+            List<uint> appIds = LoadPreviouslySelectedApps();
+            await _appInfoHandler.RetrieveAppMetadataAsync(appIds);
+
+            ByteSize totalSize = new ByteSize();
+            Dictionary<string, ByteSize> index = new Dictionary<string, ByteSize>();
+
+            var timer = Stopwatch.StartNew();
+            _ansiConsole.LogMarkupLine("Loading Manifests");
+            foreach (uint appId in appIds)
+            {
+                AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+
+                var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
+                await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+
+                var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
+                var size = ByteSize.FromBytes(allChunksForApp.Sum(e => e.CompressedLength));
+                totalSize += size;
+
+                index.Add(appInfo.Name, size);
+            }
+            _ansiConsole.LogMarkupLine("Manifests Loaded", timer);
+
+            var table = new Table { Border = TableBorder.MinimalHeavyHead };
+            table.AddColumns(new TableColumn("App"), new TableColumn("Size"));
+
+            foreach (KeyValuePair<string, ByteSize> data in SortData(index, sortOrder, sortColumn))
+            {
+                string appName = data.Key;
+                ByteSize size = data.Value;
+                table.AddRow(appName, size.ToDecimalString());
+            }
+
+            table.AddEmptyRow();
+            table.AddRow("Total Size", totalSize.ToDecimalString());
+
+            _ansiConsole.Write(table);
+        }
+
+        private IOrderedEnumerable<KeyValuePair<string, ByteSize>> SortData(
+            Dictionary<string, ByteSize> index,
+            SortOrder sortOrder,
+            string sortColumn)
+        {
+            if (sortOrder == SortOrder.Ascending)
+            {
+                if (sortColumn.Equals("app", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderBy(o => o.Key);
+                }
+                else if (sortColumn.Equals("size", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderBy(o => o.Value);
+                }
+            }
+            else if (sortOrder == SortOrder.Descending)
+            {
+                if (sortColumn.Equals("app", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderByDescending(o => o.Key);
+                }
+                else if (sortColumn.Equals("size", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderByDescending(o => o.Value);
+                }
+            }
+            return index.OrderBy(o => o.Key);
+        }
+
+        #endregion
     }
 }

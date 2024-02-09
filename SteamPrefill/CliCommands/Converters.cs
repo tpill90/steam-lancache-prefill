@@ -80,4 +80,49 @@
             return PresetWorkload.FromName(rawValue);
         }
     }
+
+    public sealed class SortOrderValidator : BindingValidator<SortOrder>
+    {
+        public override BindingValidationError Validate(SortOrder value)
+        {
+            if (value == null)
+            {
+                AnsiConsole.MarkupLine(Red($"A sort order must be specified when using {LightYellow("--sort-order")}"));
+                AnsiConsole.Markup(Red($"Valid sort orders include : {LightYellow("ascending/descending")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return Ok();
+        }
+    }
+
+    public sealed class SortOrderConverter : BindingConverter<SortOrder>
+    {
+        public override SortOrder Convert(string rawValue)
+        {
+            if (!SortOrder.TryFromValue(rawValue, out var _))
+            {
+                AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid sort order!"));
+                AnsiConsole.Markup(Red($"Valid sort orders include : {LightYellow("ascending/descending")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return SortOrder.FromValue(rawValue);
+        }
+    }
+
+    public sealed class SortColumnValidator : BindingValidator<string>
+    {
+        public override BindingValidationError Validate(string value)
+        {
+            if (string.IsNullOrEmpty(value)
+                && (!value.Equals("app", StringComparison.OrdinalIgnoreCase)
+                || !value.Equals("size", StringComparison.OrdinalIgnoreCase)))
+            {
+                AnsiConsole.MarkupLine($"Test: {value}");
+                AnsiConsole.MarkupLine(Red($"A sort column must be specified when using {LightYellow("--sort-column")}"));
+                AnsiConsole.Markup(Red($"Valid sort orders include : {LightYellow("app/size")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return Ok();
+        }
+    }
 }
