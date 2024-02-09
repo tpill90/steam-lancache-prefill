@@ -23,11 +23,13 @@ namespace SteamPrefill.CliCommands
             Validators = new [] { typeof(SortColumnValidator) })]
         public string SortColumn { get; init; } = "app";
 
+        private IAnsiConsole _ansiConsole;
+
         public async ValueTask ExecuteAsync(IConsole console)
         {
-            var ansiConsole = console.CreateAnsiConsole();
+            _ansiConsole = console.CreateAnsiConsole();
             // Property must be set to false in order to disable ansi escape sequences
-            ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
+            _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
             var downloadArgs = new DownloadArguments
             {
@@ -35,7 +37,9 @@ namespace SteamPrefill.CliCommands
                 OperatingSystems = OperatingSystems.ToList()
             };
 
-            using var steamManager = new SteamManager(ansiConsole, downloadArgs);
+            using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
+            ValidateUserHasSelectedApps(steamManager);
+
             try 
             {
                 await steamManager.InitializeAsync();
@@ -44,6 +48,21 @@ namespace SteamPrefill.CliCommands
             finally
             {
                 steamManager.Shutdown();
+            }
+        }
+
+        // Validates that the user has selected at least 1 app
+        private void ValidateUserHasSelectedApps(SteamManager steamManager)
+        {
+            var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
+
+            if (!userSelectedApps.Any())
+            {
+                // User hasn't selected any apps yet
+                _ansiConsole.MarkupLine(Red("No apps have been selected for benchmark! At least 1 app is required!"));
+                _ansiConsole.Markup(Red($"See flags {LightYellow("--appid")}, {LightYellow("--all")} and {LightYellow("--use-selected")} to interactively choose which apps to prefill"));
+
+                throw new CommandException(".", 1, true);
             }
         }
     }
