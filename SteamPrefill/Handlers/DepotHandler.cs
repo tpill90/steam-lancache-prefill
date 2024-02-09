@@ -114,6 +114,7 @@
         }
 
         //TODO comment
+        //TODO I don't like the fact that this has to be manually called in order to have things work correctly
         public async Task BuildLinkedDepotInfoAsync(List<DepotInfo> depots)
         {
             foreach (var depotInfo in depots.Where(e => e.ManifestId == null))

@@ -82,11 +82,12 @@ namespace SteamPrefill
 
             // Skips using locally cached manifests. Saves disk space, at the expense of slower subsequent runs.
             // Useful for debugging since the manifests will always be re-downloaded.
-            if (args.Any(e => e.Contains("--nocache")))
+            if (args.Any(e => e.Contains("--nocache")) || args.Any(e => e.Contains("--no-cache")))
             {
                 AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--nocache")} flag.  Will always re-download manifests...");
                 AppConfig.NoLocalCache = true;
                 args.Remove("--nocache");
+                args.Remove("--no-cache");
             }
 
             // Adding some formatting to logging to make it more readable + clear that these flags are enabled

@@ -200,11 +200,13 @@
             return userOwnedGames.Where(e => e.playtime_2weeks > 0).ToList();
         }
 
+        //TODO is this necessary because --all includes things that shouldn't be downloaded?
         /// <summary>
         /// Gets a list of available games, filtering out any unavailable, non-Windows games.
         /// </summary>
         public async Task<List<AppInfo>> GetAvailableGamesByIdAsync(List<uint> appIds)
         {
+            //TODO maybe a call to retreive app metadata async here so that you don't need to remember to do it manually
             var appInfos = new List<AppInfo>();
             foreach (var appId in appIds)
             {
