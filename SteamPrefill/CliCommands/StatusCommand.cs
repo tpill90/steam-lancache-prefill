@@ -2,7 +2,7 @@
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
-    [Command("status", Description = "Show all currently installed apps and the used disk space.")]
+    [Command("status", Description = "List all currently selected apps and the used disk space.")]
     public class StatusCommand : ICommand
     {
         [CommandOption("no-ansi",

@@ -11,7 +11,6 @@
         private readonly DownloadHandler _downloadHandler;
         private readonly DepotHandler _depotHandler;
         private readonly AppInfoHandler _appInfoHandler;
-        private readonly ManifestHandler _manifestHandler;
 
         private readonly PrefillSummaryResult _prefillSummaryResult = new PrefillSummaryResult();
 
@@ -31,7 +30,6 @@
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
             _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool, downloadArgs);
-            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3, downloadArgs);
         }
 
         #region Startup + Shutdown
@@ -355,7 +353,10 @@
         {
             await _cdnPool.PopulateAvailableServersAsync();
 
+            // Pre-Load all selected apps and their manifests
             List<uint> appIds = LoadPreviouslySelectedApps();
+            await _appInfoHandler.RetrieveAppMetadataAsync(appIds);
+
             ByteSize totalSize = new ByteSize();
             Dictionary<string, ByteSize> index = new Dictionary<string, ByteSize>();
 
@@ -368,9 +369,8 @@
                 var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
                 await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
 
-                var manifests = await _manifestHandler.GetAllManifestsAsync(filteredDepots);
-
-                var size = ByteSize.FromBytes(manifests.Sum(s1 => s1.Files.Sum(s2 => s2.Chunks.Sum(s3 => s3.CompressedLength))));
+                var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
+                var size = ByteSize.FromBytes(allChunksForApp.Sum(e => e.CompressedLength));
                 totalSize += size;
 
                 index.Add(appInfo.Name, size);
