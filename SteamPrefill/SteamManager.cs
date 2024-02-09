@@ -11,6 +11,7 @@
         private readonly DownloadHandler _downloadHandler;
         private readonly DepotHandler _depotHandler;
         private readonly AppInfoHandler _appInfoHandler;
+        private readonly ManifestHandler _manifestHandler;
 
         private readonly PrefillSummaryResult _prefillSummaryResult = new PrefillSummaryResult();
 
@@ -30,6 +31,7 @@
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
             _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool, downloadArgs);
+            _manifestHandler = new ManifestHandler(_ansiConsole, _cdnPool, _steam3, downloadArgs);
         }
 
         #region Startup + Shutdown
@@ -343,6 +345,79 @@
                 });
             });
             return new BenchmarkWorkload(queuedApps, _cdnPool.AvailableServerEndpoints);
+        }
+
+        #endregion
+
+        #region Status
+
+        public async Task CurrentlyDownloadedAsync(SortOrder sortOrder, string sortColumn)
+        {
+            await _cdnPool.PopulateAvailableServersAsync();
+
+            List<uint> appIds = LoadPreviouslySelectedApps();
+            ByteSize totalSize = new ByteSize();
+            Dictionary<string, ByteSize> index = new Dictionary<string, ByteSize>();
+
+            var timer = Stopwatch.StartNew();
+            _ansiConsole.LogMarkupLine("Loading Manifests");
+            foreach (uint appId in appIds)
+            {
+                AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+
+                var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
+                await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+
+                var manifests = await _manifestHandler.GetAllManifestsAsync(filteredDepots);
+
+                var size = ByteSize.FromBytes(manifests.Sum(s1 => s1.Files.Sum(s2 => s2.Chunks.Sum(s3 => s3.CompressedLength))));
+                totalSize += size;
+
+                index.Add(appInfo.Name, size);
+            }
+            _ansiConsole.LogMarkupLine("Manifests Loaded", timer);
+
+            var table = new Table { Border = TableBorder.MinimalHeavyHead };
+            table.AddColumns(new TableColumn("App"), new TableColumn("Size"));
+
+            foreach (KeyValuePair<string, ByteSize> data in SortData(index, sortOrder, sortColumn))
+            {
+                string appName = data.Key;
+                ByteSize size = data.Value;
+                table.AddRow(appName, size.ToDecimalString());
+            }
+
+            table.AddEmptyRow();
+            table.AddRow("Total Size", totalSize.ToDecimalString());
+
+            _ansiConsole.Write(table);
+        }
+
+        private IOrderedEnumerable<KeyValuePair<string, ByteSize>> SortData(
+            Dictionary<string, ByteSize> index, 
+            SortOrder sortOrder, 
+            string sortColumn)
+        {
+            if (sortOrder == SortOrder.Ascending)
+            {
+                if (sortColumn.Equals("app", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderBy(o => o.Key);
+                } else if (sortColumn.Equals("size", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderBy(o => o.Value);
+                }
+            } else if (sortOrder == SortOrder.Descending)
+            {
+                if (sortColumn.Equals("app", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderByDescending(o => o.Key);
+                } else if (sortColumn.Equals("size", StringComparison.OrdinalIgnoreCase))
+                {
+                    return index.OrderByDescending(o => o.Value);
+                }
+            }
+            return index.OrderBy(o => o.Key);
         }
 
         #endregion
