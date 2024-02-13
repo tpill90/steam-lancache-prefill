@@ -31,8 +31,7 @@ Creates a benchmark "workload" comprised of multiple apps, that will then be ben
 | --all          |  | Benchmark workload will be created using all currently owned apps.  |
 | --appid        |  | The id of one or more apps to include in benchmark workload file.  Useful for testing a specific app, without having to modify previously selected apps.  AppIds can be found using [SteamDB](https://steamdb.info/)  |
 | --no-ansi      |  |     Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
-| --preset    | Dota2, Destiny2 |  Can be used to quickly setup a benchmark with a predefined workload of differing characteristics.  Destiny2 represents a best case scenario where chunk sizes are close to 1Mib, whereas Dota2 is a worst case scenario of small files. |
-
+| --preset    | SmallChunks, LargeChunks |  Can be used to quickly setup a benchmark with a predefined workload of differing characteristics.  LargeChunks represents a best case scenario where chunk sizes are close to 1Mib, whereas SmallChunks is a worst case scenario of small files. |
 -----
 
 ## run

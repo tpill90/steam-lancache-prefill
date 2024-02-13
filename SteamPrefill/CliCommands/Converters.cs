@@ -66,7 +66,7 @@
             if (value.Length == 0)
             {
                 AnsiConsole.MarkupLine(Red($"A preset must be specified when using {LightYellow("--preset")}"));
-                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("Destiny2/Dota2")}"));
+                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
                 throw new CommandException(".", 1, true);
             }
             return Ok();
@@ -82,7 +82,7 @@
             if (!PresetWorkload.TryFromName(rawValue, out var _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid preset"));
-                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("Destiny2/Dota2")}"));
+                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
                 throw new CommandException(".", 1, true);
             }
             return PresetWorkload.FromName(rawValue);
