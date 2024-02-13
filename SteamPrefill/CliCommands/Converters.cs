@@ -1,5 +1,9 @@
 ﻿namespace SteamPrefill.CliCommands
 {
+    //TODO these need to have better documentation overall.  There are multiple "types" of these converters and validators, and they all cover different scenarios
+    //TODO go through all of these converters/validators and make sure their output messages are consistent between them all
+    #region Operating system
+
     /// <summary>
     /// Used to validate when an option flag has been specified, but no operating systems were specified.
     /// Ex. --os , should throw the validation error.
@@ -26,6 +30,7 @@
     {
         public override OperatingSystem Convert(string rawValue)
         {
+            //TODO case insensitive
             if (!OperatingSystem.TryFromValue(rawValue, out var _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid operating system!"));
@@ -35,6 +40,8 @@
             return OperatingSystem.FromValue(rawValue);
         }
     }
+
+    #endregion
 
     public sealed class ConcurrencyValidator : BindingValidator<uint>
     {
@@ -71,6 +78,7 @@
     {
         public override PresetWorkload Convert(string rawValue)
         {
+            //TODO case insensitive
             if (!PresetWorkload.TryFromName(rawValue, out var _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid preset"));
@@ -81,24 +89,21 @@
         }
     }
 
-    public sealed class SortOrderValidator : BindingValidator<SortOrder>
-    {
-        public override BindingValidationError Validate(SortOrder value)
-        {
-            if (value == null)
-            {
-                AnsiConsole.MarkupLine(Red($"A sort order must be specified when using {LightYellow("--sort-order")}"));
-                AnsiConsole.Markup(Red($"Valid sort orders include : {LightYellow("ascending/descending")}"));
-                throw new CommandException(".", 1, true);
-            }
-            return Ok();
-        }
-    }
+    #region Status command validators
 
     public sealed class SortOrderConverter : BindingConverter<SortOrder>
     {
         public override SortOrder Convert(string rawValue)
         {
+            // This will throw an error if a user specifies '--sort-order' but does not provide a value.
+            if (rawValue == null)
+            {
+                AnsiConsole.MarkupLine(Red($"A sort order must be provided when using {LightYellow("--sort-order")}"));
+                AnsiConsole.Markup(Red($"Valid sort orders include : {LightYellow("ascending/descending")}"));
+                throw new CommandException(".", 1, true);
+            }
+
+            rawValue = rawValue.ToLower();
             if (!SortOrder.TryFromValue(rawValue, out var _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid sort order!"));
@@ -109,20 +114,28 @@
         }
     }
 
-    public sealed class SortColumnValidator : BindingValidator<string>
+    public sealed class SortColumnConverter : BindingConverter<SortColumn>
     {
-        public override BindingValidationError Validate(string value)
+        public override SortColumn Convert(string rawValue)
         {
-            if (string.IsNullOrEmpty(value)
-                && (!value.Equals("app", StringComparison.OrdinalIgnoreCase)
-                || !value.Equals("size", StringComparison.OrdinalIgnoreCase)))
+            // This will throw an error if a user specifies '--sort-by' but does not provide a value.
+            if (rawValue == null)
             {
-                AnsiConsole.MarkupLine($"Test: {value}");
-                AnsiConsole.MarkupLine(Red($"A sort column must be specified when using {LightYellow("--sort-column")}"));
-                AnsiConsole.Markup(Red($"Valid sort orders include : {LightYellow("app/size")}"));
+                AnsiConsole.MarkupLine(Red($"A value must be provided when using {LightYellow("--sort-by")}"));
+                AnsiConsole.Markup(Red($"Valid options include : {LightYellow("app/size")}"));
                 throw new CommandException(".", 1, true);
             }
-            return Ok();
+
+            rawValue = rawValue.ToLower();
+            if (!SortColumn.TryFromValue(rawValue, out var _))
+            {
+                AnsiConsole.MarkupLine(Red($"{White(0)} is not a valid value for {LightYellow("--sort-by")}"));
+                AnsiConsole.Markup(Red($"Valid options include : {LightYellow("app/size")}"));
+                throw new CommandException(".", 1, true);
+            }
+            return SortColumn.FromValue(rawValue);
         }
     }
+
+    #endregion
 }

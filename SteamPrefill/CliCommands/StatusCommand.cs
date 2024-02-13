@@ -1,8 +1,7 @@
-
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
-    [Command("status", Description = "List all currently selected apps and the used disk space.")]
+    [Command("status", Description = "Lists all currently selected apps and their download sizes.")]
     public class StatusCommand : ICommand
     {
         [CommandOption("no-ansi",
@@ -16,12 +15,12 @@ namespace SteamPrefill.CliCommands
         public IReadOnlyList<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
 
         [CommandOption("sort-order", Description = "Specifies in which way the data should be sorted. Can be ascending/descending",
-            Converter = typeof(SortOrderConverter), Validators = new[] { typeof(SortOrderValidator) })]
+            Converter = typeof(SortOrderConverter))]
         public SortOrder SortOrder { get; init; } = SortOrder.Ascending;
 
-        [CommandOption("sort-column", Description = "Specifies by which column the data should be sorted. Can be app/size",
-            Validators = new[] { typeof(SortColumnValidator) })]
-        public string SortColumn { get; init; } = "app";
+        [CommandOption("sort-by", Description = "Specifies by which column the data should be sorted. Can be app/size",
+            Converter = typeof(SortColumnConverter))]
+        public SortColumn SortBy { get; init; } = SortColumn.App;
 
         private IAnsiConsole _ansiConsole;
 
@@ -43,7 +42,7 @@ namespace SteamPrefill.CliCommands
             try
             {
                 await steamManager.InitializeAsync();
-                await steamManager.CurrentlyDownloadedAsync(SortOrder, SortColumn);
+                await steamManager.PrintSelectedAppsStatsAsync(SortOrder, SortBy);
             }
             finally
             {
@@ -54,16 +53,17 @@ namespace SteamPrefill.CliCommands
         // Validates that the user has selected at least 1 app
         private void ValidateUserHasSelectedApps(SteamManager steamManager)
         {
-            var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
-
-            if (!userSelectedApps.Any())
+            var userHasSelectedApps = steamManager.LoadPreviouslySelectedApps().Any();
+            if (userHasSelectedApps)
             {
-                // User hasn't selected any apps yet
-                _ansiConsole.MarkupLine(Red("No apps have been selected for benchmark! At least 1 app is required!"));
-                _ansiConsole.Markup(Red($"See flags {LightYellow("--appid")}, {LightYellow("--all")} and {LightYellow("--use-selected")} to interactively choose which apps to prefill"));
-
-                throw new CommandException(".", 1, true);
+                return;
             }
+
+            // User hasn't selected any apps yet
+            _ansiConsole.MarkupLine(Red("No apps have been selected! At least 1 app is required!"));
+            _ansiConsole.Markup(Red($"Use the {Cyan("select-apps")} command to interactively choose apps"));
+
+            throw new CommandException(".", 1, true);
         }
     }
 }

@@ -51,10 +51,6 @@ namespace SteamPrefill.CliCommands.Benchmark
 
         public void PrintSummary(IAnsiConsole ansiConsole)
         {
-            // White spacing + a horizontal rule to delineate that the command has completed
-            ansiConsole.WriteLine();
-            ansiConsole.Write(new Rule());
-
             // Setting up final formatting, to make sure padding and alignment is correct
             var grid = new Grid()
                        .AddColumn(new GridColumn())

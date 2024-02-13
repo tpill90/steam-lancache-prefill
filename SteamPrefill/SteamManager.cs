@@ -98,6 +98,7 @@
             _ansiConsole.WriteLine();
 
             var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
+            //TODO switch this to iterating over the list of apps instead
             foreach (var app in availableGames)
             {
                 try
@@ -287,6 +288,10 @@
                 return;
             }
 
+            // White spacing + a horizontal rule to delineate that the command has completed
+            _ansiConsole.WriteLine();
+            _ansiConsole.Write(new Rule());
+
             // Writing stats
             benchmarkWorkload.PrintSummary(_ansiConsole);
 
@@ -296,15 +301,16 @@
             _ansiConsole.LogMarkupLine($"Resulting file size : {MediumPurple(fileSize.ToBinaryString())}");
         }
 
+        //TODO this method is awfully complex, has lots and lots of nesting.  Makes it a bit hard to read at a glance
         private async Task<BenchmarkWorkload> BuildBenchmarkWorkloadAsync(List<uint> appIds)
         {
             await _cdnPool.PopulateAvailableServersAsync();
 
             var queuedApps = new ConcurrentBag<AppQueuedRequests>();
-            await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit.Bytes, displayTransferRate: false).StartAsync(async ctx =>
+            await _ansiConsole.CreateSpectreProgress().StartAsync(async ctx =>
             {
                 var gamesToUse = await _appInfoHandler.GetAvailableGamesByIdAsync(appIds);
-                var overallProgressTask = ctx.AddTask("Processing games..".PadLeft(30), new ProgressTaskSettings { MaxValue = gamesToUse.Count });
+                var overallProgressTask = ctx.AddTask("Processing apps..".PadLeft(30), new ProgressTaskSettings { MaxValue = gamesToUse.Count });
 
                 await Parallel.ForEachAsync(gamesToUse, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (appInfo, _) =>
                 {
@@ -349,36 +355,56 @@
 
         #region Status
 
-        public async Task CurrentlyDownloadedAsync(SortOrder sortOrder, string sortColumn)
+        //TODO comment
+        public async Task PrintSelectedAppsStatsAsync(SortOrder sortOrder, SortColumn sortColumn)
         {
-            await _cdnPool.PopulateAvailableServersAsync();
+            _ansiConsole.WriteLine();
+            _ansiConsole.LogMarkupLine("Building statistics for currently selected apps...");
 
             // Pre-Load all selected apps and their manifests
             List<uint> appIds = LoadPreviouslySelectedApps();
             await _appInfoHandler.RetrieveAppMetadataAsync(appIds);
+            await _cdnPool.PopulateAvailableServersAsync();
 
-            ByteSize totalSize = new ByteSize();
-            Dictionary<string, ByteSize> index = new Dictionary<string, ByteSize>();
+            // Dictionary of app names + download sizes
+            var index = new ConcurrentDictionary<string, ByteSize>();
 
             var timer = Stopwatch.StartNew();
-            _ansiConsole.LogMarkupLine("Loading Manifests");
-            foreach (uint appId in appIds)
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(appIds);
+            await _ansiConsole.CreateSpectreProgress().StartAsync(async ctx =>
             {
-                AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+                var overallProgressTask = ctx.AddTask("Processing apps..".PadLeft(30), new ProgressTaskSettings { MaxValue = availableGames.Count });
 
-                var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
-                await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+                await Parallel.ForEachAsync(availableGames, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (app, _) =>
+                {
+                    var individualProgressTask = ctx.AddTask($"{Cyan(app.Name.Truncate(30).PadLeft(30))}");
+                    individualProgressTask.IsIndeterminate = true;
 
-                var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
-                var size = ByteSize.FromBytes(allChunksForApp.Sum(e => e.CompressedLength));
-                totalSize += size;
+                    var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, app.Depots);
+                    await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
 
-                index.Add(appInfo.Name, size);
-            }
-            _ansiConsole.LogMarkupLine("Manifests Loaded", timer);
+                    var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
+                    var downloadSize = ByteSize.FromBytes(allChunksForApp.Sum(e => e.CompressedLength));
 
+                    index.TryAdd(app.Name, downloadSize);
+
+                    overallProgressTask.Increment(1);
+                    individualProgressTask.StopTask();
+                });
+            });
+
+            var totalDownloadSize = ByteSize.FromBytes(index.Values.Sum(e => e.Bytes));
+            _ansiConsole.LogMarkupLine("Finished loading manifest metadata", timer);
+
+            // White spacing + a horizontal rule to delineate that the command has completed
+            _ansiConsole.WriteLine();
+            _ansiConsole.Write(new Rule());
+
+            // Printing out result table
             var table = new Table { Border = TableBorder.MinimalHeavyHead };
-            table.AddColumns(new TableColumn("App"), new TableColumn("Size"));
+            // Header
+            table.AddColumn(new TableColumn(Cyan("App")));
+            table.AddColumn(new TableColumn(MediumPurple("Download Size")).RightAligned());
 
             foreach (KeyValuePair<string, ByteSize> data in SortData(index, sortOrder, sortColumn))
             {
@@ -386,41 +412,29 @@
                 ByteSize size = data.Value;
                 table.AddRow(appName, size.ToDecimalString());
             }
-
-            table.AddEmptyRow();
-            table.AddRow("Total Size", totalSize.ToDecimalString());
-
+            // Summary footer
+            table.Columns[1].Footer = new Markup(Bold(White(totalDownloadSize.ToDecimalString())));
             _ansiConsole.Write(table);
+            _ansiConsole.Write(new Rule());
         }
 
-        private IOrderedEnumerable<KeyValuePair<string, ByteSize>> SortData(
-            Dictionary<string, ByteSize> index,
-            SortOrder sortOrder,
-            string sortColumn)
+        private IOrderedEnumerable<KeyValuePair<string, ByteSize>> SortData(ConcurrentDictionary<string, ByteSize> index, SortOrder sortOrder, SortColumn sortColumn)
         {
             if (sortOrder == SortOrder.Ascending)
             {
-                if (sortColumn.Equals("app", StringComparison.OrdinalIgnoreCase))
+                if (sortColumn == SortColumn.App)
                 {
                     return index.OrderBy(o => o.Key);
                 }
-                else if (sortColumn.Equals("size", StringComparison.OrdinalIgnoreCase))
-                {
-                    return index.OrderBy(o => o.Value);
-                }
+                return index.OrderBy(o => o.Value);
             }
-            else if (sortOrder == SortOrder.Descending)
+
+            // Descending
+            if (sortColumn == SortColumn.App)
             {
-                if (sortColumn.Equals("app", StringComparison.OrdinalIgnoreCase))
-                {
-                    return index.OrderByDescending(o => o.Key);
-                }
-                else if (sortColumn.Equals("size", StringComparison.OrdinalIgnoreCase))
-                {
-                    return index.OrderByDescending(o => o.Value);
-                }
+                return index.OrderByDescending(o => o.Key);
             }
-            return index.OrderBy(o => o.Key);
+            return index.OrderByDescending(o => o.Value);
         }
 
         #endregion
