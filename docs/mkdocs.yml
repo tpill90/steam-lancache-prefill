@@ -27,8 +27,10 @@ extra:
 
 theme:
   name: readthedocs
-  # For defaults see : https://github.com/mkdocs/mkdocs/tree/master/mkdocs/themes/readthedocs
-  custom_dir: custom_theme/
+  # Customized header (removes Edit on Github link) and customized footer (removes Built with mkdocs text)
+  # For the defaults see : https://github.com/mkdocs/mkdocs/tree/master/mkdocs/themes/readthedocs
+  custom_dir: mkdocs/custom_theme/
+  #TODO fix the code highlighting theme.  Looks crappy
   highlightjs: true
   # Examples of themes - https://highlightjs.org/static/demo/
   # Find which themese are available on the cdn - https://cdnjs.com/libraries/highlight.js

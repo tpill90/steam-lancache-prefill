@@ -19,6 +19,8 @@ pip install -r requirements.txt
     mkdocs.yml    # Mkdocs root configuration file.
     mkdocs/
         index.md  # The documentation homepage.
+        assets/   # Contains custom Javascript and CSS used on the docs site
+        custom_theme
         ...       # Other markdown pages, images and other files.
 
 -----
