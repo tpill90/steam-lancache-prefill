@@ -19,7 +19,7 @@
             _ansiConsole = ansiConsole;
             _downloadArgs = downloadArgs;
 
-            if (AppConfig.EnableSteamKitDebugLogs)
+            if (AppConfig.DebugLogs)
             {
                 DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
                 DebugLog.Enabled = true;
@@ -85,8 +85,8 @@
             if (prefillPopularGames != null)
             {
                 var popularGames = (await SteamChartsService.MostPlayedByDailyPlayersAsync(_ansiConsole))
-                                    .Take(prefillPopularGames.Value)
-                                    .Select(e => e.AppId);
+                                   .Take(prefillPopularGames.Value)
+                                   .Select(e => e.AppId);
                 appIdsToDownload.AddRange(popularGames);
             }
 
@@ -153,10 +153,7 @@
 
             // Get the full file list for each depot, and queue up the required chunks
             List<QueuedRequest> chunkDownloadQueue = null;
-            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ =>
-            {
-                chunkDownloadQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
-            });
+            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ => { chunkDownloadQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots); });
 
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
@@ -176,16 +173,16 @@
             {
                 _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
                 _prefillSummaryResult.Updated++;
+
+                // Logging some metrics about the download
+                _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
+                _ansiConsole.WriteLine();
             }
             else
             {
                 _prefillSummaryResult.FailedApps++;
             }
             downloadTimer.Stop();
-
-            // Logging some metrics about the download
-            _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
-            _ansiConsole.WriteLine();
         }
 
         #endregion
@@ -204,55 +201,18 @@
 
         public List<uint> LoadPreviouslySelectedApps()
         {
-            if (File.Exists(AppConfig.UserSelectedAppsPath))
+            if (!File.Exists(AppConfig.UserSelectedAppsPath))
             {
-                return JsonSerializer.Deserialize(File.ReadAllText(AppConfig.UserSelectedAppsPath), SerializationContext.Default.ListUInt32);
+                return new List<uint>();
             }
-            return new List<uint>();
+
+            return JsonSerializer.Deserialize(File.ReadAllText(AppConfig.UserSelectedAppsPath), SerializationContext.Default.ListUInt32);
         }
 
         #endregion
 
-        public async Task<List<AppInfo>> GetAllAvailableAppsAsync()
-        {
-            var ownedGameIds = _steam3.LicenseManager.AllOwnedAppIds;
-
-            // Loading app metadata from steam, skipping related DLC apps
-            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
-            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(ownedGameIds);
-
-            return availableGames;
-        }
-
-        private async Task PrintUnownedAppsAsync(List<uint> distinctAppIds)
-        {
-            // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
-            AppInfo[] unownedApps = await Task.WhenAll(distinctAppIds.Where(e => !_steam3.LicenseManager.AccountHasAppAccess(e))
-                                                                      .Select(e => _appInfoHandler.GetAppInfoAsync(e)));
-            _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Length;
-
-
-            if (unownedApps.Empty())
-            {
-                return;
-            }
-
-            var table = new Table { Border = TableBorder.MinimalHeavyHead };
-            // Header
-            table.AddColumn(new TableColumn(White("App")));
-
-            // Rows
-            foreach (var app in unownedApps.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase))
-            {
-                table.AddRow($"[link=https://store.steampowered.com/app/{app.AppId}]🔗[/] {White(app.Name)}");
-            }
-
-            _ansiConsole.MarkupLine("");
-            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Length)} unowned apps!  They will be excluded from this prefill run..."));
-            _ansiConsole.Write(table);
-        }
-
         //TODO consider breaking this out into its own class
+
         #region Benchmarking
 
         public async Task SetupBenchmarkAsync(List<uint> appIds, bool useAllOwnedGames, bool useSelectedApps)
@@ -438,5 +398,46 @@
         }
 
         #endregion
+
+
+        public async Task<List<AppInfo>> GetAllAvailableAppsAsync()
+        {
+            var ownedGameIds = _steam3.LicenseManager.AllOwnedAppIds;
+
+            // Loading app metadata from steam, skipping related DLC apps
+            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(ownedGameIds);
+
+            return availableGames;
+        }
+
+        private async Task PrintUnownedAppsAsync(List<uint> distinctAppIds)
+        {
+            // Write out any apps that can't be downloaded as a warning message, so users can know that they were skipped
+            AppInfo[] unownedApps = await Task.WhenAll(distinctAppIds.Where(e => !_steam3.LicenseManager.AccountHasAppAccess(e))
+                                                                     .Select(e => _appInfoHandler.GetAppInfoAsync(e)));
+            _prefillSummaryResult.UnownedAppsSkipped = unownedApps.Length;
+
+
+            if (unownedApps.Empty())
+            {
+                return;
+            }
+
+            var table = new Table { Border = TableBorder.MinimalHeavyHead };
+            // Header
+            table.AddColumn(new TableColumn(White("App")));
+
+            // Rows
+            foreach (var app in unownedApps.OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase))
+            {
+                table.AddRow($"[link=https://store.steampowered.com/app/{app.AppId}]🔗[/] {White(app.Name)}");
+            }
+
+            _ansiConsole.MarkupLine("");
+            _ansiConsole.MarkupLine(LightYellow($" Warning!  Found {Magenta(unownedApps.Length)} unowned apps!  They will be excluded from this prefill run..."));
+            _ansiConsole.Write(table);
+        }
+
     }
 }

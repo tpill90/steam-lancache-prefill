@@ -61,7 +61,6 @@ namespace SteamPrefill.CliCommands
             var downloadArgs = new DownloadArguments
             {
                 Force = Force ?? default(bool),
-                NoCache = AppConfig.NoLocalCache,
                 TransferSpeedUnit = TransferSpeedUnit,
                 OperatingSystems = OperatingSystems.ToList()
             };

@@ -67,8 +67,8 @@ namespace SteamPrefill
             if (args.Any(e => e.Contains("--debug")))
             {
                 AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--debug")} flag.  Displaying debug only logging...");
-                AnsiConsole.Console.LogMarkupLine($"  Additional debugging files will be output to {Magenta(AppConfig.DebugOutputDir)}");
-                AppConfig.EnableSteamKitDebugLogs = true;
+                AnsiConsole.Console.LogMarkupLine($"Additional debugging files will be output to {Magenta(AppConfig.DebugOutputDir)}");
+                AppConfig.DebugLogs = true;
                 args.Remove("--debug");
             }
 
@@ -91,7 +91,7 @@ namespace SteamPrefill
             }
 
             // Adding some formatting to logging to make it more readable + clear that these flags are enabled
-            if (AppConfig.EnableSteamKitDebugLogs || AppConfig.SkipDownloads || AppConfig.NoLocalCache)
+            if (AppConfig.DebugLogs || AppConfig.SkipDownloads || AppConfig.NoLocalCache)
             {
                 AnsiConsole.Console.WriteLine();
                 AnsiConsole.Console.Write(new Rule());

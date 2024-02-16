@@ -113,7 +113,7 @@
             return filteredDepots;
         }
 
-        //TODO comment
+        //TODO document how this works, and why its needed
         //TODO I don't like the fact that this has to be manually called in order to have things work correctly
         public async Task BuildLinkedDepotInfoAsync(List<DepotInfo> depots)
         {

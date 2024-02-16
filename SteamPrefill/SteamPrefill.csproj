@@ -25,9 +25,9 @@
     <!-- Reverts back to the default trim mode used by dotnet 6, otherwise CliFx breaks without reflection -->
     <TrimMode>partial</TrimMode>
     
-    <PublishReadyToRun>true</PublishReadyToRun>
     <PublishSingleFile>true</PublishSingleFile>
-
+    <SelfContained>true</SelfContained>
+    
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
 

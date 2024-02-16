@@ -1,10 +1,5 @@
 namespace SteamPrefill.Handlers.Steam
 {
-    /// <summary>
-    /// Enable with :
-    /// DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
-    /// DebugLog.Enabled = true;
-    /// </summary>
     public class SteamKitDebugListener : IDebugListener
     {
         private readonly IAnsiConsole _ansiConsole;

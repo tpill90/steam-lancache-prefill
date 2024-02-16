@@ -10,11 +10,12 @@ namespace SteamPrefill.Settings
         }
 
         /// <summary>
-        /// TODO document that this is actually the "trigger" domain.  Explain what it is used for, and why it is needed.
+        /// This domain is used to determine if there is an available Lancache instance available.
+        /// Resolving a private IP indicates that there is a cache available.
+        /// This is the same domain that the real Steam client uses to determine if a cache is available.
         /// </summary>
         public static string SteamTriggerDomain => "lancache.steamcontent.com";
 
-        //TODO comment
         private static bool _verboseLogs;
         public static bool VerboseLogs
         {
@@ -25,29 +26,7 @@ namespace SteamPrefill.Settings
                 AnsiConsoleExtensions.WriteVerboseLogs = value;
             }
         }
-
-        //TODO comment
-        //TODO maybe rename to debug?
-        private static bool _enableSteamKitDebugLogs;
-        public static bool EnableSteamKitDebugLogs
-        {
-            get => _enableSteamKitDebugLogs;
-            set
-            {
-                _enableSteamKitDebugLogs = value;
-
-                // Enable verbose logs as well
-                VerboseLogs = true;
-                AnsiConsoleExtensions.WriteVerboseLogs = value;
-
-                // Used for debugging, when --debug is used Steam metadata will be dumped to these folders
-                Directory.CreateDirectory($@"{DebugOutputDir}\AppInfo");
-            }
-        }
-
-        //TODO comment
-        public static bool SkipDownloads { get; set; }
-
+        
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
@@ -80,20 +59,42 @@ namespace SteamPrefill.Settings
         /// </summary>
         public static readonly string SuccessfullyDownloadedDepotsPath = Path.Combine(ConfigDir, "successfullyDownloadedDepots.json");
 
-        //TODO comment
+        /// <summary>
+        /// Stores the user's current CellId, which corresponds to their region.  
+        /// </summary>
+        /// <see cref="Steam3Session.CellId">See for additional documentation</see>
         public static readonly string CachedCellIdPath = Path.Combine(CacheDir, "cellId.txt");
 
         #endregion
 
-        #region Debugging File Paths
+        #region Debugging 
 
         public static readonly string DebugOutputDir = Path.Combine(CacheDir, "Debugging");
-
-        #endregion
 
         /// <summary>
         /// Skips using locally cached manifests. Saves disk space, at the expense of slower subsequent runs.  Intended for debugging.
         /// </summary>
         public static bool NoLocalCache { get; set; }
+
+        /// <summary>
+        /// Will skip over downloading chunks, but will still download manifests and build the chunk download list.  Useful for testing
+        /// core logic of SteamPrefill without having to wait for downloads to finish.
+        /// </summary>
+        public static bool SkipDownloads { get; set; }
+
+        private static bool _debugLogs;
+        public static bool DebugLogs
+        {
+            get => _debugLogs;
+            set
+            {
+                _debugLogs = value;
+
+                // Enable verbose logs as well
+                VerboseLogs = true;
+            }
+        }
+
+        #endregion
     }
 }

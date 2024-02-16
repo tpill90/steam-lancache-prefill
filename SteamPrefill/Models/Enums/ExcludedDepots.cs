@@ -21,7 +21,17 @@
             732,
             734,
             
-            //TODO should I exclude the directx runtimes from the downloads?  Kind of adds noise for no real reason
+            // Excluding VC Redist since they add unnecessary noise to a app's depot list
+            228981,
+            228982,
+            228983,
+            228984,
+            228985,
+            228986,
+            228987,
+            228988,
+            228989,
+            228990
         };
     }
 }
