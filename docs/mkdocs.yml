@@ -17,7 +17,7 @@ extra_javascript:
   - assets/extra.js
   
 # Defines global variables that can be used by templates
-# TODO finish doing the variable substituion for the remainder of the docs.  Still have some steam specific things left in shared docs
+# TODO finish doing the variable substitution for the remainder of the docs.  Still have some steam specific things left in shared docs
 extra:
   #TODO rename this to prefill_name after I finish getting everything into variables.  Maybe even appName?
   prefillName: SteamPrefill

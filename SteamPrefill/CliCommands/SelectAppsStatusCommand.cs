@@ -1,8 +1,8 @@
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
-    [Command("status", Description = "Lists all currently selected apps and their download sizes.")]
-    public class StatusCommand : ICommand
+    [Command("select-apps status", Description = "Lists all currently selected apps and their download sizes.")]
+    public class SelectAppsStatusCommand : ICommand
     {
         [CommandOption("no-ansi",
             Description = "Application output will be in plain text.  " +
