@@ -8,6 +8,8 @@ extra_css:
   - assets/language-picker.css
   - assets/copy-to-clipboard.css
   - assets/extra.css
+  # Overrides the default hljs theme, gives better coloring of things like comments
+  - assets/external/vs2015.css
 extra_javascript:
   - assets/external/asciinema-player.min.js
   - assets/external/clipboard.min.js
@@ -17,10 +19,8 @@ extra_javascript:
   - assets/extra.js
   
 # Defines global variables that can be used by templates
-# TODO finish doing the variable substitution for the remainder of the docs.  Still have some steam specific things left in shared docs
 extra:
-  #TODO rename this to prefill_name after I finish getting everything into variables.  Maybe even appName?
-  prefillName: SteamPrefill
+  prefill_name: SteamPrefill
   gaming_service_name: Steam
   repo_name: steam-lancache-prefill
   cache_trigger_domain: lancache.steamcontent.com
@@ -32,7 +32,7 @@ theme:
   custom_dir: mkdocs/custom_theme/
   #TODO fix the code highlighting theme.  Looks crappy
   highlightjs: true
-  # Examples of themes - https://highlightjs.org/static/demo/
+  # Examples of themes - https://highlightjs.org/demo
   # Find which themese are available on the cdn - https://cdnjs.com/libraries/highlight.js
   hljs_style: default
   hljs_languages:

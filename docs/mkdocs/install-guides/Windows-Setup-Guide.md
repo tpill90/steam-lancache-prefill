@@ -1,16 +1,16 @@
 # Windows Setup Guide
 
-## Installing {{prefillName}}
+## Installing {{prefill_name}}
 
 1.  Navigate to the [Releases](https://github.com/tpill90/{{repo_name}}/releases) page on Github.
-2.  Download the latest version for Windows.  The filename should look like `{{prefillName}}-X.Y.Z-win-x64.zip`.
+2.  Download the latest version for Windows.  The filename should look like `{{prefill_name}}-X.Y.Z-win-x64.zip`.
 3.  Unzip to a directory of your choice.  This can be anywhere on your system.
 
 -----
 
 ## Optional Windows Setup
 
-Configuring your terminal to use Unicode will result in a much nicer experience with **{{prefillName}}**, for much nicer looking UI output.
+Configuring your terminal to use Unicode will result in a much nicer experience with **{{prefill_name}}**, for much nicer looking UI output.
 
 ![UTF8 Comparison](images/ConsoleWithUtf8.png){: style="width:730px"}
 
@@ -34,6 +34,6 @@ if(!(gc $profile).Contains("OutputEncoding"))
 
 ## Next Steps
 
-If you are new to **{{prefillName}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide. 
+If you are new to **{{prefill_name}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide. 
 
 Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/{{repo_name}}#frequently-asked-questions).  

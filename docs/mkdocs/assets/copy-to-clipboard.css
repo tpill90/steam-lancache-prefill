@@ -3,8 +3,6 @@
     position: relative;
 }
 
-/* TODO figure out why actual wiki code highlighting colors have changed */
-
 .clipboardContainer {
     position: absolute;
     top: .5em;

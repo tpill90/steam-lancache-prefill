@@ -49,14 +49,14 @@ dotnet build
 ## Running the project
 
 !!! note
-    These steps assume that the working directory is `/{{prefillName}}`.  All commands assume that they can find `{{prefillName}}.csproj` in the working dir.
+    These steps assume that the working directory is `/{{prefill_name}}`.  All commands assume that they can find `{{prefill_name}}.csproj` in the working dir.
 
 Typically, for development you will want to run the project in `Debug` mode.  This mode will run dramatically slower than `Release`, however it will leave useful debugging information in the compiled assembly.  Running the following will detect and compile any changes, and then execute the project:
 ```powershell
 dotnet run
 ```
 
-The above is analogous to running `./{{prefillName}}.exe` without any parameters.  To instead supply parameters :
+The above is analogous to running `./{{prefill_name}}.exe` without any parameters.  To instead supply parameters :
 ```powershell
 dotnet run -- prefill --all
 ```
@@ -79,4 +79,4 @@ dotnet test
 
 ## Where should I get started in the codebase?
 
-A good place to start poking around the project would be the [CliCommands folder](https://github.com/tpill90/{{repo_name}}/tree/master/{{prefillName}}/CliCommands).  This folder contains the implementations for each of the individual commands that can be run, such as `prefill` or `select-apps`.  
+A good place to start poking around the project would be the [CliCommands folder](https://github.com/tpill90/{{repo_name}}/tree/master/{{prefill_name}}/CliCommands).  This folder contains the implementations for each of the individual commands that can be run, such as `prefill` or `select-apps`.  
