@@ -8,9 +8,10 @@ p {
     font-size: 18px !important;
 }
 
-/* Increases content width */
+/* Increases content width, default is far too narrow even on a desktop */
 .wy-nav-content {
-    max-width: 71% !important;
+    /* max-width: 71% !important; */
+    max-width: 1138px !important;
 }
 
 /* Makes long text in a table wrap around */

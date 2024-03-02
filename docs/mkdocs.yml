@@ -5,11 +5,12 @@ site_url: https://tpill90.github.io/steam-lancache-prefill
 
 extra_css:
   - assets/external/asciinema-player.css
+  # Overrides the default hljs theme, gives better coloring of things like comments
+  - assets/external/vs2015.css
   - assets/language-picker.css
   - assets/copy-to-clipboard.css
   - assets/extra.css
-  # Overrides the default hljs theme, gives better coloring of things like comments
-  - assets/external/vs2015.css
+
 extra_javascript:
   - assets/external/asciinema-player.min.js
   - assets/external/clipboard.min.js
@@ -30,7 +31,6 @@ theme:
   # Customized header (removes Edit on Github link) and customized footer (removes Built with mkdocs text)
   # For the defaults see : https://github.com/mkdocs/mkdocs/tree/master/mkdocs/themes/readthedocs
   custom_dir: mkdocs/custom_theme/
-  #TODO fix the code highlighting theme.  Looks crappy
   highlightjs: true
   # Examples of themes - https://highlightjs.org/demo
   # Find which themese are available on the cdn - https://cdnjs.com/libraries/highlight.js
