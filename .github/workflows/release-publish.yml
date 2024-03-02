@@ -67,7 +67,8 @@ jobs:
           --nologo \
           -o "publish/$PROJECT_NAME-$version-${{ matrix.runtime }}" \
           -c Release \
-          --runtime "${{ matrix.runtime }}";
+          --runtime "${{ matrix.runtime }}" \
+          --self-contained true;
 
         cd publish;
 
