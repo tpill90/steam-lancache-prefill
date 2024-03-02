@@ -49,7 +49,6 @@
                 while (failedRequests.Any() && retryCount < 2)
                 {
                     retryCount++;
-                    await Task.Delay(2000 * retryCount);
                     failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList(), downloadArgs, forceRecache: true);
                 }
             });
@@ -60,7 +59,17 @@
                 return true;
             }
 
-            _ansiConsole.MarkupLine(Red($"{failedRequests.Count} failed downloads"));
+            _ansiConsole.LogMarkupError($"Download failed! {LightYellow(failedRequests.Count)} requests failed unexpectedly, see {LightYellow("app.log")} for more details.");
+            _ansiConsole.WriteLine();
+
+            // Web requests frequently fail due to transient errors, so displaying all errors to the user is unnecessary or even confusing.
+            // However, if a request fails repeatedly then there might be an underlying issue preventing success.
+            // The number of failures could approach in the thousands or even more, so rather than spam the console
+            // we will instead log them as a batch to app.log 
+            foreach (var failedRequest in failedRequests)
+            {
+                FileLogger.LogExceptionNoStackTrace($"Request /depot/{failedRequest.DepotId}/chunk/{failedRequest.ChunkId} failed", failedRequest.LastFailureReason);
+            }
             return false;
         }
 
@@ -68,7 +77,7 @@
         /// <summary>
         /// Attempts to download the specified requests.  Returns a list of any requests that have failed for any reason.
         /// </summary>
-        /// <param name="forceRecache">When specified, will cause the cache to delete the existing cached data for a request, and redownload it again.</param>
+        /// <param name="forceRecache">When specified, will cause the cache to delete the existing cached data for a request, and re-download it again.</param>
         /// <returns>A list of failed requests</returns>
         public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload,
                                                                                 DownloadArguments downloadArgs, bool forceRecache = false)
@@ -104,9 +113,8 @@
                 }
                 catch (Exception e)
                 {
+                    request.LastFailureReason = e;
                     failedRequests.Add(request);
-                    _ansiConsole.LogMarkupLine(Red($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed : {e.GetType()}"));
-                    FileLogger.LogExceptionNoStackTrace($"Request /depot/{request.DepotId}/chunk/{request.ChunkId} failed", e);
                 }
                 progressTask.Increment(request.CompressedLength);
             });
