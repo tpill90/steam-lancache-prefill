@@ -22,7 +22,7 @@
     },
     "Benchmark - Setup - Preset": {
       "commandName": "Project",
-      "commandLineArgs": "benchmark setup -h"
+      "commandLineArgs": "benchmark setup --preset SmallChunks"
     },
     "Benchmark - Setup - All": {
       "commandName": "Project",
