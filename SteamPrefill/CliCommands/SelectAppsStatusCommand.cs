@@ -32,7 +32,6 @@ namespace SteamPrefill.CliCommands
 
             var downloadArgs = new DownloadArguments
             {
-                NoCache = AppConfig.NoLocalCache,
                 OperatingSystems = OperatingSystems.ToList()
             };
 

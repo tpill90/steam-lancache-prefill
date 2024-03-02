@@ -26,7 +26,7 @@ namespace SteamPrefill.Settings
                 AnsiConsoleExtensions.WriteVerboseLogs = value;
             }
         }
-        
+
         /// <summary>
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.

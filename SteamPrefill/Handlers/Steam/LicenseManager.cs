@@ -75,7 +75,7 @@
             }
         }
     }
-    
+
     public sealed class UserLicenses
     {
         public int LicenseCount => OwnedPackageIds.Count;

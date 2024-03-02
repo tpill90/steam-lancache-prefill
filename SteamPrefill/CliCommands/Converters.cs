@@ -69,11 +69,11 @@
             }
 
             AnsiConsole.MarkupLine(Red($"A preset must be specified when using {LightYellow("--preset")}"));
-                AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
+            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
             throw new CommandException(".", 1, true);
         }
     }
-    
+
     public sealed class PresetWorkloadConverter : BindingConverter<PresetWorkload>
     {
         public override PresetWorkload Convert(string rawValue)
