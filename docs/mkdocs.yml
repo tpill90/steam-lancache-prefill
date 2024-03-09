@@ -57,6 +57,10 @@ plugins:
       enabled: !ENV [ENABLED_HTMLPROOFER, False]
       validate_external_urls: True
       raise_error: True
+      ignore_urls:
+        - https://steamdb.info/*
+        - https://steamstat.us/*
+        
   # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
   - awesome-pages:
       strict: true
