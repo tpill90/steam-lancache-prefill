@@ -87,7 +87,7 @@
             }
 
             AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid preset"));
-            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("Destiny2/Dota2")}"));
+            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
             throw new CommandException(".", 1, true);
         }
     }
