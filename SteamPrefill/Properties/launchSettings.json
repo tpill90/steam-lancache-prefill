@@ -42,7 +42,7 @@
     },
     "Stats": {
       "commandName": "Project",
-      "commandLineArgs": "status --nocache" 
-    } 
+      "commandLineArgs": "status --nocache"
+    }
   }
 }
