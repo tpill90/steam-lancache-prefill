@@ -1,127 +1,18 @@
 name: release-publish
 run-name: "Publish Release"
 
-#TODO parameterize this and move this into lancache prefill common so I don't have to keep updating it in each project.
 on:
   push:
     tags:
       - '*'
 
-env:
-  # Used to parameterize these build scripts between LancachePrefill projects
-  PROJECT_NAME: SteamPrefill
-
 permissions:
   contents: write # Required to create a release
 
 jobs:
-  # Needed in order to prevent softprops/action-gh-release from creating duplicate releases for each publish target.
-  # The duplicate releases happen because of a race condition, where each parallel publish job thinks the release has not yet been created.
-  create-placeholder-release:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:8.0
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-    # Gets the executable version that will be used later in the uploaded zip file name
-    - name: Set Version
-      id: vars
-      run: |
-        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' $PROJECT_NAME/$PROJECT_NAME.csproj); 
-        echo "version=$version" >> $GITHUB_OUTPUT;
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        draft: true
-        name: "v${{ steps.vars.outputs.version }}"
-        files: "**/*.zip" 
-        generate_release_notes: true
-
-  dotnet-publish:
-    runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:8.0
-    needs: create-placeholder-release
-    strategy:
-      matrix:
-        runtime: ['win-x64', 'linux-x64', 'linux-arm64', 'osx-x64']
-      fail-fast: false
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-    # Gets the executable version that will be used later in the uploaded zip file name
-    - name: Set Version
-      id: vars
-      run: |
-        version=$(grep -Po '(?<=<VersionPrefix>)(.*?)(?=</VersionPrefix>)' $PROJECT_NAME/$PROJECT_NAME.csproj); 
-        echo "version=$version" >> $GITHUB_OUTPUT;
-    - run: apt-get update
-    - run: apt-get install zip -y
-    - name: Publish 
-      run: >
-        version=${{ steps.vars.outputs.version }}
-
-        dotnet publish $PROJECT_NAME/$PROJECT_NAME.csproj \
-          --nologo \
-          -o "publish/$PROJECT_NAME-$version-${{ matrix.runtime }}" \
-          -c Release \
-          --runtime "${{ matrix.runtime }}" \
-          --self-contained true;
-
-        cd publish;
-
-        zip -r $PROJECT_NAME-$version-${{ matrix.runtime }}.zip $PROJECT_NAME-$version-${{ matrix.runtime }};
-        cp $PROJECT_NAME-$version-${{ matrix.runtime }}.zip ../;
-        rm $PROJECT_NAME-$version-${{ matrix.runtime }}.zip;
-        cd ..;
-    - name: Upload
-      uses: actions/upload-artifact@v3
-      with:
-        name: SteamPrefill-${{ steps.vars.outputs.version }}-${{ matrix.runtime }} 
-        path: publish/
-        if-no-files-found: error
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
-      with:
-        draft: true
-        name: "v${{ steps.vars.outputs.version }}"
-        files: "**/*.zip" 
-        generate_release_notes: true
-  docker-publish-x64:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        submodules: true
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v2
-      with:
-        dotnet-version: 8.0.x
-    - name: Publish
-      run: >
-        dotnet publish $PROJECT_NAME/$PROJECT_NAME.csproj \
-          --nologo \
-          -o publish \
-          -c Release \
-          --runtime "linux-x64" \
-          --self-contained true;
-    - name: Login to Docker Hub
-      uses: docker/login-action@v2
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-    - name: Extract metadata for Docker
-      id: meta
-      uses: docker/metadata-action@98669ae865ea3cffbcbaa878cf57c20bbf1c6c38
-      with:
-        images: tpill90/steam-lancache-prefill
-    - name: Build and push Docker image
-      uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
-      with:
-        context: .
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
+  release-publish:
+    uses: tpill90/lancache-prefill-common/.github/workflows/release-publish-template.yml@main
+    secrets: inherit
+    with:
+      PROJECT_NAME: SteamPrefill
+      DOCKERHUB_NAME: steam-lancache-prefill

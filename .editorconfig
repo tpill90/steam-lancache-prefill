@@ -19,7 +19,7 @@ tab_size = 4
 indent_style = space
 indent_size = 4
 
-# -----  Resharper Rules ----- 
+# -----  Resharper Rules -----
 # https://www.jetbrains.com/help/resharper/EditorConfig_CSHARP_CSharpIndentStylePageSchema.html#resharper_csharp_align_linq_query
 align_linq_query = true
 align_multiline_calls_chain = true
@@ -65,7 +65,7 @@ dotnet_diagnostic.CA1822.severity = none
 # - I'm not worried about performance in this application where ContainsKey() is being used, and I like the current syntax as far as readability
 dotnet_diagnostic.CA1854.severity = none
 
-# CA1860: Avoid using 'Enumerable.Any()' extension method, both for clarity and performance 
+# CA1860: Avoid using 'Enumerable.Any()' extension method, both for clarity and performance
 # - I don't agree with this analyzer, using Any() is far more readable than comparing Count == 0, and has been a pattern in dotnet for more than a decade
 dotnet_diagnostic.CA1860.severity = none
 
@@ -74,7 +74,7 @@ dotnet_diagnostic.CA2007.severity = none
 # CA2201: Do not raise reserved exception types
 dotnet_diagnostic.CA2201.severity = none
 
-# CS1998: Async method lacks 'await' operators and will run synchronously 
+# CS1998: Async method lacks 'await' operators and will run synchronously
 dotnet_diagnostic.cs1998.severity = error
 # CS4014: Because this call is not awaited, execution of the current method continues before the call is completed
 dotnet_diagnostic.cs4014.severity = error
@@ -85,6 +85,10 @@ dotnet_style_prefer_collection_expression = false
 
 # IDE0090 : 'new' expression can be simplified
 csharp_style_implicit_object_creation_when_type_is_apparent = false
+
+# IDE0290: Use primary constructor
+# - I'm a fan of this syntax in Typescript, but it still feels a bit too jarring seeing it C# now
+csharp_style_prefer_primary_constructors = false
 
 # Banned APIs will be bumped up to an error instead of warning
 dotnet_diagnostic.rs0030.severity = error
