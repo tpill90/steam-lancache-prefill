@@ -2,14 +2,14 @@
 {
     public sealed class Package
     {
-        public uint Id;
+        public readonly uint Id;
 
-        public List<uint> AppIds;
-        public List<uint> DepotIds;
+        public readonly List<uint> AppIds;
+        public readonly List<uint> DepotIds;
 
         public uint? MasterSubscriptionAppId;
 
-        public bool IsFreeWeekend;
+        public readonly bool IsFreeWeekend;
         public DateTime? FreeWeekendExpiryTimeUtc;
         public bool FreeWeekendHasExpired => DateTime.UtcNow > FreeWeekendExpiryTimeUtc;
 
