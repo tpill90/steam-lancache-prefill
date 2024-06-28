@@ -1,0 +1,55 @@
+/* Increase H1 size */
+h1 {
+    font-size: 36px;
+}
+
+/* Increases default font size */
+p {
+    font-size: 18px !important;
+}
+
+/* Increases content width */
+.wy-nav-content {
+    max-width: 71% !important;
+}
+
+/* Makes long text in a table wrap around */
+.wy-table-responsive table td {
+    white-space: normal !important;
+}
+
+/* Increases font size on tables to a readable size */
+.rst-content table.docutils td, .rst-content table.docutils th {
+    font-size: 100% !important;
+}
+
+/* Code block font is too small by default */
+code {
+    font-size: 14px !important; 
+}
+
+/* #region Asciinema Overrides */
+
+/* Custom font to match Windows Terminal's default */
+@font-face {
+    font-family: "Cascadia Mono";
+    src:    local(CascadiaMono),
+            url("external/CascadiaMono.ttf") format("truetype");
+    font-stretch: normal;
+    font-style: normal;
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "Cascadia Mono";
+    src:    local(CascadiaMono),
+            url("external/CascadiaMono.ttf") format("truetype");
+    font-stretch: normal;
+}
+
+/* Makes the color for Spectre.Console's progress bar more closely match the other yellows */
+.fg-11 {
+    color: rgb(249,241,165) !important;
+}
+
+/* #endregion */
