@@ -53,11 +53,23 @@
             var packageRequests = nonExpiredLicenses.Select(e => new PICSRequest(e.PackageID, e.AccessToken)).ToList();
 
             var jobResult = _steamAppsApi.PICSGetProductInfo(new List<PICSRequest>(), packageRequests).ToTask().Result;
-            var packageInfos = jobResult.Results.SelectMany(e => e.Packages)
-                                        .Select(e => e.Value)
-                                        .Select(e => new Package(e.KeyValues))
-                                        .OrderBy(e => e.Id)
-                                        .ToList();
+            var jobResults2 = jobResult.Results.SelectMany(e => e.Packages)
+                                                                 .Select(e => e.Value)
+                                                                 .ToList();
+            var packageInfos = jobResults2
+                               .Select(e => new Package(e.KeyValues))
+                               .OrderBy(e => e.Id)
+                               .ToList();
+
+            foreach (var packageInfo in packageInfos)
+            {
+                var license = nonExpiredLicenses.First(e => e.PackageID == packageInfo.Id);
+                foreach (var appId in packageInfo.AppIds)
+                {
+                    _userLicenses.AppIdPurchaseDateLookup.Add(new KeyValue2(appId, license.TimeCreated));
+                }
+            }
+            _userLicenses.AppIdPurchaseDateLookup = _userLicenses.AppIdPurchaseDateLookup.OrderBy(e => e.Value).ToList();
 
             _userLicenses.OwnedPackageIds.AddRange(packageInfos.Select(e => e.Id).ToList());
 
@@ -80,6 +92,8 @@
     {
         public int LicenseCount => OwnedPackageIds.Count;
 
+        public List<KeyValue2> AppIdPurchaseDateLookup = new List<KeyValue2>();
+
         public HashSet<uint> OwnedPackageIds { get; } = new HashSet<uint>();
         public HashSet<uint> OwnedAppIds { get; } = new HashSet<uint>();
         public HashSet<uint> OwnedDepotIds { get; } = new HashSet<uint>();
@@ -87,6 +101,23 @@
         public override string ToString()
         {
             return $"Packages : {OwnedPackageIds.Count} Apps : {OwnedAppIds.Count} Depots : {OwnedDepotIds.Count}";
+        }
+    }
+
+    public class KeyValue2
+    {
+        public uint AppId { get; set; }
+        public DateTime Value { get; set; }
+
+        public KeyValue2(uint appId, DateTime val)
+        {
+            AppId = appId;
+            Value = val;
+        }
+
+        public override string ToString()
+        {
+            return $"Id : {AppId} Purchased : {Value}";
         }
     }
 }
