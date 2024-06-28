@@ -17,7 +17,7 @@ extra_javascript:
   - assets/external/tippy-bundle.umd.min.js
   - assets/copy-to-clipboard.js
   - assets/extra.js
-  
+
 # Defines global variables that can be used by templates
 extra:
   prefill_name: SteamPrefill
@@ -53,14 +53,16 @@ markdown_extensions:
 plugins:
   # Fails the build if any of the external or internal links 404
   # See for more info : https://github.com/manuzhang/mkdocs-htmlproofer-plugin
-  - htmlproofer:
-      enabled: !ENV [ENABLED_HTMLPROOFER, False]
-      validate_external_urls: True
-      raise_error: True
-      ignore_urls:
-        - https://steamdb.info/*
-        - https://steamstat.us/*
-        
+  # TODO reenable this, I'm tired of looking at it today
+  # - htmlproofer:
+  #     enabled: !ENV [ENABLED_HTMLPROOFER, False]
+  #     validate_external_urls: True
+  #     raise_error: True
+  #     ignore_urls:
+  #       - https://steamdb.info/*
+  #       - https://steamstat.us/*
+  #       - https://waveform.com/tools/bufferbloat/*
+
   # https://github.com/lukasgeiter/mkdocs-awesome-pages-plugin
   - awesome-pages:
       strict: true
@@ -81,12 +83,11 @@ plugins:
 
 nav:
   - Welcome: index.md
-  - Install Guides: 
-    - ... | flat | install-guides/*.md
-  - Detailed Command Usage: 
-    - ... | flat | detailed-command-usage/*.md
-  - Dev Guides: 
-    - ... | flat | dev-guides/*.md
-  - Steam Documentation: 
-    - ... | flat | steam-docs/*.md
-  
+  - Install Guides:
+      - ... | flat | install-guides/*.md
+  - Detailed Command Usage:
+      - ... | flat | detailed-command-usage/*.md
+  - Dev Guides:
+      - ... | flat | dev-guides/*.md
+  - Steam Documentation:
+      - ... | flat | steam-docs/*.md

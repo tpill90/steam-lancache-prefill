@@ -2,7 +2,7 @@
 
 ## Installing Prerequisites
 
-This project is using [mkdocs](https://www.mkdocs.org) to generate the static documentation that is then hosted on Github Pages.  The only requirement for building **mkdocs** is to have **Python 3** installed, which can be done through [Chocolatey](https://community.chocolatey.org/packages/python).
+This project is using [mkdocs](https://www.mkdocs.org) to generate the static documentation that is then hosted on Github Pages. The only requirement for building **mkdocs** is to have **Python 3** installed, which can be done through [Chocolatey](https://community.chocolatey.org/packages/python).
 
 ```powershell
 # Installs Python from Chocolatey.  Alternatively Python can be manually installed.
@@ -12,7 +12,7 @@ choco install python
 pip install -r requirements.txt
 ```
 
------
+---
 
 ## Project Layout
 
@@ -20,18 +20,20 @@ pip install -r requirements.txt
     mkdocs/
         index.md  # The documentation homepage.
         assets/   # Contains custom Javascript and CSS used on the docs site
-        custom_theme
+        custom_theme/
+    	img/
+    	img/svg/   # The .ansi files in the parent directory will be rendered here.
         ...       # Other markdown pages, images and other files.
 
------
+---
 
 ## Making Changes
 
-**mkdocs** has a built in server that will watch for changes being made, and immediately display those changes.  
+**mkdocs** has a built in server that will watch for changes being made, and immediately display those changes.
 
-You can launch the the live server using `mkdocs serve`, and open `http://127.0.0.1:8000/` in your browser.  You can now make edits and have the page automatically refresh and display those changes!
+You can launch the the live server using `mkdocs serve`, and open `http://127.0.0.1:8000/` in your browser. You can now make edits and have the page automatically refresh and display those changes!
 
------
+---
 
 ## Helpful links
 

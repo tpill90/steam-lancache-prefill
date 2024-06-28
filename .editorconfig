@@ -16,6 +16,7 @@ tab_size = 4
 # .NET formatting rules.  See https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
 # Resharper Rules. See https://www.jetbrains.com/help/resharper/EditorConfig_Index.html
 [*.cs]
+# TODO change this to tab in all projects.
 indent_style = space
 indent_size = 4
 
