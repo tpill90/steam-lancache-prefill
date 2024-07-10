@@ -109,6 +109,7 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 - [Is it possible to prefill apps I don't own?](https://tpill90.github.io/steam-lancache-prefill/faq/#is-it-possible-to-prefill-apps-i-dont-own)
 - [How can I limit download speeds?](https://tpill90.github.io/steam-lancache-prefill/faq/#how-can-i-limit-download-speeds)
 - [My logs have weird characters that make it hard to read. Is there any way to remove them?](https://tpill90.github.io/steam-lancache-prefill/faq/#my-logs-have-weird-characters-that-make-it-hard-to-read-is-there-any-way-to-remove-them)
+- [Can I use more than one Steam account at the same time?](https://tpill90.github.io/steam-lancache-prefill/faq/#can-i-use-more-than-one-steam-account-at-the-same-time)
 
 # Detailed Command Usage
 

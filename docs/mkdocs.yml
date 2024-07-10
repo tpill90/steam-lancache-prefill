@@ -83,6 +83,7 @@ plugins:
 
 nav:
   - Welcome: index.md
+  - Frequently Asked Questions: faq.md
   - Install Guides:
       - ... | flat | install-guides/*.md
   - Detailed Command Usage:

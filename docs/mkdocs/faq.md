@@ -81,3 +81,13 @@ Depending on the terminal that you are using, and what colors your system suppor
 One of the reasons you may be seeing this is that your terminal is misreporting what capabilities it supports, thus receiving output that it can't handle. To remove these characters from the log, simply use the flag `--no-ansi` which will remove all unsupported characters from the application's output.
 
 ---
+
+## Can I use more than one Steam account at the same time?
+
+Unfortunately SteamPrefill doesn't directly support multiple accounts as it was written to be a single user application. Fortunately there is however a fairly simple workaround. SteamPrefill is designed as a "self-contained" application, meaning that it keeps all of its configuration inside of the folder where it is installed.
+
+In order to use two (or more) accounts at the same time, you should create a separate instance of SteamPrefill for each account. Suppose that you have two accounts that you would like to use, when correctly setup the folder structure should look similar to this:
+
+<img src="../images/svg/Multi-User-File-Structure.svg" alt="Structure required for two Steam accounts">
+
+After the multiple instances have been created, they can both be used as usual by logging in and running the prefill.
