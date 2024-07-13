@@ -1,12 +1,11 @@
 # Configuring a Nightly Job
 
 !!! Note
-    This guide assumes that you have already installed **{{prefill_name}}** on your system.  If you have not yet installed **{{prefill_name}}**, see [Linux Setup Guide](../Linux-Setup-Guide)
-
+This guide assumes that you have already installed **{{prefill_name}}** on your system. If you have not yet installed **{{prefill_name}}**, see [Linux Setup Guide](../Linux-Setup-Guide)
 
 ## Configuring The Schedule
 
-We will first need to configure a `timer` which will configure the schedule that **{{prefill_name}}** will run on.  In this example, we will setup a schedule that will run nightly at 4am local time.
+We will first need to configure a `timer` which will configure the schedule that **{{prefill_name}}** will run on. In this example, we will setup a schedule that will run nightly at 4am local time.
 
 You should create a new file named `/etc/systemd/system/{{prefill_name.lower()}}.timer`, and save the following configuration into that file.
 
@@ -26,14 +25,14 @@ Persistent=true
 WantedBy=timers.target
 ```
 
------
+---
 
 ## Configuring The Job
 
-Next, well setup the job that will be triggered nightly by the `timer` that we previously setup.  Create a new file `/etc/systemd/system/{{prefill_name.lower()}}.service`, and save the following configuration into the file.
+Next, well setup the job that will be triggered nightly by the `timer` that we previously setup. Create a new file `/etc/systemd/system/{{prefill_name.lower()}}.service`, and save the following configuration into the file.
 
 !!! Note
-    The values of `User`, `WorkingDirectory`, and `ExecStart` will need to be configured to point to your **{{prefill_name}}** install location.
+The values of `User`, `WorkingDirectory`, and `ExecStart` will need to be configured to point to your **{{prefill_name}}** install location.
 
 ```ini
 [Unit]
@@ -44,11 +43,13 @@ Wants=remote-fs.target
 [Service]
 User=# Replace with your username
 
-# Set this to the directory where {{prefill_name}} is installed. 
-WorkingDirectory=# Example : /home/tim/{{prefill_name}}
+# Set this to the directory where {{prefill_name}} is installed.
+# Example : /home/tim/{{prefill_name}}
+WorkingDirectory=
 
 # This should be the full path to {{prefill_name}}, as well as any additional option flags
-ExecStart= # Example: /home/tim/{{prefill_name}}/{{prefill_name}} prefill --no-ansi
+# Example: /home/tim/{{prefill_name}}/{{prefill_name}} prefill --no-ansi
+ExecStart=
 
 Type=oneshot
 Nice=19
@@ -58,6 +59,7 @@ WantedBy=multi-user.target
 ```
 
 Once these two files are setup, you can enable the scheduled job with:
+
 ```
 sudo systemctl daemon-reload
 sudo systemctl enable --now {{prefill_name.lower()}}.timer
@@ -69,7 +71,7 @@ If everything was configured correctly, you should see similar output from runni
 <div data-cli-player="../casts/systemd-timer-status.cast" data-rows=8></div>
 <br>
 
------
+---
 
 ## Checking Service Logs
 
@@ -77,4 +79,3 @@ It is possible to check on the status of the service using `sudo systemctl statu
 
 <div data-cli-player="../casts/systemd-service-logs.cast" data-rows=17></div>
 <br>
-
