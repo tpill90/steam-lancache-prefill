@@ -1,7 +1,7 @@
 # Configuring a Nightly Job
 
 !!! Note
-This guide assumes that you have already installed **{{prefill_name}}** on your system. If you have not yet installed **{{prefill_name}}**, see [Linux Setup Guide](../Linux-Setup-Guide)
+    This guide assumes that you have already installed **{{prefill_name}}** on your system.  If you have not yet installed **{{prefill_name}}**, see [Linux Setup Guide](../Linux-Setup-Guide)
 
 ## Configuring The Schedule
 
@@ -29,11 +29,12 @@ WantedBy=timers.target
 
 ## Configuring The Job
 
-Next, well setup the job that will be triggered nightly by the `timer` that we previously setup. Create a new file `/etc/systemd/system/{{prefill_name.lower()}}.service`, and save the following configuration into the file.
+Next, we will setup the job that will be triggered nightly by the `timer` that we previously setup.  Create a new file `/etc/systemd/system/{{prefill_name.lower()}}.service`, and save the following configuration into the file.
 
 !!! Note
-The values of `User`, `WorkingDirectory`, and `ExecStart` will need to be configured to point to your **{{prefill_name}}** install location.
+    The values of `User`, `WorkingDirectory`, and `ExecStart` will need to be configured to point to your **{{prefill_name}}** install location.
 
+#TODO the syntax highlighting here is absolutely awful
 ```ini
 [Unit]
 Description={{prefill_name}}

@@ -255,10 +255,55 @@
             // Writing stats
             benchmarkWorkload.PrintSummary(_ansiConsole);
 
-            var fileSize = ByteSize.FromBytes(new FileInfo(AppConfig.BenchmarkWorkloadPath).Length);
+            CheckBenchmarkWorkloadSize(benchmarkWorkload);
+
             _ansiConsole.Write(new Rule());
             _ansiConsole.LogMarkupLine("Completed build of workload file...");
-            _ansiConsole.LogMarkupLine($"Resulting file size : {MediumPurple(fileSize.ToBinaryString())}");
+        }
+
+        //TODO document
+        private static void CheckBenchmarkWorkloadSize(BenchmarkWorkload generatedWorkload)
+        {
+            // While technically you can run a benchmark from a client Linux machine, this scenario is probably pretty rare since most people
+            // run SteamPrefill on the cache host.  Rather than add some more complexity by checking that the benchmark is definitely being created
+            // on the cache host, we'll omit it and save some added complexity
+            if (!System.OperatingSystem.IsLinux())
+            {
+                return;
+            }
+
+            var systemMemory = SystemMemoryMetrics.GetTotalSystemMemory();
+            // If the user generated a workload that is larger than the system's total memory, then the benchmark will always be reading from disk.
+            if (generatedWorkload.TotalDownloadSize > systemMemory)
+            {
+                return;
+            }
+
+            // Table setup
+            var table = new Table
+            {
+                ShowHeaders = false,
+                Border = TableBorder.Rounded,
+                BorderStyle = new Style(SpectreColors.LightYellow)
+            };
+            table.AddColumn("");
+
+            // Adding message rows
+            table.AddRow(LightYellow($"{new string(' ', 40)}!!!!!! Warning !!!!!!"));
+            table.AddEmptyRow();
+            table.AddRow($"The generated workload size of {Magenta(generatedWorkload.TotalDownloadSizeFormatted)} " +
+                         $"is smaller than the total system memory of {LightYellow(systemMemory.ToDecimalString())}.");
+            table.AddRow("Linux will cache files that it reads in system memory to improve performance of frequently used files,");
+            table.AddRow("however this benchmark is typically used to test disk IO performance.");
+            table.AddRow("In order to guarantee that an accurate benchmark where files are only ever read from disk,");
+            table.AddRow("the workload size should be larger than the system's memory.");
+            table.AddEmptyRow();
+            table.AddRow($"Please create a new benchmark workload that is larger than {LightYellow(systemMemory.ToDecimalString())}.");
+
+
+            // Render the table to the console
+            AnsiConsole.Write(table);
+            AnsiConsole.WriteLine();
         }
 
         //TODO this method is awfully complex, has lots and lots of nesting.  Makes it a bit hard to read at a glance
@@ -378,6 +423,7 @@
             _ansiConsole.Write(new Rule());
         }
 
+        //TODO rename
         private IOrderedEnumerable<KeyValuePair<string, ByteSize>> SortData(ConcurrentDictionary<string, ByteSize> index, SortOrder sortOrder, SortColumn sortColumn)
         {
             if (sortOrder == SortOrder.Ascending)
@@ -398,7 +444,6 @@
         }
 
         #endregion
-
 
         public async Task<List<AppInfo>> GetAllAvailableAppsAsync()
         {
