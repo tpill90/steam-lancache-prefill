@@ -57,7 +57,7 @@ namespace SteamPrefill.CliCommands.Benchmark
                        .AddRow(White(Underline("Benchmark workload summary")))
                        .AddRow(BuildSummaryTable())
                        // Request distribution
-                       .AddRow(White(Underline("Request size distribution")))
+                       .AddRow(White(Underline("Chunk size distribution")))
                        .AddEmptyRow()
                        .AddRow(BuildRequestSizeChart());
 
@@ -94,7 +94,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         }
 
         /// <summary>
-        /// Generates a bar chart of request size distribution
+        /// Generates a bar chart of chunk size distribution
         /// </summary>
         private BarChart BuildRequestSizeChart()
         {
@@ -237,7 +237,7 @@ namespace SteamPrefill.CliCommands.Benchmark
     [Intellenum(typeof(string))]
     public sealed partial class PresetWorkload
     {
-        public static readonly PresetWorkload BigChunks = new PresetWorkload("1085660");
+        public static readonly PresetWorkload LargeChunks = new PresetWorkload("1085660");
         public static readonly PresetWorkload SmallChunks = new PresetWorkload("570");
     }
 }
