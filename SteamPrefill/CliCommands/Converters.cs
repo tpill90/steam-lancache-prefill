@@ -69,7 +69,7 @@
             }
 
             AnsiConsole.MarkupLine(Red($"A preset must be specified when using {LightYellow("--preset")}"));
-            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
+            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/LargeChunks")}"));
             throw new CommandException(".", 1, true);
         }
     }
@@ -87,7 +87,7 @@
             }
 
             AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid preset"));
-            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/BigChunks")}"));
+            AnsiConsole.Markup(Red($"Valid presets include : {LightYellow("SmallChunks/LargeChunks")}"));
             throw new CommandException(".", 1, true);
         }
     }
