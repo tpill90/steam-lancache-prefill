@@ -13,6 +13,10 @@ curly_bracket_next_line = true
 indent_style = tab
 tab_size = 4
 
+[*.csproj]
+indent_style = space
+indent_size = 2
+
 # .NET formatting rules.  See https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/formatting-rules
 # Resharper Rules. See https://www.jetbrains.com/help/resharper/EditorConfig_Index.html
 [*.cs]

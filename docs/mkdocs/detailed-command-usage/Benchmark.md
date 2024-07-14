@@ -4,12 +4,7 @@
 
 Intended for use in identifying potential Lancache bottlenecks, which is typically disk IO. Can be used both server side as well as client side.
 
-<!-- TODO give this whole file another run through.  Maybe write a more in depth workflow explanation.  --!>
-<!-- TODO don't like this line -->
-
 `benchmark` uses the same download logic as `prefill`, however it offers the following advantages instead:
-
-<!-- TODO touch this up -->
 
 - Portable, no need to login to Steam in order to start the benchmark.
 - Able to be used across multiple machines at the same time, without logging in.
@@ -29,7 +24,7 @@ The workflow for benchmarking is to setup a workload with the `setup` subcommand
 Creates a benchmark "workload" comprised of multiple apps, that will then be benchmarked using the `run` sub-command.  Generally, the ideal benchmark will be the one that most closely matches the apps that you will usually be downloaded.  This can be setup for example with `./SteamPrefill benchmark setup --use-selected`. A benchmark can also be setup by specifying an individual game's appid (or more than one if desired), or by using one of the built in presets like `--preset SmallChunks` or `--preset LargeChunks`
 
 !!! Warning
-    This benchmark feature is typically used to test disk IO performance. Linux will cache files that it reads in system memory to improve performance of frequently used files. In order to guarantee that an accurate benchmark where files are only ever read from disk, the workload size needs to be larger than the Lancache server's total amount of memory.
+    This benchmark feature is typically used to test disk IO performance. Linux will cache files that it reads in system memory to improve performance of frequently used files. In order to generate  an accurate benchmark where files are only ever read from disk, the workload size needs to be larger than the Lancache server's total amount of memory.
 
 Once the workload has been generated, a summary with some stats will be displayed. The chunk size distribution will give you an idea of the performance characteristics of the workload you created. The ideal performance scenario is when the chunk sizes are primarily 1 MiB or larger, whereas the worst possible scenario is having them be on the small side. Note that there is nothing that you can do about the chunk sizes, these are the size that the chunks are stored on Steam's servers. The distribution is here just for the sake of visibility into what is being tested.
 
