@@ -15,18 +15,9 @@ namespace SteamPrefill.CliCommands.Benchmark
 
         public List<QueuedRequest> AllQueuedRequests => QueuedAppsList.SelectMany(e => e.QueuedRequests).ToList();
 
-        private ByteSize? _totalDownloadSize;
-        public ByteSize TotalDownloadSize
-        {
-            get
-            {
-                if (_totalDownloadSize == null)
-                {
-                    _totalDownloadSize = ByteSize.FromBytes(QueuedAppsList.Sum(e => e.TotalBytes));
-                }
-                return _totalDownloadSize.Value;
-            }
-        }
+        private ByteSize _totalDownloadSize;
+        public ByteSize TotalDownloadSize => _totalDownloadSize;
+        public string TotalDownloadSizeFormatted => _totalDownloadSize.ToDecimalString();
 
         public long TotalFiles => QueuedAppsList.Sum(e => e.FileCount);
         public string TotalFilesFormatted => TotalFiles.ToString("n0");
@@ -43,6 +34,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         public BenchmarkWorkload(ConcurrentBag<AppQueuedRequests> queuedAppsList, ConcurrentStack<Server> cdnServers)
         {
             QueuedAppsList = queuedAppsList;
+            _totalDownloadSize = ByteSize.FromBytes(QueuedAppsList.Sum(e => e.TotalBytes));
             ServerShimList = cdnServers.Select(e => _mapper.Map<Server, CdnServerShim>(e)).ToList();
         }
 
