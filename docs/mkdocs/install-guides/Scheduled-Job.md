@@ -34,7 +34,6 @@ Next, we will setup the job that will be triggered nightly by the `timer` that w
 !!! Note
     The values of `User`, `WorkingDirectory`, and `ExecStart` will need to be configured to point to your **{{prefill_name}}** install location.
 
-#TODO the syntax highlighting here is absolutely awful
 ```ini
 [Unit]
 Description={{prefill_name}}
@@ -42,7 +41,8 @@ After=remote-fs.target
 Wants=remote-fs.target
 
 [Service]
-User=# Replace with your username
+# Replace with your username
+User=
 
 # Set this to the directory where {{prefill_name}} is installed.
 # Example : /home/tim/{{prefill_name}}

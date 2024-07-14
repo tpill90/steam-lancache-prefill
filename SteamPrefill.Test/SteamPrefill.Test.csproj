@@ -24,11 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- TODO remove this custom built SteamKit2 dll once the SteamKit team has published the auth changes -->
-    <Reference Include="SteamKit2">
-      <HintPath>..\lib\SteamKit2.dll</HintPath>
-    </Reference>
-    <!--<PackageReference Include="SteamKit2" Version="2.4.1" />-->
+    <PackageReference Include="SteamKit2" Version="2.5.0-Beta.1" />
 
     <ProjectReference Include="..\SteamPrefill\SteamPrefill.csproj" />
     <Reference Include="Spectre.Console">

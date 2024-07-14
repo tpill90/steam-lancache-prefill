@@ -19,8 +19,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 - Multi-platform support (Windows, Linux, MacOS, Arm64, Docker, Unraid)
 - High-performance! Downloads are significantly faster than using Steam. Downloads can scale all the way up to 100gbit/s!
 - Game downloads write no data to disk, so there is no need to have enough free space available. This also means no unnecessary wear-and-tear to SSDs!
-- Completely implemented from scratch, has no dependency on `SteamCMD`!
-- No Steam API key required!
+- Includes a built in benchmark feature for diagnosing performance bottlenecks!
 
 # Table of contents
 
