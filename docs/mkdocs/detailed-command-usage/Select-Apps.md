@@ -11,8 +11,10 @@
 
 ## Status
 
-<!-- TODO needs an asciicast here -->
-Lists all selected apps and their disk usage.
+Lists all selected apps and their download size.  Please note that the download size is going to be smaller than the final install size since Steam compresses game files for download.
+
+<div data-cli-player="../casts/select-apps-status.cast" data-rows=18></div>
+<br>
 
 -----
 
