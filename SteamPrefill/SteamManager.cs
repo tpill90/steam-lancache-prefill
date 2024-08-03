@@ -289,9 +289,10 @@
             table.AddColumn("");
 
             // Adding message rows
+            var totalDownloadSize = generatedWorkload.TotalDownloadSize;
             table.AddRow(LightYellow($"{new string(' ', 40)}!!!!!! Warning !!!!!!"));
             table.AddEmptyRow();
-            table.AddRow($"The generated workload size of {Magenta(generatedWorkload.TotalDownloadSizeFormatted)} " +
+            table.AddRow($"The generated workload size of {Magenta(totalDownloadSize.ToBinaryString())} " +
                          $"is smaller than the total system memory of {LightYellow(systemMemory.ToDecimalString())}.");
             table.AddRow("Linux will cache files that it reads in system memory to improve performance of frequently used files,");
             table.AddRow("however this benchmark is typically used to test disk IO performance.");
