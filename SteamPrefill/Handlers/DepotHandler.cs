@@ -12,11 +12,11 @@
         /// </summary>
         private readonly Dictionary<uint, HashSet<ulong>> _downloadedDepots = new Dictionary<uint, HashSet<ulong>>();
 
-        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler, CdnPool cdnPool, DownloadArguments downloadArgs)
+        public DepotHandler(IAnsiConsole ansiConsole, Steam3Session steam3Session, AppInfoHandler appInfoHandler, CdnPool cdnPool)
         {
             _steam3Session = steam3Session;
             _appInfoHandler = appInfoHandler;
-            _manifestHandler = new ManifestHandler(ansiConsole, cdnPool, steam3Session, downloadArgs);
+            _manifestHandler = new ManifestHandler(ansiConsole, cdnPool, steam3Session);
 
             if (File.Exists(AppConfig.SuccessfullyDownloadedDepotsPath))
             {
@@ -103,7 +103,7 @@
                     continue;
                 }
 
-                // Low Violence 
+                // Low Violence
                 if (depot.LowViolence != null && depot.LowViolence.Value)
                 {
                     continue;

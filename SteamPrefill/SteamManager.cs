@@ -29,7 +29,7 @@
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);
             _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
-            _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool, downloadArgs);
+            _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool);
         }
 
         #region Startup + Shutdown

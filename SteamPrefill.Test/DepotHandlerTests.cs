@@ -37,7 +37,7 @@ namespace SteamPrefill.Test
             appInfoHandlerMock.Setup(e => e.GetAppInfoAsync(It.IsAny<uint>()))
                           .Returns(Task.FromResult(new AppInfo(steam3, 222, appKeyValues)));
 
-            _depotHandler = new DepotHandler(new TestConsole(), steam3, appInfoHandlerMock.Object, null, new DownloadArguments());
+            _depotHandler = new DepotHandler(new TestConsole(), steam3, appInfoHandlerMock.Object, null);
         }
 
         [Fact]

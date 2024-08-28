@@ -12,16 +12,14 @@
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
         private readonly Steam3Session _steam3Session;
-        private readonly DownloadArguments _downloadArguments;
 
         private const int MaxRetries = 3;
 
-        public ManifestHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, Steam3Session steam3Session, DownloadArguments downloadArguments)
+        public ManifestHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, Steam3Session steam3Session)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
             _steam3Session = steam3Session;
-            _downloadArguments = downloadArguments;
         }
 
         /// <summary>
@@ -133,7 +131,7 @@
         /// These manifest codes act as a form of "authorization" for the CDN.  You can only download a manifest if your account has access to the
         /// specified depot, so since the CDN itself doesn't check for access, this will prevent unauthorized depot downloads
         ///
-        /// https://steamdb.info/blog/manifest-request-codes/ 
+        /// https://steamdb.info/blog/manifest-request-codes/
         /// </summary>
         /// <param name="depot">The depot to request a manifest code for</param>
         /// <returns>A manifest code valid for 5 minutes.</returns>
@@ -141,7 +139,7 @@
         private async Task<ManifestRequestCode> GetManifestRequestCodeAsync(DepotInfo depot)
         {
             ulong manifestRequestCode = await _steam3Session.SteamContent.GetManifestRequestCode(depot.DepotId, depot.ContainingAppId, depot.ManifestId.Value, "public")
-                                                                         // Adding an additional timeout to this SteamKit method.  I have a feeling that this is not properly timing out 
+                                                                         // Adding an additional timeout to this SteamKit method.  I have a feeling that this is not properly timing out
                                                                          // for some users.
                                                                          .WaitAsync(TimeSpan.FromSeconds(90));
 

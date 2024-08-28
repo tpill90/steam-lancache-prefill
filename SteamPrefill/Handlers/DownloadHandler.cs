@@ -65,7 +65,7 @@
             // Web requests frequently fail due to transient errors, so displaying all errors to the user is unnecessary or even confusing.
             // However, if a request fails repeatedly then there might be an underlying issue preventing success.
             // The number of failures could approach in the thousands or even more, so rather than spam the console
-            // we will instead log them as a batch to app.log 
+            // we will instead log them as a batch to app.log
             foreach (var failedRequest in failedRequests)
             {
                 FileLogger.LogExceptionNoStackTrace($"Request /depot/{failedRequest.DepotId}/chunk/{failedRequest.ChunkId} failed", failedRequest.LastFailureReason);
