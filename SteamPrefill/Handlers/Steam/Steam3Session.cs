@@ -5,7 +5,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <summary>
         /// CellId represents the region that the user is geographically located in, and determines which Connection Managers and CDNs
         /// will be used by SteamPrefill.
-        /// 
+        ///
         /// Typically, Steam will automatically select the correct CellId using geolocation.
         /// However, the api endpoint used (ISteamDirectory/GetCMList) will unpredictably return non-local servers due to an issue with Valve's
         /// api not handling trailing slashes correctly.
@@ -50,7 +50,10 @@ namespace SteamPrefill.Handlers.Steam
             _ansiConsole = ansiConsole;
 
             _steamClient = new SteamClient(SteamConfiguration.Create(e => e.WithCellID(CellId)
-                                                                                                 .WithConnectionTimeout(TimeSpan.FromSeconds(60))));
+                                                                           // TODO remove this line when this PR is merged and deployed https://github.com/SteamRE/SteamKit/pull/1420
+                                                                           .WithProtocolTypes(ProtocolTypes.WebSocket)
+                                                                           .WithConnectionTimeout(TimeSpan.FromSeconds(10))));
+
             _steamUser = _steamClient.GetHandler<SteamUser>();
             SteamAppsApi = _steamClient.GetHandler<SteamApps>();
             SteamContent = _steamClient.GetHandler<SteamContent>();
@@ -65,7 +68,7 @@ namespace SteamPrefill.Handlers.Steam
                 _isConnecting = false;
                 _disconnected = false;
             });
-            // If a connection attempt fails in anyway, SteamKit2 notifies of the failure with a "disconnect"
+            // If a connection attempt fails in any way, SteamKit2 notifies of the failure with a "disconnect"
             _callbackManager.Subscribe<SteamClient.DisconnectedCallback>(e =>
             {
                 _isConnecting = false;
@@ -119,7 +122,7 @@ namespace SteamPrefill.Handlers.Steam
                 }
             }
 
-            await _steamClient.CurrentEndPoint.PrintGeolocationInfoAsync();
+            _ansiConsole.LogMarkupVerbose($"Connected to CM {LightYellow(_steamClient.CurrentEndPoint)}");
         }
 
         private async Task GetAccessTokenAsync()
