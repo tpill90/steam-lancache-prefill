@@ -12,13 +12,14 @@
     {
         public override BindingValidationError Validate(OperatingSystem[] value)
         {
-            if (value.Length == 0)
+            if (value.Length != 0)
             {
-                AnsiConsole.MarkupLine(Red($"An operating system must be specified when using {LightYellow("--os")}"));
-                AnsiConsole.Markup(Red($"Valid operating systems include : {LightYellow("windows/linux/macos")}"));
-                throw new CommandException(".", 1, true);
+                return Ok();
             }
-            return Ok();
+
+            AnsiConsole.MarkupLine(Red($"An operating system must be specified when using {LightYellow("--os")}"));
+            AnsiConsole.Markup(Red($"Valid operating systems include : {LightYellow("windows/linux/macos")}"));
+            throw new CommandException(".", 1, true);
         }
     }
 
@@ -31,6 +32,7 @@
         public override OperatingSystem Convert(string rawValue)
         {
             //TODO case insensitive
+            rawValue = rawValue.ToLower();
             if (!OperatingSystem.TryFromValue(rawValue, out _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid operating system!"));
@@ -43,22 +45,27 @@
 
     #endregion
 
+    #region Benchmark
+
     public sealed class ConcurrencyValidator : BindingValidator<uint>
     {
         public override BindingValidationError Validate(uint value)
         {
-            if (value == 0)
+            if (value != 0)
             {
-                AnsiConsole.MarkupLine(Red($"{White(0)} is not a valid value for {LightYellow("--concurrency")}"));
-                AnsiConsole.Markup(Red($"Please select a value between {LightYellow("1-100")}"));
-                throw new CommandException(".", 1, true);
+                return Ok();
             }
 
-            return Ok();
+            AnsiConsole.MarkupLine(Red($"{White(0)} is not a valid value for {LightYellow("--concurrency")}"));
+            AnsiConsole.Markup(Red($"Please enter a value between {LightYellow("1-100")}"));
+            throw new CommandException(".", 1, true);
         }
     }
 
     //TODO this pattern of these two is burdensome and difficult to understand.  Can this be abstracted at all?
+    /// <summary>
+    /// Checks to make sure that at least one value has been passed to the --preset option.
+    /// </summary>
     public sealed class PresetWorkloadValidator : BindingValidator<PresetWorkload[]>
     {
         public override BindingValidationError Validate(PresetWorkload[] value)
@@ -92,6 +99,8 @@
         }
     }
 
+    #endregion
+
     #region Status command validators
 
     public sealed class SortOrderConverter : BindingConverter<SortOrder>
@@ -117,6 +126,9 @@
         }
     }
 
+    /// <summary>
+    /// Validates that the user has provided a valid value when using the '--sort-by' option.
+    /// </summary>
     public sealed class SortColumnConverter : BindingConverter<SortColumn>
     {
         public override SortColumn Convert(string rawValue)
@@ -129,10 +141,11 @@
                 throw new CommandException(".", 1, true);
             }
 
+            // Checking to make sure that the value provided is one of the enum's values
             rawValue = rawValue.ToLower();
             if (!SortColumn.TryFromValue(rawValue, out var _))
             {
-                AnsiConsole.MarkupLine(Red($"{White(0)} is not a valid value for {LightYellow("--sort-by")}"));
+                AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid value for {LightYellow("--sort-by")}"));
                 AnsiConsole.Markup(Red($"Valid options include : {LightYellow("app/size")}"));
                 throw new CommandException(".", 1, true);
             }
