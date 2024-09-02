@@ -1,6 +1,6 @@
 namespace SteamPrefill.Handlers.Steam
 {
-    public class SteamKitDebugListener : IDebugListener
+    public sealed class SteamKitDebugListener : IDebugListener
     {
         private readonly IAnsiConsole _ansiConsole;
 
@@ -15,7 +15,7 @@ namespace SteamPrefill.Handlers.Steam
 
         public void WriteLine(string category, string msg)
         {
-            _ansiConsole.MarkupLine($"SteamKitDebug - {category}: {msg}");
+            _ansiConsole.LogMarkupLine($"{category}: {msg}");
         }
     }
 }

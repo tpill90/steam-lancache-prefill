@@ -24,9 +24,9 @@
     <TrimmerSingleWarn>false</TrimmerSingleWarn>
     <!-- Reverts back to the default trim mode used by dotnet 6, otherwise CliFx breaks without reflection -->
     <TrimMode>partial</TrimMode>
-    
+
     <PublishSingleFile>true</PublishSingleFile>
-    
+
     <!-- Required to be enabled in order to run this application on Ubuntu Docker images. -->
     <InvariantGlobalization>true</InvariantGlobalization>
 
@@ -66,8 +66,8 @@
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
-    <PackageReference Include="protobuf-net" Version="3.2.16" />
-    <PackageReference Include="SteamKit2" Version="2.5.0-Beta.1" />
+    <PackageReference Include="protobuf-net" Version="3.2.30" />
+    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.34.0" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
