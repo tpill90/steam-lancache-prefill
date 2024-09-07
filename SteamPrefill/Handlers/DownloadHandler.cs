@@ -17,6 +17,7 @@
             _cdnPool = cdnPool;
 
             _client = new HttpClient();
+            // Lancache requires this user agent in order to correctly identify and cache Valve's content servers
             _client.DefaultRequestHeaders.Add("User-Agent", "Valve/Steam HTTP Client 1.0");
         }
 
