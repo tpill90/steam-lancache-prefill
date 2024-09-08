@@ -104,6 +104,7 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 - [Can I run SteamPrefill on the Lancache server?](https://tpill90.github.io/steam-lancache-prefill/faq/#can-i-run-steamprefill-on-the-lancache-server)
 - [Can SteamPrefill be run on a schedule?](https://tpill90.github.io/steam-lancache-prefill/faq/#can-steamprefill-be-run-on-a-schedule)
 - [Can I fill my cache using previously installed Steam games?](https://tpill90.github.io/steam-lancache-prefill/faq/#can-i-fill-my-cache-using-previously-installed-steam-games)
+- [Where does SteamPrefill store downloads?](https://tpill90.github.io/steam-lancache-prefill/faq/#where-does-steamprefill-store-downloads)
 - [How do I pause my running downloads?](https://tpill90.github.io/steam-lancache-prefill/faq/#how-do-i-pause-my-running-downloads)
 - [Is it possible to prefill apps I don't own?](https://tpill90.github.io/steam-lancache-prefill/faq/#is-it-possible-to-prefill-apps-i-dont-own)
 - [How can I limit download speeds?](https://tpill90.github.io/steam-lancache-prefill/faq/#how-can-i-limit-download-speeds)
@@ -116,11 +117,8 @@ More in depth documentation on SteamPrefill's various commands can be found on t
 
 - Looking to see what other options can be used with `prefill`?  See [prefill](https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Prefill/)
 - Interested to seeing the total download size of your selected apps? Try [select-apps status](https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Select-Apps/#status)
-- Getting slow downloads from your cache, and interested in diagnosing it?  Use the [benchmark](https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Select-Apps/#status)
+- Getting slow downloads from your cache, and interested in diagnosing it?  Use the [benchmark](https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Benchmark)
 
-
-> **Note**
-> Detailed command documentation has been moved to the wiki : [Detailed Command Usage](https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Prefill/)
 
 # Updating
 

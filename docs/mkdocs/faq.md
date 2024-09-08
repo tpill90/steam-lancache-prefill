@@ -40,6 +40,12 @@ Unfortunately it is not possible to fill a Lancache using games that have been i
 
 ---
 
+## Where does SteamPrefill store downloads?
+
+**SteamPrefill** actually doesn't save anything at all!  It will simply download data from the Lancache as quickly as it can, without saving the data to disk.  The Lancache instance will be what is writing game downloads to disk as something is being downloaded through it, whether by using **Steam** or **SteamPrefill**.
+
+---
+
 ## How do I pause my running downloads?
 
 You can pause your downloads at any time by simply pressing `CTRL + C`, which will immediately terminate the application. This won't hurt anything at all, and **SteamPrefill** will pickup where it left off during the next `prefill` run.

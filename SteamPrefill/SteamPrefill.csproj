@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64</RuntimeIdentifiers>
@@ -39,7 +39,6 @@
     <DebugSymbols>false</DebugSymbols>
   </PropertyGroup>
 
-  <!--TODO add this to the other projects-->
   <PropertyGroup>
     <!-- Removes the full file system path from exception stack traces, only shows the file names now -->
     <PathMap>$(MSBuildProjectDirectory)=$(MSBuildProjectName)</PathMap>
