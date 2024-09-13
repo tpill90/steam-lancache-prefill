@@ -1,6 +1,6 @@
-# clear-cache
+# clear-temp
 
-<div data-cli-player="../casts/clear-cache.cast" data-rows=6></div>
+<div data-cli-player="../casts/clear-temp.cast" data-rows=6></div>
 <br>
 
 ## Overview
