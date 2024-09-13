@@ -2,10 +2,10 @@
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
-    [Command("clear-temp", Description = "Empties out temporary cached data (from SteamPrefill), to free up disk space")]
+    [Command("clear-temp", Description = "Empties out temporary data, such as saved manifests, to free up disk space")]
     public sealed class ClearTempCommand : ICommand
     {
-        [CommandOption("yes", shortName: 'y', Description = "When specified, will clear the cache without prompting", Converter = typeof(NullableBoolConverter))]
+        [CommandOption("yes", shortName: 'y', Description = "When specified, will clear the temp files without prompting.", Converter = typeof(NullableBoolConverter))]
         public bool? AcceptPrompt { get; init; }
 
         public ValueTask ExecuteAsync(IConsole console)
@@ -14,28 +14,28 @@ namespace SteamPrefill.CliCommands
 
             var ansiConsole = console.CreateAnsiConsole();
             // Remove the v1/v2/v3 sub-directories
-            var rootCacheDir = new DirectoryInfo(AppConfig.CacheDir).Parent;
+            var rootTempDir = new DirectoryInfo(AppConfig.TempDir).Parent;
 
-            // Scanning the cache directory to see how much space could be saved
-            List<FileInfo> cacheFolderContents = null;
-            ansiConsole.StatusSpinner().Start($"Scanning {Cyan("Cache")} directory...", ctx =>
+            // Scanning the temp directory to see how much space could be saved
+            List<FileInfo> tempFolderContents = null;
+            ansiConsole.StatusSpinner().Start($"Scanning {Cyan("temp")} directory...", ctx =>
             {
-                cacheFolderContents = rootCacheDir.EnumerateFiles("*.*", SearchOption.AllDirectories).ToList();
+                tempFolderContents = rootTempDir.EnumerateFiles("*.*", SearchOption.AllDirectories).ToList();
             });
 
-            var totalSizeOnDisk = ByteSize.FromBytes(cacheFolderContents.Sum(e => e.Length));
-            if (totalSizeOnDisk.Bytes == 0 && cacheFolderContents.Count == 0)
+            var totalSizeOnDisk = ByteSize.FromBytes(tempFolderContents.Sum(e => e.Length));
+            if (totalSizeOnDisk.Bytes == 0 && tempFolderContents.Count == 0)
             {
-                ansiConsole.LogMarkupLine($"Nothing to cleanup! {Cyan("Cache")} directory is already empty!");
+                ansiConsole.LogMarkupLine($"Nothing to cleanup! {Cyan("temp")} directory is already empty!");
                 return default;
             }
-            ansiConsole.LogMarkupLine($"Found {LightYellow(cacheFolderContents.Count)} cached files, totaling {Magenta(totalSizeOnDisk.ToDecimalString())}");
+            ansiConsole.LogMarkupLine($"Found {LightYellow(tempFolderContents.Count)} temp files, totaling {Magenta(totalSizeOnDisk.ToDecimalString())}");
 
             // If user hasn't passed in the accept flag, then we should ask them if they want to delete the files
             if (!(AcceptPrompt ?? false))
             {
                 var userResponse = ansiConsole.Prompt(new SelectionPrompt<bool>()
-                                                      .Title("Continue to empty cache?")
+                                                      .Title("Continue to delete temp files?")
                                                       .AddChoices(true, false)
                                                       .UseConverter(e => e == false ? "No" : "Yes"));
                 filesShouldBeDeleted = filesShouldBeDeleted || userResponse;
@@ -46,9 +46,9 @@ namespace SteamPrefill.CliCommands
                 return default;
             }
 
-            ansiConsole.StatusSpinner().Start("Deleting cached files...", ctx =>
+            ansiConsole.StatusSpinner().Start("Deleting temp files...", ctx =>
             {
-                Directory.Delete(rootCacheDir.FullName, true);
+                Directory.Delete(rootTempDir.FullName, true);
             });
             ansiConsole.LogMarkupLine("Done!");
 

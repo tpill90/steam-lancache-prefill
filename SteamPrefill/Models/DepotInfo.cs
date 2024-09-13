@@ -7,7 +7,7 @@
 
         public ulong? ManifestId { get; set; }
 
-        public string ManifestFileName => $"{AppConfig.CacheDir}/{_originalAppId}_{ContainingAppId}_{DepotId}_{ManifestId}.bin";
+        public string ManifestFileName => $"{AppConfig.TempDir}/{_originalAppId}_{ContainingAppId}_{DepotId}_{ManifestId}.bin";
 
         /// <summary>
         /// Determines what app actually owns the depot, by default it is the current app.

@@ -6,7 +6,7 @@ namespace SteamPrefill.Settings
         {
             // Create required folders
             Directory.CreateDirectory(ConfigDir);
-            Directory.CreateDirectory(CacheDir);
+            Directory.CreateDirectory(TempDir);
         }
 
         /// <summary>
@@ -31,12 +31,7 @@ namespace SteamPrefill.Settings
         /// Downloaded manifests, as well as other metadata, are saved into this directory to speedup future prefill runs.
         /// All data in here should be able to be deleted safely.
         /// </summary>
-        public static readonly string CacheDir = CacheDirUtils.GetCacheDirBaseDirectories("SteamPrefill", CacheDirVersion);
-
-        /// <summary>
-        /// Increment when there is a breaking change made to the files in the cache directory
-        /// </summary>
-        private const string CacheDirVersion = "v1";
+        public static readonly string TempDir = TempDirUtils.GetTempDirBaseDirectories("SteamPrefill", "v1");
 
         /// <summary>
         /// Contains user configuration.  Should not be deleted, doing so will reset the app back to defaults.
@@ -54,22 +49,22 @@ namespace SteamPrefill.Settings
         public static readonly string UserSelectedAppsPath = Path.Combine(ConfigDir, "selectedAppsToPrefill.json");
 
         /// <summary>
-        /// Keeps track of which depots have been previously downloaded.  Is used to determine whether or not a game is up to date,
-        /// based on whether all of the depots being downloaded are up to date.
+        /// Keeps track of which depots have been previously downloaded.  Is used to determine whether a game is up-to-date,
+        /// based on whether all the depots being downloaded are up-to-date.
         /// </summary>
         public static readonly string SuccessfullyDownloadedDepotsPath = Path.Combine(ConfigDir, "successfullyDownloadedDepots.json");
 
         /// <summary>
-        /// Stores the user's current CellId, which corresponds to their region.  
+        /// Stores the user's current CellId, which corresponds to their region.
         /// </summary>
         /// <see cref="Steam3Session.CellId">See for additional documentation</see>
-        public static readonly string CachedCellIdPath = Path.Combine(CacheDir, "cellId.txt");
+        public static readonly string CachedCellIdPath = Path.Combine(TempDir, "cellId.txt");
 
         #endregion
 
-        #region Debugging 
+        #region Debugging
 
-        public static readonly string DebugOutputDir = Path.Combine(CacheDir, "Debugging");
+        public static readonly string DebugOutputDir = Path.Combine(TempDir, "Debugging");
 
         /// <summary>
         /// Skips using locally cached manifests. Saves disk space, at the expense of slower subsequent runs.  Intended for debugging.
