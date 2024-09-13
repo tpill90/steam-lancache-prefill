@@ -2,7 +2,7 @@
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
-    [Command("clear-cache", Description = "Empties out temporary cached data, to free up disk space")]
+    [Command("clear-temp", Description = "Empties out temporary cached data (from SteamPrefill), to free up disk space")]
     public sealed class ClearCacheCommand : ICommand
     {
         [CommandOption("yes", shortName: 'y', Description = "When specified, will clear the cache without prompting", Converter = typeof(NullableBoolConverter))]

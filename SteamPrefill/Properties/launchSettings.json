@@ -38,7 +38,7 @@
     },
     "Clear cache": {
       "commandName": "Project",
-      "commandLineArgs": "clear-cache"
+      "commandLineArgs": "clear-temp"
     },
     "Stats": {
       "commandName": "Project",
