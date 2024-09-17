@@ -23,7 +23,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 # Table of contents
 
-- [Initial Setup](#initial-setup)
+- [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Frequently Asked Questions](#frequently-asked-questions)
 - [Detailed Command Usage](#detailed-command-usage)
@@ -55,7 +55,7 @@ Detailed setup guides are available for the following platforms:
 
 ## Selecting what to prefill
 
-> **Warning**
+> [!WARNING]
 > This guide was written with Linux in mind. If you are running **SteamPrefill** on Windows you will need to substitute `./SteamPrefill` with `.\SteamPrefill.exe` instead.
 
 Prior to prefilling for the first time, you will have to decide which apps should be prefilled. This will be done using an interactive menu, for selecting what to prefill from all of your currently owned apps. To display the interactive menu, run the following command
@@ -97,7 +97,7 @@ Any data that was previously downloaded, will be retrieved from the Lancache, wh
 
 # Frequently Asked Questions
 
-> **Note**
+> [!NOTE]
 > FAQs have been moved to the project wiki. A table of contents is provided here for convenience and visibility : [Frequently Asked Questions](https://tpill90.github.io/steam-lancache-prefill/faq/)
 
 - [I have to login with my password? How do I know this is safe?](https://tpill90.github.io/steam-lancache-prefill/faq/#i-have-to-login-with-my-password-how-do-i-know-this-is-safe)
