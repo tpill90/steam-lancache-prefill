@@ -9,11 +9,11 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    container:
+      image: python:3.11
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.x
+      - run: git config --global --add safe.directory "*";
       - run: >
           cd docs;
           pip install -r requirements.txt;
