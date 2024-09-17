@@ -88,8 +88,16 @@ dotnet_diagnostic.cs4014.severity = error
 # - Not a fan of the syntax, feels a little bit too terse
 dotnet_style_prefer_collection_expression = false
 
+# IDE0074: Use compound assignment
+# - I'm not a big fan of this syntax, I find it a bit difficult to read similarly how I find ternary operators difficult to read.
+dotnet_diagnostic.IDE0074.severity = none
+
 # IDE0090 : 'new' expression can be simplified
 csharp_style_implicit_object_creation_when_type_is_apparent = false
+
+# IDE0270: Null check can be simplified
+dotnet_style_coalesce_expression = false
+dotnet_diagnostic.IDE0270.severity = none
 
 # IDE0290: Use primary constructor
 # - I'm a fan of this syntax in Typescript, but it still feels a bit too jarring seeing it C# now

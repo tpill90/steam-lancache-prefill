@@ -56,7 +56,7 @@ namespace SteamPrefill.CliCommands
             // Property must be set to false in order to disable ansi escape sequences
             _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
 
-            await UpdateChecker.CheckForUpdatesAsync(typeof(Program), "tpill90/steam-lancache-prefill", AppConfig.CacheDir);
+            await UpdateChecker.CheckForUpdatesAsync(typeof(Program), "tpill90/steam-lancache-prefill", AppConfig.TempDir);
 
             var downloadArgs = new DownloadArguments
             {

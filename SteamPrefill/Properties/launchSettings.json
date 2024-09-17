@@ -36,13 +36,13 @@
       "commandName": "Project",
       "commandLineArgs": "benchmark run"
     },
-    "Clear cache": {
-      "commandName": "Project",
-      "commandLineArgs": "clear-cache"
-    },
     "Stats": {
       "commandName": "Project",
       "commandLineArgs": "status --nocache"
+    },
+    "Clear Temp": {
+      "commandName": "Project",
+      "commandLineArgs": "clear-temp"
     }
   }
 }
