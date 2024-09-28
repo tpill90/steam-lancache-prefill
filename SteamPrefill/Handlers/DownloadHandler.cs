@@ -101,16 +101,40 @@
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                     requestMessage.Headers.Host = cdnServer.Host;
 
-                    using var cts = new CancellationTokenSource();
-                    using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-                    using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
-                    response.EnsureSuccessStatusCode();
+                    using var requestHead = new HttpRequestMessage(HttpMethod.Head, url);
 
-                    // Don't save the data anywhere, so we don't have to waste time writing it to disk.
-                    var buffer = new byte[4096];
-                    while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
+
+                    using var cts = new CancellationTokenSource();
+
+
+                    string status = "MISS";
+                    if(AppConfig.FastCache)
                     {
+
+                        using var head = await _client.SendAsync(requestHead, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+
+
+                        IEnumerable<string> values;
+                        if (head.Headers.TryGetValues("X-Cache-Status", out values))
+                        {
+                            status = values.FirstOrDefault();
+                        }
+
                     }
+
+                    if (status != "HIT")
+                    {
+                        using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                        using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
+                        response.EnsureSuccessStatusCode();
+
+                        // Don't save the data anywhere, so we don't have to waste time writing it to disk.
+                        var buffer = new byte[4096];
+                        while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
+                        {
+                        }
+                    }
+
                 }
                 catch (Exception e)
                 {

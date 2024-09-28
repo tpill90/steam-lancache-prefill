@@ -90,6 +90,17 @@ namespace SteamPrefill
                 args.Remove("--no-cache");
             }
 
+            // Skips already downloaded chunks using a headers check
+            if (args.Any(e => e.Contains("--fast-cache")) || args.Any(e => e.Contains("--fastcache")) || args.Any(e => e.Contains("--skip-cached")) || args.Any(e => e.Contains("--skip-cached")))
+            {
+                AnsiConsole.Console.LogMarkupLine($"Using {Red("--fastcache")} flag. Will skip transmitting chunks the lancache already has. {Red("Do not use this flag with a benchmark. Your result will be inaccurate.")}");
+                AppConfig.FastCache = true;
+                args.Remove("--fast-cache");
+                args.Remove("--fastcache");
+                args.Remove("--skip-cached");
+                args.Remove("--skipcached");
+            }
+
             // Adding some formatting to logging to make it more readable + clear that these flags are enabled
             if (AppConfig.DebugLogs || AppConfig.SkipDownloads || AppConfig.NoLocalCache)
             {

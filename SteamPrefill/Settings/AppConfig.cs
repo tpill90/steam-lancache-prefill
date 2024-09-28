@@ -77,6 +77,11 @@ namespace SteamPrefill.Settings
         /// </summary>
         public static bool SkipDownloads { get; set; }
 
+        /// <summary>
+        /// Will skip any chunks that have already been downloaded. Using for quickly resuming downloads that may have been interrupted, or to only download updated chunks when a game update is released.
+        /// </summary>
+        public static bool FastCache {get; set;}
+
         private static bool _debugLogs;
         public static bool DebugLogs
         {
