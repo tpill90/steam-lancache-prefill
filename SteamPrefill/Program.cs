@@ -60,7 +60,7 @@ namespace SteamPrefill
         /// </summary>
         private static List<string> ParseHiddenFlags()
         {
-            // Have to skip the first argument, since its the path to the executable
+            // Have to skip the first argument, since it is the path to the executable
             var args = Environment.GetCommandLineArgs().Skip(1).ToList();
 
             // Enables SteamKit2 debugging as well as SteamPrefill verbose logs
@@ -88,6 +88,17 @@ namespace SteamPrefill
                 AppConfig.NoLocalCache = true;
                 args.Remove("--nocache");
                 args.Remove("--no-cache");
+            }
+
+            if (args.Any(e => e.Contains("--cellid")))
+            {
+                var flagIndex = args.IndexOf("--cellid");
+                var id = args[flagIndex + 1];
+                AppConfig.CellIdOverride = uint.Parse(id);
+
+                AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--cellid")} flag.  Will force the usage of cell id {Magenta(id)}");
+                args.Remove("--cellid");
+                args.Remove(id);
             }
 
             // Adding some formatting to logging to make it more readable + clear that these flags are enabled

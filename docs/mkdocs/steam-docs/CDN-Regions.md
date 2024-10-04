@@ -1,10 +1,13 @@
 # CDN Regions
 
+!!! Note
+    As of 2024-10-04 it appears that it is no longer possible to choose a CDN region in Steam.  It is however still possible to choose a region for logging into Steam.
+
 Valve maintains CDNs in various regions for Steam, which are identified internally as a `CellId`.  This is a list of the currently known CDN regions for Steam, pulled directly from the **Content Server Directory Service**.
 
 The **Download Region** setting in Steam will display a large number of regions, however the majority of them do not exist.  The only ones that exist are the ones included in this page.  In addition, setting an override region will have no effect on which download region your client will use.  Steam will always determine which download region to serve you from, based on some unknown geo-location criteria.
 
-![docker no command](images/download-region-settings.png){: style="height:430px"}
+![download region](images/download-region-settings.png){: style="height:430px"}
 
 Please note that this list is non-exhaustive, and likely inaccurate, as Valve may potentially change them in the future.
 

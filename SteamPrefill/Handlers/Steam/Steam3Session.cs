@@ -20,7 +20,18 @@ namespace SteamPrefill.Handlers.Steam
         /// </summary>
         private uint CellId
         {
-            get => File.Exists(AppConfig.CachedCellIdPath) ? uint.Parse(File.ReadAllText(AppConfig.CachedCellIdPath)) : 0;
+            get
+            {
+                if (AppConfig.CellIdOverride != null)
+                {
+                    return AppConfig.CellIdOverride.Value;
+                }
+                if (File.Exists(AppConfig.CachedCellIdPath))
+                {
+                    return uint.Parse(File.ReadAllText(AppConfig.CachedCellIdPath));
+                }
+                return 0;
+            }
             set => File.WriteAllText(AppConfig.CachedCellIdPath, value.ToString());
         }
 
@@ -178,7 +189,7 @@ namespace SteamPrefill.Handlers.Steam
         /// <exception cref="SteamConnectionException">Throws if unable to connect to Steam</exception>
         private void ConnectToSteam()
         {
-            _ansiConsole.LogMarkupVerbose($"Connecting with CellId: {LightYellow(CellId)}");
+            _ansiConsole.LogMarkupVerbose($"Connecting with CellId: {Magenta(CellId)}");
             var timeoutAfter = DateTime.Now.AddSeconds(30);
 
             // Busy waiting until the client has a successful connection established

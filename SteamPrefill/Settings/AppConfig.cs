@@ -90,6 +90,8 @@ namespace SteamPrefill.Settings
             }
         }
 
+        public static uint? CellIdOverride { get; set; }
+
         #endregion
     }
 }
