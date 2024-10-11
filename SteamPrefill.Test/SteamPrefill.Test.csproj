@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.2" />
+    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5" />
 
     <ProjectReference Include="..\SteamPrefill\SteamPrefill.csproj" />
     <Reference Include="Spectre.Console">

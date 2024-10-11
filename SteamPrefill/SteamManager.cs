@@ -19,12 +19,6 @@
             _ansiConsole = ansiConsole;
             _downloadArgs = downloadArgs;
 
-            if (AppConfig.DebugLogs)
-            {
-                DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
-                DebugLog.Enabled = true;
-            }
-
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);
@@ -451,7 +445,7 @@
             var ownedGameIds = _steam3.LicenseManager.AllOwnedAppIds;
 
             // Loading app metadata from steam, skipping related DLC apps
-            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, loadRecentlyPlayed: true);
+            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, getRecentlyPlayedMetadata: true);
             var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(ownedGameIds);
 
             return availableGames;

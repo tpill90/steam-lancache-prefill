@@ -28,7 +28,7 @@
         /// <summary>
         /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
         /// </summary>
-        public async Task RetrieveAppMetadataAsync(List<uint> appIds, bool loadDlcApps = true, bool loadRecentlyPlayed = false)
+        public async Task RetrieveAppMetadataAsync(List<uint> appIds, bool loadDlcApps = true, bool getRecentlyPlayedMetadata = false)
         {
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App metadata...", async _ =>
             {
@@ -40,9 +40,9 @@
                     await FetchDlcAppInfoAsync();
                 }
 
-                if (loadRecentlyPlayed)
+                // Populating play time if needed, otherwise we'll skip it to slightly speed things up
+                if (getRecentlyPlayedMetadata)
                 {
-                    // Populating play time
                     foreach (var app in await GetRecentlyPlayedGamesAsync())
                     {
                         var appInfo = await GetAppInfoAsync((uint)app.appid);
@@ -184,13 +184,13 @@
                 include_played_free_games = true,
                 skip_unvetted_apps = false
             };
-            var response = await _steam3Session.unifiedPlayerService.SendMessage(e => e.GetOwnedGames(request)).ToTask();
+            var response = await _steam3Session.unifiedPlayerService.GetOwnedGames(request).ToTask();
             if (response.Result != EResult.OK)
             {
                 throw new Exception("Unexpected error while requesting owned games!");
             }
 
-            _ownedGames = response.GetDeserializedResponse<CPlayer_GetOwnedGames_Response>().games;
+            _ownedGames = response.Body.games;
             return _ownedGames;
         }
 
