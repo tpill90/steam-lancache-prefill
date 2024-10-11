@@ -62,6 +62,7 @@ namespace SteamPrefill.Handlers.Steam
 
             _steamClient = new SteamClient(SteamConfiguration.Create(e => e.WithCellID(CellId)
                                                                            // TODO remove this line when this PR is merged and deployed https://github.com/SteamRE/SteamKit/pull/1420
+                                                                           //TODO seems to no longer work
                                                                            .WithProtocolTypes(ProtocolTypes.WebSocket)
                                                                            .WithConnectionTimeout(TimeSpan.FromSeconds(10))));
 
@@ -99,6 +100,12 @@ namespace SteamPrefill.Handlers.Steam
 
             _userAccountStore = UserAccountStore.LoadFromFile();
             LicenseManager = new LicenseManager(SteamAppsApi);
+
+            // Setting up optional SteamKit2 debug output.  Not enabled by default because it writes out way too much output that isn't useful outside of debugging.
+            if (AppConfig.DebugLogs)
+            {
+                DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
+            }
         }
 
         public async Task LoginToSteamAsync()
@@ -133,7 +140,7 @@ namespace SteamPrefill.Handlers.Steam
                 }
             }
 
-            _ansiConsole.LogMarkupVerbose($"Connected to CM {LightYellow(_steamClient.CurrentEndPoint)}");
+            _ansiConsole.LogMarkupVerbose($"Connected to CM {Cyan(_steamClient.CurrentEndPoint)}");
         }
 
         private async Task GetAccessTokenAsync()
@@ -226,7 +233,7 @@ namespace SteamPrefill.Handlers.Steam
             _loggedOnCallbackResult = null;
 
             _logonDetails.AccessToken = _userAccountStore.AccessToken;
-            _steamUser.LogOn(_logonDetails);
+            _steamClient.GetHandler<SteamUser>().LogOn(_logonDetails);
 
             // Busy waiting for the callback to complete, then we can return the callback value synchronously
             while (_loggedOnCallbackResult == null)

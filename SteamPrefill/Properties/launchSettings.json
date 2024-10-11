@@ -2,7 +2,7 @@
   "profiles": {
     "Prefill All": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --force --verbose"
+      "commandLineArgs": "prefill --debug --cellid 63"
     },
     "Prefill All - No Download": {
       "commandName": "Project",
@@ -14,7 +14,7 @@
     },
     "Select Apps": {
       "commandName": "Project",
-      "commandLineArgs": "select-apps"
+      "commandLineArgs": "select-apps --cellid 66"
     },
     "Prefill Selected": {
       "commandName": "Project",

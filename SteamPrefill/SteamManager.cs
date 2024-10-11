@@ -19,12 +19,6 @@
             _ansiConsole = ansiConsole;
             _downloadArgs = downloadArgs;
 
-            if (AppConfig.DebugLogs)
-            {
-                DebugLog.AddListener(new SteamKitDebugListener(_ansiConsole));
-                DebugLog.Enabled = true;
-            }
-
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);

@@ -40,6 +40,7 @@ global using System.Runtime.InteropServices;
 global using System.Threading;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
+global using System.Text.RegularExpressions;
 global using System.Threading.Tasks;
 global using Terminal.Gui;
 global using static LancachePrefill.Common.SpectreFormatters;
