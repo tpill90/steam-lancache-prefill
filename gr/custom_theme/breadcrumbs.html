@@ -1,0 +1,52 @@
+<div role="navigation" aria-label="breadcrumbs navigation">
+    <ul class="wy-breadcrumbs">
+        <!-- Navigation breadcrumbs on the left hand side of the header -->
+        <li><a href="{{ nav.homepage.url|url }}" class="icon icon-home" alt="{% trans %}Docs{% endtrans %}"></a> &raquo;</li>
+        {%- if page %}
+            {%- for doc in page.ancestors[::-1] %}
+            {%- if doc.link %}
+                <li><a href="{{ doc.link|e }}">{{ doc.title }}</a> &raquo;</li>
+            {%- else %}
+                <li>{{ doc.title }} &raquo;</li>
+            {%- endif %}
+            {%- endfor %}
+            <li>{{ page.title }}</li>
+        {%- endif %}
+
+        <!-- Language picker -->
+        <li class="wy-breadcrumbs-aside">
+            <div class="dropdown-container">
+                <!-- Button for the language drop down selector  -->
+                <button>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="flagIcon">
+                        <path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24z"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown entries that are hidden by default -->
+                <div class="dropdown-content">
+                    {% for lang, display in config.plugins.i18n.config.languages.items() -%}
+                        <a href="{{ lang | url }}">
+                            <img src="{{ base_url }}/assets/flags/{{ lang }}.svg" class="flagIcon"> {{ display.name }}
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </li>
+    </ul>
+
+    
+
+    {%- if config.theme.prev_next_buttons_location|lower in ['top', 'both'] and page and (page.next_page or page.previous_page) %}
+      <div class="rst-breadcrumbs-buttons" role="navigation" aria-label="{% trans %}Breadcrumb Navigation{% endtrans %}">
+        {%- if page.previous_page %}
+          <a href="{{ page.previous_page.url|url }}" class="btn btn-neutral float-left" title="{{ page.previous_page.title }}"><span class="icon icon-circle-arrow-left" aria-hidden="true"></span> {% trans %}Previous{% endtrans %}</a>
+        {%- endif %}
+        {%- if page.next_page %}
+          <a href="{{ page.next_page.url|url }}" class="btn btn-neutral float-right" title="{{ page.next_page.title }}">{% trans %}Next{% endtrans %} <span class="icon icon-circle-arrow-right" aria-hidden="true"></span></a>
+        {%- endif %}
+      </div>
+    {%- endif %}
+    <hr/>
+  </div>
+  
