@@ -6,14 +6,16 @@ namespace SteamPrefill
         {
             try
             {
-                // Checking to see if the user double clicked the exe in Windows, and display a message on how to use the app
+                // Checking to see if the user double-clicked the exe in Windows, and display a message on how to use the app
                 OperatingSystemUtils.DetectDoubleClickOnWindows("SteamPrefill");
 
                 var cliArgs = ParseHiddenFlags();
-                var description = "Automatically fills a Lancache with games from Steam, so that subsequent downloads will be \n" +
-                                  "  served from the Lancache, improving speeds and reducing load on your internet connection. \n" +
-                                  "\n" +
-                                  "  Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'";
+                var description = """
+                                  Automatically fills a Lancache with games from Steam, so that subsequent downloads will be
+                                    served from the Lancache, improving speeds and reducing load on your internet connection.
+
+                                    Start by selecting apps for prefill with the 'select-apps' command, then start the prefill using 'prefill'
+                                  """;
 
                 return await new CliApplicationBuilder()
                              .AddCommandsFromThisAssembly()
@@ -99,6 +101,17 @@ namespace SteamPrefill
                 AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--cellid")} flag.  Will force the usage of cell id {Magenta(id)}");
                 args.Remove("--cellid");
                 args.Remove(id);
+            }
+
+            if (args.Any(e => e.Contains("--max-threads")))
+            {
+                var flagIndex = args.IndexOf("--max-threads");
+                var count = args[flagIndex + 1];
+                AppConfig.MaxConcurrencyOverride = int.Parse(count);
+
+                AnsiConsole.Console.LogMarkupLine($"Using {LightYellow("--max-threads")} flag.  Will download using at most {Magenta(count)} threads");
+                args.Remove("--max-threads");
+                args.Remove(count);
             }
 
             // Adding some formatting to logging to make it more readable + clear that these flags are enabled

@@ -92,6 +92,8 @@ namespace SteamPrefill.Settings
 
         public static uint? CellIdOverride { get; set; }
 
+        public static int? MaxConcurrencyOverride { get; set; }
+
         #endregion
     }
 }
