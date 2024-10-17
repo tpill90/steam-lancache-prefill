@@ -66,7 +66,13 @@
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
     <PackageReference Include="protobuf-net" Version="3.2.30" />
-    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.2" />
+
+    <!-- TODO remove this temporary steamkit build when the fix has been pushed to nuget -->
+    <Reference Include="SteamKit2">
+      <HintPath>..\lib\SteamKit2.dll</HintPath>
+    </Reference>
+    <!--<PackageReference Include="SteamKit2" Version="3.0.0-Beta.2" />-->
+
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.34.0" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
