@@ -32,7 +32,7 @@ Automatically fills a [Lancache](https://lancache.net/) with games from Steam, s
 
 # Installation
 
-**SteamPrefill** is flexible and portable, and supports multiple platforms and configurations. It can be run on directly on the Lancache server itself, or on your gaming machine as an alternative Steam client. You should decide which one works better for your use case.
+**SteamPrefill** is flexible and portable, and supports multiple platforms and configurations. It can be run directly on the Lancache server itself, or on your gaming machine as an alternative Steam client. You should decide which one works better for your use case.
 
 Detailed setup guides are available for the following platforms:
 
