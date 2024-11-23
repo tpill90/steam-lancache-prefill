@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -15,21 +14,16 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Moq" Version="4.18.2" />
-    <PackageReference Include="Spectre.Console.Testing" Version="0.44.0" />
+    <PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.67" />
+    <PackageReference Include="Spectre.Console.Testing" Version="0.49.2-preview.0.67" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-  </ItemGroup>
 
-  <ItemGroup>
     <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5" />
-
     <ProjectReference Include="..\SteamPrefill\SteamPrefill.csproj" />
-    <Reference Include="Spectre.Console">
-      <HintPath>..\lib\Spectre.Console.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

@@ -66,6 +66,7 @@
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
     <PackageReference Include="protobuf-net" Version="3.2.30" />
+    <PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.67" />
     <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.34.0" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
@@ -76,11 +77,6 @@
     <!-- Custom CliFx build, allows for top level exception handling in application code, instead of CliFx swallowing all exceptions -->
     <Reference Include="CliFx">
       <HintPath>..\LancachePrefill.Common\lib\CliFx.dll</HintPath>
-    </Reference>
-
-    <!-- Custom Spectre.Console build, includes changes to display transfer speed in bits -->
-    <Reference Include="Spectre.Console">
-      <HintPath>..\LancachePrefill.Common\lib\Spectre.Console.dll</HintPath>
     </Reference>
 
     <!-- Debugging Packages -->
@@ -107,7 +103,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Spectre.Console.Analyzer" Version="0.44.0">
+    <PackageReference Include="Spectre.Console.Analyzer" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
