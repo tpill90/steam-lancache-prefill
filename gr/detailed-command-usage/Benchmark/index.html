@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://tpill90.github.io/steam-lancache-prefill/gr/detailed-command-usage/Benchmark/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>benchmark - steam-lancache-prefill wiki</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../assets/external/asciinema-player.css" rel="stylesheet" />
+        <link href="../../../assets/language-picker.css" rel="stylesheet" />
+        <link href="../../../assets/copy-to-clipboard.css" rel="stylesheet" />
+        <link href="../../../assets/extra.css" rel="stylesheet" />
+        <link href="../../../assets/syntax-style-overrides.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "benchmark";
+        var mkdocs_page_input_path = "detailed-command-usage/Benchmark.md";
+        var mkdocs_page_url = "/steam-lancache-prefill/gr/detailed-command-usage/Benchmark/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/ini.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/powershell.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> steam-lancache-prefill wiki
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Welcome</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../faq/">Frequently Asked Questions</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Docker-Setup-Guide/">Docker Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Linux-Setup-Guide/">Linux Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Scheduled-Job/">Configuring a Nightly Job</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Unraid-Setup-Guide/">Unraid Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Windows-Setup-Guide/">Windows Setup Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Detailed Command Usage</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">benchmark</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#setup">setup</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#run">run</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Clear-Temp/">clear-temp</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Prefill/">prefill</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Select-Apps/">select-apps</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dev Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guides/Compiling-from-source/">Compiling από την πηγή</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guides/mkdocs-setup/">Working With Project Documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Steam Documentation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../steam-docs/CDN-Regions/">CDN Regions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../steam-docs/External-Links/">External Links</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">steam-lancache-prefill wiki</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+    <ul class="wy-breadcrumbs">
+        <!-- Navigation breadcrumbs on the left hand side of the header -->
+        <li><a href="../../" class="icon icon-home" alt="Docs"></a> &raquo;</li>
+                <li>Detailed Command Usage &raquo;</li>
+            <li>benchmark</li>
+
+        <!-- Language picker -->
+        <li class="wy-breadcrumbs-aside">
+            <div class="dropdown-container">
+                <!-- Button for the language drop down selector  -->
+                <button>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="flagIcon">
+                        <path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24z"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown entries that are hidden by default -->
+                <div class="dropdown-content">
+                    <a href="../../../en">
+                            <img src="../../../assets/flags/en.svg" class="flagIcon"> English
+                        </a>
+                    <a href="../..">
+                            <img src="../../../assets/flags/gr.svg" class="flagIcon"> Ελληνικά
+                        </a>
+                    
+                </div>
+            </div>
+        </li>
+    </ul>
+    <hr/>
+  </div>
+  
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="benchmark">benchmark<a class="headerlink" href="#benchmark" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Intended for use in identifying potential Lancache bottlenecks, which is typically disk IO. Can be used both server side as well as client side.</p>
+<p><code>benchmark</code> uses the same download logic as <code>prefill</code>, however it offers the following advantages instead:</p>
+<ul>
+<li>Portable, no need to login to Steam in order to start the benchmark.</li>
+<li>Able to be used across multiple machines at the same time, without logging in.</li>
+<li>Continuous sustained download, combines multiple apps into a single download.</li>
+<li>Repeatable, will perform the same download every time.</li>
+<li>Randomized, requests will be completed in a random order.</li>
+</ul>
+<p>The workflow for benchmarking is to setup a workload with the <code>setup</code> subcommand, which can be used as many times as desired with the <code>run</code> subcommand.</p>
+<hr />
+<h2 id="setup">setup<a class="headerlink" href="#setup" title="Permanent link">&para;</a></h2>
+<div data-cli-player="../casts/benchmark-setup.cast" data-rows=19></div>
+<p><br></p>
+<p>Creates a benchmark "workload" comprised of multiple apps, that will then be benchmarked using the <code>run</code> sub-command.  Generally, the ideal benchmark will be the one that most closely matches the apps that you will usually be downloaded.  This can be setup for example with <code>./SteamPrefill benchmark setup --use-selected</code>. A benchmark can also be setup by specifying an individual game's appid (or more than one if desired), or by using one of the built in presets like <code>--preset SmallChunks</code> or <code>--preset LargeChunks</code></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This benchmark feature is typically used to test disk IO performance. Linux will cache files that it reads in system memory to improve performance of frequently used files. In order to generate  an accurate benchmark where files are only ever read from disk, the workload size needs to be larger than the Lancache server's total amount of memory.</p>
+</div>
+<p>Once the workload has been generated, a summary with some stats will be displayed. The chunk size distribution will give you an idea of the performance characteristics of the workload you created. The ideal performance scenario is when the chunk sizes are primarily 1 MiB or larger, whereas the worst possible scenario is having them be on the small side. Note that there is nothing that you can do about the chunk sizes, these are the size that the chunks are stored on Steam's servers. The distribution is here just for the sake of visibility into what is being tested.</p>
+<!-- Markdown columns determine width based on the the longest cell.  &nbsp; forces the length to be longer, so --use-selected doesn't get broken into two lines  -->
+
+<table>
+<thead>
+<tr>
+<th>Option &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</th>
+<th>Values</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>--use-selected</td>
+<td></td>
+<td>Creates a workload file using apps previously specified with <code>select-apps</code>. Ideal for most use cases, since it likely aligns with games that will be downloaded by real event clients.</td>
+</tr>
+<tr>
+<td>--all</td>
+<td></td>
+<td>Benchmark workload will be created using all currently owned apps.</td>
+</tr>
+<tr>
+<td>--appid</td>
+<td></td>
+<td>The id of one or more apps to include in benchmark workload file. Useful for testing a specific app, without having to modify previously selected apps. AppIds can be found using <a href="https://steamdb.info/">SteamDB</a></td>
+</tr>
+<tr>
+<td>--no-ansi</td>
+<td></td>
+<td>Application output will be in plain text, rather than using the visually appealing colors and progress bars. Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.</td>
+</tr>
+<tr>
+<td>--preset</td>
+<td>SmallChunks, LargeChunks</td>
+<td>Can be used to quickly setup a benchmark with a predefined workload of differing characteristics. LargeChunks represents a best case scenario where chunk sizes are close to 1Mib, whereas SmallChunks is a worst case scenario of small files.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="run">run<a class="headerlink" href="#run" title="Permanent link">&para;</a></h2>
+<p>Runs multiple iterations of the benchmark workload created with <code>benchmark setup</code>. Useful for measuring the throughput for the Lancache server, and diagnosing any potential performance issues.</p>
+<p><u><strong> Warmup </strong></u></p>
+<div data-cli-player="../casts/benchmark-warmup.cast" data-rows=5></div>
+<p><br></p>
+<p>The first part of the benchmark run will be the initialization + warmup of the workload. The workload file previously created with <code>benchmark setup</code> will be loaded from disk, and the ordering of the requests to be made will be randomized.</p>
+<p>Next, the warmup run will download all of the workload's requests, which is necessary for a few reasons:</p>
+<ul>
+<li>It ensures that all of the data has been downloaded, and is cached by the Lancache.</li>
+<li>Allows for data that has been cached in the server's memory to be flushed by the new requests, ensuring that we are testing disk I/O.</li>
+<li>Gives the CPU a chance to physically warm up, minimizing potential fluctuations between runs.</li>
+</ul>
+<p><u><strong> Running </strong></u></p>
+<p>After the warmup, <code>benchmark run</code> will begin downloading the same workload in a loop, for as many iterations as specified with <code>--iterations</code> (default: 5). After each iteration, it will display the overall average download rate for that iteration.</p>
+<div data-cli-player="../casts/benchmark-iterations.cast" data-rows=5></div>
+<p><br></p>
+<p>Once all the iterations have been completed, a summary table displaying the min/max/average will be shown:</p>
+<div data-cli-player="../casts/benchmark-run-summary.cast" data-rows=6></div>
+<p><br></p>
+<p><u><strong> Identifying bottlenecks </strong></u></p>
+<p>While <code>benchmark run</code> is useful for getting an overall idea of your server's performance, it won't however identify bottlenecks in the system by itself. It is instead primarily intended to be another tool to help with identifying bottlenecks, by providing a constant and even load on the server.</p>
+<p>It is recommended that you run some sort of system monitoring software on the server while running your benchmarks, so that you can get an idea of how your server is handling the load. There are many monitoring tools available, such as <a href="https://github.com/nicolargo/glances">Glances</a>, that provide a visual overview of the system.</p>
+<p>Two important measurements to keep an eye on, are the overall <code>CPU</code> usage, as well as <code>iowait</code>. The majority of bottlenecks for servers will be either the speed of the CPU, or the speed at which the disk(s) can read.</p>
+<p><img alt="benchmark-run-glances" src="../images/benchmark-run-glances.png" style="width:350px" /></p>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th></th>
+<th>Values</th>
+<th>Default</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>--concurrency</td>
+<td>-c</td>
+<td>1-100</td>
+<td><strong>30</strong></td>
+<td>The maximum number of concurrent requests in flight at one time. A higher number may improve maximum throughput, but may possibly have a negative effect if the cache server cannot process the concurrent requests fast enough.</td>
+</tr>
+<tr>
+<td>--iterations</td>
+<td>-i</td>
+<td>1-25</td>
+<td><strong>5</strong></td>
+<td>The number of runs to do before calculating overall results.</td>
+</tr>
+<tr>
+<td>--unit</td>
+<td></td>
+<td>bits, bytes</td>
+<td><strong>bits</strong></td>
+<td>Specifies which unit to use to display download speed.</td>
+</tr>
+<tr>
+<td>--no-ansi</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Application output will be in plain text, rather than using the visually appealing colors and progress bars. Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+      <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+          <a href="../../install-guides/Windows-Setup-Guide/" class="btn btn-neutral float-left" title="Windows Setup Guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+          <a href="../Clear-Temp/" class="btn btn-neutral float-right" title="clear-temp">Next <span class="icon icon-circle-arrow-right"></span></a>
+      </div>
+  
+    <hr/>
+
+    <div role="contentinfo">
+      <!-- Copyright etc -->
+    </div>
+  </footer>
+  
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/tpill90/steam-lancache-prefill" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../../install-guides/Windows-Setup-Guide/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../Clear-Temp/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../assets/external/asciinema-player.min.js" defer></script>
+      <script src="../../../assets/external/clipboard.min.js" defer></script>
+      <script src="../../../assets/external/popper.min.js" defer></script>
+      <script src="../../../assets/external/tippy-bundle.umd.min.js" defer></script>
+      <script src="../../../assets/copy-to-clipboard.js" defer></script>
+      <script src="../../../assets/extra.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
