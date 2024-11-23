@@ -84,6 +84,10 @@ dotnet_diagnostic.cs1998.severity = error
 # CS4014: Because this call is not awaited, execution of the current method continues before the call is completed
 dotnet_diagnostic.cs4014.severity = error
 
+# IDE0008 - Use explicit type instead of 'var'
+# - No idea why it is now recommending you to not use var anymore.  So disabling it.
+dotnet_diagnostic.IDE0008.severity = none
+
 # IDE0028: Simplify collection initialization
 # - Not a fan of the syntax, feels a little bit too terse
 dotnet_style_prefer_collection_expression = false
