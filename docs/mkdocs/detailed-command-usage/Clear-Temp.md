@@ -18,4 +18,4 @@ For most users it isn't necessary to use this command, however it may be useful 
 
 | Option      |     |      |
 | ----------- | --- | ---  |
-| --yes       | -y  | Clears the temp files immediately, displaying a prompt. |
+| --yes       | -y  | When specified, will clear the temp files without prompting. |
