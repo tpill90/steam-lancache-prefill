@@ -9,7 +9,7 @@
         private readonly Steam3Session _steam3Session;
         private readonly LicenseManager _licenseManager;
 
-        private List<CPlayer_GetOwnedGames_Response.Game> _ownedGames;
+        private List<CPlayer_GetOwnedGames_Response.Game> _recentlyPlayed;
 
         /// <summary>
         /// A dictionary of all app metadata currently retrieved from Steam
@@ -26,21 +26,18 @@
         #region Loading Metadata
 
         /// <summary>
-        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps
+        /// Gets the latest app metadata from steam, for the specified apps, as well as their related DLC apps.
         /// </summary>
-        public async Task RetrieveAppMetadataAsync(List<uint> appIds, bool loadDlcApps = true, bool getRecentlyPlayedMetadata = false)
+        public async Task RetrieveAppMetadataAsync(List<uint> appIds, bool getRecentlyPlayedMetadata = false)
         {
             await _ansiConsole.StatusSpinner().StartAsync("Retrieving latest App metadata...", async _ =>
             {
                 await BulkLoadAppInfoAsync(appIds);
+                // Once we have loaded all the apps we'll know what DLC is owned, so we can then load DLC metadata
+                await FetchDlcAppInfoAsync();
 
-                if (loadDlcApps)
-                {
-                    // Once we have loaded all the apps, we can also load information for related DLC
-                    await FetchDlcAppInfoAsync();
-                }
-
-                // Populating play time if needed, otherwise we'll skip it to slightly speed things up
+                // Populating play time if needed in the case of select-apps or using prefill's --recent flag.
+                // Otherwise we'll skip it to slightly speed things up
                 if (getRecentlyPlayedMetadata)
                 {
                     foreach (var app in await GetRecentlyPlayedGamesAsync())
@@ -166,14 +163,13 @@
         }
 
         /// <summary>
-        /// Gets a list of all games owned by the current user.
-        /// This differs from the list of owned AppIds, as this exclusively contains "games", excluding things like DLC/Tools/etc
+        /// Gets a list of games owned by the user, and filters them down to just the ones that have recent playtime in the last 2 weeks.
         /// </summary>
-        private async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetUsersOwnedGamesAsync()
+        public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetRecentlyPlayedGamesAsync()
         {
-            if (_ownedGames != null)
+            if (_recentlyPlayed != null)
             {
-                return _ownedGames;
+                return _recentlyPlayed;
             }
 
             var request = new CPlayer_GetOwnedGames_Request
@@ -190,15 +186,10 @@
                 throw new Exception("Unexpected error while requesting owned games!");
             }
 
-            _ownedGames = response.Body.games;
-            return _ownedGames;
+            _recentlyPlayed = response.Body.games.Where(e => e.playtime_2weeks > 0).ToList();
+            return _recentlyPlayed;
         }
 
-        public async Task<List<CPlayer_GetOwnedGames_Response.Game>> GetRecentlyPlayedGamesAsync()
-        {
-            var userOwnedGames = await GetUsersOwnedGamesAsync();
-            return userOwnedGames.Where(e => e.playtime_2weeks > 0).ToList();
-        }
 
         //TODO is this necessary because --all includes things that shouldn't be downloaded?
         /// <summary>
@@ -213,17 +204,18 @@
                 appInfos.Add(await GetAppInfoAsync(appId));
             }
 
-            // Filtering down some exclusions
+
+
+            // Filtering out some apps exclusions
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
             var filteredGames = appInfos.Where(e => (e.Type == AppType.Game || e.Type == AppType.Beta)
-                                                    && (e.ReleaseState != ReleaseState.Unavailable && e.ReleaseState != ReleaseState.Prerelease)
+                                                    && (e.ReleaseState == ReleaseState.Released || e.ReleaseState == ReleaseState.Prerelease)
                                                     && e.SupportsWindows
                                                     && _steam3Session.LicenseManager.AccountHasAppAccess(e.AppId))
-                                        .Where(e => !excludedAppIds.Contains(e.AppId))
-                                        .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
-                                        .Where(e => !e.Name.Contains("AMD Driver Updater"))
-                                        .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
-                                        .ToList();
+                                                    .Where(e => !excludedAppIds.Contains(e.AppId))
+                                                    .Where(e => !e.Categories.Contains(Category.Mods) && !e.Categories.Contains(Category.ModsHL2))
+                                                    .OrderBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+                                                    .ToList();
 
             return filteredGames;
         }

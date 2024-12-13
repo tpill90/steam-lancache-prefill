@@ -20,8 +20,8 @@
             731,
             732,
             734,
-            
-            // Excluding VC Redist since they add unnecessary noise to a app's depot list
+
+            // Excluding VC Redist since they add unnecessary noise to an app's depot list
             228981,
             228982,
             228983,
