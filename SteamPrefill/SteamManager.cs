@@ -92,12 +92,11 @@
             _ansiConsole.WriteLine();
 
             var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
-            //TODO switch this to iterating over the list of apps instead
             foreach (var app in availableGames)
             {
                 try
                 {
-                    await DownloadSingleAppAsync(app.AppId);
+                    await DownloadSingleAppAsync(app);
                 }
                 catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
                 {
@@ -120,10 +119,8 @@
             _prefillSummaryResult.RenderSummaryTable(_ansiConsole);
         }
 
-        private async Task DownloadSingleAppAsync(uint appId)
+        private async Task DownloadSingleAppAsync(AppInfo appInfo)
         {
-            AppInfo appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
-
             // Filter depots based on specified language/OS/cpu architecture/etc
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
             if (filteredDepots.Empty())
@@ -445,7 +442,7 @@
             var ownedGameIds = _steam3.LicenseManager.AllOwnedAppIds;
 
             // Loading app metadata from steam, skipping related DLC apps
-            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, loadDlcApps: false, getRecentlyPlayedMetadata: true);
+            await _appInfoHandler.RetrieveAppMetadataAsync(ownedGameIds, getRecentlyPlayedMetadata: true);
             var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(ownedGameIds);
 
             return availableGames;
