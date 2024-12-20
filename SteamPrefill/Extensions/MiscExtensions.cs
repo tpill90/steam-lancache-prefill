@@ -37,12 +37,16 @@
 
         public static async Task<string> ReadPasswordAsync(this IAnsiConsole console, string promptText = null)
         {
-            var promptTask = Task.Run(() =>
+            // Wrapping the prompt in a task so that we can add a timeout if the user doesn't enter a password
+            Task<string> promptTask = Task.Run(() =>
             {
                 var defaultPrompt = $"Please enter your {Cyan("Steam password")}. {LightYellow("(Password won't be saved)")} : ";
-                return console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
+                var password = console.Prompt(new TextPrompt<string>(promptText ?? defaultPrompt)
                                       .PromptStyle("white")
                                       .Secret());
+
+                // For whatever reason Steam allows you to enter as long of a password as you'd like, and silently truncates anything after 64 characters
+                return password.Substring(0, 64);
             });
             return await promptTask.WaitAsync(TimeSpan.FromSeconds(30));
         }
