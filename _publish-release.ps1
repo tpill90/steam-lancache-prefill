@@ -12,6 +12,7 @@ $newVersion = Read-Host "Enter new version, with no leading 'v'.  Ex. '1.2.3'"
 if($newVersion.Contains("v"))
 {
     Write-Color $newVersion, " is not a valid version since it has a leading 'v'." -Color Yellow, Red
+    return
 }
 
 # Updating csproj version
