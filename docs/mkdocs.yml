@@ -23,7 +23,6 @@ extra:
   prefill_name: SteamPrefill
   gaming_service_name: Steam
   repo_name: steam-lancache-prefill
-  cache_trigger_domain: lancache.steamcontent.com
 
 theme:
   name: readthedocs
