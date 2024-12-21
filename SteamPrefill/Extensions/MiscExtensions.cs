@@ -46,7 +46,12 @@
                                       .Secret());
 
                 // For whatever reason Steam allows you to enter as long of a password as you'd like, and silently truncates anything after 64 characters
-                return password.Substring(0, 64);
+                if (password.Length > 64)
+                {
+                    return password.Substring(0, 64);
+                }
+
+                return password;
             });
             return await promptTask.WaitAsync(TimeSpan.FromSeconds(30));
         }
