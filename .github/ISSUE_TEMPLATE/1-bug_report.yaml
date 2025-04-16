@@ -1,0 +1,51 @@
+name: 🐞 Bug Report
+description: Create a report to help us improve
+title: "<title>"
+labels: ["Bug"]
+body:
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A clear and detailed description of what the bug is.  Describe what steps you've taken to troubleshoot the issue.
+      placeholder: "..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Expected Behavior
+      description: Explain what your expected behavior of the app is.  What is the difference between what it is currently doing, and what you think it should be doing.
+      placeholder: "..."
+    validations:
+      required: true
+
+  - type: dropdown
+    attributes:
+      label: Platform
+      options:
+        - Linux
+        - Docker
+        - Unraid (Ich777's App)
+        - Windows
+        - Linux ARM
+        - MacOS
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Discord Username
+      description: If you are part of the Lancache Discord Server this helps with communicating across both Github and Discord.
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Anything else?
+      description: |
+        Screenshots? Logs? Anything that will give us more context about the issue you are encountering!
+
+        SteamPrefill's logs can be found in the application's directory alongside the executable.
+      placeholder: "..."
+    validations:
+      required: false

@@ -1,0 +1,19 @@
+name: ❓ Question
+description: Need some clarification?  Looking for some guidance?  Ask away!
+title: "[Question]"
+labels: ["Question"]
+body:
+  - type: textarea
+    attributes:
+      label: Question
+      description: Ask away!
+      placeholder: "..."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Discord Username
+      description: If you are part of the Lancache Discord Server this helps with communicating across both Github and Discord.
+    validations:
+      required: false

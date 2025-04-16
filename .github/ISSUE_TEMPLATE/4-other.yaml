@@ -1,0 +1,17 @@
+name: Other
+description: For when the other issue types don't fit your issue.
+title: "<title>"
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      placeholder: "..."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Discord Username
+      description: If you are part of the Lancache Discord Server this helps with communicating across both Github and Discord.
+    validations:
+      required: false

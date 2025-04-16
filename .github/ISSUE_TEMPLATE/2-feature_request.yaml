@@ -1,0 +1,19 @@
+name: 💭 Feature Request
+description: Have an idea for new functionality?
+title: "[Feature Request]"
+labels: ["Feature Request"]
+body:
+  - type: textarea
+    attributes:
+      label: Description
+      description: Describe the new feature.  What is the new functionality?  What is the use case?  What is the user interface and how is it intended to be used?
+      placeholder: "..."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Discord Username
+      description: If you are part of the Lancache Discord Server this helps with communicating across both Github and Discord.
+    validations:
+      required: false
