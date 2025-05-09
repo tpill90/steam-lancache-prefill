@@ -4,6 +4,22 @@
     {
         private readonly SteamApps _steamAppsApi;
 
+        /// <summary>
+        /// Stores the initial license list received from Steam.
+        /// Steam makes periodic callbacks to this handler, so this field will be updated multiple times throughout the application's lifetime.
+        /// </summary>
+        private IReadOnlyCollection<LicenseListCallback.License> _licenseList;
+
+        /// <summary>
+        /// Key is PackageId, Value is the list of AppIds contained within the package.
+        /// </summary>
+        private readonly Dictionary<uint, List<uint>> _ownedPackageApps = new Dictionary<uint, List<uint>>();
+
+        /// <summary>
+        /// Key is PackageId, Value is the DateTime the package was added to the account.
+        /// </summary>
+        public Dictionary<uint, DateTime> PackageCreationTimes { get; private set; } = new Dictionary<uint, DateTime>();
+
         internal UserLicenses _userLicenses = new UserLicenses();
 
         public List<uint> AllOwnedAppIds => _userLicenses.OwnedAppIds.ToList();
@@ -44,6 +60,7 @@
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
             _userLicenses = new UserLicenses();
+            _licenseList = licenseList;
 
             // Filters out licenses that are subscription based, and have expired, like EA Play for example.
             // The account will continue to "own" the packages, and will be unable to download their apps, so they must be filtered out here.
@@ -72,7 +89,49 @@
 
                 _userLicenses.OwnedAppIds.AddRange(package.AppIds);
                 _userLicenses.OwnedDepotIds.AddRange(package.DepotIds);
+                _ownedPackageApps[package.Id] = package.AppIds;
             }
+
+            PackageCreationTimes.Clear();
+            foreach (var license in nonExpiredLicenses)
+            {
+                PackageCreationTimes[license.PackageID] = license.TimeCreated;
+            }
+        }
+
+        /// <summary>
+        /// Gets a list of App IDs for packages that were purchased/activated within the specified duration.
+        /// </summary>
+        /// <param name="recentDuration">The timespan to check for recent purchases (e.g., TimeSpan.FromDays(14))</param>
+        /// <returns>A list of App IDs from recently purchased packages.</returns>
+        public List<uint> GetAppIdsFromRecentlyPurchasedPackages(TimeSpan recentDuration)
+        {
+            var recentAppIds = new List<uint>();
+            var cutoffDate = DateTime.UtcNow.Subtract(recentDuration);
+
+            foreach (var kvp in PackageCreationTimes)
+            {
+                var packageId = kvp.Key;
+                var creationTime = kvp.Value;
+
+                if (creationTime >= cutoffDate && _ownedPackageApps.TryGetValue(packageId, out var appIdsInPackage))
+                {
+                    recentAppIds.AddRange(appIdsInPackage);
+                }
+            }
+            return recentAppIds.Distinct().ToList();
+        }
+
+        public DateTime? GetPurchaseDateForApp(uint appId)
+        {
+            foreach (var kvp in PackageCreationTimes)
+            {
+                if (_ownedPackageApps.TryGetValue(kvp.Key, out var appIds) && appIds.Contains(appId))
+                {
+                    return kvp.Value;
+                }
+            }
+            return null;
         }
     }
 

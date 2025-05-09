@@ -63,9 +63,17 @@
 
         #region Prefill
 
-        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames)
+        /// <summary>
+        /// Given a list of AppIds, determines which apps require updates, and downloads the required depots.
+        /// </summary>
+        /// <param name="downloadAllOwnedGames">If set to true, all games owned by the user will be downloaded</param>
+        /// <param name="prefillRecentGames">If set to true, games played in the last 2 weeks will be downloaded</param>
+        /// <param name="prefillPopularGames">If set to a value > 0, the most popular N games will be downloaded</param>
+        /// <param name="prefillRecentlyPurchasedGames">If set to true, games purchased in the last 2 weeks will be downloaded</param>
+        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames,
+                                                    int? prefillPopularGames, bool prefillRecentlyPurchasedGames)
         {
-            // Building out full list of AppIds to use.
+            // Building out the list of AppIds to download
             var appIdsToDownload = LoadPreviouslySelectedApps();
             if (downloadAllOwnedGames)
             {
@@ -82,6 +90,27 @@
                                    .Take(prefillPopularGames.Value)
                                    .Select(e => e.AppId);
                 appIdsToDownload.AddRange(popularGames);
+            }
+            if (prefillRecentlyPurchasedGames)
+            {
+                var recentPackages = _steam3.LicenseManager.GetAppIdsFromRecentlyPurchasedPackages(TimeSpan.FromDays(14));
+                appIdsToDownload.AddRange(recentPackages);
+
+                // Verbose logging for recently purchased games
+                _ansiConsole.LogMarkupVerbose($"[bold yellow]Recently purchased games (last 2 weeks):[/]");
+                foreach (var appId in recentPackages)
+                {
+                    var purchaseDate = _steam3.LicenseManager.GetPurchaseDateForApp(appId);
+                    var appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+                    if (purchaseDate != null)
+                    {
+                        _ansiConsole.LogMarkupVerbose($"  [green]{appInfo.Name}[/] (AppId: {appId}) - Purchased: {purchaseDate.Value.ToLocalTime():yyyy-MM-dd HH:mm}");
+                    }
+                    else
+                    {
+                        _ansiConsole.LogMarkupVerbose($"  [green]{appInfo.Name}[/] (AppId: {appId}) - Purchased: Unknown");
+                    }
+                }
             }
 
             // AppIds can potentially be added twice when building out the full list of ids
