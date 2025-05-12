@@ -1,12 +1,8 @@
 # Linux Setup Guide
 
-This guide is written to help Linux beginners successfully download **{{prefill_name}}** on their Lancache caching server. 
-
------
-
 ## Installing Prerequisites
 
-Prior to installing **{{prefill_name}}** we will need to make sure that `curl`, `jq`, and `unzip` are already installed on our system.  Depending on your machine's configuration, this software may or may not already be installed.  Regardless, the following steps will ensure that everything needed is successfully installed.  
+Prior to installing **{{prefill_name}}** we will need to make sure that `curl`, `jq`, and `unzip` are already installed on our system.  Depending on your machine's configuration, this software may or may not already be installed.  Regardless, the following steps will ensure that everything needed is successfully installed.
 
 !!! note
     These steps assume that you are using Ubuntu/Debian.  Depending on which Linux distro you are using, you may have to use slightly different commands.
@@ -44,7 +40,7 @@ After running the above commands successfully, you should see similar output in 
 <div data-cli-player="../casts/make-new-directory.cast" data-rows=4></div>
 <br>
 
-We can now move on to downloading the [install script](https://github.com/tpill90/{{repo_name}}/blob/master/scripts/update.sh) from the repo, and running it to install **{{prefill_name}}** 
+We can now move on to downloading the [install script](https://github.com/tpill90/{{repo_name}}/blob/master/scripts/update.sh) from the repo, and running it to install **{{prefill_name}}**
 
 ```bash
 # Downloads the install script
@@ -72,6 +68,6 @@ If everything worked as expected, you should see output similar to below
 
 ## Next Steps
 
-If you are new to **{{prefill_name}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide. 
+If you are new to **{{prefill_name}}** and would like an introductory tutorial, see the [Getting Started](https://github.com/tpill90/{{repo_name}}#getting-started) guide.
 
-Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/{{repo_name}}#frequently-asked-questions).  
+Answers to common issues and questions can be found at [Frequently Asked Questions](https://github.com/tpill90/{{repo_name}}#frequently-asked-questions).
