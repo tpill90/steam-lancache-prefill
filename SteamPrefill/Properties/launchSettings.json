@@ -12,13 +12,17 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --all --force --nocache --no-download --verbose"
     },
-    "Select Apps": {
+    "Prefill Purchased - No Download": {
       "commandName": "Project",
-      "commandLineArgs": "select-apps"
+      "commandLineArgs": "prefill --recently-purchased --force --no-download --verbose"
     },
     "Prefill Selected": {
       "commandName": "Project",
       "commandLineArgs": "prefill --force --verbose"
+    },
+    "Select Apps": {
+      "commandName": "Project",
+      "commandLineArgs": "select-apps"
     },
     "Benchmark - Setup - Preset": {
       "commandName": "Project",

@@ -5,20 +5,9 @@
         private readonly SteamApps _steamAppsApi;
 
         /// <summary>
-        /// Stores the initial license list received from Steam.
-        /// Steam makes periodic callbacks to this handler, so this field will be updated multiple times throughout the application's lifetime.
+        /// Contains the purchase date for an app.  Key is the appId and the value is when it was purchased.
         /// </summary>
-        private IReadOnlyCollection<LicenseListCallback.License> _licenseList;
-
-        /// <summary>
-        /// Key is PackageId, Value is the list of AppIds contained within the package.
-        /// </summary>
-        private readonly Dictionary<uint, List<uint>> _ownedPackageApps = new Dictionary<uint, List<uint>>();
-
-        /// <summary>
-        /// Key is PackageId, Value is the DateTime the package was added to the account.
-        /// </summary>
-        public Dictionary<uint, DateTime> PackageCreationTimes { get; private set; } = new Dictionary<uint, DateTime>();
+        private readonly Dictionary<uint, DateTime> _appPurchaseTimeLookup = new Dictionary<uint, DateTime>();
 
         internal UserLicenses _userLicenses = new UserLicenses();
 
@@ -32,7 +21,7 @@
         /// <summary>
         /// Checks against the list of currently owned apps to determine if the user is able to download this app.
         /// </summary>
-        /// <param name="appid">Id of the application to check for access</param>
+        /// <param name="appid">ID of the application to check for access</param>
         /// <returns>True if the user has access to the app</returns>
         public bool AccountHasAppAccess(uint appid)
         {
@@ -60,13 +49,12 @@
         public void LoadPackageInfo(IReadOnlyCollection<LicenseListCallback.License> licenseList)
         {
             _userLicenses = new UserLicenses();
-            _licenseList = licenseList;
 
             // Filters out licenses that are subscription based, and have expired, like EA Play for example.
             // The account will continue to "own" the packages, and will be unable to download their apps, so they must be filtered out here.
             var nonExpiredLicenses = licenseList.Where(e => !e.LicenseFlags.HasFlag(ELicenseFlags.Expired)).ToList();
 
-            // Some packages require a access token in order to request their apps/depot list
+            // Some packages require an access token in order to request their apps/depot list
             var packageRequests = nonExpiredLicenses.Select(e => new PICSRequest(e.PackageID, e.AccessToken)).ToList();
 
             var jobResult = _steamAppsApi.PICSGetProductInfo(new List<PICSRequest>(), packageRequests).ToTask().Result;
@@ -76,9 +64,11 @@
                                         .OrderBy(e => e.Id)
                                         .ToList();
 
-            _userLicenses.OwnedPackageIds.AddRange(packageInfos.Select(e => e.Id).ToList());
-
-            // Handling packages that are normally purchased or added via cd-key
+            // Processing the results
+            var licenseDateLookup = nonExpiredLicenses.GroupBy(e => e.PackageID)
+                                                      // It's possible to have more than one license for a game if you have a family share.  Picking the most recently purchased one.
+                                                      .Select(e => e.OrderByDescending(e2 => e2.TimeCreated).Select(e2 => e2).First())
+                                                      .ToDictionary(e => e.PackageID, e => e.TimeCreated);
             foreach (var package in packageInfos)
             {
                 // Removing any free weekends that are no longer active
@@ -89,56 +79,43 @@
 
                 _userLicenses.OwnedAppIds.AddRange(package.AppIds);
                 _userLicenses.OwnedDepotIds.AddRange(package.DepotIds);
-                _ownedPackageApps[package.Id] = package.AppIds;
+
+                // Building out the AppID to purchase date lookup.
+                foreach (var appId in package.AppIds)
+                {
+                    if (!_appPurchaseTimeLookup.ContainsKey(appId))
+                    {
+                        _appPurchaseTimeLookup.Add(appId, licenseDateLookup[package.Id]);
+                    }
+                }
             }
 
-            PackageCreationTimes.Clear();
-            foreach (var license in nonExpiredLicenses)
-            {
-                PackageCreationTimes[license.PackageID] = license.TimeCreated;
-            }
+            _userLicenses.OwnedPackageIds.AddRange(packageInfos.Select(e => e.Id).ToList());
         }
 
         /// <summary>
-        /// Gets a list of App IDs for packages that were purchased/activated within the specified duration.
+        /// Gets a list of AppIDs for packages that were purchased/activated within the specified duration.
         /// </summary>
-        /// <param name="recentDuration">The timespan to check for recent purchases (e.g., TimeSpan.FromDays(14))</param>
-        /// <returns>A list of App IDs from recently purchased packages.</returns>
-        public List<uint> GetAppIdsFromRecentlyPurchasedPackages(TimeSpan recentDuration)
+        /// <param name="recentDays">How recent the apps should have been purchased.  Ex, 14 will include any games purchased in the last two weeks.</param>
+        /// <returns>A list of recently purchased AppIDs.</returns>
+        public List<uint> GetRecentlyPurchasedAppIds(int recentDays)
         {
-            var recentAppIds = new List<uint>();
-            var cutoffDate = DateTime.UtcNow.Subtract(recentDuration);
+            var cutoffDate = DateTime.UtcNow.Subtract(TimeSpan.FromDays(recentDays));
 
-            foreach (var kvp in PackageCreationTimes)
-            {
-                var packageId = kvp.Key;
-                var creationTime = kvp.Value;
-
-                if (creationTime >= cutoffDate && _ownedPackageApps.TryGetValue(packageId, out var appIdsInPackage))
-                {
-                    recentAppIds.AddRange(appIdsInPackage);
-                }
-            }
-            return recentAppIds.Distinct().ToList();
+            return _appPurchaseTimeLookup.ToList()
+                                         .Where(e => e.Value >= cutoffDate)
+                                         .Select(e => e.Key)
+                                         .ToList();
         }
 
-        public DateTime? GetPurchaseDateForApp(uint appId)
+        public DateTime GetPurchaseDateForApp(uint appId)
         {
-            foreach (var kvp in PackageCreationTimes)
-            {
-                if (_ownedPackageApps.TryGetValue(kvp.Key, out var appIds) && appIds.Contains(appId))
-                {
-                    return kvp.Value;
-                }
-            }
-            return null;
+            return _appPurchaseTimeLookup[appId];
         }
     }
 
     public sealed class UserLicenses
     {
-        public int LicenseCount => OwnedPackageIds.Count;
-
         public HashSet<uint> OwnedPackageIds { get; } = new HashSet<uint>();
         public HashSet<uint> OwnedAppIds { get; } = new HashSet<uint>();
         public HashSet<uint> OwnedDepotIds { get; } = new HashSet<uint>();

@@ -2,15 +2,15 @@
 {
     public sealed class Package
     {
-        public uint Id;
+        public readonly uint Id;
 
-        public List<uint> AppIds;
-        public List<uint> DepotIds;
+        public readonly List<uint> AppIds;
+        public readonly List<uint> DepotIds;
 
         public uint? MasterSubscriptionAppId;
 
-        public bool IsFreeWeekend;
-        public DateTime? FreeWeekendExpiryTimeUtc;
+        public readonly bool IsFreeWeekend;
+        private DateTime? FreeWeekendExpiryTimeUtc;
         public bool FreeWeekendHasExpired => DateTime.UtcNow > FreeWeekendExpiryTimeUtc;
 
         public Package(KeyValue rootKeyValue)
@@ -28,7 +28,11 @@
 
         public override string ToString()
         {
-            return $"Id : {Id}  MasterSubscriptionId : {MasterSubscriptionAppId}";
+            if (MasterSubscriptionAppId != null)
+            {
+                return $"Id : {Id}  MasterSubscriptionId : {MasterSubscriptionAppId}";
+            }
+            return $"Id : {Id}";
         }
     }
 }

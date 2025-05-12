@@ -36,7 +36,7 @@ namespace SteamPrefill.CliCommands
         public bool? Verbose
         {
             get => AppConfig.VerboseLogs;
-            init => AppConfig.VerboseLogs = value ?? default(bool);
+            init => AppConfig.VerboseLogs = value ?? false;
         }
 
         [CommandOption("unit",
@@ -63,9 +63,9 @@ namespace SteamPrefill.CliCommands
 
             var downloadArgs = new DownloadArguments
             {
-                Force = Force ?? default(bool),
+                Force = Force ?? false,
                 TransferSpeedUnit = TransferSpeedUnit,
-                OperatingSystems = OperatingSystems.ToList(),
+                OperatingSystems = OperatingSystems.ToList()
             };
 
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);
@@ -75,10 +75,10 @@ namespace SteamPrefill.CliCommands
             try
             {
                 await steamManager.InitializeAsync();
-                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? default(bool),
-                                                             PrefillRecentGames ?? default(bool),
+                await steamManager.DownloadMultipleAppsAsync(DownloadAllOwnedGames ?? false,
+                                                             PrefillRecentGames ?? false,
                                                              PrefillPopularGames,
-                                                             PrefillRecentlyPurchased ?? default(bool));
+                                                             PrefillRecentlyPurchased ?? false);
             }
             finally
             {
@@ -91,7 +91,7 @@ namespace SteamPrefill.CliCommands
         {
             var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
 
-            if ((DownloadAllOwnedGames ?? default(bool)) || (PrefillRecentGames ?? default(bool)) || (PrefillRecentlyPurchased ?? default(bool)) || PrefillPopularGames != null || userSelectedApps.Any())
+            if ((DownloadAllOwnedGames ?? false) || (PrefillRecentGames ?? false) || (PrefillRecentlyPurchased ?? false) || PrefillPopularGames != null || userSelectedApps.Any())
             {
                 return;
             }
@@ -99,7 +99,7 @@ namespace SteamPrefill.CliCommands
             _ansiConsole.MarkupLine(Red("No apps have been selected for prefill! At least 1 app is required!"));
             _ansiConsole.MarkupLine(Red($"Use the {Cyan("select-apps")} command to interactively choose which apps to prefill. "));
             _ansiConsole.MarkupLine("");
-            _ansiConsole.Markup(Red($"Alternatively, the flags {LightYellow("--all")}, {LightYellow("--recent")}, {LightYellow("--recently-purchased")}, or {LightYellow("--top N")} can be specified."));
+            _ansiConsole.Markup(Red($"Alternatively, the flags {LightYellow("--all")}, {LightYellow("--recent")}, {LightYellow("--recently-purchased")}, or {LightYellow("--top")} can be specified."));
             throw new CommandException(".", 1, true);
         }
 

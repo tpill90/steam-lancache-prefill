@@ -64,7 +64,8 @@
         #region Prefill
 
         /// <summary>
-        /// Given a list of AppIds, determines which apps require updates, and downloads the required depots.
+        /// Given a list of AppIds, determines which apps require updates, and downloads the required depots.  By default,
+        /// it will always include apps chosen by the select-apps command.
         /// </summary>
         /// <param name="downloadAllOwnedGames">If set to true, all games owned by the user will be downloaded</param>
         /// <param name="prefillRecentGames">If set to true, games played in the last 2 weeks will be downloaded</param>
@@ -93,23 +94,17 @@
             }
             if (prefillRecentlyPurchasedGames)
             {
-                var recentPackages = _steam3.LicenseManager.GetAppIdsFromRecentlyPurchasedPackages(TimeSpan.FromDays(14));
-                appIdsToDownload.AddRange(recentPackages);
+                var recentApps = _steam3.LicenseManager.GetRecentlyPurchasedAppIds(30);
+                appIdsToDownload.AddRange(recentApps);
 
                 // Verbose logging for recently purchased games
-                _ansiConsole.LogMarkupVerbose($"[bold yellow]Recently purchased games (last 2 weeks):[/]");
-                foreach (var appId in recentPackages)
+                await _appInfoHandler.RetrieveAppMetadataAsync(recentApps);
+                _ansiConsole.LogMarkupVerbose("[bold yellow]Recently purchased games (last 2 weeks):[/]");
+                foreach (var appId in recentApps)
                 {
                     var purchaseDate = _steam3.LicenseManager.GetPurchaseDateForApp(appId);
                     var appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
-                    if (purchaseDate != null)
-                    {
-                        _ansiConsole.LogMarkupVerbose($"  [green]{appInfo.Name}[/] (AppId: {appId}) - Purchased: {purchaseDate.Value.ToLocalTime():yyyy-MM-dd HH:mm}");
-                    }
-                    else
-                    {
-                        _ansiConsole.LogMarkupVerbose($"  [green]{appInfo.Name}[/] (AppId: {appId}) - Purchased: Unknown");
-                    }
+                    _ansiConsole.LogMarkupVerbose($"  {Green(appInfo.Name).PadRight(35)} - Purchased: {LightYellow(purchaseDate.ToLocalTime().ToString("yyyy-MM-dd"))}");
                 }
             }
 
