@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://tpill90.github.io/steam-lancache-prefill/gr/detailed-command-usage/Select-Apps/" />
+      <link rel="shortcut icon" href="../../../img/favicon.ico" />
+    <title>select-apps - steam-lancache-prefill wiki</title>
+    <link rel="stylesheet" href="../../../css/theme.css" />
+    <link rel="stylesheet" href="../../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../../assets/external/asciinema-player.css" rel="stylesheet" />
+        <link href="../../../assets/language-picker.css" rel="stylesheet" />
+        <link href="../../../assets/copy-to-clipboard.css" rel="stylesheet" />
+        <link href="../../../assets/extra.css" rel="stylesheet" />
+        <link href="../../../assets/syntax-style-overrides.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "select-apps";
+        var mkdocs_page_input_path = "detailed-command-usage/Select-Apps.md";
+        var mkdocs_page_url = "/steam-lancache-prefill/gr/detailed-command-usage/Select-Apps/";
+      </script>
+    
+    <script src="../../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/ini.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/powershell.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../../" class="icon icon-home"> steam-lancache-prefill wiki
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../">Welcome</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../faq/">Frequently Asked Questions</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Docker-Setup-Guide/">Docker Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Linux-Setup-Guide/">Linux Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Scheduled-Job/">Configuring a Nightly Job</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Unraid-Setup-Guide/">Unraid Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Windows-Setup-Guide/">Windows Setup Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Detailed Command Usage</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../Benchmark/">benchmark</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Clear-Temp/">clear-temp</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Prefill/">prefill</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">select-apps</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#status">Status</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#example-usage">Example usage</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#customized-the-sorting">Customized the sorting</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#options">Options</a>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dev Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guides/Compiling-from-source/">Compiling από την πηγή</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guides/mkdocs-setup/">Working With Project Documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Steam Documentation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../steam-docs/CDN-Regions/">CDN Regions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../steam-docs/External-Links/">External Links</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../">steam-lancache-prefill wiki</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+    <ul class="wy-breadcrumbs">
+        <!-- Navigation breadcrumbs on the left hand side of the header -->
+        <li><a href="../../" class="icon icon-home" alt="Docs"></a> &raquo;</li>
+                <li>Detailed Command Usage &raquo;</li>
+            <li>select-apps</li>
+
+        <!-- Language picker -->
+        <li class="wy-breadcrumbs-aside">
+            <div class="dropdown-container">
+                <!-- Button for the language drop down selector  -->
+                <button>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="flagIcon">
+                        <path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24z"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown entries that are hidden by default -->
+                <div class="dropdown-content">
+                    <a href="../../../en">
+                            <img src="../../../assets/flags/en.svg" class="flagIcon"> English
+                        </a>
+                    <a href="../..">
+                            <img src="../../../assets/flags/gr.svg" class="flagIcon"> Ελληνικά
+                        </a>
+                    
+                </div>
+            </div>
+        </li>
+    </ul>
+    <hr/>
+  </div>
+  
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="select-apps">select-apps<a class="headerlink" href="#select-apps" title="Permanent link">&para;</a></h1>
+<div data-cli-player="../casts/select-apps.cast" data-rows=30></div>
+<p><br></p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<!-- TODO Write this at some point -->
+
+<hr />
+<h2 id="status">Status<a class="headerlink" href="#status" title="Permanent link">&para;</a></h2>
+<p>Lists all selected apps and their download size.  Please note that the download size is going to be smaller than the final install size since Steam compresses game files for download.</p>
+<div data-cli-player="../casts/select-apps-status.cast" data-rows=18></div>
+<p><br></p>
+<hr />
+<!-- TODO give this another pass -->
+
+<h3 id="example-usage">Example usage<a class="headerlink" href="#example-usage" title="Permanent link">&para;</a></h3>
+<p>Checking the <code>status</code> is as simple as running the following from the terminal:</p>
+<pre><code class="language-powershell">./SteamPrefill select-apps status
+</code></pre>
+<h4 id="customized-the-sorting">Customized the sorting<a class="headerlink" href="#customized-the-sorting" title="Permanent link">&para;</a></h4>
+<p>An advanced usage with customized sorting can be used as the following from the terminal:</p>
+<pre><code class="language-powershell">./SteamPrefill select-apps status --sort-order descending --sort-by size
+</code></pre>
+<hr />
+<h3 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th></th>
+<th>Values</th>
+<th>Default</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>--sort-order</td>
+<td></td>
+<td>ascending, descending</td>
+<td><strong>ascending</strong></td>
+<td>Specifies which order the data should be sorted.</td>
+</tr>
+<tr>
+<td>--sort-by</td>
+<td></td>
+<td>app, size</td>
+<td><strong>app</strong></td>
+<td>Specifies which column should be used for the sorting.</td>
+</tr>
+<tr>
+<td>--os</td>
+<td></td>
+<td>windows, linux, macos</td>
+<td><strong>windows</strong></td>
+<td>Specifies which operating system(s) chunks should be filtered for.</td>
+</tr>
+<tr>
+<td>--no-ansi</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Application output will be in plain text, rather than using the visually appealing colors and progress bars. Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+      <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+          <a href="../Prefill/" class="btn btn-neutral float-left" title="prefill"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+          <a href="../../dev-guides/Compiling-from-source/" class="btn btn-neutral float-right" title="Compiling από την πηγή">Next <span class="icon icon-circle-arrow-right"></span></a>
+      </div>
+  
+    <hr/>
+
+    <div role="contentinfo">
+      <!-- Copyright etc -->
+    </div>
+  </footer>
+  
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/tpill90/steam-lancache-prefill" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../Prefill/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../../dev-guides/Compiling-from-source/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../../..';</script>
+    <script src="../../../js/theme_extra.js" defer></script>
+    <script src="../../../js/theme.js" defer></script>
+      <script src="../../../assets/external/asciinema-player.min.js" defer></script>
+      <script src="../../../assets/external/clipboard.min.js" defer></script>
+      <script src="../../../assets/external/popper.min.js" defer></script>
+      <script src="../../../assets/external/tippy-bundle.umd.min.js" defer></script>
+      <script src="../../../assets/copy-to-clipboard.js" defer></script>
+      <script src="../../../assets/extra.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
