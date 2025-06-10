@@ -25,7 +25,7 @@ Lists all selected apps and their download size.  Please note that the download 
 Checking the `status` is as simple as running the following from the terminal:
 
 ```powershell
-./{{prefill_name}} status
+./{{prefill_name}} select-apps status
 ```
 
 #### Customized the sorting
@@ -33,7 +33,7 @@ Checking the `status` is as simple as running the following from the terminal:
 An advanced usage with customized sorting can be used as the following from the terminal:
 
 ```powershell
-./{{prefill_name}} status --sort-order descending --sort-column size
+./{{prefill_name}} select-apps status --sort-order descending --sort-by size
 ```
 
 -----
