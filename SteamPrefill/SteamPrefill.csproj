@@ -74,14 +74,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="2.2.1" />
-    <PackageReference Include="SharpCompress" Version="0.32.2" />
-    <PackageReference Include="Terminal.Gui" Version="1.7.2" />
-    <PackageReference Include="Wcwidth" Version="1.0.0" />
-    <PackageReference Include="ZString" Version="2.4.4" />
-
-    <PackageReference Include="System.IO.Hashing" Version="9.0.7" />
-
     <!-- Custom CliFx build, allows for top level exception handling in application code, instead of CliFx swallowing all exceptions -->
     <Reference Include="CliFx">
       <HintPath>..\LancachePrefill.Common\lib\CliFx.dll</HintPath>
@@ -118,9 +110,6 @@
   </ItemGroup>
 
   <ItemGroup>
-
-    <!--<ProjectReference Include="..\..\ExternalLibraries\SteamKit\SteamKit2\SteamKit2\SteamKit2.csproj" />-->
-
     <ProjectReference Include="..\LancachePrefill.Common\dotnet\LancachePrefill.Common.csproj" />
   </ItemGroup>
 

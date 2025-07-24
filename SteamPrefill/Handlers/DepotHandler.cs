@@ -138,6 +138,7 @@
             var chunkQueue = new List<QueuedRequest>();
             foreach (var depotManifest in depotManifests)
             {
+                //TODO do some work on this
                 var depot = depots.First(e => e.DepotId == depotManifest.DepotId);
                 var depotKey = await _steam3Session.RequestDepotKeyAsync(depotManifest.DepotId, depot.ContainingAppId);
 

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace SteamPrefill.Models
+﻿namespace SteamPrefill.Models
 {
     [ProtoContract(SkipConstructor = true)]
     public struct QueuedRequest
@@ -34,6 +32,8 @@ namespace SteamPrefill.Models
         public readonly byte[] DepotKey;
 
         public ChunkData chunkData;
+
+		public Exception LastFailureReason { get; set; }
 
         public QueuedRequest(Manifest depotManifest, ChunkData chunk, byte[] depotKey)
         {
