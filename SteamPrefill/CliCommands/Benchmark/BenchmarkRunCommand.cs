@@ -58,7 +58,7 @@ namespace SteamPrefill.CliCommands.Benchmark
                 await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit).StartAsync(async ctx =>
                 {
                     var downloadArguments = new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency };
-                    var failedRequests = await _downloadHandler.AttemptDownloadAsync(ctx, $"Run {Cyan(run)}", _allRequests, downloadArguments);
+                    var failedRequests = await _downloadHandler.AttemptDownloadAsync(ctx, $"Run {Cyan(run)}", _allRequests);
 
                     // Any failed requests means that the run is invalidated
                     if (failedRequests.Any())
@@ -93,7 +93,7 @@ namespace SteamPrefill.CliCommands.Benchmark
                 _allRequests.Shuffle();
             });
 
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency });
             await _downloadHandler.InitializeAsync();
 
             _ansiConsole.LogMarkupLine("Completed initialization", initTimer);
@@ -107,8 +107,7 @@ namespace SteamPrefill.CliCommands.Benchmark
 
             await _ansiConsole.CreateSpectreProgress(TransferSpeedUnit).StartAsync(async ctx =>
             {
-                var downloadArguments = new DownloadArguments { MaxConcurrentRequests = (int)MaxConcurrency };
-                var failedRequests = await _downloadHandler.AttemptDownloadAsync(ctx, LightYellow("Running warmup"), _allRequests, downloadArguments);
+                var failedRequests = await _downloadHandler.AttemptDownloadAsync(ctx, LightYellow("Running warmup"), _allRequests);
 
                 // Fail early if there are any failed requests, benchmark is likely to not be valid at all.
                 if (failedRequests.Any())

@@ -4,6 +4,7 @@
     {
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
+        private readonly DownloadArguments _downloadArgs;
         private readonly HttpClient _client;
 
         /// <summary>
@@ -11,10 +12,11 @@
         /// </summary>
         private string _lancacheAddress;
 
-        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
+        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, DownloadArguments downloadArgs)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
+            _downloadArgs = downloadArgs;
 
             _client = new HttpClient();
             // Lancache requires this user agent in order to correctly identify and cache Valve's content servers
@@ -35,23 +37,23 @@
         /// false will be returned
         /// </summary>
         /// <returns>True if all downloads succeeded.  False if any downloads failed 3 times in a row.</returns>
-        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
+        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests)
         {
             await InitializeAsync();
 
             int retryCount = 0;
             var failedRequests = new ConcurrentBag<QueuedRequest>();
-            await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
+            await _ansiConsole.CreateSpectreProgress(_downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
                 // Run the initial download
                 //TODO needs to switch to saying Validating instead of Downloading if validation is running
-                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs);
+                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests);
 
                 // Handle any failed requests
                 while (failedRequests.Any() && retryCount < 2)
                 {
                     retryCount++;
-                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList(), downloadArgs, forceRecache: true);
+                    failedRequests = await AttemptDownloadAsync(ctx, $"Retrying  {retryCount}..", failedRequests.ToList(), forceRecache: true);
                 }
             });
 
@@ -82,7 +84,7 @@
         /// <param name="forceRecache">When specified, will cause the cache to delete the existing cached data for a request, and re-download it again.</param>
         /// <returns>A list of failed requests</returns>
         public async Task<ConcurrentBag<QueuedRequest>> AttemptDownloadAsync(ProgressContext ctx, string taskTitle, List<QueuedRequest> requestsToDownload,
-                                                                                DownloadArguments downloadArgs, bool forceRecache = false)
+                                                                                bool forceRecache = false)
         {
             double requestTotalSize = requestsToDownload.Sum(e => e.CompressedLength);
             var progressTask = ctx.AddTask(taskTitle, new ProgressTaskSettings { MaxValue = requestTotalSize });
@@ -90,7 +92,7 @@
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             var cdnServer = _cdnPool.TakeConnection();
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, body: async (request, _) =>
+            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = _downloadArgs.MaxConcurrentRequests }, body: async (request, _) =>
             {
                 try
                 {

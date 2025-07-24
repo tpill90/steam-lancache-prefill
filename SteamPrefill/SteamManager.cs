@@ -22,7 +22,7 @@
             _steam3 = new Steam3Session(_ansiConsole);
             _cdnPool = new CdnPool(_ansiConsole, _steam3);
             _appInfoHandler = new AppInfoHandler(_ansiConsole, _steam3, _steam3.LicenseManager);
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, downloadArgs);
             _depotHandler = new DepotHandler(_ansiConsole, _steam3, _appInfoHandler, _cdnPool);
         }
 
@@ -183,7 +183,7 @@
                 return;
             }
 
-            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue, _downloadArgs);
+            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(chunkDownloadQueue);
             if (downloadSuccessful)
             {
                 _depotHandler.MarkDownloadAsSuccessful(filteredDepots);
