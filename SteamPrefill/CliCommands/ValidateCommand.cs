@@ -60,7 +60,8 @@ namespace SteamPrefill.CliCommands
             {
                 Force = Force ?? default(bool),
                 TransferSpeedUnit = TransferSpeedUnit,
-                OperatingSystems = OperatingSystems.ToList()
+                OperatingSystems = OperatingSystems.ToList(),
+                ValidateChunks = true
             };
 
             using var steamManager = new SteamManager(_ansiConsole, downloadArgs);

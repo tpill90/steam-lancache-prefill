@@ -10,6 +10,12 @@
         public bool Force { get; init; }
 
         /// <summary>
+        /// Determines if the individually downloaded chunks have their checksums validated, to try to
+        /// check if there are any corrupted chunks in the cache.
+        /// </summary>
+        public bool ValidateChunks { get; init; }
+
+        /// <summary>
         /// Determines which unit to display the download speed in.
         /// </summary>
         public TransferSpeedUnit TransferSpeedUnit { get; set; } = TransferSpeedUnit.Bits;

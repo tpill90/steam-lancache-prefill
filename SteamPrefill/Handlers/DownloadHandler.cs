@@ -106,13 +106,27 @@
 
                     using var cts = new CancellationTokenSource();
                     using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-                    byte[] encryptedChunkData = await response.Content.ReadAsByteArrayAsync(cts.Token);
-                    response.EnsureSuccessStatusCode();
 
+                    // TODO figure out how to format user error messages
+                    if (_downloadArgs.ValidateChunks)
+                    {
+                        byte[] chunkPayload = await response.Content.ReadAsByteArrayAsync(cts.Token);
 
-                    byte[] decompressed = new byte[request.chunkData.UncompressedLength];
-                    DepotChunk.Process(request.ToChunkData(), encryptedChunkData, decompressed, request.DepotKey);
+                        // I know that this is making a lot of unnecessary allocations, but they're a drop in the bucket compared to the decompression algorithm
+                        var tempBuffer = new byte[request.chunkData.UncompressedLength];
+                        DepotChunk.Process(request.ToChunkData(), chunkPayload, tempBuffer, request.DepotKey);
+                    }
+                    else
+                    {
+                        using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
+                        response.EnsureSuccessStatusCode();
 
+                        // Don't save the data anywhere, so we don't have to waste time writing it to disk.
+                        var buffer = new byte[4096];
+                        while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
+                        {
+                        }
+                    }
                 }
                 catch (Exception e)
                 {

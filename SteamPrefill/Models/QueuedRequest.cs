@@ -48,6 +48,7 @@
             chunkData = chunk;
         }
 
+        // TODO I don't like this.  Its a hideous way to do things
         public DepotManifest.ChunkData ToChunkData()
         {
             return new DepotManifest.ChunkData(chunkData.ChunkIDOriginal, ExpectedChecksum, chunkData.Offset, CompressedLength, chunkData.UncompressedLength);
