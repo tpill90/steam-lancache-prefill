@@ -25,24 +25,6 @@
             }
         }
 
-        public void MarkDownloadAsSuccessful(List<DepotInfo> depots)
-        {
-            foreach (var depot in depots)
-            {
-                var depotId = depot.DepotId;
-
-                // Initialize the entry for the specified depot
-                if (!_downloadedDepots.ContainsKey(depotId))
-                {
-                    _downloadedDepots.Add(depotId, new HashSet<ulong>());
-                }
-
-                var downloadedManifests = _downloadedDepots[depotId];
-                downloadedManifests.Add(depot.ManifestId.Value);
-            }
-            File.WriteAllText(AppConfig.SuccessfullyDownloadedDepotsPath, JsonSerializer.Serialize(_downloadedDepots, SerializationContext.Default.DictionaryUInt32HashSetUInt64));
-        }
-
         /// <summary>
         /// An depot will be considered up to date if it's current version (manifest) has been previously downloaded.
         /// Thus, an app will be considered up to date if all of it's depots latest manifests have been previously downloaded.

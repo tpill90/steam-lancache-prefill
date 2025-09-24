@@ -20,21 +20,6 @@
             }
         }
 
-        [SuppressMessage("Security", "CA5394:Random is an insecure RNG", Justification = "Security doesn't matter here, just need to shuffle requests.")]
-        public static void Shuffle<T>(this IList<T> list)
-        {
-            var random = new Random();
-            int n = list.Count;
-            while (n > 1)
-            {
-                n--;
-                int k = random.Next(n + 1);
-                T value = list[k];
-                list[k] = list[n];
-                list[n] = value;
-            }
-        }
-
         public static async Task<string> ReadPasswordAsync(this IAnsiConsole console, string promptText = null)
         {
             // Wrapping the prompt in a task so that we can add a timeout if the user doesn't enter a password
