@@ -8,28 +8,6 @@
         public uint AppId { get; set; }
         public ReleaseState ReleaseState { get; set; }
 
-        /// <summary>
-        /// Games on Steam can potentially have multiple "release dates", and are not consistently populated across all games.
-        /// Determines which date to use based on which ones are currently populated.
-        /// </summary>
-        public DateTime? ReleaseDate
-        {
-            get
-            {
-                if (OriginalReleaseDate != null)
-                {
-                    return OriginalReleaseDate;
-                }
-                if (SteamReleaseDate != null)
-                {
-                    return SteamReleaseDate;
-                }
-                // For some reason, some games are missing both release dates, with no other alternative dates in their KeyValue pairs.
-                // These games are even missing a release date in the Steam store.
-                return null;
-            }
-        }
-
         private DateTime? SteamReleaseDate { get; set; }
         private DateTime? OriginalReleaseDate { get; set; }
 

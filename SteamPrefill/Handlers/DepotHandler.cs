@@ -25,15 +25,6 @@
             }
         }
 
-        /// <summary>
-        /// An depot will be considered up to date if it's current version (manifest) has been previously downloaded.
-        /// Thus, an app will be considered up to date if all of it's depots latest manifests have been previously downloaded.
-        /// </summary>
-        public bool AppIsUpToDate(List<DepotInfo> depots)
-        {
-            return depots.All(e => _downloadedDepots.ContainsKey(e.DepotId)
-                                   && _downloadedDepots[e.DepotId].Contains(e.ManifestId.Value));
-        }
 
         /// <summary>
         /// Filters depots based on the language/operating system/cpu architecture specified in the DownloadArguments
@@ -108,13 +99,10 @@
             }
         }
 
-        /// <summary>
-        /// Downloads all of the required manifests for a game, and then combines all of the required chunk requests into a single queue.
-        /// </summary>
-        /// <returns></returns>
         public async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)
         {
-            var depotManifests = await _manifestHandler.GetAllManifestsAsync(depots);
+            await Task.CompletedTask;
+            var depotManifests = new List<Manifest>();
 
             // Queueing up chunks for each depot
             var chunkQueue = new List<QueuedRequest>();

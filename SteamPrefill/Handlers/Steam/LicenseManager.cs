@@ -93,25 +93,6 @@
             _userLicenses.OwnedPackageIds.AddRange(packageInfos.Select(e => e.Id).ToList());
         }
 
-        /// <summary>
-        /// Gets a list of AppIDs for packages that were purchased/activated within the specified duration.
-        /// </summary>
-        /// <param name="recentDays">How recent the apps should have been purchased.  Ex, 14 will include any games purchased in the last two weeks.</param>
-        /// <returns>A list of recently purchased AppIDs.</returns>
-        public List<uint> GetRecentlyPurchasedAppIds(int recentDays)
-        {
-            var cutoffDate = DateTime.UtcNow.Subtract(TimeSpan.FromDays(recentDays));
-
-            return _appPurchaseTimeLookup.ToList()
-                                         .Where(e => e.Value >= cutoffDate)
-                                         .Select(e => e.Key)
-                                         .ToList();
-        }
-
-        public DateTime GetPurchaseDateForApp(uint appId)
-        {
-            return _appPurchaseTimeLookup[appId];
-        }
     }
 
     public sealed class UserLicenses

@@ -11,7 +11,6 @@ namespace SteamPrefill.CliCommands.Benchmark
 
         private CdnPool _cdnPool;
         private List<QueuedRequest> _allRequests;
-        private ByteSize _totalDownloadSize = ByteSize.MinValue;
 
 
         public void PrintSummary(List<Stopwatch> runElapsedTimes, ByteSize totalDownloadSize)

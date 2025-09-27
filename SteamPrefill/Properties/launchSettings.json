@@ -1,8 +1,8 @@
 {
   "profiles": {
-    "Prefill All": {
+    "Stats": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --all --force --verbose"
+      "commandLineArgs": "stats"
     },
     "Prefill All - No Download": {
       "commandName": "Project",

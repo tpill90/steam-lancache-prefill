@@ -20,11 +20,11 @@ namespace SteamPrefill.Models
             Files = new List<FileData>();
         }
 
-        public Manifest(DepotManifest sourceManifest, DepotInfo depotInfo) : this()
+        public Manifest(DepotManifest sourceManifest, uint depotId, ulong manifestId) : this()
         {
             Files = sourceManifest.Files.Select(e => new FileData(e)).ToList();
-            Id = depotInfo.ManifestId.Value;
-            DepotId = depotInfo.DepotId;
+            Id = manifestId;
+            DepotId = depotId;
         }
 
         public static Manifest LoadFromFile(string filename)

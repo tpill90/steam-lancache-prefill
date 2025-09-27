@@ -16,6 +16,9 @@ namespace SteamPrefill.CliCommands
             try
             {
                 await steamManager.InitializeAsync();
+
+                //await steamManager.WriteStatsAsync(230411, 230410, @"C:\Users\Tim\Dropbox\Programming\Lancache-Prefills\Warframe Manifests.txt");
+                await steamManager.WriteStatsAsync(526871, 526870, @"C:\Users\Tim\Dropbox\Programming\Lancache-Prefills\Satisfactory Manifests.txt");
             }
             finally
             {

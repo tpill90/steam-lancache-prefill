@@ -18,8 +18,6 @@
         [ProtoMember(3)]
         public readonly uint CompressedLength;
 
-        public Exception LastFailureReason { get; set; }
-
         public QueuedRequest(Manifest depotManifest, ChunkData chunk)
         {
             DepotId = depotManifest.DepotId;
