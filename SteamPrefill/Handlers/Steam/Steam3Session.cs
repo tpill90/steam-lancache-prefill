@@ -18,6 +18,7 @@ namespace SteamPrefill.Handlers.Steam
         ///
         /// See https://tpill90.github.io/steam-lancache-prefill/steam-docs/CDN-Regions/ for a list of known CDNs
         /// </summary>
+        // TODO maybe this should just be moved to AppConfig
         private uint CellId
         {
             get

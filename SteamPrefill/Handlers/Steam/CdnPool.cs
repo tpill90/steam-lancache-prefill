@@ -85,13 +85,15 @@ namespace SteamPrefill.Handlers.Steam
                 // GetServersForSteamPipe() sometimes hangs and never times out.  Wrapping the call in another task, so that we can timeout the entire method.
                 await Task.Run(async () =>
                 {
-                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe();
+                    var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(AppConfig.CellIdOverride);
                     AvailableServerEndpoints.PushRange(returnedServers.ToArray());
 
                     // Filtering out non-cacheable CDNs.  HTTPS servers are included, as they appear to be able to be manually overridden to HTTP.
                     // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
                     AvailableServerEndpoints = AvailableServerEndpoints
                                                 .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
+                                                // Filtering out Australian CDNs that don't support HTTP
+                                                .Where(e => e.CellID != 51 && e.CellID != 53 && e.CellID != 54 && e.CellID != 55)
                                                 .DistinctBy(e => e.Host)
                                                 .ToConcurrentStack();
                 }).WaitAsync(TimeSpan.FromSeconds(15));
