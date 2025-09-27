@@ -11,25 +11,29 @@ The **Download Region** setting in Steam will display a large number of regions,
 
 Please note that this list is non-exhaustive, and likely inaccurate, as Valve may potentially change them in the future.
 
-| Cell Id | Short | City              |
-|---------|-------|-------------------|
-| 0       |       | **Use Geolocation**           |
-| 1       | ord   | Chicago           |
-| 4       | lhr   | London            |
-| 5       | fra   | Frankfurt         |
-| 14      | par   | Paris             |
-| 15      | ams   | Amsterdam         |
-| 25      | gru   | Sao Paulo         |
-| 31      | sea   | Seattle           |
-| 32      | tyo   | Japan             |
-| 33      | hkg   | Hong Kong         |
-| 35      | sgp   | Singapore         |
-| 38      | waw   | Poland            |
-| 40      | mad   | Madrid            |
-| 50      | atl   | Atlanta           |
-| 52      | syd   | Sydney            |
-| 63      | iad   | Washington, DC    |
-| 64      | lax   | Los Angeles       |
-| 65      | dfw   | Dallas Fort-Worth |
-| 66      | sto   | Stockholm         |
-| 92      | vie   | Vienna            |
+| Cell Id | Short | City               |
+|---------|-------|--------------------|
+| 0       |       | **Use Geolocation**|
+| 1       | ord   | Chicago            |
+| 4       | lhr   | London             |
+| 5       | fra   | Frankfurt          |
+| 14      | par   | Paris              |
+| 15      | ams   | Amsterdam          |
+| 25      | gru   | Sao Paulo          |
+| 31      | sea   | Seattle            |
+| 32      | tyo   | Japan              |
+| 33      | hkg   | Hong Kong          |
+| 35      | sgp   | Singapore          |
+| 38      | waw   | Poland             |
+| 40      | mad   | Madrid             |
+| 50      | atl   | Atlanta            |
+| 51      | bne   | Brisbane           |
+| 52      | syd   | Sydney             |
+| 53      | mel   | Melbourne          |
+| 54      | adl   | Adelaide           |
+| 55      | per   | Perth              |
+| 63      | iad   | Washington, DC     |
+| 64      | lax   | Los Angeles        |
+| 65      | dfw   | Dallas Fort-Worth  |
+| 66      | sto   | Stockholm          |
+| 92      | vie   | Vienna             |

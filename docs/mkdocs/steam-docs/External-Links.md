@@ -1,6 +1,6 @@
 # External Links
-|   Link    |  Description   |  
-| ----------- | ------------ | 
+|   Link    |  Description   |
+| ----------- | ------------ |
 | [https://steamdb.info/](https://steamdb.info/) | Third Party database of Steam apps.  Has extensive metadata, as well as historical data.    |
 | [https://steamdb.info/faq/](https://steamdb.info/faq/) | Useful info about SteamDB, as well as some technical info on how Steam works internally |
 | [https://steamapi.xpaw.me/](https://steamapi.xpaw.me/) | List of all known public Steam Web Api endpoints    |
@@ -10,3 +10,4 @@
 | [https://partner.steamgames.com/doc/api/steam_api?#enums](https://partner.steamgames.com/doc/api/steam_api?#enums) | Steam API enums |
 | [https://github.com/Revadike/InternalSteamWebAPI/wiki](https://github.com/Revadike/InternalSteamWebAPI/wiki) | Undocumented Steam API used internally |
 | [https://github.com/SteamDatabase/SteamTracking/tree/master/API](https://github.com/SteamDatabase/SteamTracking/tree/master/API) | More undocumented Steam APIs |
+| [https://www.netify.ai/resources/cdn/steam-cdn](https://www.netify.ai/resources/cdn/steam-cdn) | Known Valve CDNs |
