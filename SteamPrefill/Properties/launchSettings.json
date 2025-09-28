@@ -18,7 +18,7 @@
     },
     "Prefill Selected": {
       "commandName": "Project",
-      "commandLineArgs": "prefill --force --verbose --debug --cellid 52"
+      "commandLineArgs": "prefill --force --verbose"
     },
     "Select Apps": {
       "commandName": "Project",

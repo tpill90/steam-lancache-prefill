@@ -35,9 +35,6 @@
         /// </summary>
         public async Task InitializeAsync()
         {
-            AppConfig.VerboseLogs = true;
-            AppConfig.DebugLogs = true;
-
             var timer = Stopwatch.StartNew();
             _ansiConsole.LogMarkupLine("Starting login!");
 
@@ -48,8 +45,6 @@
             // White spacing + a horizontal rule to delineate that initialization has completed
             _ansiConsole.WriteLine();
             _ansiConsole.Write(new Rule());
-
-            await _cdnPool.PopulateAvailableServersAsync();
 
         }
 
@@ -79,10 +74,73 @@
         public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames,
                                                     int? prefillPopularGames, bool prefillRecentlyPurchasedGames)
         {
-            //TODO remove this
-            await Task.CompletedTask;
-            return;
+            // Building out the list of AppIds to download
+            var appIdsToDownload = LoadPreviouslySelectedApps();
+            if (downloadAllOwnedGames)
+            {
+                appIdsToDownload.AddRange(_steam3.LicenseManager.AllOwnedAppIds);
+            }
+            if (prefillRecentGames)
+            {
+                var recentGames = await _appInfoHandler.GetRecentlyPlayedGamesAsync();
+                appIdsToDownload.AddRange(recentGames.Select(e => (uint)e.appid));
+            }
+            if (prefillPopularGames != null)
+            {
+                var popularGames = (await SteamChartsService.MostPlayedByDailyPlayersAsync(_ansiConsole))
+                                   .Take(prefillPopularGames.Value)
+                                   .Select(e => e.AppId);
+                appIdsToDownload.AddRange(popularGames);
+            }
+            if (prefillRecentlyPurchasedGames)
+            {
+                var recentApps = _steam3.LicenseManager.GetRecentlyPurchasedAppIds(30);
+                appIdsToDownload.AddRange(recentApps);
 
+                // Verbose logging for recently purchased games
+                await _appInfoHandler.RetrieveAppMetadataAsync(recentApps);
+                _ansiConsole.LogMarkupVerbose("[bold yellow]Recently purchased games (last 2 weeks):[/]");
+                foreach (var appId in recentApps)
+                {
+                    var purchaseDate = _steam3.LicenseManager.GetPurchaseDateForApp(appId);
+                    var appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+                    _ansiConsole.LogMarkupVerbose($"  {Green(appInfo.Name).PadRight(35)} - Purchased: {LightYellow(purchaseDate.ToLocalTime().ToString("yyyy-MM-dd"))}");
+                }
+            }
+
+            // AppIds can potentially be added twice when building out the full list of ids
+            var distinctAppIds = appIdsToDownload.Distinct().ToList();
+            await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
+
+            // Whitespace divider
+            _ansiConsole.WriteLine();
+
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
+            foreach (var app in availableGames)
+            {
+                try
+                {
+                    await DownloadSingleAppAsync(app);
+                }
+                catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
+                {
+                    // We'll want to bomb out the entire process for these exceptions, as they mean we can't prefill any apps at all
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    // Need to catch any exceptions that might happen during a single download, so that the other apps won't be affected
+                    _ansiConsole.LogMarkupLine(Red($"Unexpected download error : {e.Message}  Skipping app..."));
+                    _ansiConsole.MarkupLine("");
+                    FileLogger.LogException(e);
+
+                    _prefillSummaryResult.FailedApps++;
+                }
+            }
+            await PrintUnownedAppsAsync(distinctAppIds);
+
+            _ansiConsole.LogMarkupLine("Prefill complete!");
+            _prefillSummaryResult.RenderSummaryTable(_ansiConsole);
         }
 
         private async Task DownloadSingleAppAsync(AppInfo appInfo)

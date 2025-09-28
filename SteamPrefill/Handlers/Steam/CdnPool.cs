@@ -106,6 +106,8 @@ namespace SteamPrefill.Handlers.Steam
                     // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
                     AvailableServerEndpoints = AvailableServerEndpoints
                                                 .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
+                                                // Filtering out Australian CDNs that don't support HTTP
+                                                .Where(e => e.CellID != 51 && e.CellID != 53 && e.CellID != 54 && e.CellID != 55)
                                                 .DistinctBy(e => e.Host)
                                                 .ToConcurrentStack();
                 }).WaitAsync(TimeSpan.FromSeconds(15));
