@@ -76,7 +76,6 @@ namespace SteamPrefill.Handlers.Steam
                                        .OrderByDescending(e => e.Load)
                                        .ToConcurrentStack();
 
-            Debugger.Break();
         }
 
         private async Task RequestSteamCdnServersAsync()
@@ -88,19 +87,6 @@ namespace SteamPrefill.Handlers.Steam
                 {
                     var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(AppConfig.CellIdOverride);
                     AvailableServerEndpoints.PushRange(returnedServers.ToArray());
-
-                    foreach (Server server in returnedServers.ToList())
-                    {
-                        var maxHostLength = returnedServers.Max(e => e.Host.Length);
-                        _ansiConsole.LogMarkupLine($"{server.Host.PadRight(maxHostLength)} " +
-                                                   $"Protocol: {LightBlue(server.Protocol.ToString().PadRight(5))} " +
-                                                   $"CellID: {LightYellow(server.CellID.ToString().PadRight(3))} " +
-                                                   $"Type: {Cyan(server.Type.ToString().PadRight(10))} " +
-                                                   $"SourceID: {Magenta(server.SourceID.ToString().PadRight(4))} " +
-                                                   $"Load: {LightYellow(server.Load)}");
-                    }
-
-                    Debugger.Break();
 
                     // Filtering out non-cacheable CDNs.  HTTPS servers are included, as they appear to be able to be manually overridden to HTTP.
                     // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
