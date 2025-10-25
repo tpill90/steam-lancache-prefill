@@ -16,6 +16,14 @@
             // I'm currently unable to determine how the real Steam client determines to skip this depot.
             1770480,
 
+            //TODO I'm not happy with solving this issue with Battlefield 6 this way.  It looks like it is using some of these depots as
+            // a flag of sorts to confirm ownership, however they have no content to download.  I'm betting that this is the same issue as VTOL VR,
+            // and a proper fix would resolve it's issues as well.
+            // DepotDownloader is properly excluding these depots based on that they don't have a depot key.  I should look into this more in the future.
+            //BF6
+            2807962,
+            2807967,
+
             // CS2 excludes these for some unknown reason.  Might be related to "systemdefined"	on the DepotInfo
             731,
             732,
@@ -31,7 +39,9 @@
             228987,
             228988,
             228989,
-            228990
+            228990,
+
+
         };
     }
 }
