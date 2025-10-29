@@ -139,6 +139,9 @@
             }
             await PrintUnownedAppsAsync(distinctAppIds);
 
+            // Show total data downloaded from external sources
+            var totalTransferred = _prefillSummaryResult.TotalBytesTransferred;
+            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalTransferred.ToDecimalString())}");
             _ansiConsole.LogMarkupLine("Prefill complete!");
             _prefillSummaryResult.RenderSummaryTable(_ansiConsole);
         }
@@ -173,7 +176,7 @@
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
-            _prefillSummaryResult.TotalBytesTransferred += totalBytes;
+            _prefillSummaryResult.TotalBytesTransferred = _prefillSummaryResult.TotalBytesTransferred + totalBytes;
 
             _ansiConsole.LogMarkupVerbose($"Downloading {Magenta(totalBytes.ToDecimalString())} from {LightYellow(chunkDownloadQueue.Count)} chunks");
 
@@ -190,7 +193,7 @@
                 _prefillSummaryResult.Updated++;
 
                 // Logging some metrics about the download
-                _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
+                _ansiConsole.LogMarkupLine($"Finished downloaded {Magenta(totalBytes.ToDecimalString())} in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
                 _ansiConsole.WriteLine();
             }
             else
