@@ -215,7 +215,7 @@
         /// <param name="verifyPopularGames">If set to a value > 0, the most popular N games will be verified</param>
         /// <param name="verifyRecentlyPurchasedGames">If set to true, games purchased in the last 2 weeks will be verified</param>
         public async Task VerifyMultipleAppsAsync(bool verifyAllOwnedGames, bool verifyRecentGames,
-                                                  int? verifyPopularGames, bool verifyRecentlyPurchasedGames)
+                                                  int? verifyPopularGames, bool verifyRecentlyPurchasedGames, bool autoRepair)
         {
             // Building out the list of AppIds to verify
             var appIdsToVerify = LoadPreviouslySelectedApps();
@@ -259,13 +259,15 @@
             _ansiConsole.WriteLine();
 
             var failedChunksCount = 0;
+            var repairedChunksCount = 0;
             var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
             foreach (var app in availableGames)
             {
                 try
                 {
-                    var appFailedChunks = await VerifySingleAppAsync(app);
+                    var (appFailedChunks, appRepairedChunks) = await VerifySingleAppAsync(app, autoRepair);
                     failedChunksCount += appFailedChunks;
+                    repairedChunksCount += appRepairedChunks;
                 }
                 catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
                 {
@@ -283,10 +285,18 @@
             await PrintUnownedAppsAsync(distinctAppIds);
 
             _ansiConsole.LogMarkupLine("Verification complete!");
+            if (autoRepair && repairedChunksCount > 0)
+            {
+                _ansiConsole.LogMarkupLine(Green($"Successfully repaired {Magenta(repairedChunksCount)} corrupted chunks in the lancache."));
+            }
             if (failedChunksCount > 0)
             {
                 _ansiConsole.LogMarkupLine(Red($"Found {Magenta(failedChunksCount)} corrupted chunks in the lancache."));
-                _ansiConsole.LogMarkupLine(LightYellow("Corrupted chunks must be manually deleted from the lancache to fix."));
+                if (!autoRepair)
+                {
+                    _ansiConsole.LogMarkupLine(LightYellow("Corrupted chunks must be manually deleted from the lancache to fix."));
+                    _ansiConsole.LogMarkupLine(LightYellow("Use --repair flag to automatically fix corrupted chunks."));
+                }
             }
             else
             {
@@ -294,14 +304,14 @@
             }
         }
 
-        private async Task<int> VerifySingleAppAsync(AppInfo appInfo)
+        private async Task<(int failedChunks, int repairedChunks)> VerifySingleAppAsync(AppInfo appInfo, bool autoRepair)
         {
             // Filter depots based on specified language/OS/cpu architecture/etc
             var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
             if (filteredDepots.Empty())
             {
                 _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {LightYellow("No depots to verify.  Current arguments filtered all depots")}");
-                return 0;
+                return (0, 0);
             }
 
             await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
@@ -318,12 +328,31 @@
             _ansiConsole.LogMarkupVerbose($"Verifying {LightYellow(chunkVerifyQueue.Count)} chunks");
 
             var failedChunks = await _downloadHandler.VerifyQueuedChunksAsync(chunkVerifyQueue, _downloadArgs);
+            var repairedChunks = 0;
+
             if (failedChunks.Any())
             {
                 _ansiConsole.LogMarkupLine($"Found {Red(failedChunks.Count)} corrupted chunks for {Cyan(appInfo)}");
                 foreach (var failedChunk in failedChunks)
                 {
                     _ansiConsole.LogMarkupVerbose($"  Corrupted: depot {failedChunk.DepotId} chunk {failedChunk.ChunkId}");
+                }
+
+                if (autoRepair)
+                {
+                    repairedChunks = await RepairCorruptedChunksAsync(failedChunks, _downloadArgs);
+                    _ansiConsole.LogMarkupLine($"Repaired {Green(repairedChunks)} corrupted chunks for {Cyan(appInfo)}");
+
+                    // Re-verify the repaired chunks to confirm they're fixed
+                    if (repairedChunks > 0)
+                    {
+                        var stillFailedChunks = await _downloadHandler.VerifyQueuedChunksAsync(failedChunks[..repairedChunks], _downloadArgs);
+                        if (stillFailedChunks.Any())
+                        {
+                            _ansiConsole.LogMarkupVerbose($"Warning: {Red(stillFailedChunks.Count)} chunks still corrupted after repair attempt");
+                            repairedChunks -= stillFailedChunks.Count;
+                        }
+                    }
                 }
             }
             else
@@ -332,7 +361,8 @@
             }
             _ansiConsole.WriteLine();
 
-            return failedChunks.Count;
+            var finalFailedCount = failedChunks.Count - repairedChunks;
+            return (finalFailedCount, repairedChunks);
         }
 
         #endregion

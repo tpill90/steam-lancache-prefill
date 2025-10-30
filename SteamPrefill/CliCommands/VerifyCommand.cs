@@ -34,6 +34,9 @@ namespace SteamPrefill.CliCommands
             init => AppConfig.VerboseLogs = value ?? false;
         }
 
+        [CommandOption("repair", Description = "Automatically redownload and repair corrupted chunks instead of just reporting them.", Converter = typeof(NullableBoolConverter))]
+        public bool? AutoRepair { get; init; }
+
         [CommandOption("no-ansi",
             Description = "Application output will be in plain text.  " +
                           "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
@@ -68,7 +71,8 @@ namespace SteamPrefill.CliCommands
                 await steamManager.VerifyMultipleAppsAsync(VerifyAllOwnedGames ?? false,
                                                            VerifyRecentGames ?? false,
                                                            VerifyPopularGames,
-                                                           VerifyRecentlyPurchasedGames ?? false);
+                                                           VerifyRecentlyPurchasedGames ?? false,
+                                                           AutoRepair ?? false);
             }
             finally
             {
