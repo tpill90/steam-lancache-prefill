@@ -365,6 +365,33 @@
             return (finalFailedCount, repairedChunks);
         }
 
+        /// <summary>
+        /// Attempts to repair corrupted chunks by re-downloading them with nocache flag to force lancache to update
+        /// </summary>
+        /// <param name="corruptedChunks">List of chunks that failed verification</param>
+        /// <param name="downloadArgs">Download arguments</param>
+        /// <returns>Number of chunks successfully repaired</returns>
+        private async Task<int> RepairCorruptedChunksAsync(List<QueuedRequest> corruptedChunks, DownloadArguments downloadArgs)
+        {
+            await _cdnPool.PopulateAvailableServersAsync();
+            _ansiConsole.LogMarkupVerbose($"Attempting to repair {LightYellow(corruptedChunks.Count)} corrupted chunks...");
+
+            // Download the corrupted chunks with nocache=1 to force lancache to refetch from upstream
+            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(corruptedChunks, downloadArgs, true);
+
+            if (downloadSuccessful)
+            {
+                _ansiConsole.LogMarkupVerbose("All corrupted chunks repaired successfully");
+                return corruptedChunks.Count;
+            }
+            else
+            {
+                _ansiConsole.LogMarkupVerbose("Some chunks could not be repaired");
+                // We can't determine exactly how many failed, so we'll report 0 repaired
+                return 0;
+            }
+        }
+
         #endregion
 
         #region Select Apps

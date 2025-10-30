@@ -34,8 +34,9 @@
         /// In the case of any failed downloads, the failed downloads will be retried up to 3 times.  If the downloads fail 3 times, then
         /// false will be returned
         /// </summary>
+        /// <param name="forceRecache">When true, adds nocache=1 to URLs to force lancache to re-fetch from upstream instead of serving cached content</param>
         /// <returns>True if all downloads succeeded.  False if any downloads failed 3 times in a row.</returns>
-        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
+        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs, bool forceRecache = false)
         {
             await InitializeAsync();
 
@@ -44,7 +45,7 @@
             await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
                 // Run the initial download
-                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs);
+                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs, forceRecache);
 
                 // Handle any failed requests
                 while (failedRequests.Any() && retryCount < 2)
