@@ -132,6 +132,57 @@
             return failedRequests;
         }
 
+        /// <summary>
+        /// Attempts to download all queued requests and verify their integrity.  Returns a list of failed chunks.
+        /// </summary>
+        public async Task<List<QueuedRequest>> VerifyQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
+        {
+            await InitializeAsync();
+
+            var failedRequests = new ConcurrentBag<QueuedRequest>();
+            var cdnServer = _cdnPool.TakeConnection();
+            await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
+            {
+                // Run the verification
+                var progressTask = ctx.AddTask("Verifying..", new ProgressTaskSettings { MaxValue = queuedRequests.Count });
+
+                await Parallel.ForEachAsync(queuedRequests, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, async (request, _) =>
+                {
+                    try
+                    {
+                        var url = $"http://{_lancacheAddress}/depot/{request.DepotId}/chunk/{request.ChunkId}";
+                        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                        requestMessage.Headers.Host = cdnServer.Host;
+
+                        using var cts = new CancellationTokenSource();
+                        using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                        using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
+                        response.EnsureSuccessStatusCode();
+
+                        // Compute SHA1 hash of the response
+                        using var sha1 = SHA1.Create();
+                        var computedHash = await sha1.ComputeHashAsync(responseStream, cts.Token);
+                        var computedHex = BitConverter.ToString(computedHash).Replace("-", "").ToLower();
+
+                        // Compare with expected ChunkId
+                        if (!string.Equals(computedHex, request.ChunkId, StringComparison.Ordinal))
+                        {
+                            failedRequests.Add(request);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        request.LastFailureReason = e;
+                        failedRequests.Add(request);
+                    }
+                    progressTask.Increment(1);
+                });
+            });
+
+            // No need to return connection for verify since no retries
+            return failedRequests.ToList();
+        }
+
         public void Dispose()
         {
             _client?.Dispose();

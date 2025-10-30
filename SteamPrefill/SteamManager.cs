@@ -205,6 +205,138 @@
 
         #endregion
 
+        #region Verify
+
+        /// <summary>
+        /// Given a list of AppIds, verifies the integrity of cached chunks against the latest manifests.
+        /// </summary>
+        /// <param name="verifyAllOwnedGames">If set to true, all games owned by the user will be verified</param>
+        /// <param name="verifyRecentGames">If set to true, games played in the last 2 weeks will be verified</param>
+        /// <param name="verifyPopularGames">If set to a value > 0, the most popular N games will be verified</param>
+        /// <param name="verifyRecentlyPurchasedGames">If set to true, games purchased in the last 2 weeks will be verified</param>
+        public async Task VerifyMultipleAppsAsync(bool verifyAllOwnedGames, bool verifyRecentGames,
+                                                  int? verifyPopularGames, bool verifyRecentlyPurchasedGames)
+        {
+            // Building out the list of AppIds to verify
+            var appIdsToVerify = LoadPreviouslySelectedApps();
+            if (verifyAllOwnedGames)
+            {
+                appIdsToVerify.AddRange(_steam3.LicenseManager.AllOwnedAppIds);
+            }
+            if (verifyRecentGames)
+            {
+                var recentGames = await _appInfoHandler.GetRecentlyPlayedGamesAsync();
+                appIdsToVerify.AddRange(recentGames.Select(e => (uint)e.appid));
+            }
+            if (verifyPopularGames != null)
+            {
+                var popularGames = (await SteamChartsService.MostPlayedByDailyPlayersAsync(_ansiConsole))
+                                   .Take(verifyPopularGames.Value)
+                                   .Select(e => e.AppId);
+                appIdsToVerify.AddRange(popularGames);
+            }
+            if (verifyRecentlyPurchasedGames)
+            {
+                var recentApps = _steam3.LicenseManager.GetRecentlyPurchasedAppIds(30);
+                appIdsToVerify.AddRange(recentApps);
+
+                // Verbose logging for recently purchased games
+                await _appInfoHandler.RetrieveAppMetadataAsync(recentApps);
+                _ansiConsole.LogMarkupVerbose("[bold yellow]Recently purchased games (last 2 weeks):[/]");
+                foreach (var appId in recentApps)
+                {
+                    var purchaseDate = _steam3.LicenseManager.GetPurchaseDateForApp(appId);
+                    var appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+                    _ansiConsole.LogMarkupVerbose($"  {Green(appInfo.Name).PadRight(35)} - Purchased: {LightYellow(purchaseDate.ToLocalTime().ToString("yyyy-MM-dd"))}");
+                }
+            }
+
+            // AppIds can potentially be added twice when building out the full list of ids
+            var distinctAppIds = appIdsToVerify.Distinct().ToList();
+            await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
+
+            // Whitespace divider
+            _ansiConsole.WriteLine();
+
+            var failedChunksCount = 0;
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
+            foreach (var app in availableGames)
+            {
+                try
+                {
+                    var appFailedChunks = await VerifySingleAppAsync(app);
+                    failedChunksCount += appFailedChunks;
+                }
+                catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
+                {
+                    // We'll want to bomb out the entire process for these exceptions, as they mean we can't verify any apps at all
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    // Need to catch any exceptions that might happen during a single verify, so that the other apps won't be affected
+                    _ansiConsole.LogMarkupLine(Red($"Unexpected verify error : {e.Message}  Skipping app..."));
+                    _ansiConsole.MarkupLine("");
+                    FileLogger.LogException(e);
+                }
+            }
+            await PrintUnownedAppsAsync(distinctAppIds);
+
+            _ansiConsole.LogMarkupLine("Verification complete!");
+            if (failedChunksCount > 0)
+            {
+                _ansiConsole.LogMarkupLine(Red($"Found {Magenta(failedChunksCount)} corrupted chunks in the lancache."));
+                _ansiConsole.LogMarkupLine(LightYellow("Corrupted chunks must be manually deleted from the lancache to fix."));
+            }
+            else
+            {
+                _ansiConsole.LogMarkupLine(Green("No corrupted chunks found!"));
+            }
+        }
+
+        private async Task<int> VerifySingleAppAsync(AppInfo appInfo)
+        {
+            // Filter depots based on specified language/OS/cpu architecture/etc
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
+            if (filteredDepots.Empty())
+            {
+                _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {LightYellow("No depots to verify.  Current arguments filtered all depots")}");
+                return 0;
+            }
+
+            await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+
+            _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
+
+            await _cdnPool.PopulateAvailableServersAsync();
+
+            // Get the full file list for each depot, and queue up the required chunks
+            List<QueuedRequest> chunkVerifyQueue = null;
+            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ => { chunkVerifyQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots); });
+
+            // Finally run the queued verifications
+            _ansiConsole.LogMarkupVerbose($"Verifying {LightYellow(chunkVerifyQueue.Count)} chunks");
+
+            var failedChunks = await _downloadHandler.VerifyQueuedChunksAsync(chunkVerifyQueue, _downloadArgs);
+            if (failedChunks.Any())
+            {
+                _ansiConsole.LogMarkupLine($"Found {Red(failedChunks.Count)} corrupted chunks for {Cyan(appInfo)}");
+                foreach (var failedChunk in failedChunks)
+                {
+                    _ansiConsole.LogMarkupVerbose($"  Corrupted: depot {failedChunk.DepotId} chunk {failedChunk.ChunkId}");
+                }
+            }
+            else
+            {
+                _ansiConsole.LogMarkupLine($"All chunks verified successfully for {Cyan(appInfo)}");
+            }
+            _ansiConsole.WriteLine();
+
+            return failedChunks.Count;
+        }
+
+        #endregion
+
         #region Select Apps
 
         public void SetAppsAsSelected(List<TuiAppInfo> tuiAppModels)

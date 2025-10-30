@@ -10,3 +10,5 @@ lockfile
 /docs/__pycache__
 /docs/RenderAnsiToSvg/__pycache__
 /SteamPrefill/app.log
+
+.fake
