@@ -34,8 +34,9 @@
         /// In the case of any failed downloads, the failed downloads will be retried up to 3 times.  If the downloads fail 3 times, then
         /// false will be returned
         /// </summary>
+        /// <param name="forceRecache">When true, adds nocache=1 to URLs to force lancache to re-fetch from upstream instead of serving cached content</param>
         /// <returns>True if all downloads succeeded.  False if any downloads failed 3 times in a row.</returns>
-        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
+        public async Task<bool> DownloadQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs, bool forceRecache = false)
         {
             await InitializeAsync();
 
@@ -44,7 +45,7 @@
             await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
             {
                 // Run the initial download
-                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs);
+                failedRequests = await AttemptDownloadAsync(ctx, "Downloading..", queuedRequests, downloadArgs, forceRecache);
 
                 // Handle any failed requests
                 while (failedRequests.Any() && retryCount < 2)
@@ -130,6 +131,57 @@
             // Making sure the progress bar is always set to its max value, in-case some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
+        }
+
+        /// <summary>
+        /// Attempts to download all queued requests and verify their integrity.  Returns a list of failed chunks.
+        /// </summary>
+        public async Task<List<QueuedRequest>> VerifyQueuedChunksAsync(List<QueuedRequest> queuedRequests, DownloadArguments downloadArgs)
+        {
+            await InitializeAsync();
+
+            var failedRequests = new ConcurrentBag<QueuedRequest>();
+            var cdnServer = _cdnPool.TakeConnection();
+            await _ansiConsole.CreateSpectreProgress(downloadArgs.TransferSpeedUnit).StartAsync(async ctx =>
+            {
+                // Run the verification
+                var progressTask = ctx.AddTask("Verifying..", new ProgressTaskSettings { MaxValue = queuedRequests.Count });
+
+                await Parallel.ForEachAsync(queuedRequests, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, async (request, _) =>
+                {
+                    try
+                    {
+                        var url = $"http://{_lancacheAddress}/depot/{request.DepotId}/chunk/{request.ChunkId}";
+                        using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                        requestMessage.Headers.Host = cdnServer.Host;
+
+                        using var cts = new CancellationTokenSource();
+                        using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                        using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
+                        response.EnsureSuccessStatusCode();
+
+                        // Compute SHA1 hash of the response
+                        using var sha1 = SHA1.Create();
+                        var computedHash = await sha1.ComputeHashAsync(responseStream, cts.Token);
+                        var computedHex = BitConverter.ToString(computedHash).Replace("-", "").ToLower();
+
+                        // Compare with expected ChunkId
+                        if (!string.Equals(computedHex, request.ChunkId, StringComparison.Ordinal))
+                        {
+                            failedRequests.Add(request);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        request.LastFailureReason = e;
+                        failedRequests.Add(request);
+                    }
+                    progressTask.Increment(1);
+                });
+            });
+
+            // No need to return connection for verify since no retries
+            return failedRequests.ToList();
         }
 
         public void Dispose()

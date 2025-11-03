@@ -139,6 +139,9 @@
             }
             await PrintUnownedAppsAsync(distinctAppIds);
 
+            // Show total data downloaded from external sources
+            var totalTransferred = _prefillSummaryResult.TotalBytesTransferred;
+            _ansiConsole.LogMarkupLine($"Total downloaded: {Magenta(totalTransferred.ToDecimalString())}");
             _ansiConsole.LogMarkupLine("Prefill complete!");
             _prefillSummaryResult.RenderSummaryTable(_ansiConsole);
         }
@@ -173,7 +176,7 @@
             // Finally run the queued downloads
             var downloadTimer = Stopwatch.StartNew();
             var totalBytes = ByteSize.FromBytes(chunkDownloadQueue.Sum(e => e.CompressedLength));
-            _prefillSummaryResult.TotalBytesTransferred += totalBytes;
+            _prefillSummaryResult.TotalBytesTransferred = _prefillSummaryResult.TotalBytesTransferred + totalBytes;
 
             _ansiConsole.LogMarkupVerbose($"Downloading {Magenta(totalBytes.ToDecimalString())} from {LightYellow(chunkDownloadQueue.Count)} chunks");
 
@@ -190,7 +193,7 @@
                 _prefillSummaryResult.Updated++;
 
                 // Logging some metrics about the download
-                _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
+                _ansiConsole.LogMarkupLine($"Finished downloaded {Magenta(totalBytes.ToDecimalString())} in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
                 _ansiConsole.WriteLine();
             }
             else
@@ -198,6 +201,195 @@
                 _prefillSummaryResult.FailedApps++;
             }
             downloadTimer.Stop();
+        }
+
+        #endregion
+
+        #region Verify
+
+        /// <summary>
+        /// Given a list of AppIds, verifies the integrity of cached chunks against the latest manifests.
+        /// </summary>
+        /// <param name="verifyAllOwnedGames">If set to true, all games owned by the user will be verified</param>
+        /// <param name="verifyRecentGames">If set to true, games played in the last 2 weeks will be verified</param>
+        /// <param name="verifyPopularGames">If set to a value > 0, the most popular N games will be verified</param>
+        /// <param name="verifyRecentlyPurchasedGames">If set to true, games purchased in the last 2 weeks will be verified</param>
+        public async Task VerifyMultipleAppsAsync(bool verifyAllOwnedGames, bool verifyRecentGames,
+                                                  int? verifyPopularGames, bool verifyRecentlyPurchasedGames, bool autoRepair)
+        {
+            // Building out the list of AppIds to verify
+            var appIdsToVerify = LoadPreviouslySelectedApps();
+            if (verifyAllOwnedGames)
+            {
+                appIdsToVerify.AddRange(_steam3.LicenseManager.AllOwnedAppIds);
+            }
+            if (verifyRecentGames)
+            {
+                var recentGames = await _appInfoHandler.GetRecentlyPlayedGamesAsync();
+                appIdsToVerify.AddRange(recentGames.Select(e => (uint)e.appid));
+            }
+            if (verifyPopularGames != null)
+            {
+                var popularGames = (await SteamChartsService.MostPlayedByDailyPlayersAsync(_ansiConsole))
+                                   .Take(verifyPopularGames.Value)
+                                   .Select(e => e.AppId);
+                appIdsToVerify.AddRange(popularGames);
+            }
+            if (verifyRecentlyPurchasedGames)
+            {
+                var recentApps = _steam3.LicenseManager.GetRecentlyPurchasedAppIds(30);
+                appIdsToVerify.AddRange(recentApps);
+
+                // Verbose logging for recently purchased games
+                await _appInfoHandler.RetrieveAppMetadataAsync(recentApps);
+                _ansiConsole.LogMarkupVerbose("[bold yellow]Recently purchased games (last 2 weeks):[/]");
+                foreach (var appId in recentApps)
+                {
+                    var purchaseDate = _steam3.LicenseManager.GetPurchaseDateForApp(appId);
+                    var appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
+                    _ansiConsole.LogMarkupVerbose($"  {Green(appInfo.Name).PadRight(35)} - Purchased: {LightYellow(purchaseDate.ToLocalTime().ToString("yyyy-MM-dd"))}");
+                }
+            }
+
+            // AppIds can potentially be added twice when building out the full list of ids
+            var distinctAppIds = appIdsToVerify.Distinct().ToList();
+            await _appInfoHandler.RetrieveAppMetadataAsync(distinctAppIds);
+
+            // Whitespace divider
+            _ansiConsole.WriteLine();
+
+            var failedChunksCount = 0;
+            var repairedChunksCount = 0;
+            var availableGames = await _appInfoHandler.GetAvailableGamesByIdAsync(distinctAppIds);
+            foreach (var app in availableGames)
+            {
+                try
+                {
+                    var (appFailedChunks, appRepairedChunks) = await VerifySingleAppAsync(app, autoRepair);
+                    failedChunksCount += appFailedChunks;
+                    repairedChunksCount += appRepairedChunks;
+                }
+                catch (Exception e) when (e is LancacheNotFoundException || e is InfiniteLoopException)
+                {
+                    // We'll want to bomb out the entire process for these exceptions, as they mean we can't verify any apps at all
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    // Need to catch any exceptions that might happen during a single verify, so that the other apps won't be affected
+                    _ansiConsole.LogMarkupLine(Red($"Unexpected verify error : {e.Message}  Skipping app..."));
+                    _ansiConsole.MarkupLine("");
+                    FileLogger.LogException(e);
+                }
+            }
+            await PrintUnownedAppsAsync(distinctAppIds);
+
+            _ansiConsole.LogMarkupLine("Verification complete!");
+            if (autoRepair && repairedChunksCount > 0)
+            {
+                _ansiConsole.LogMarkupLine(Green($"Successfully repaired {Magenta(repairedChunksCount)} corrupted chunks in the lancache."));
+            }
+            if (failedChunksCount > 0)
+            {
+                _ansiConsole.LogMarkupLine(Red($"Found {Magenta(failedChunksCount)} corrupted chunks in the lancache."));
+                if (!autoRepair)
+                {
+                    _ansiConsole.LogMarkupLine(LightYellow("Corrupted chunks must be manually deleted from the lancache to fix."));
+                    _ansiConsole.LogMarkupLine(LightYellow("Use --repair flag to automatically fix corrupted chunks."));
+                }
+            }
+            else
+            {
+                _ansiConsole.LogMarkupLine(Green("No corrupted chunks found!"));
+            }
+        }
+
+        private async Task<(int failedChunks, int repairedChunks)> VerifySingleAppAsync(AppInfo appInfo, bool autoRepair)
+        {
+            // Filter depots based on specified language/OS/cpu architecture/etc
+            var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
+            if (filteredDepots.Empty())
+            {
+                _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}  {LightYellow("No depots to verify.  Current arguments filtered all depots")}");
+                return (0, 0);
+            }
+
+            await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+
+            _ansiConsole.LogMarkupLine($"Starting {Cyan(appInfo)}");
+
+            await _cdnPool.PopulateAvailableServersAsync();
+
+            // Get the full file list for each depot, and queue up the required chunks
+            List<QueuedRequest> chunkVerifyQueue = null;
+            await _ansiConsole.StatusSpinner().StartAsync("Fetching depot manifests...", async _ => { chunkVerifyQueue = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots); });
+
+            // Finally run the queued verifications
+            _ansiConsole.LogMarkupVerbose($"Verifying {LightYellow(chunkVerifyQueue.Count)} chunks");
+
+            var failedChunks = await _downloadHandler.VerifyQueuedChunksAsync(chunkVerifyQueue, _downloadArgs);
+            var repairedChunks = 0;
+
+            if (failedChunks.Any())
+            {
+                _ansiConsole.LogMarkupLine($"Found {Red(failedChunks.Count)} corrupted chunks for {Cyan(appInfo)}");
+                foreach (var failedChunk in failedChunks)
+                {
+                    _ansiConsole.LogMarkupVerbose($"  Corrupted: depot {failedChunk.DepotId} chunk {failedChunk.ChunkId}");
+                }
+
+                if (autoRepair)
+                {
+                    repairedChunks = await RepairCorruptedChunksAsync(failedChunks, _downloadArgs);
+                    _ansiConsole.LogMarkupLine($"Repaired {Green(repairedChunks)} corrupted chunks for {Cyan(appInfo)}");
+
+                    // Re-verify the repaired chunks to confirm they're fixed
+                    if (repairedChunks > 0)
+                    {
+                        var stillFailedChunks = await _downloadHandler.VerifyQueuedChunksAsync(failedChunks[..repairedChunks], _downloadArgs);
+                        if (stillFailedChunks.Any())
+                        {
+                            _ansiConsole.LogMarkupVerbose($"Warning: {Red(stillFailedChunks.Count)} chunks still corrupted after repair attempt");
+                            repairedChunks -= stillFailedChunks.Count;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _ansiConsole.LogMarkupLine($"All chunks verified successfully for {Cyan(appInfo)}");
+            }
+            _ansiConsole.WriteLine();
+
+            var finalFailedCount = failedChunks.Count - repairedChunks;
+            return (finalFailedCount, repairedChunks);
+        }
+
+        /// <summary>
+        /// Attempts to repair corrupted chunks by re-downloading them with nocache flag to force lancache to update
+        /// </summary>
+        /// <param name="corruptedChunks">List of chunks that failed verification</param>
+        /// <param name="downloadArgs">Download arguments</param>
+        /// <returns>Number of chunks successfully repaired</returns>
+        private async Task<int> RepairCorruptedChunksAsync(List<QueuedRequest> corruptedChunks, DownloadArguments downloadArgs)
+        {
+            await _cdnPool.PopulateAvailableServersAsync();
+            _ansiConsole.LogMarkupVerbose($"Attempting to repair {LightYellow(corruptedChunks.Count)} corrupted chunks...");
+
+            // Download the corrupted chunks with nocache=1 to force lancache to refetch from upstream
+            var downloadSuccessful = await _downloadHandler.DownloadQueuedChunksAsync(corruptedChunks, downloadArgs, true);
+
+            if (downloadSuccessful)
+            {
+                _ansiConsole.LogMarkupVerbose("All corrupted chunks repaired successfully");
+                return corruptedChunks.Count;
+            }
+            else
+            {
+                _ansiConsole.LogMarkupVerbose("Some chunks could not be repaired");
+                // We can't determine exactly how many failed, so we'll report 0 repaired
+                return 0;
+            }
         }
 
         #endregion
