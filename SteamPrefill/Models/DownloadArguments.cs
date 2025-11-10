@@ -42,5 +42,10 @@
 
         public Architecture Architecture { get; init; } = Architecture.x64;
         public Language Language { get; init; } = Language.English;
+
+        /// <summary>
+        /// When set to true, force the usage of localhost IP instead of resolving lancache IP
+        /// </summary>
+        public bool ForceLocalhost { get; init; }
     }
 }
