@@ -14,8 +14,8 @@
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Moq" Version="4.18.2" />
-    <PackageReference Include="Spectre.Console" Version="0.49.2-preview.0.67" />
-    <PackageReference Include="Spectre.Console.Testing" Version="0.49.2-preview.0.67" />
+    <PackageReference Include="Spectre.Console" Version="0.51.1" />
+    <PackageReference Include="Spectre.Console.Testing" Version="0.51.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
