@@ -43,19 +43,27 @@ if [ -f ./SteamPrefill ]; then
     fi
 fi
 
+# Figuring out if we're on x86 or ARM
+CPUTYPE=$(arch)
+if [[ "$CPUTYPE" == "amd64" ]] || [[ "$CPUTYPE" == "x86_64" ]]; then
+    ARCH="x64";
+elif [[ "$CPUTYPE" == "aarch64" ]]; then
+    ARCH="arm64";
+fi
+
 # Downloading latest version
 echo -e "${Yellow} Downloading... ${NC}"
-DOWNLOAD_URL="https://github.com/tpill90/steam-lancache-prefill/releases/download/v${LATEST_TAG}/SteamPrefill-${LATEST_TAG}-linux-x64.zip"
+DOWNLOAD_URL="https://github.com/tpill90/steam-lancache-prefill/releases/download/v${LATEST_TAG}/SteamPrefill-${LATEST_TAG}-linux-${ARCH}.zip"
 wget -q -nc --show-progress --progress=bar:force:noscroll $DOWNLOAD_URL
 
 # Unzip
 echo -e "${Yellow} Unzipping... ${NC}"
-unzip -q -j -o SteamPrefill-${LATEST_TAG}-linux-x64.zip
+unzip -q -j -o SteamPrefill-${LATEST_TAG}-linux-${ARCH}.zip
 
 # Required so executable permissions don't get overwritten by unzip
 chmod +x SteamPrefill update.sh
 
 # Cleanup
-rm SteamPrefill-${LATEST_TAG}-linux-x64.zip
+rm SteamPrefill-${LATEST_TAG}-linux-${ARCH}.zip
 
 echo -e " ${Cyan} Complete! ${NC}"
