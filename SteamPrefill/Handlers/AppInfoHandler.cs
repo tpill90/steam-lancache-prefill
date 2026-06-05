@@ -206,7 +206,7 @@
 
             // We'll filter out some specific non-game appids which would otherwise be included.
             var excludedAppIds = Enum.GetValues(typeof(ExcludedAppId)).Cast<uint>().ToList();
-            var filteredGames = appInfos.Where(e => (e.Type == AppType.Game || e.Type == AppType.Beta)
+            var filteredGames = appInfos.Where(e => (e.Type == AppType.Game || e.Type == AppType.Beta || e.Type == AppType.Demo)
                                                     && (e.ReleaseState != ReleaseState.Unavailable && e.ReleaseState != ReleaseState.Disabled)
                                                     && e.SupportsWindows
                                                     && _steam3Session.LicenseManager.AccountHasAppAccess(e.AppId))
