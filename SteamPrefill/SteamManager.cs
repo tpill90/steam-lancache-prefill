@@ -190,7 +190,8 @@
                 _prefillSummaryResult.Updated++;
 
                 // Logging some metrics about the download
-                _ansiConsole.LogMarkupLine($"Finished in {LightYellow(downloadTimer.FormatElapsedString())} - {Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
+                _ansiConsole.LogMarkupLine($"Finished downloading {Magenta(totalBytes.ToDecimalString())} in {LightYellow(downloadTimer.FormatElapsedString())} - " +
+                                           $"{Magenta(totalBytes.CalculateBitrate(downloadTimer))}");
                 _ansiConsole.WriteLine();
             }
             else
