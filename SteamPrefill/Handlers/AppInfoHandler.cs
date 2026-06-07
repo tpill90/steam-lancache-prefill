@@ -107,7 +107,8 @@
             List<PicsProductInfo> appInfos = resultSet.Results.SelectMany(e => e.Apps).Select(e => e.Value).ToList();
             foreach (var app in appInfos)
             {
-                LoadedAppInfos.TryAdd(app.ID, new AppInfo(_steam3Session, app.ID, app.KeyValues));
+                var purchaseDate = _licenseManager.GetPurchaseDateForApp(app.ID);
+                LoadedAppInfos.TryAdd(app.ID, new AppInfo(_steam3Session, app.ID, app.KeyValues, purchaseDate));
 
                 app.KeyValues.WriteSteamMetadataToDisk($@"{AppConfig.DebugOutputDir}\AppInfo\AppInfo_{app.ID}.txt");
             }
