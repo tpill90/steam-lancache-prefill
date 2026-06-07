@@ -36,7 +36,7 @@ namespace SteamPrefill.CliCommands
                 }
 
                 Application.Init();
-                using var tui2 = new SelectAppsTui(tuiAppModels);
+                using var tui2 = new SelectAppsTui(tuiAppModels, showPurchaseDate: true);
                 Key userKeyPress = tui2.Run();
 
                 // There is an issue with Terminal.Gui where this property is set to 'true' when the TUI is initialized, but forgets to reset it back to 'false' when the TUI closes.
@@ -83,7 +83,8 @@ namespace SteamPrefill.CliCommands
                                         new TuiAppInfo(e.AppId.ToString(), e.Name)
                                         {
                                             MinutesPlayed = e.MinutesPlayed2Weeks,
-                                            ReleaseDate = e.ReleaseDate
+                                            ReleaseDate = e.ReleaseDate,
+                                            PurchaseDate = e.PurchaseDate
                                         }).ToList();
 
             // Flagging previously selected apps as selected

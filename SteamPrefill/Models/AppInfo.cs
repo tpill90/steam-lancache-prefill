@@ -5,8 +5,8 @@
     /// </summary>
     public sealed class AppInfo
     {
-        public uint AppId { get; set; }
-        public ReleaseState ReleaseState { get; set; }
+        public uint AppId { get; }
+        public ReleaseState ReleaseState { get; }
 
         /// <summary>
         /// Games on Steam can potentially have multiple "release dates", and are not consistently populated across all games.
@@ -30,8 +30,8 @@
             }
         }
 
-        private DateTime? SteamReleaseDate { get; set; }
-        private DateTime? OriginalReleaseDate { get; set; }
+        private DateTime? SteamReleaseDate { get; }
+        private DateTime? OriginalReleaseDate { get; }
 
         public List<uint> DlcAppIds { get; } = new List<uint>();
 
@@ -40,7 +40,7 @@
         /// </summary>
         public List<DepotInfo> Depots { get; } = new List<DepotInfo>();
 
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
         /// Lists Operating Systems supported by this app.  If there is no OS listed, then it is assumed Windows is supported by default
@@ -57,13 +57,15 @@
 
         public bool IsInvalidApp => Type == null;
 
-        public bool IsFreeGame { get; set; }
+        public bool IsFreeGame { get; }
 
         public int? MinutesPlayed2Weeks { get; set; }
 
+        public DateTime? PurchaseDate { get; init; }
+
         public List<Category> Categories { get; init; }
 
-        public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue)
+        public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue, DateTime purchaseDate)
         {
             AppId = appId;
             Name = rootKeyValue["common"]["name"].Value.EscapeMarkup();
@@ -106,6 +108,8 @@
                          .Children
                          .Select(e => (Category)int.Parse(e.Name.Replace("category_", "")))
                          .ToList();
+
+            PurchaseDate = purchaseDate;
         }
 
         public override string ToString()
