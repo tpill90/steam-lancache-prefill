@@ -102,11 +102,10 @@
                 return Manifest.LoadFromFile(depot.ManifestFileName);
             }
 
-            _ansiConsole.LogMarkupVerbose($"Downloading manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)}");
-
             ManifestRequestCode manifestRequestCode = await GetManifestRequestCodeAsync(depot);
 
             Server server = _cdnPool.TakeConnection();
+            _ansiConsole.LogMarkupVerbose($"Manifest {LightYellow(depot.ManifestId)} for depot {Cyan(depot.DepotId)} will download from CDN {LightYellow(server.Host)}");
             DepotManifest manifest = await _steam3Session.CdnClient.DownloadManifestAsync(depot.DepotId, depot.ManifestId.Value, manifestRequestCode.Code, server);
             if (manifest == null)
             {

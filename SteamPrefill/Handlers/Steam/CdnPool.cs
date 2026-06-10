@@ -116,7 +116,6 @@ namespace SteamPrefill.Handlers.Steam
             }
 
             AvailableServerEndpoints.TryPop(out var server);
-            _ansiConsole.LogMarkupVerbose($"Using CDN {Cyan(server.Host)}");
             return server;
         }
 
@@ -128,6 +127,16 @@ namespace SteamPrefill.Handlers.Steam
         public void ReturnConnection(Server server)
         {
             AvailableServerEndpoints.Push(server);
+        }
+
+        /// <summary>
+        /// Returns a snapshot of all currently available servers, ordered by load.
+        /// Unlike <see cref="TakeConnection"/>, the servers are not removed from the pool, so that they can be shared
+        /// across multiple concurrent depot downloads and used as failover targets.
+        /// </summary>
+        public List<Server> GetServersByLoad()
+        {
+            return AvailableServerEndpoints.OrderByDescending(e => e.Load).ToList();
         }
     }
 }
