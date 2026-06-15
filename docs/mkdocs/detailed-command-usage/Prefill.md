@@ -63,3 +63,4 @@ It is possible to combine multiple flags together in a single command, rather th
 | --verbose   |     |                       |             | Produces more detailed log output.  By default, games that are already up to date will not be displayed at all.  Specifying this option will make it so that all games, even ones up to date, will be logged.  |
 | --unit      |     | bits, bytes           | **bits**    | Specifies which unit to use to display download speed.   |
 | --no-ansi   |     |                       |             | Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file. |
+| --force-localhost |     |                       |             | Force the application to use the localhost IP (127.0.0.1) instead of the DNS IP (usefull in case the application is on the same lancache server). |

@@ -23,6 +23,11 @@ namespace SteamPrefill.CliCommands.Benchmark
             Converter = typeof(NullableBoolConverter))]
         public bool? NoAnsiEscapeSequences { get; init; }
 
+        [CommandOption("force-localhost",
+            Description = "Force the application to use the localhost IP (127.0.0.1) instead of the DNS IP (usefull in case the application is on the same lancache server)",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? ForceLocalhost { get; init; }
+
         private IAnsiConsole _ansiConsole;
 
         private CdnPool _cdnPool;
@@ -93,7 +98,7 @@ namespace SteamPrefill.CliCommands.Benchmark
                 _allRequests.Shuffle();
             });
 
-            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool);
+            _downloadHandler = new DownloadHandler(_ansiConsole, _cdnPool, ForceLocalhost ?? false);
             await _downloadHandler.InitializeAsync();
 
             _ansiConsole.LogMarkupLine("Completed initialization", initTimer);

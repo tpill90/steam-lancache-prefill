@@ -5,16 +5,18 @@
         private readonly IAnsiConsole _ansiConsole;
         private readonly CdnPool _cdnPool;
         private readonly HttpClient _client;
+        private readonly bool _forceLocalhost;
 
         /// <summary>
         /// The URL/IP Address where the Lancache has been detected.
         /// </summary>
         private string _lancacheAddress;
 
-        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool)
+        public DownloadHandler(IAnsiConsole ansiConsole, CdnPool cdnPool, bool forceLocalhost)
         {
             _ansiConsole = ansiConsole;
             _cdnPool = cdnPool;
+            _forceLocalhost = forceLocalhost;
 
             _client = new HttpClient();
             // Lancache requires this user agent in order to correctly identify and cache Valve's content servers
@@ -23,7 +25,12 @@
 
         public async Task InitializeAsync()
         {
-            if (_lancacheAddress == null)
+            if (_forceLocalhost)
+            {
+                _lancacheAddress = "localhost";
+                _ansiConsole.LogMarkupLine("Using localhost IP for lancache server ...");
+            }
+            else if (_lancacheAddress == null)
             {
                 _lancacheAddress = await LancacheIpResolver.ResolveLancacheIpAsync(_ansiConsole, AppConfig.SteamTriggerDomain);
             }
@@ -98,6 +105,8 @@
                     {
                         url += "?nocache=1";
                     }
+
+                    _ansiConsole.LogMarkupVerbose($"Requesting URL : {Cyan(url)}");
                     using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                     requestMessage.Headers.Host = cdnServer.Host;
 

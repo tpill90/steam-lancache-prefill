@@ -50,6 +50,11 @@ namespace SteamPrefill.CliCommands
             Converter = typeof(NullableBoolConverter))]
         public bool? NoAnsiEscapeSequences { get; init; }
 
+        [CommandOption("force-localhost",
+            Description = "Force the application to use the localhost IP (127.0.0.1) instead of the DNS IP (usefull in case the application is on the same lancache server)",
+            Converter = typeof(NullableBoolConverter))]
+        public bool? ForceLocalhost { get; init; }
+
         private IAnsiConsole _ansiConsole;
         private int? _prefillPopularGames;
 
@@ -65,6 +70,7 @@ namespace SteamPrefill.CliCommands
             {
                 Force = Force ?? false,
                 TransferSpeedUnit = TransferSpeedUnit,
+                ForceLocalhost = ForceLocalhost ?? false,
                 OperatingSystems = OperatingSystems.ToList()
             };
 
