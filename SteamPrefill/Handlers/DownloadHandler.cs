@@ -226,6 +226,10 @@
                         var url = $"http://{_lancacheAddress}/depot/{probe.DepotId}/chunk/{probe.ChunkId}?nocache=1";
                         using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
                         requestMessage.Headers.Host = server.Host;
+                        // Only the response status matters for the probe, so request a single byte rather than transferring
+                        // the full ~1MB chunk over a potentially slow connection.  A serving CDN returns 200/206, one that
+                        // doesn't cache this depot still returns 403.
+                        requestMessage.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(0, 0);
 
                         using var cts = new CancellationTokenSource();
                         using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
