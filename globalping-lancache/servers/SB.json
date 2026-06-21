@@ -1,0 +1,154 @@
+{
+  "response": {
+    "servers": [
+      {
+        "type": "SteamCache",
+        "source_id": 85,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 68,
+        "num_entries_in_client_list": 1,
+        "host": "cache2-syd1.steamcontent.com",
+        "vhost": "cache2-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-a"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 94,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 70,
+        "num_entries_in_client_list": 1,
+        "host": "cache6-syd1.steamcontent.com",
+        "vhost": "cache6-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-b"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 6,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 69,
+        "num_entries_in_client_list": 1,
+        "host": "cache4-syd1.steamcontent.com",
+        "vhost": "cache4-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-a"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 93,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 72,
+        "num_entries_in_client_list": 1,
+        "host": "cache5-syd1.steamcontent.com",
+        "vhost": "cache5-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-b"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 86,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 71,
+        "num_entries_in_client_list": 1,
+        "host": "cache3-syd1.steamcontent.com",
+        "vhost": "cache3-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-a"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 554,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 68,
+        "num_entries_in_client_list": 1,
+        "host": "cache7-syd1.steamcontent.com",
+        "vhost": "cache7-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-b"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 555,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 69,
+        "num_entries_in_client_list": 1,
+        "host": "cache8-syd1.steamcontent.com",
+        "vhost": "cache8-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-b"
+      },
+      {
+        "type": "SteamCache",
+        "source_id": 179,
+        "cell_id": 52,
+        "load": 20,
+        "weighted_load": 71,
+        "num_entries_in_client_list": 1,
+        "host": "cache1-syd1.steamcontent.com",
+        "vhost": "cache1-syd1.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 3,
+        "group": "syd1-a"
+      },
+      {
+        "type": "CDN",
+        "source_id": 31,
+        "load": 0,
+        "weighted_load": 130,
+        "num_entries_in_client_list": 1,
+        "host": "fastly.cdn.steampipe.steamcontent.com",
+        "vhost": "fastly.cdn.steampipe.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 2
+      },
+      {
+        "type": "CDN",
+        "source_id": 11,
+        "load": 0,
+        "weighted_load": 130,
+        "num_entries_in_client_list": 1,
+        "host": "steampipe.akamaized.net",
+        "vhost": "steampipe.akamaized.net",
+        "https_support": "mandatory",
+        "priority_class": 2
+      },
+      {
+        "type": "CDN",
+        "source_id": 33,
+        "load": 0,
+        "weighted_load": 130,
+        "num_entries_in_client_list": 1,
+        "host": "alibaba.cdn.steampipe.steamcontent.com",
+        "vhost": "alibaba.cdn.steampipe.steamcontent.com",
+        "https_support": "unavailable",
+        "priority_class": 1
+      },
+      {
+        "type": "CDN",
+        "source_id": 35,
+        "load": 0,
+        "weighted_load": 130,
+        "num_entries_in_client_list": 1,
+        "host": "google2.cdn.steampipe.steamcontent.com",
+        "vhost": "google2.cdn.steampipe.steamcontent.com",
+        "https_support": "mandatory",
+        "priority_class": 1
+      }
+    ]
+  }
+}
