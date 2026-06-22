@@ -6,7 +6,7 @@ Import-Module PSWriteColor
 $uri = "/depot/3527291/chunk/5e385330290f274474a065226bf6ccf0042a8e2d"
 
 $allServers = @()
-$jsonFiles = Get-ChildItem -Path "C:\Users\Tim\Dropbox\Programming\Lancache-Prefills\SteamPrefill\globalping-lancache\servers" -Filter *.json
+$jsonFiles = Get-ChildItem -Path .\servers -Filter *.json
 foreach($file in $jsonFiles)
 {
     $fileContent = Get-Content -Path $file.FullName -Raw
@@ -14,9 +14,8 @@ foreach($file in $jsonFiles)
     $allServers += $serversInFile.response.servers
 }
 
-Write-Host $allServers.Count
 $filtered = $allServers | Where-Object { $_.bypass_proxies_of_type -ne $null } | Sort-Object { $_.cell_id }
-Write-Color "Found ", $filtered.Count, " servers with bypass field" -Color White, Yellow, White
+Write-Color "Found ", $filtered.Count, " servers of ", $allServers.Count, " which have the 'bypass_proxies_of_type' field" -Color White, Yellow, White, Magenta, White
 
 foreach ($cdn in $filtered)
 {
@@ -33,11 +32,11 @@ foreach ($cdn in $filtered)
         }
 
         $response = Invoke-WebRequest -Uri "http://$($cdn.host)$uri" -Method HEAD -UseBasicParsing -Headers $headers -TimeoutSec 1
-        Write-Host "$($cdn.host) : $($response.StatusCode)"
+        Write-Host "$($cdn.host.PadRight(35)) : $($response.StatusCode)"
     }
     catch
     {
-        Write-Host "$($cdn.host) :  " -NoNewLine
+        Write-Host "$($cdn.host.PadRight(35)) : " -NoNewLine
         Write-Host "$($_.Exception.Response.StatusCode.Value__)" -ForegroundColor Red
     }
 }

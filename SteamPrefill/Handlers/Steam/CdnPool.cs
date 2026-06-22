@@ -1,5 +1,3 @@
-using Microsoft.IdentityModel.Tokens;
-
 namespace SteamPrefill.Handlers.Steam
 {
     /// <summary>
@@ -73,10 +71,12 @@ namespace SteamPrefill.Handlers.Steam
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
 
+            // Test code
+            var asd = AvailableServerEndpoints.ToList();
+            asd.Last().Host = "cache1-bne-edgx.steamcontent.com";
+
             AvailableServerEndpoints = AvailableServerEndpoints
-                                       // "CDN" type servers always have a load of 0, seem to be the fastest
-                                       .OrderByDescending(e => e.Load)
-                                       .ToConcurrentStack();
+                .ToConcurrentStack();
 
         }
 
@@ -94,11 +94,9 @@ namespace SteamPrefill.Handlers.Steam
                     // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
                     AvailableServerEndpoints = AvailableServerEndpoints
                                                 .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
-                                                // Filtering out Australian CDNs that don't support HTTP.
-                                                // These appear to be the only CDNs that have this field on them, no other regional cdns have this property.
-                                                .Where(e => e.BypassProxiesOfType.Empty())
                                                 .DistinctBy(e => e.Host)
                                                 .ToConcurrentStack();
+
                 }).WaitAsync(TimeSpan.FromSeconds(15));
             }
             catch (TimeoutException)

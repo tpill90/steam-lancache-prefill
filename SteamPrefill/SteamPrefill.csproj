@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64</RuntimeIdentifiers>
@@ -15,6 +15,9 @@
     <AnalysisLevel>latest</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+
+    <!-- Allows us to use publicized assemblies -->
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <!-- Publish Settings -->
@@ -61,13 +64,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
     <!-- External Packages -->
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
     <PackageReference Include="protobuf-net" Version="3.2.30" />
     <PackageReference Include="Spectre.Console" Version="0.51.1" />
-    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5" />
+    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5"  Publicize="true" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.34.0" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>
