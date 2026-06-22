@@ -31,8 +31,8 @@ namespace SteamPrefill.Handlers.Steam
         }
 
         /// <summary>
-        /// Gets a list of available CDN servers from the Steam network.
-        /// Required to be called prior to using the class.
+        /// Gets a list of available CDN servers from the Steam network, will retry until it gets at least 5 available servers.
+        /// It is required to manually be called prior to using the class.
         /// </summary>
         /// <exception cref="CdnExhaustionException">If no servers are available for use, this exception will be thrown.</exception>
         public async Task PopulateAvailableServersAsync()

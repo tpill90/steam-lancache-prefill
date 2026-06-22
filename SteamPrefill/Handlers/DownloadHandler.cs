@@ -89,36 +89,28 @@
             var failedRequests = new ConcurrentBag<QueuedRequest>();
 
             var cdnServer = _cdnPool.TakeConnection();
-            await Parallel.ForEachAsync(requestsToDownload, new ParallelOptions { MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests }, body: async (request, _) =>
+            using var cts = new CancellationTokenSource();
+            var parallelOptions = new ParallelOptions
             {
-                try
-                {
-                    var url = $"http://{_lancacheAddress}/depot/{request.DepotId}/chunk/{request.ChunkId}";
-                    if (forceRecache)
-                    {
-                        url += "?nocache=1";
-                    }
-                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
-                    requestMessage.Headers.Host = cdnServer.Host;
+                MaxDegreeOfParallelism = downloadArgs.MaxConcurrentRequests,
+                CancellationToken = cts.Token
+            };
 
-                    using var cts = new CancellationTokenSource();
-                    using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
-                    using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
-                    response.EnsureSuccessStatusCode();
-
-                    // Don't save the data anywhere, so we don't have to waste time writing it to disk.
-                    var buffer = new byte[4096];
-                    while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
-                    {
-                    }
-                }
-                catch (Exception e)
+            try
+            {
+                await Parallel.ForEachAsync(requestsToDownload, parallelOptions, body: async (request, _) =>
                 {
-                    request.LastFailureReason = e;
-                    failedRequests.Add(request);
-                }
-                progressTask.Increment(request.CompressedLength);
-            });
+                    await DoRequestAsync(forceRecache, request, cdnServer, cts, failedRequests);
+                    progressTask.Increment(request.CompressedLength);
+                });
+            }
+            catch (Exception e)
+            {
+                // Making sure the progress bar is always set to its max value, in-case some unexpected error leaves the progress bar showing as unfinished
+                _ansiConsole.LogMarkupError("Requests failed with 403, cycling over to next CDN.");
+                progressTask.Increment(progressTask.MaxValue);
+                return new ConcurrentBag<QueuedRequest>(requestsToDownload);
+            }
 
             //TODO In the scenario where a user still had all requests fail, potentially display a warning that there is an underlying issue
             // Only return the connections for reuse if there were no errors
@@ -130,6 +122,43 @@
             // Making sure the progress bar is always set to its max value, in-case some unexpected error leaves the progress bar showing as unfinished
             progressTask.Increment(progressTask.MaxValue);
             return failedRequests;
+        }
+
+        private async Task DoRequestAsync(bool forceRecache, QueuedRequest request, Server cdnServer, CancellationTokenSource batchDownCancellationTokenSource, ConcurrentBag<QueuedRequest> failedRequests)
+        {
+            try
+            {
+                var url = $"http://{_lancacheAddress}/depot/{request.DepotId}/chunk/{request.ChunkId}";
+                if (forceRecache)
+                {
+                    url += "?nocache=1";
+                }
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                requestMessage.Headers.Host = cdnServer.Host;
+
+                using var cts = new CancellationTokenSource();
+                using var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                using Stream responseStream = await response.Content.ReadAsStreamAsync(cts.Token);
+
+                // TODO explain this
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    //_ansiConsole.LogMarkupError($"Request {LightYellow(url)} failed with {LightYellow("404 Not Found")}");
+                    await batchDownCancellationTokenSource.CancelAsync();
+                }
+                response.EnsureSuccessStatusCode();
+
+                // Don't save the data anywhere, so we don't have to waste time writing it to disk.
+                var buffer = new byte[4096];
+                while (await responseStream.ReadAsync(buffer, cts.Token) != 0)
+                {
+                }
+            }
+            catch (Exception e)
+            {
+                request.LastFailureReason = e;
+                failedRequests.Add(request);
+            }
         }
 
         public void Dispose()
