@@ -1,0 +1,45 @@
+cache1-akl-edgx.steamcontent.com    : 403
+cache1-bne-edgx.steamcontent.com    : 403
+cache2-bne-edgx.steamcontent.com    : 403
+cache1-bne-edgx.steamcontent.com    : 403
+cache2-bne-edgx.steamcontent.com    : 403
+cache2-mel-edgx.steamcontent.com    : 403
+cache1-mel-edgx.steamcontent.com    : 403
+cache2-mel-edgx.steamcontent.com    : 403
+cache1-mel-edgx.steamcontent.com    : 403
+cache2-hel-retn.steamcontent.com    :
+cache2-iev-giga.steamcontent.com    : 403
+cache5-iev-giga.steamcontent.com    : 403
+cache6-iev-giga.steamcontent.com    : 403
+cache4-iev-giga.steamcontent.com    : 403
+cache3-iev-giga.steamcontent.com    : 403
+cache1-iev-giga.steamcontent.com    : 403
+cache6-iev-giga.steamcontent.com    : 403
+cache2-iev-giga.steamcontent.com    : 403
+cache3-iev-giga.steamcontent.com    : 403
+cache1-iev-giga.steamcontent.com    : 403
+cache5-iev-giga.steamcontent.com    : 403
+cache3-iev-odix.steamcontent.com    : 403
+cache4-iev-odix.steamcontent.com    : 403
+cache1-bts-slix.steamcontent.com    : 403
+cache1-bts-slix.steamcontent.com    : 403
+cache2-bts-slix.steamcontent.com    : 403
+cache2-bts-slix.steamcontent.com    : 403
+cache4-eze-cbse.steamcontent.com    : 403
+cache2-eze-pita.steamcontent.com    : 403
+cache1-eze-pita.steamcontent.com    : 403
+cache3-eze-cbse.steamcontent.com    : 403
+cache1-eze-cbse.steamcontent.com    : 403
+cache2-eze-cbse.steamcontent.com    : 403
+cache1-scl-gzgh.steamcontent.com    : 403
+cache1-bog-edgu.steamcontent.com    : 403
+cache1-maa2.steamcontent.com        :
+cache2-maa2.steamcontent.com        :
+cache2-nqz-kzkt.steamcontent.com    : 403
+cache2-nqz-kzkt.steamcontent.com    : 403
+cache1-nqz-kzkt.steamcontent.com    : 403
+cache1-nqz-kzkt.steamcontent.com    : 403
+cache2-ala-kzkt.steamcontent.com    : 403
+cache2-ala-kzkt.steamcontent.com    : 403
+cache1-ala-kzkt.steamcontent.com    : 403
+cache1-ala-kzkt.steamcontent.com    : 403

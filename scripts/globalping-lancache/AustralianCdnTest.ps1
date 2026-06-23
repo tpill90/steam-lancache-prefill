@@ -32,7 +32,7 @@ foreach ($cdn in $filtered)
         }
 
         $response = Invoke-WebRequest -Uri "http://$($cdn.host)$uri" -Method HEAD -UseBasicParsing -Headers $headers -TimeoutSec 1
-        Write-Host "$($cdn.host.PadRight(35)) : $($response.StatusCode)"
+        #Write-Host "$($cdn.host.PadRight(35)) : $($response.StatusCode)"
     }
     catch
     {
