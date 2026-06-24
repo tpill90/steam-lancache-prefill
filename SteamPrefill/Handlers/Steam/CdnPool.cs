@@ -70,14 +70,6 @@ namespace SteamPrefill.Handlers.Steam
             {
                 throw new CdnExhaustionException("Unable to get available CDN servers from Steam!");
             }
-
-            // Test code
-            var asd = AvailableServerEndpoints.ToList();
-            asd.Last().Host = "cache1-bne-edgx.steamcontent.com";
-
-            AvailableServerEndpoints = AvailableServerEndpoints
-                .ToConcurrentStack();
-
         }
 
         private async Task RequestSteamCdnServersAsync()
@@ -89,19 +81,33 @@ namespace SteamPrefill.Handlers.Steam
                 {
                     var returnedServers = await _steamSession.SteamContent.GetServersForSteamPipe(AppConfig.CellIdOverride);
                     AvailableServerEndpoints.PushRange(returnedServers.ToArray());
-
-                    // Filtering out non-cacheable CDNs.  HTTPS servers are included, as they appear to be able to be manually overridden to HTTP.
-                    // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
-                    AvailableServerEndpoints = AvailableServerEndpoints
-                                                .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
-                                                .DistinctBy(e => e.Host)
-                                                .ToConcurrentStack();
-
                 }).WaitAsync(TimeSpan.FromSeconds(15));
             }
             catch (TimeoutException)
             {
                 // Swallowing timeout exceptions, so that we can retry and see if the next attempt succeeds
+            }
+
+            // Filtering out non-cacheable CDNs.  HTTPS servers are included, as they appear to be able to be manually overridden to HTTP.
+            // SteamCache type servers are Valve run.  CDN type servers appear to be ISP run.
+            var filteredServers = AvailableServerEndpoints
+                                       .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
+                                       .DistinctBy(e => e.Host)
+                                       .ToList();
+
+            // TODO Test code
+            filteredServers.Last().Host = "cache1-bne-edgx.steamcontent.com";
+            filteredServers.Last().VHost = "cache1-bne-edgx.steamcontent.com";
+
+            // Finally checking which servers support HTTPS and adding them back into the list of available servers
+            AvailableServerEndpoints.Clear();
+            foreach (var server in filteredServers)
+            {
+                var supportsHttp = await ServerSupportsHttpAsync(server);
+                if (supportsHttp)
+                {
+                    AvailableServerEndpoints.Push(server);
+                }
             }
         }
 
@@ -131,6 +137,41 @@ namespace SteamPrefill.Handlers.Steam
         public void ReturnConnection(Server server)
         {
             AvailableServerEndpoints.Push(server);
+        }
+
+        // TODO comment
+        private async Task<bool> ServerSupportsHttpAsync(Server server)
+        {
+            try
+            {
+                // This is just an arbitrary file from VC 2005 Redist which has been on Steam's CDNs forever and likely will never go away.
+                // https://steamdb.info/depot/228981/manifests/
+                var url = $"http://{server.Host}/depot/228981/chunk/652b6c9b4aa15a255b9cd513752dbb82169c9097";
+                using var requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                // Only the response status matters for the probe, so request a single byte rather than transferring
+                // the full ~1MB chunk over a potentially slow connection.  A serving CDN returns 200/206, one that
+                // doesn't cache this depot still returns 403.
+                requestMessage.Headers.Range = new RangeHeaderValue(0, 0);
+
+                using var cts = new CancellationTokenSource();
+                using var client = new HttpClient();
+                using var response = await client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+
+                // Handle the CDN not supporting HTTP.
+                if (response.StatusCode == HttpStatusCode.Forbidden)
+                {
+                    _ansiConsole.LogMarkupVerbose($"CDN {LightYellow(server.Host)} does not support HTTP.  Skipping");
+                    return false;
+                }
+                response.EnsureSuccessStatusCode();
+            }
+            catch
+            {
+                // Transient errors
+                return false;
+            }
+
+            return true;
         }
     }
 }

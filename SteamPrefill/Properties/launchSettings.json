@@ -46,7 +46,7 @@
     },
     "Clear Temp": {
       "commandName": "Project",
-      "commandLineArgs": "clear-temp"
+      "commandLineArgs": "clear-temp --yes"
     }
   }
 }

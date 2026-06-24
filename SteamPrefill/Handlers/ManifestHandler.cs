@@ -27,7 +27,6 @@
         /// Will retry up to 3 times, in the case of transient errors.
         /// If the download for a manifest has failed 3 times, it will skip downloading the current app.
         /// </summary>
-        /// <exception cref="ManifestException"></exception>
         public async Task<List<Manifest>> GetAllManifestsAsync(List<DepotInfo> depots)
         {
             _ansiConsole.LogMarkupVerbose($"Downloading manifests for {Magenta(depots.Count)} depots");

@@ -334,6 +334,7 @@
                 var gamesToUse = await _appInfoHandler.GetAvailableGamesByIdAsync(appIds);
                 var overallProgressTask = ctx.AddTask("Processing apps..".PadLeft(30), new ProgressTaskSettings { MaxValue = gamesToUse.Count });
 
+                // TODO How is it that 10 parallel downloads doesn't mess with the cdn pool not having that many?
                 await Parallel.ForEachAsync(gamesToUse, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (appInfo, _) =>
                 {
                     var individualProgressTask = ctx.AddTask($"{Cyan(appInfo.Name.Truncate(30).PadLeft(30))}");
