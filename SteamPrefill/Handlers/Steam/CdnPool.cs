@@ -93,6 +93,8 @@ namespace SteamPrefill.Handlers.Steam
             var filteredServers = AvailableServerEndpoints
                                        .Where(e => (e.Type == "SteamCache" || e.Type == "CDN") && e.AllowedAppIds.Length == 0)
                                        .DistinctBy(e => e.Host)
+                                       // "CDN" type servers always have a load of 0, seem to be the fastest
+                                       .OrderByDescending(e => e.Load)
                                        .ToList();
 
             // TODO Test code
