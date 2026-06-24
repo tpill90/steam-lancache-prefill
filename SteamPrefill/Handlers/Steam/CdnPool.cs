@@ -130,13 +130,15 @@ namespace SteamPrefill.Handlers.Steam
         }
 
         /// <summary>
-        /// Returns a snapshot of all currently available servers, ordered by load.
+        /// Returns a snapshot of all currently available servers, ordered by load (lowest first).
         /// Unlike <see cref="TakeConnection"/>, the servers are not removed from the pool, so that they can be shared
         /// across multiple concurrent depot downloads and used as failover targets.
+        /// Lowest-load-first matches the order <see cref="TakeConnection"/> pops servers, so probing and downloading
+        /// prefer the fastest servers ("CDN" type servers have a load of 0) before falling back to busier ones.
         /// </summary>
         public List<Server> GetServersByLoad()
         {
-            return AvailableServerEndpoints.OrderByDescending(e => e.Load).ToList();
+            return AvailableServerEndpoints.OrderBy(e => e.Load).ToList();
         }
     }
 }
