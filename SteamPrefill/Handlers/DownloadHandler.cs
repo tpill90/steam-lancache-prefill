@@ -242,7 +242,7 @@
                         response.EnsureSuccessStatusCode();
 
                         depotServers[probe.DepotId] = server;
-                        _ansiConsole.LogMarkupLine($"Depot {Cyan(probe.DepotId)} will download from CDN {LightYellow(server.Host)}");
+                        _ansiConsole.LogMarkupVerbose($"Depot {Cyan(probe.DepotId)} will download from CDN {LightYellow(server.Host)}");
                         return;
                     }
                     catch (Exception e)
