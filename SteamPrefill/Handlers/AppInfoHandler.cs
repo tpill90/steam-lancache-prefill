@@ -54,7 +54,6 @@
             var initialAppIdLoadTimer = Stopwatch.StartNew();
 
             var filteredAppIds = appIds.Where(e => !LoadedAppInfos.ContainsKey(e))
-                                                .Where(e => _licenseManager.AccountHasAppAccess(e))
                                                 .Distinct()
                                                 .ToList();
 

@@ -65,7 +65,7 @@
 
         public List<Category> Categories { get; init; }
 
-        public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue, DateTime purchaseDate)
+        public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue, DateTime? purchaseDate)
         {
             AppId = appId;
             Name = rootKeyValue["common"]["name"].Value.EscapeMarkup();

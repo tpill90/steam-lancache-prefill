@@ -104,7 +104,7 @@
                 {
                     var purchaseDate = _steam3.LicenseManager.GetPurchaseDateForApp(appId);
                     var appInfo = await _appInfoHandler.GetAppInfoAsync(appId);
-                    _ansiConsole.LogMarkupVerbose($"  {Green(appInfo.Name).PadRight(35)} - Purchased: {LightYellow(purchaseDate.ToLocalTime().ToString("yyyy-MM-dd"))}");
+                    _ansiConsole.LogMarkupVerbose($"  {Green(appInfo.Name).PadRight(50)} Purchased: {LightYellow(purchaseDate.Value.ToLocalTime().ToString("yyyy-MM-dd"))}");
                 }
             }
 

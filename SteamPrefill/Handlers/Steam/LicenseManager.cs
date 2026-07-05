@@ -108,9 +108,15 @@
                                          .ToList();
         }
 
-        public DateTime GetPurchaseDateForApp(uint appId)
+        public DateTime? GetPurchaseDateForApp(uint appId)
         {
-            return _appPurchaseTimeLookup[appId];
+            if (_userLicenses.OwnedAppIds.Contains(appId))
+            {
+                return _appPurchaseTimeLookup[appId];
+            }
+
+            // We don't own the app, return null
+            return null;
         }
     }
 
