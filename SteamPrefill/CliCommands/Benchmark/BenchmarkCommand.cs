@@ -1,4 +1,5 @@
-﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿// ReSharper disable MemberCanBePrivate.Global - CommandOption properties can't ever be private, otherwise they won't work with CliFx.
+// ReSharper disable UnusedAutoPropertyAccessor.Global - Init setters are used even if resharper thinks they aren't, since CliFx sets them at runtime.
 namespace SteamPrefill.CliCommands.Benchmark
 {
     [UsedImplicitly]

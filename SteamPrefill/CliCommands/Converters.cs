@@ -30,7 +30,7 @@
     {
         public override OperatingSystem Convert(string rawValue)
         {
-            //TODO case insensitive
+            rawValue = rawValue.ToLower();
             if (!OperatingSystem.TryFromValue(rawValue, out _))
             {
                 AnsiConsole.MarkupLine(Red($"{White(rawValue)} is not a valid operating system!"));
