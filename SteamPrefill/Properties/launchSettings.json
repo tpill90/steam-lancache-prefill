@@ -20,6 +20,10 @@
       "commandName": "Project",
       "commandLineArgs": "prefill --force --verbose"
     },
+    "Prefill Top": {
+      "commandName": "Project",
+      "commandLineArgs": "prefill --top --force --no-download --verbose"
+    },
     "Select Apps": {
       "commandName": "Project",
       "commandLineArgs": "select-apps"
