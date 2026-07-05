@@ -22,7 +22,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
 
-    <PackageReference Include="SteamKit2" Version="3.0.0-Beta.5" />
+    <PackageReference Include="SteamKit2" Version="3.4.0" />
     <ProjectReference Include="..\SteamPrefill\SteamPrefill.csproj" />
   </ItemGroup>
 
