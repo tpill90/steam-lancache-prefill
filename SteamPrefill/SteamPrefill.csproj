@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <RuntimeIdentifiers>win-x64;linux-x64;linux-arm64;osx-x64</RuntimeIdentifiers>
@@ -6,7 +6,7 @@
 
     <AssemblyName>SteamPrefill</AssemblyName>
     <RootNamespace>SteamPrefill</RootNamespace>
-    <VersionPrefix>3.5.1</VersionPrefix>
+    <VersionPrefix>3.6.0</VersionPrefix>
     <Authors>tpill90</Authors>
 
     <!-- Code analysis settings -->
