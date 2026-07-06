@@ -1,4 +1,5 @@
-﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿// ReSharper disable MemberCanBePrivate.Global - CommandOption properties can't ever be private, otherwise they won't work with CliFx.
+// ReSharper disable UnusedAutoPropertyAccessor.Global - Init setters are used even if resharper thinks they aren't, since CliFx sets them at runtime.
 namespace SteamPrefill.CliCommands.Benchmark
 {
     [UsedImplicitly]
@@ -8,17 +9,16 @@ namespace SteamPrefill.CliCommands.Benchmark
         [CommandOption("appid", Description = "The id of one or more apps to include in benchmark workload file.  AppIds can be found using https://steamdb.info/")]
         public List<uint> AppIds { get; init; } = new List<uint>();
 
-        [CommandOption("all", Description = "Includes all currently owned apps in benchmark workload file", Converter = typeof(NullableBoolConverter))]
-        public bool? BenchmarkAllOwnedApps { get; init; }
+        [CommandOption("all", Description = "Includes all currently owned apps in benchmark workload file")]
+        public bool BenchmarkAllOwnedApps { get; init; }
 
-        [CommandOption("use-selected", Description = "Includes apps selected using 'select-apps' in the benchmark workload file", Converter = typeof(NullableBoolConverter))]
-        public bool? UseSelectedApps { get; init; }
+        [CommandOption("use-selected", Description = "Includes apps selected using 'select-apps' in the benchmark workload file")]
+        public bool UseSelectedApps { get; init; }
 
         [CommandOption("no-ansi",
             Description = "Application output will be in plain text.  " +
-                          "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.",
-            Converter = typeof(NullableBoolConverter))]
-        public bool? NoAnsiEscapeSequences { get; init; }
+                          "Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.")]
+        public bool NoAnsiEscapeSequences { get; init; }
 
         [CommandOption("preset",
             Description = "Sets up a benchmark with one or more preset workloads, with differing performance characteristics. Can be SmallChunks/LargeChunks",
@@ -34,7 +34,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         {
             _ansiConsole = console.CreateAnsiConsole();
             // Property must be set to false in order to disable ansi escape sequences
-            _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences ?? true;
+            _ansiConsole.Profile.Capabilities.Ansi = !NoAnsiEscapeSequences;
 
             using var steamManager = new SteamManager(_ansiConsole, new DownloadArguments());
             ValidateUserHasSelectedApps(steamManager);
@@ -43,7 +43,7 @@ namespace SteamPrefill.CliCommands.Benchmark
             {
                 var combinedAppIds = PresetAppIds.Union(AppIds).ToList();
                 await steamManager.InitializeAsync();
-                await steamManager.SetupBenchmarkAsync(combinedAppIds, BenchmarkAllOwnedApps ?? false, UseSelectedApps ?? false);
+                await steamManager.SetupBenchmarkAsync(combinedAppIds, BenchmarkAllOwnedApps, UseSelectedApps);
             }
             finally
             {
@@ -54,7 +54,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         // Validates that the user has selected at least 1 app
         private void ValidateUserHasSelectedApps(SteamManager steamManager)
         {
-            var userSelectedApps = steamManager.LoadPreviouslySelectedApps();
+            var selectedApps = steamManager.LoadPreviouslySelectedApps();
 
             if (AppIds != null && AppIds.Any())
             {
@@ -64,13 +64,13 @@ namespace SteamPrefill.CliCommands.Benchmark
             {
                 return;
             }
-            if (BenchmarkAllOwnedApps ?? false)
+            if (BenchmarkAllOwnedApps)
             {
                 return;
             }
-            if (UseSelectedApps != null && UseSelectedApps.Value)
+            if (UseSelectedApps)
             {
-                if (userSelectedApps.Any())
+                if (selectedApps.Any())
                 {
                     return;
                 }

@@ -1,16 +1,17 @@
-﻿// ReSharper disable MemberCanBePrivate.Global - Properties used as parameters can't be private with CliFx, otherwise they won't work.
+﻿// ReSharper disable MemberCanBePrivate.Global - CommandOption properties can't ever be private, otherwise they won't work with CliFx.
+// ReSharper disable UnusedAutoPropertyAccessor.Global - Init setters are used even if resharper thinks they aren't, since CliFx sets them at runtime.
 namespace SteamPrefill.CliCommands
 {
     [UsedImplicitly]
     [Command("clear-temp", Description = "Empties out temporary data, such as saved manifests, to free up disk space")]
     public sealed class ClearTempCommand : ICommand
     {
-        [CommandOption("yes", shortName: 'y', Description = "When specified, will clear the temp files without prompting.", Converter = typeof(NullableBoolConverter))]
-        public bool? AcceptPrompt { get; init; }
+        [CommandOption("yes", shortName: 'y', Description = "When specified, will clear the temp files without prompting.")]
+        public bool AcceptPrompt { get; init; }
 
         public ValueTask ExecuteAsync(IConsole console)
         {
-            var filesShouldBeDeleted = AcceptPrompt ?? false;
+            var filesShouldBeDeleted = AcceptPrompt;
 
             var ansiConsole = console.CreateAnsiConsole();
             // Remove the v1/v2/v3 sub-directories
@@ -32,12 +33,12 @@ namespace SteamPrefill.CliCommands
             ansiConsole.LogMarkupLine($"Found {LightYellow(tempFolderContents.Count)} temp files, totaling {Magenta(totalSizeOnDisk.ToDecimalString())}");
 
             // If user hasn't passed in the accept flag, then we should ask them if they want to delete the files
-            if (!(AcceptPrompt ?? false))
+            if (!AcceptPrompt)
             {
-                var userResponse = ansiConsole.Prompt(new SelectionPrompt<bool>()
-                                                      .Title("Continue to delete temp files?")
-                                                      .AddChoices(true, false)
-                                                      .UseConverter(e => e == false ? "No" : "Yes"));
+                bool userResponse = ansiConsole.Prompt(new SelectionPrompt<bool>()
+                                                       .Title("Continue to delete temp files?")
+                                                       .AddChoices(true, false)
+                                                       .UseConverter(e => e == false ? "No" : "Yes"));
                 filesShouldBeDeleted = filesShouldBeDeleted || userResponse;
             }
 
