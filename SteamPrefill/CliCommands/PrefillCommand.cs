@@ -29,7 +29,8 @@ namespace SteamPrefill.CliCommands
         public bool Force { get; init; }
 
         [CommandOption("os", Description = "Specifies which operating system(s) games should be downloaded for.  Can be windows/linux/macos",
-            Converter = typeof(OperatingSystemConverter), Validators = new[] { typeof(OperatingSystemValidator) })]
+            Converter = typeof(OperatingSystemConverter),
+            Validators = new[] { typeof(OperatingSystemValidator) })]
         public IReadOnlyList<OperatingSystem> OperatingSystems { get; init; } = new List<OperatingSystem> { OperatingSystem.Windows };
 
         [CommandOption("verbose", Description = "Produces more detailed log output. Will output logs for games are already up to date.")]

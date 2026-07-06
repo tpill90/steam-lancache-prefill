@@ -64,7 +64,7 @@
     <!-- External Packages -->
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="HexMate" Version="0.0.3" />
-    <PackageReference Include="Intellenum" Version="1.0.0-beta.3" />
+    <PackageReference Include="Intellenum" Version="2.0.1" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
     <PackageReference Include="Spectre.Console" Version="0.51.1" />
     <PackageReference Include="SteamKit2" Version="3.4.0" />
