@@ -62,12 +62,13 @@
 
   <ItemGroup>
     <!-- External Packages -->
-    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <!-- This is used to avoid having to use AutoMapper in order to access SteamKit2 internals -->
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.2" PrivateAssets="all" />
     <PackageReference Include="HexMate" Version="0.0.3" />
     <PackageReference Include="Intellenum" Version="2.0.1" />
     <PackageReference Include="protobuf-net" Version="3.2.56" />
     <PackageReference Include="Spectre.Console" Version="0.51.1" />
-    <PackageReference Include="SteamKit2" Version="3.4.0" />
+    <PackageReference Include="SteamKit2" Version="3.4.0" Publicize="true" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.34.0" />
     <PackageReference Include="ThisAssembly.AssemblyInfo" Version="1.2.14">
       <PrivateAssets>all</PrivateAssets>

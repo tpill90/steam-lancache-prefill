@@ -1,5 +1,4 @@
-﻿global using AutoMapper;
-global using ByteSizeLib;
+﻿global using ByteSizeLib;
 global using CliFx;
 global using CliFx.Attributes;
 global using CliFx.Exceptions;

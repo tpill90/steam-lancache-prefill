@@ -8,10 +8,11 @@ namespace SteamPrefill.CliCommands.Benchmark
         [ProtoMember(1)]
         public ConcurrentBag<AppQueuedRequests> QueuedAppsList { get; init; }
 
-        //TODO document why this is needed
+        //TODO document why this is needed.  Its because I'm unable to serialize SteamKit2's Server type.
         [ProtoMember(2)]
         public List<CdnServerShim> ServerShimList { get; init; }
-        public ConcurrentStack<Server> CdnServerList => ServerShimList.Select(e => _mapper.Map<CdnServerShim, Server>(e)).ToConcurrentStack();
+
+        public ConcurrentStack<Server> CdnServerList => ServerShimList.Select(e => new Server {Host = e.Host}).ToConcurrentStack();
 
         public List<QueuedRequest> AllQueuedRequests => QueuedAppsList.SelectMany(e => e.QueuedRequests).ToList();
 
@@ -34,17 +35,11 @@ namespace SteamPrefill.CliCommands.Benchmark
         public ByteSize AverageChunkSize => ByteSize.FromBytes((double)TotalDownloadSize.Bytes / (double)TotalFiles);
         public string AverageChunkSizeFormatted => AverageChunkSize.ToBinaryString();
 
-        private static IMapper _mapper = new MapperConfiguration(cfg =>
-        {
-            cfg.CreateMap<Server, CdnServerShim>();
-            cfg.CreateMap<CdnServerShim, Server>();
-        }).CreateMapper();
-
         public BenchmarkWorkload(ConcurrentBag<AppQueuedRequests> queuedAppsList, ConcurrentStack<Server> cdnServers)
         {
             QueuedAppsList = queuedAppsList;
             _totalDownloadSize = ByteSize.FromBytes(QueuedAppsList.Sum(e => e.TotalBytes));
-            ServerShimList = cdnServers.Select(e => _mapper.Map<Server, CdnServerShim>(e)).ToList();
+            ServerShimList = cdnServers.Select(e => new CdnServerShim { Host = e.Host}).ToList();
         }
 
         #region Summary output
