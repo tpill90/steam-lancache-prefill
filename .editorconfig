@@ -33,6 +33,9 @@ blank_lines_after_block_statements = 0
 csharp_prefer_braces = true
 csharp_space_after_cast = false
 indent_preprocessor_region = do_not_change
+resharper_js_brace_style = next_line
+# Resharper keeps recommending that basically every method can be made static.  There is no need to be recommending this so aggressively.
+resharper_member_can_be_made_static_local_highlighting = none
 space_between_attribute_sections = false
 
 
