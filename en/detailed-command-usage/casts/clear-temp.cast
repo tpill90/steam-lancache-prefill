@@ -1,0 +1,10 @@
+{"version": 2, "width": 120, "height": 30, "timestamp": 1680890897, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}}
+[0.070479, "o", "\u001b[?1h\u001b="]
+[0.070977, "o", "\u001b[39;49m"]
+[0.097002, "o", "\u001b[?25l"]
+[0.124736, "o", "                             \r\n\u001b[38;5;2m⣾\u001b[0m Scanning \u001b[38;5;80mTemp\u001b[0m directory...\r\n                             "]
+[0.124955, "o", "\r\u001b[2K\u001b[1A\u001b[2K\u001b[1A\u001b[2K"]
+[0.125015, "o", "\u001b[?25h"]
+[0.125779, "o", "[6:08:17 PM] Found \u001b[38;5;229m142\u001b[0m temp files, totaling \u001b[38;5;170m26.49 MiB\u001b[0m\r\n"]
+[0.137423, "o", "\u001b[?25lContinue to delete temp files?\r\n                        \r\n\u001b[38;5;12m> Yes\u001b[0m                   \r\n  No                    "]
+[0.13761, "o", "\r\u001b[3AContinue to delete temp files?\r\n                        \r\n\u001b[38;5;12m> Yes\u001b[0m                   \r\n  No                    "]
