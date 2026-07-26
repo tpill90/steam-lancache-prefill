@@ -4,6 +4,11 @@ namespace SteamPrefill
     {
         public static async Task<int> Main()
         {
+            Console.CancelKeyPress += (_, _) => {
+                AnsiConsole.Write("\x1b[?25h\n");
+                Console.Out.Flush();
+            };
+
             try
             {
                 // Checking to see if the user double-clicked the exe in Windows, and display a message on how to use the app
