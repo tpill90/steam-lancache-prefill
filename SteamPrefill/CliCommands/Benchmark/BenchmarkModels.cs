@@ -12,7 +12,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         [ProtoMember(2)]
         public List<CdnServerShim> ServerShimList { get; init; }
 
-        public ConcurrentStack<Server> CdnServerList => ServerShimList.Select(e => new Server {Host = e.Host}).ToConcurrentStack();
+        public ConcurrentStack<Server> CdnServerList => ServerShimList.Select(e => new Server { Host = e.Host }).ToConcurrentStack();
 
         public List<QueuedRequest> AllQueuedRequests => QueuedAppsList.SelectMany(e => e.QueuedRequests).ToList();
 
@@ -39,7 +39,7 @@ namespace SteamPrefill.CliCommands.Benchmark
         {
             QueuedAppsList = queuedAppsList;
             _totalDownloadSize = ByteSize.FromBytes(QueuedAppsList.Sum(e => e.TotalBytes));
-            ServerShimList = cdnServers.Select(e => new CdnServerShim { Host = e.Host}).ToList();
+            ServerShimList = cdnServers.Select(e => new CdnServerShim { Host = e.Host }).ToList();
         }
 
         #region Summary output
