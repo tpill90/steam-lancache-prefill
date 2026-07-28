@@ -16,7 +16,7 @@ To download and run the latest version of the container, open up a terminal and 
 
 ```bash
 docker run -it --rm --net=host \
-  --volume ~/.config/{{prefill_name}}:/Config \
+  --volume ~/.config/{{prefill_name}}:/app/Config \
   tpill90/{{repo_name}}:latest
 ```
 
@@ -29,7 +29,7 @@ At this point, you will be able to run any of the `COMMANDS` listed in the outpu
 
 ```Bash
 docker run -it --rm --net=host  \
-  --volume ~/.config/{{prefill_name}}:/Config \
+  --volume ~/.config/{{prefill_name}}:/app/Config \
   tpill90/{{repo_name}}:latest \
   select-apps
 ```
