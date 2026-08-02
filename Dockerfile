@@ -22,4 +22,11 @@ ENV \
 COPY  /publish/SteamPrefill /app/SteamPrefill
 RUN chmod +x /app/SteamPrefill
 
+# Addresses issue created in https://github.com/tpill90/steam-lancache-prefill/commit/6a94d555fca6bd5a49f950d3b24dba08253b1bb0.
+# Moving the application's dir made it so that config dir was no longer located in /Config, which didn't match the instructions in my docs
+# on how to run the docker version, causing the app to be "logged out" after every run.
+#
+# Rather than change the docs and making all users be aware of this issue, I opted to just symlink the original Config dir to the correct new path.
+RUN ln -s /Config /app/Config
+
 ENTRYPOINT [ "/app/SteamPrefill" ]
