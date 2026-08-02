@@ -8,7 +8,7 @@
 
         /// <summary>
         /// KeyValue store of DepotId/ManifestId, that keeps a history of which manifest version(s) have been downloaded for each depot id.
-        /// If a manifest version is found for a specific depot, than that depot can be considered as previously downloaded.
+        /// If a manifest version is found for a specific depot, then that depot can be considered as previously downloaded.
         /// </summary>
         private readonly Dictionary<uint, HashSet<ulong>> _downloadedDepots = new Dictionary<uint, HashSet<ulong>>();
 
@@ -44,7 +44,7 @@
         }
 
         /// <summary>
-        /// An depot will be considered up to date if it's current version (manifest) has been previously downloaded.
+        /// A depot will be considered up to date if it's current version (manifest) has been previously downloaded.
         /// Thus, an app will be considered up to date if all of it's depots latest manifests have been previously downloaded.
         /// </summary>
         public bool AppIsUpToDate(List<DepotInfo> depots)
@@ -110,15 +110,25 @@
                 }
                 filteredDepots.Add(depot);
             }
-            return filteredDepots;
+            return filteredDepots.OrderBy(e => e.DepotId).ToList();
         }
 
-        //TODO document how this works, and why its needed
+        //TODO document how this works, and why its needed - It's usually content that is shared between apps, where one app owns the content.
+        // Example: Half Life 2 (AppId 220) owns Depot 221 (Half-Life 2 Base).  The other Half Life 2 Episodes also use this as a shared depot.
         //TODO I don't like the fact that this has to be manually called in order to have things work correctly
-        public async Task BuildLinkedDepotInfoAsync(List<DepotInfo> depots)
+        public async Task BuildLinkedDepotInfoAsync(List<DepotInfo> depots, AppInfo appInfo)
         {
-            foreach (var depotInfo in depots.Where(e => e.ManifestId == null))
+            var filteredDepots = depots.Where(e => e.ManifestId == null).ToList();
+            if (filteredDepots.Empty())
             {
+                return;
+            }
+
+            AnsiConsole.Console.LogMarkupLine($"Found {LightYellow(filteredDepots.Count.ToString())} null manifests");
+            foreach (var depotInfo in filteredDepots)
+            {
+                var containingApp = await _appInfoHandler.GetAppInfoAsync(depotInfo.ContainingAppId);
+
                 // Shared depots will have to go get the manifest id from the original app's depot
                 var linkedApp = await _appInfoHandler.GetAppInfoAsync(depotInfo.DepotFromApp.Value);
                 var linkedDepot = linkedApp.Depots.First(e => e.DepotId == depotInfo.DepotId);
@@ -127,7 +137,7 @@
         }
 
         /// <summary>
-        /// Downloads all of the required manifests for a game, and then combines all of the required chunk requests into a single queue.
+        /// Downloads all required manifests for a game, and then combines all required chunk requests into a single queue.
         /// </summary>
         /// <returns></returns>
         public async Task<List<QueuedRequest>> BuildChunkDownloadQueueAsync(List<DepotInfo> depots)

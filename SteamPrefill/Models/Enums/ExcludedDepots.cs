@@ -1,5 +1,6 @@
 ﻿namespace SteamPrefill.Models.Enums
 {
+    // TODO comment what this does
     public static class ExcludedDepots
     {
         public static readonly HashSet<ulong> Ids = new HashSet<ulong>
@@ -8,6 +9,7 @@
             // Steam somehow determines that this depot should not be installed alongside Dota 2, however there is no associated metadata
             // that indicates that this depot should not be downloaded.  This must be hardcoded in the real Steam client as well.
             381450,
+
             // CS2 Workshop Tools, also unclear how Valve is filtering this from installing normally
             2347779,
 
@@ -31,7 +33,18 @@
             228987,
             228988,
             228989,
-            228990
+            228990,
+            // .NET Redist
+            229000,
+            229001,
+            229002,
+            229003,
+            229004,
+            229005,
+            229006,
+            229007,
+            // OpenAL 2.0.7.0 Redist
+            229020,
         };
     }
 }

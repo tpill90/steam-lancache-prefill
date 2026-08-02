@@ -190,7 +190,7 @@
                 return;
             }
 
-            await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+            await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots, appInfo);
 
             // We will want to re-download the entire app, if any of the depots have been updated
             if (_downloadArgs.Force == false && _depotHandler.AppIsUpToDate(filteredDepots))
@@ -379,7 +379,7 @@
                     try
                     {
                         var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, appInfo.Depots);
-                        await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+                        await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots, appInfo);
                         if (filteredDepots.Empty())
                         {
                             _ansiConsole.LogMarkupLine($"{Cyan(appInfo)} - {LightYellow("No depots to download.  Current arguments filtered all depots")}");
@@ -440,7 +440,7 @@
                     individualProgressTask.IsIndeterminate = true;
 
                     var filteredDepots = await _depotHandler.FilterDepotsToDownloadAsync(_downloadArgs, app.Depots);
-                    await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots);
+                    await _depotHandler.BuildLinkedDepotInfoAsync(filteredDepots, app);
 
                     var allChunksForApp = await _depotHandler.BuildChunkDownloadQueueAsync(filteredDepots);
                     var downloadSize = ByteSize.FromBytes(allChunksForApp.Sum(e => e.CompressedLength));
