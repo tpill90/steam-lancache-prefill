@@ -37,8 +37,11 @@
         public uint? DepotFromApp { get; }
         private uint? DlcAppId { get; }
 
-        // If there is no manifest we can't download this depot, and if there is no shared depot then we can't look up a related manifest we could use
-        public bool IsInvalidDepot => ManifestId == null && DepotFromApp == null;
+        // If there is no manifest we can't download this depot.
+        // If there is no shared depot (DepotFromApp == null) then we can't look up a related manifest we could use either.
+        // If the DepotFromAppId is the exact same Id as the DepotId itself it means that it is a DLC that has been messed up by the publisher and configured wrong.
+        // This usually happens when the DLC is just a "ownership check".
+        public bool IsInvalidDepot => ManifestId == null && (DepotFromApp == null || DepotFromApp.Value == DepotId);
 
         public List<OperatingSystem> SupportedOperatingSystems { get; init; } = new List<OperatingSystem>();
         public Architecture Architecture { get; init; }

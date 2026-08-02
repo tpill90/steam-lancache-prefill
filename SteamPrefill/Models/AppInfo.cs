@@ -96,6 +96,15 @@
                                                        .Select(e => new DepotInfo(e, appId))
                                                        .Where(e => !e.IsInvalidDepot)
                                                        .ToList();
+
+                var invalidDepots = rootKeyValue["depots"].Children.Where(e => uint.TryParse(e.Name, out _))
+                                      .Select(e => new DepotInfo(e, appId))
+                                      .Where(e => e.IsInvalidDepot)
+                                      .ToList();
+                if (invalidDepots.Any())
+                {
+                    //Console.WriteLine("");
+                }
             }
 
             // Extended Section

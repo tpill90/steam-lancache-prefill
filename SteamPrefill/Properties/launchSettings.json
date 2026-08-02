@@ -28,6 +28,10 @@
       "commandName": "Project",
       "commandLineArgs": "select-apps"
     },
+    "Stats": {
+      "commandName": "Project",
+      "commandLineArgs": "select-apps status"
+    },
     "Benchmark - Setup - Preset": {
       "commandName": "Project",
       "commandLineArgs": "benchmark setup --preset LargeChunks"
@@ -44,10 +48,7 @@
       "commandName": "Project",
       "commandLineArgs": "benchmark run"
     },
-    "Stats": {
-      "commandName": "Project",
-      "commandLineArgs": "status --nocache"
-    },
+
     "Clear Temp": {
       "commandName": "Project",
       "commandLineArgs": "clear-temp"
