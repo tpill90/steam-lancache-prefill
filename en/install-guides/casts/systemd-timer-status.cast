@@ -1,0 +1,4 @@
+{"version": 2, "width": 120, "height": 30, "timestamp": 1682209197, "env": {"SHELL": "/bin/bash", "TERM": "xterm-256color"}}
+[0.008024, "o", "\u001b[?1h\u001b=\r"]
+[0.012229, "o", "\u001b[0;1;32m●\u001b[0m steamprefill.timer - SteamPrefill run daily\u001b[m\r\n     Loaded: loaded (/etc/systemd/system/steamprefill.timer; enabled; vendor preset: enabled)\u001b[m\r\n     Active: \u001b[0;1;32mactive (waiting)\u001b[0m since Sun 2023-04-23 00:16:58 UTC; 2min 59s ago\u001b[m\r\n    Trigger: Sun 2023-04-23 04:00:00 UTC; 3h 40min left\u001b[m\r\n   Triggers: ● steamprefill.service\u001b[m\r\n\u001b[m\r\nApr 23 00:16:58 lancache systemd[1]: Started SteamPrefill run daily.\u001b[m\r\n"]
+[0.012304, "o", "\r\u001b[K\u001b[?1l\u001b>"]

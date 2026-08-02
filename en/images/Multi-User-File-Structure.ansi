@@ -1,0 +1,11 @@
+[01;34m.[00m
+├── [01;34mSteamPrefill-Account1[00m
+│   ├── [01;34mConfig[00m
+│   │   └── account.config
+│   ├── [01;32mSteamPrefill[00m
+│   └── [01;32mupdate.sh[00m
+└── [01;34mSteamPrefill-Account2[00m
+    ├── [01;34mConfig[00m
+    │   └── account.config
+    ├── [01;32mSteamPrefill[00m
+    └── [01;32mupdate.sh[00m

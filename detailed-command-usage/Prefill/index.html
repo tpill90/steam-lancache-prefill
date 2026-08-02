@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://tpill90.github.io/steam-lancache-prefill/detailed-command-usage/Prefill/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>prefill - steam-lancache-prefill wiki</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+        <link href="../../assets/external/asciinema-player.css" rel="stylesheet" />
+        <link href="../../assets/language-picker.css" rel="stylesheet" />
+        <link href="../../assets/copy-to-clipboard.css" rel="stylesheet" />
+        <link href="../../assets/extra.css" rel="stylesheet" />
+        <link href="../../assets/syntax-style-overrides.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "prefill";
+        var mkdocs_page_input_path = "detailed-command-usage/Prefill.md";
+        var mkdocs_page_url = "/steam-lancache-prefill/detailed-command-usage/Prefill/";
+      </script>
+    
+    <script src="../../js/jquery-3.6.0.min.js" defer></script>
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/bash.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/ini.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/languages/powershell.min.js"></script>
+      <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> steam-lancache-prefill wiki
+        </a>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Welcome</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../faq/">Frequently Asked Questions</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Docker-Setup-Guide/">Docker Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Linux-Setup-Guide/">Linux Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Scheduled-Job/">Configuring a Nightly Job</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Unraid-Setup-Guide/">Unraid Setup Guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../install-guides/Windows-Setup-Guide/">Windows Setup Guide</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Detailed Command Usage</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../Benchmark/">benchmark</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Clear-Temp/">clear-temp</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="./">prefill</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#example-usage">Example usage</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#prefilling-your-entire-steam-library">Prefilling your entire Steam library</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#ensuring-your-cache-is-fully-primed">Ensuring your cache is fully primed</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#combining-multiple-flags">Combining multiple flags</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#options">Options</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../Select-Apps/">select-apps</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Dev Guides</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guides/Compiling-from-source/">Compiling From Source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dev-guides/mkdocs-setup/">Working With Project Documentation</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Steam Documentation</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../steam-docs/CDN-Regions/">CDN Regions</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../steam-docs/External-Links/">External Links</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">steam-lancache-prefill wiki</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+    <ul class="wy-breadcrumbs">
+        <!-- Navigation breadcrumbs on the left hand side of the header -->
+        <li><a href="../.." class="icon icon-home" alt="Docs"></a> &raquo;</li>
+                <li>Detailed Command Usage &raquo;</li>
+            <li>prefill</li>
+
+        <!-- Language picker -->
+        <li class="wy-breadcrumbs-aside">
+            <div class="dropdown-container">
+                <!-- Button for the language drop down selector  -->
+                <button>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="flagIcon">
+                        <path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24z"></path>
+                    </svg>
+                </button>
+
+                <!-- Dropdown entries that are hidden by default -->
+                <div class="dropdown-content">
+                    <a href="../../en">
+                            <img src="../../assets/flags/en.svg" class="flagIcon"> English
+                        </a>
+                    <a href="../../gr">
+                            <img src="../../assets/flags/gr.svg" class="flagIcon"> Ελληνικά
+                        </a>
+                    
+                </div>
+            </div>
+        </li>
+    </ul>
+    <hr/>
+  </div>
+  
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="prefill">prefill<a class="headerlink" href="#prefill" title="Permanent link">&para;</a></h1>
+<div data-cli-player="../casts/prefill.cast" data-rows=13></div>
+<p><br></p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Automatically fills a Lancache with games from Steam so that subsequent downloads will be served from the Lancache, improving speeds and reducing load on your internet connection.</p>
+<p>Keeps track of which games have been previously downloaded, and will only download games that have updates.  </p>
+<hr />
+<h2 id="example-usage">Example usage<a class="headerlink" href="#example-usage" title="Permanent link">&para;</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This command will automatically include any apps that have been selected using <code>select-apps</code>, regardless of any additional optional flags specified.</p>
+</div>
+<p>Initiating a <code>prefill</code> run is as simple as running the following from the terminal:</p>
+<pre><code class="language-powershell">./SteamPrefill prefill
+</code></pre>
+<p>At the beginning of a <code>prefill</code> run, <strong>SteamPrefill</strong> will check to see which apps have new updates since the last <code>prefill</code> run, as well as checking to see if any apps have never been successfully prefilled.  If <code>prefill</code> detects that there are any apps that need to be downloaded, it will begin doing so.  If there are no apps that need to be downloaded, then the <code>prefill</code> run will simply finish immediately.  </p>
+<h3 id="prefilling-your-entire-steam-library">Prefilling your entire Steam library<a class="headerlink" href="#prefilling-your-entire-steam-library" title="Permanent link">&para;</a></h3>
+<p>Depending on the size of your library, and which apps you want to prefill, it may be easier to simply prefill the entire library instead.  This will also automatically include any new games you may have purchased, without having to use <code>select-apps</code> to select the newly purchased game.</p>
+<pre><code class="language-powershell">./SteamPrefill prefill --all
+</code></pre>
+<h3 id="ensuring-your-cache-is-fully-primed">Ensuring your cache is fully primed<a class="headerlink" href="#ensuring-your-cache-is-fully-primed" title="Permanent link">&para;</a></h3>
+<p>Suppose that you have an event coming up, and you want to be 100% certain that your Lancache is prefilled.  Normally running <code>prefill</code> will ensure that you have the latest update data primed, however you may want to have complete certainty that it is.  Adding the <code>--force</code> flag will make <strong>SteamPrefill</strong> re-download every app, ignoring the fact that they may have already been up to date from a previous run.  Because <strong>SteamPrefill</strong> will be re-downloading every app again from start to finish, any data that may be missing will be filled in again.</p>
+<pre><code class="language-powershell">./SteamPrefill prefill --force
+</code></pre>
+<h3 id="combining-multiple-flags">Combining multiple flags<a class="headerlink" href="#combining-multiple-flags" title="Permanent link">&para;</a></h3>
+<p>It is possible to combine multiple flags together in a single command, rather than having to use them separately one at a time.  For example, the following command will prefill the most popular games on Steam, only download the Linux version, and display more detailed log output:</p>
+<pre><code class="language-powershell">./SteamPrefill prefill --top --os linux --verbose
+</code></pre>
+<hr />
+<h2 id="options">Options<a class="headerlink" href="#options" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th></th>
+<th>Values</th>
+<th>Default</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>--os</td>
+<td></td>
+<td>windows, linux, macos</td>
+<td><strong>windows</strong></td>
+<td>Specifies which operating system(s) games should be downloaded for.  Typically, almost all games support Windows, however there are increasingly more games that have Linux specific game files.  In some cases, the Linux game files may be as large as the Windows version.</td>
+</tr>
+<tr>
+<td>--all</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Downloads all owned apps, useful for prefilling a completely empty cache.</td>
+</tr>
+<tr>
+<td>--recent</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Adds any games played within the last 2 weeks to the download queue.</td>
+</tr>
+<tr>
+<td>--recently-purchased</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Prefill will include all games purchased in the last 2 weeks.</td>
+</tr>
+<tr>
+<td>--top</td>
+<td></td>
+<td>1-100</td>
+<td><strong>50</strong></td>
+<td>Downloads the most popular games by player count, over the last 2 weeks.</td>
+</tr>
+<tr>
+<td>--force</td>
+<td>-f</td>
+<td></td>
+<td></td>
+<td>By default, <strong>SteamPrefill</strong> will keep track of the most recently prefilled apps, and will only attempt to prefill if there it determines there a newer version available for download.  This default behavior will work best for most use cases, as no time will be wasted re-downloading files that have been previously prefilled.  <br/><br/> Running with the flag <code>--force</code> will override this behavior, and instead will always run the prefill, re-downloading all files for the selected apps.  This flag may be useful for diagnostics, or benchmarking network performance.</td>
+</tr>
+<tr>
+<td>--verbose</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Produces more detailed log output.  By default, games that are already up to date will not be displayed at all.  Specifying this option will make it so that all games, even ones up to date, will be logged.</td>
+</tr>
+<tr>
+<td>--unit</td>
+<td></td>
+<td>bits, bytes</td>
+<td><strong>bits</strong></td>
+<td>Specifies which unit to use to display download speed.</td>
+</tr>
+<tr>
+<td>--no-ansi</td>
+<td></td>
+<td></td>
+<td></td>
+<td>Application output will be in plain text, rather than using the visually appealing colors and progress bars.  Should only be used if terminal does not support Ansi Escape sequences, or when redirecting output to a file.</td>
+</tr>
+</tbody>
+</table>
+              
+            </div>
+          </div><footer>
+      <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+          <a href="../Clear-Temp/" class="btn btn-neutral float-left" title="clear-temp"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+          <a href="../Select-Apps/" class="btn btn-neutral float-right" title="select-apps">Next <span class="icon icon-circle-arrow-right"></span></a>
+      </div>
+  
+    <hr/>
+
+    <div role="contentinfo">
+      <!-- Copyright etc -->
+    </div>
+  </footer>
+  
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/tpill90/steam-lancache-prefill" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../Clear-Temp/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../Select-Apps/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme_extra.js" defer></script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../assets/external/asciinema-player.min.js" defer></script>
+      <script src="../../assets/external/clipboard.min.js" defer></script>
+      <script src="../../assets/external/popper.min.js" defer></script>
+      <script src="../../assets/external/tippy-bundle.umd.min.js" defer></script>
+      <script src="../../assets/copy-to-clipboard.js" defer></script>
+      <script src="../../assets/extra.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
