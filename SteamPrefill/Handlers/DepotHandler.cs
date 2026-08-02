@@ -117,6 +117,9 @@
         //TODO I don't like the fact that this has to be manually called in order to have things work correctly
         public async Task BuildLinkedDepotInfoAsync(List<DepotInfo> depots)
         {
+            // filter out any depots that link to itself instead of the original app's depot, since it fails otherwise
+            depots.RemoveAll(e => e.ManifestId == null && e.DepotFromApp.Value == e.DepotId);
+
             foreach (var depotInfo in depots.Where(e => e.ManifestId == null))
             {
                 // Shared depots will have to go get the manifest id from the original app's depot
