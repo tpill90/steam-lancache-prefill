@@ -3,6 +3,7 @@
     /// <summary>
     /// Represents an application (game, tool, video, server) that can be downloaded from steam
     /// </summary>
+    [DebuggerDisplay("{Name} - {AppId}")]
     public sealed class AppInfo
     {
         public uint AppId { get; }
@@ -65,7 +66,10 @@
 
         public List<Category> Categories { get; init; }
 
-        public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue, DateTime? purchaseDate)
+        // TODO comment what this handles
+        public bool ExcludeFromFamilySharing { get; init; }
+
+    public AppInfo(Steam3Session steamSession, uint appId, KeyValue rootKeyValue, DateTime? purchaseDate)
         {
             AppId = appId;
             Name = rootKeyValue["common"]["name"].Value.EscapeMarkup();
@@ -81,6 +85,8 @@
 
             ReleaseState.TryFromValue(rootKeyValue["common"]["releasestate"].ToLowerCaseString(), out var releaseState);
             ReleaseState = releaseState;
+
+            ExcludeFromFamilySharing = rootKeyValue["common"]["exfgls"].AsBoolean();
 
             if (rootKeyValue["depots"] != KeyValue.Invalid)
             {
@@ -114,6 +120,7 @@
 
         public override string ToString()
         {
+            // TODO remove AppId because it will display in the app output.  Need to use the debug only version of this
             return $"{Name.EscapeMarkup()} - {AppId}";
         }
     }
