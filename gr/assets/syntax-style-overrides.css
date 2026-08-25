@@ -1,0 +1,21 @@
+/*
+    Explanation of what each class is supposed to be doing:
+    https://highlightjs.readthedocs.io/en/latest/css-classes-reference.html
+*/
+
+.hljs-comment {
+    color: green
+}
+
+.hljs-variable {
+    color: #BD63C5;
+}
+
+.hljs-keyword {
+    color: #8F08C4
+}
+
+.hljs-attr,
+.hljs-built_in {
+    color: #00f
+}
