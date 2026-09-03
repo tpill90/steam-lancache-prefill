@@ -1,6 +1,6 @@
 # External Links
-|   Link    |  Description   |  
-| ----------- | ------------ | 
+| Link |  Description |  
+| ---- | ------------ | 
 | [https://steamdb.info/](https://steamdb.info/) | Third Party database of Steam apps.  Has extensive metadata, as well as historical data.    |
 | [https://steamdb.info/faq/](https://steamdb.info/faq/) | Useful info about SteamDB, as well as some technical info on how Steam works internally |
 | [https://steamapi.xpaw.me/](https://steamapi.xpaw.me/) | List of all known public Steam Web Api endpoints    |

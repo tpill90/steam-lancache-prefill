@@ -77,6 +77,9 @@ plugins:
         gr:
           name: Ελληνικά
           build: true
+        de:
+          name: Deutsch
+          build: true
   # Allows global variables - https://github.com/fralau/mkdocs_macros_plugin
   - macros
 

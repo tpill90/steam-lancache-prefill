@@ -6,7 +6,7 @@
 2.  Download the latest version for Windows.  The filename should look like `{{prefill_name}}-X.Y.Z-win-x64.zip`.
 3.  Unzip to a directory of your choice.  This can be anywhere on your system.
 
------
+---
 
 ## Optional Windows Setup
 
@@ -30,7 +30,7 @@ if(!(gc $profile).Contains("OutputEncoding"))
 }
 ```
 
------
+---
 
 ## Next Steps
 

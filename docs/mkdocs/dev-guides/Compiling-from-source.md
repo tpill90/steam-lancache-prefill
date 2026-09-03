@@ -18,7 +18,7 @@ Additionally, if Git has not already been installed it can be installed using th
 choco install git.install
 ```
 
------
+---
 
 ## Cloning the repository
 
@@ -34,7 +34,7 @@ Alternatively if you've already cloned the repository without the submodules, us
 git submodule update --init --recursive
 ```
 
------
+---
 
 ## Compiling
 
@@ -44,7 +44,7 @@ The project can be compiled by running the following in the repository root (the
 dotnet build
 ```
 
------
+---
 
 ## Running the project
 
@@ -66,7 +66,7 @@ Alternatively, to run the project at full speed with all compilation optimizatio
 dotnet run --configuration Release
 ```
 
------
+---
 
 ## Running Unit Tests
 
@@ -75,7 +75,7 @@ To compile and run all tests in the entire repo, run the following command:
 dotnet test
 ```
 
------
+---
 
 ## Where should I get started in the codebase?
 
