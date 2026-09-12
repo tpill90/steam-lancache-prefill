@@ -67,14 +67,15 @@
         /// Given a list of AppIds, determines which apps require updates, and downloads the required depots.  By default,
         /// it will always include apps chosen by the select-apps command.
         /// </summary>
+        /// <param name="appIdsToPrefill">If any values are specified, only these apps will be downloaded, ignoring apps chosen by the select-apps command.</param>
         /// <param name="downloadAllOwnedGames">If set to true, all games owned by the user will be downloaded</param>
         /// <param name="prefillRecentGames">If set to true, games played in the last 2 weeks will be downloaded</param>
         /// <param name="prefillPopularGames">If set to a value > 0, the most popular N games will be downloaded</param>
         /// <param name="prefillRecentlyPurchasedGames">If set to true, games purchased in the last 30 days will be downloaded</param>
-        public async Task DownloadMultipleAppsAsync(bool downloadAllOwnedGames, bool prefillRecentGames,
+        public async Task DownloadMultipleAppsAsync(List<uint> appIdsToPrefill, bool downloadAllOwnedGames, bool prefillRecentGames,
                                                     int? prefillPopularGames, bool prefillRecentlyPurchasedGames)
         {
-            var appIdsToDownload = await BuildAppIdDownloadListAsync(downloadAllOwnedGames, prefillRecentGames, prefillPopularGames, prefillRecentlyPurchasedGames);
+            var appIdsToDownload = await BuildAppIdDownloadListAsync(appIdsToPrefill, downloadAllOwnedGames, prefillRecentGames, prefillPopularGames, prefillRecentlyPurchasedGames);
 
             // AppIds can potentially be added twice when building out the full list of ids
             var distinctAppIds = appIdsToDownload.Distinct().ToList();
@@ -111,15 +112,25 @@
             _prefillSummaryResult.RenderSummaryTable(_ansiConsole);
         }
 
+        /// <param name="appIdsToPrefill">If any values are specified, only these apps will be downloaded, ignoring apps chosen by the select-apps command.</param>
         /// <param name="downloadAllOwnedGames">If set to true, all games owned by the user will be downloaded</param>
         /// <param name="prefillRecentGames">If set to true, games played in the last 2 weeks will be downloaded</param>
         /// <param name="prefillPopularGames">If set to a value > 0, the most popular N games will be downloaded</param>
         /// <param name="prefillRecentlyPurchasedGames">If set to true, games purchased in the last 30 days will be downloaded</param>
-        private async Task<List<uint>> BuildAppIdDownloadListAsync(bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames,
+        private async Task<List<uint>> BuildAppIdDownloadListAsync(List<uint> appIdsToPrefill, bool downloadAllOwnedGames, bool prefillRecentGames, int? prefillPopularGames,
                                                                    bool prefillRecentlyPurchasedGames)
         {
-            // Always including selected apps
-            var appIdsToDownload = LoadPreviouslySelectedApps();
+            List<uint> appIdsToDownload;
+            if (appIdsToPrefill != null && appIdsToPrefill.Any())
+            {
+                // Specific appIds were requested, so only those apps will be downloaded, bypassing the previously selected apps list entirely.
+                appIdsToDownload = new List<uint>(appIdsToPrefill);
+            }
+            else
+            {
+                // Always including selected apps
+                appIdsToDownload = LoadPreviouslySelectedApps();
+            }
 
             // All
             if (downloadAllOwnedGames)

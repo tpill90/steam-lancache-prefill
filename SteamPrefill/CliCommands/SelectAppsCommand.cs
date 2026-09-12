@@ -63,7 +63,7 @@ namespace SteamPrefill.CliCommands
 
                 if (runPrefill)
                 {
-                    await steamManager.DownloadMultipleAppsAsync(false, false, null, false);
+                    await steamManager.DownloadMultipleAppsAsync(new List<uint>(), false, false, null, false);
                 }
             }
             finally

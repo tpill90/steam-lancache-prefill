@@ -14,7 +14,7 @@ Keeps track of which games have been previously downloaded, and will only downlo
 ## Example usage
 
 !!! Note
-    This command will automatically include any apps that have been selected using `select-apps`, regardless of any additional optional flags specified.
+    This command will automatically include any apps that have been selected using `select-apps`, regardless of any additional optional flags specified.  The exception to this is `--appid`, which will only prefill the specified app(s), ignoring the apps selected using `select-apps`.
 
 Initiating a `prefill` run is as simple as running the following from the terminal:
 ```powershell
@@ -30,6 +30,20 @@ Depending on the size of your library, and which apps you want to prefill, it ma
 
 ```powershell
 ./{{prefill_name}} prefill --all
+```
+
+### Prefilling specific app(s)
+
+Sometimes it is useful to prefill a specific game (or a small set of games), without also prefilling everything else selected using `select-apps`.  This is useful, for example, when scheduling a prefill of a specific game shortly before it will be played, without having to wait for the rest of the regularly scheduled games to be prefilled first.  Specifying `--appid` will cause **{{prefill_name}}** to only prefill the app(s) specified, ignoring any apps that were previously selected with `select-apps`.
+
+```powershell
+./{{prefill_name}} prefill --appid 730
+```
+
+More than one app can be prefilled at once, by specifying `--appid` multiple times:
+
+```powershell
+./{{prefill_name}} prefill --appid 730 --appid 440
 ```
 
 ### Ensuring your cache is fully primed
@@ -54,6 +68,7 @@ It is possible to combine multiple flags together in a single command, rather th
 
 | Option      |     | Values                | Default     |     |
 | ----------- | --- | --------------------- | ----------- | --- |
+| --appid     |     |                       |             | The id of one or more apps to prefill, ignoring the apps selected using `select-apps`. Useful for prefilling a specific game on its own. AppIds can be found using [SteamDB](https://steamdb.info/) |
 | --os        |     | windows, linux, macos | **windows** | Specifies which operating system(s) games should be downloaded for.  Typically, almost all games support Windows, however there are increasingly more games that have Linux specific game files.  In some cases, the Linux game files may be as large as the Windows version. |
 | --all       |     |                       |             | Downloads all owned apps, useful for prefilling a completely empty cache.  |
 | --recent    |     |                       |             | Adds any games played within the last 2 weeks to the download queue.  |
