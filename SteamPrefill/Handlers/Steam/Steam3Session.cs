@@ -1,3 +1,5 @@
+using System.Globalization;
+
 namespace SteamPrefill.Handlers.Steam
 {
     public sealed class Steam3Session : IDisposable
@@ -136,7 +138,93 @@ namespace SteamPrefill.Handlers.Steam
             }
 
             _ansiConsole.LogMarkupVerbose($"Connected to CM {Cyan(_steamClient.CurrentEndPoint)}");
+
+            await TryRenewAccessTokenAsync();
+            WarnIfAccessTokenExpiresSoon();
         }
+
+        #region Access token expiration
+
+        /// <summary>
+        /// Starting at this many days before expiration, a warning will be displayed on every run, and the token renewal will be attempted.
+        /// </summary>
+        private const int AccessTokenExpirationWarningDays = 30;
+
+        /// <summary>
+        /// Steam's refresh tokens expire after ~6 months.  Once logged in, Steam can be asked to issue a new refresh token,
+        /// which allows unattended (scheduled) runs to keep working without the user having to re-enter their password.
+        /// Steam decides on its own whether the token is renewed, so this is only a best effort.
+        /// </summary>
+        private async Task TryRenewAccessTokenAsync()
+        {
+            var expiresUtc = _userAccountStore.AccessTokenExpiresUtc;
+            if (expiresUtc == null || expiresUtc.Value > DateTime.UtcNow.AddDays(AccessTokenExpirationWarningDays))
+            {
+                return;
+            }
+
+            try
+            {
+                var result = await _steamClient.Authentication.GenerateAccessTokenForAppAsync(_steamId, _userAccountStore.AccessToken, allowRenewal: true);
+                if (string.IsNullOrEmpty(result.RefreshToken) || result.RefreshToken == _userAccountStore.AccessToken)
+                {
+                    _ansiConsole.LogMarkupVerbose("Steam did not issue a renewed login token");
+                    return;
+                }
+
+                _userAccountStore.AccessToken = result.RefreshToken;
+                _userAccountStore.Save();
+                _ansiConsole.LogMarkupLine($"Renewed Steam login token.  New token is valid until {Cyan(FormatExpiration(_userAccountStore.AccessTokenExpiresUtc))}");
+            }
+            catch (Exception e)
+            {
+                // Renewal failing isn't fatal, the current token is still valid.  The warning below will tell the user what to do.
+                _ansiConsole.LogMarkupVerbose($"Unable to renew Steam login token : {e.Message.EscapeMarkup()}");
+            }
+        }
+
+        private void WarnIfAccessTokenExpiresSoon()
+        {
+            var expiresUtc = _userAccountStore.AccessTokenExpiresUtc;
+            if (expiresUtc == null)
+            {
+                return;
+            }
+
+            var daysRemaining = (int)Math.Floor((expiresUtc.Value - DateTime.UtcNow).TotalDays);
+            if (daysRemaining > AccessTokenExpirationWarningDays)
+            {
+                _ansiConsole.LogMarkupVerbose($"Steam login token is valid until {Cyan(FormatExpiration(expiresUtc))}");
+                return;
+            }
+
+            _ansiConsole.LogMarkupLine(LightYellow($"Warning: The saved Steam login token expires in {daysRemaining} day(s), on {FormatExpiration(expiresUtc)}!"));
+            _ansiConsole.LogMarkupLine(LightYellow("Once it has expired, scheduled/unattended runs will fail until you log in again interactively."));
+        }
+
+        private static string FormatExpiration(DateTime? expiresUtc)
+        {
+            return expiresUtc?.ToLocalTime().ToString("yyyy-MM-dd HH:mm", CultureInfo.InvariantCulture) ?? "unknown";
+        }
+
+        /// <summary>
+        /// When running unattended (systemd, cron, Docker without -it, etc.) there is nobody to type in a password.  Instead of waiting for the password
+        /// prompt to time out, fail immediately with a clear message and a dedicated exit code, so that the failure can be detected and acted upon.
+        /// </summary>
+        private void ThrowIfReauthenticationNotPossible(string reason)
+        {
+            if (!Console.IsInputRedirected)
+            {
+                return;
+            }
+
+            _ansiConsole.LogMarkupLine(Red(reason));
+            _ansiConsole.LogMarkupLine(Red("Steam re-authentication is required, but SteamPrefill is running non-interactively and can't prompt for a password."));
+            _ansiConsole.LogMarkupLine(Red($"Run {Cyan("./SteamPrefill prefill")} once in an interactive terminal to log in again."));
+            throw new CommandException("Steam login token expired or invalid.  Re-authentication required.", ExitCodes.ReauthenticationRequired);
+        }
+
+        #endregion
 
         private async Task GetAccessTokenAsync()
         {
@@ -168,6 +256,15 @@ namespace SteamPrefill.Handlers.Steam
 
         private async Task ConfigureLoginDetailsAsync()
         {
+            // Checked before prompting for the username, since an unattended run wouldn't be able to answer either prompt
+            if (!_userAccountStore.AccessTokenIsValid())
+            {
+                var reason = _userAccountStore.AccessTokenExpiresUtc == null
+                    ? "No saved Steam login token was found!"
+                    : $"The saved Steam login token expired on {FormatExpiration(_userAccountStore.AccessTokenExpiresUtc)}!";
+                ThrowIfReauthenticationNotPossible(reason);
+            }
+
             var username = await _userAccountStore.GetUsernameAsync(_ansiConsole);
 
             _logonDetails = new SteamUser.LogOnDetails
@@ -278,6 +375,7 @@ namespace SteamPrefill.Handlers.Steam
             // User previously authenticated, but changed their password such that the previous access token is no longer valid.
             if (loggedOn.Result == EResult.AccessDenied)
             {
+                ThrowIfReauthenticationNotPossible("Steam rejected the saved login token (was the password changed?)");
                 _ansiConsole.LogMarkupLine(Red("Steam password was changed!  Current login token is no longer valid.  Re-authentication is required..."));
                 _logonDetails.Password = _ansiConsole.ReadPasswordAsync($"{Red("Please enter your password!")}").GetAwaiter().GetResult();
                 _userAccountStore.AccessToken = null;
