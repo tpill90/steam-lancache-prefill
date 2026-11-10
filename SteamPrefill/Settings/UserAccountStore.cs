@@ -55,11 +55,24 @@ namespace SteamPrefill.Settings
                 return false;
             }
 
-            var parsedToken = new JwtSecurityToken(AccessToken);
-
             // Tokens seem to be valid for ~6 months.  We're going to add a bit of "buffer" (1 day) to make sure that new tokens are request prior to expiration
-            var tokenHasExpired = DateTimeOffset.Now.DateTime.AddDays(1) < parsedToken.ValidTo;
-            return tokenHasExpired;
+            return DateTime.UtcNow.AddDays(1) < AccessTokenExpiresUtc;
+        }
+
+        /// <summary>
+        /// The point in time (UTC) at which the saved access token expires.  Null if no token has been saved yet.
+        /// </summary>
+        public DateTime? AccessTokenExpiresUtc
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(AccessToken))
+                {
+                    return null;
+                }
+                // JwtSecurityToken.ValidTo is always returned in UTC
+                return new JwtSecurityToken(AccessToken).ValidTo;
+            }
         }
 
         private async Task<string> PromptForUsernameAsync(IAnsiConsole ansiConsole)
